@@ -1,0 +1,186 @@
+bsod x.y.z
+
+---------------------------------------------------------------------------
+Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+All rights reserved.
+
+This code has been developed by the University of Waikato WAND
+research group. For further information please see http://www.wand.net.nz/.
+---------------------------------------------------------------------------
+
+
+This directory contains source code for bsod, a tool for the visualisation 
+of network traffic captured from live interfaces or from offline traces.
+
+bsod was written to make use of the libtrace traffic processing library
+also developed by the WAND research group. This means that it can 
+understand and visualise live traffic capture from devices such as pcap
+and DAG interfaces, as well as traces stored in erf and pcap formats.
+
+
+It is licensed under ...
+
+The files CHANGES and TODO contain more information regarding the current
+release.
+
+Please read the included INSTALL file for information regarding the
+installation of bsod, including required dependencies.
+
+For further information, please contact the WAND group. See
+http://www.wand.net.nz/ for details.
+
+
+
+
+Configuring bsod server
+----------------------------------
+----------------------------------
+
+The default configuration file is "/usr/local/bsod/etc/bsod_server.conf".
+You can specify a different file by giving bsod server the command line 
+option '-C /path/to/config/file'. Configuration options are pairs of the 
+form:
+
+<key> <value>
+
+A value can be one of two types - string or integer. All strings are 
+enclosed in double quotes, while integers are simply a number.
+
+
+KEY		VALUE TYPE
+--------------------------
+pidfile		string
+background	integer
+basedir		string
+source		string
+listenport	integer
+filter		string
+colour_module	string
+rpos_module	string
+lpos_module	string
+dir_module	string
+macaddrfile	string
+loop		integer
+shownondata	integer
+showdata	integer
+showcontrol	integer
+
+
+option: pidfile		type: string
+    The file that the process id (pid) of the bsod server should be written
+    to when running.
+
+option: background	type: integer
+    Set this to 1 if the bsod server should run in the background (daemonise),
+    otherwise set it to 0 to run in the foreground.
+
+option: basedir		type: string
+    The directory in which to find the relevant files for running the bsod
+    server, including the shared libraries for dynamic loading of layout,
+    colour, and direction evaluation schemes. Defaults to "/usr/local/bsod".
+
+option: source		type: string
+    A URI for libtrace describing the type and location of the data to be 
+    visualised. 
+    eg: rtclient:name-of-rt-server:port
+	erf:/path/to/erf.trace
+	pcap:/path/to/pcap.trace
+	pcapint:eth0
+    
+option: listenport	type: integer
+    The port that the server should listen to for incoming connections.
+    This is the only config option that is not reparsed when the server is
+    restarted via a SIGUSR1. Defaults to 32500.
+
+option: filter		type: string
+    BPF style filter to apply to the source URI. Works on any URI but is only
+    tested on ethernets.
+
+option: colour_module	type: string
+    Specify the shared library that should be loaded to supply the colour
+    selection algorithms. Defaults to "plugins/colour/colours.so", which
+    uses the colour scheme we originally came up with. 
+
+option: rpos_module	type: string
+    Specify the shared library that should be loaded to supply the layout
+    algorithms for the right hand side of the display. Defaults to 
+    "plugins/position/radial.so", which fits the entire ipv4 address space 
+    into a circle. Other options include "plugins/position/networkxxyy.so"
+    (fits the entire ipv4 address space into a square), 
+    "plugins/position/network16.so" (will treat addresses as belonging to the
+    same /16 network, using only the last two octets of the address to lay
+    them out into a square), and "plugins/position/multiplenet24.so" (will
+    evenly spread a number of /24 networks out over a square).
+    
+option: lpos_module	type: string
+    Specify the shared library that should be loaded to supply the layout
+    algorithms for the left hand side of the display. Defaults to 
+    "plugins/position/network16.so", which treats all addresses as belonging
+    to the same /16 network. Using the last two octets of the address, it 
+    will lay them out over the whole square side. Other options include 
+    "plugins/position/networkxxyy.so" (fits the entire ipv4 address space 
+    into a square), "plugins/position/radial.so" (will fit the ipv4 address 
+    space into a circle, and "plugins/position/multiplenet24.so" (will
+    evenly spread a number of /24 networks out over a square).
+
+option: dir_module	type: string
+    Specify the shared library that should be loaded to determine which
+    direction packets are travelling in. This defaults to 
+    "plugins/direction/interface.so", which uses the interface field in
+    the erf header to decide between incoming and outgoing traffic. If
+    you are using a pcap based format instead of erf, you will want to
+    use the module "plugins/direction/destmac.so". If you use this
+    alternate module, you will need to specify the file containing local
+    mac addresses with the 'macaddrfile' option. Whether the packet is
+    destined to or coming from one of these listed mac addresses is used
+    to determine which way it is travelling.
+
+option: macaddrfile	type: string
+    If using the "plugins/direction/destmac.so" module for direction, then
+    you need to explicitly specify all local mac addresses that could
+    possibly appear in the trace/capture. These should be in the standard
+    colon seperated hex notation (eg 00:11:22:33:44:55), one address per 
+    line in the file. Defaults to "/usr/local/bsod/etc/mac_addrs".
+    
+option: loop		type: integer
+    Only makes sense when running with offline traces. If set to 1, then 
+    the visualisation will loop when it reaches the end of the trace file.
+    If set to 0, then the server will exit when it reaches the end of the 
+    file. Defaults to 0.
+
+option: shownondata	type: integer
+    If set to 1 the display will show packets that contain no TCP or UDP
+    payload data. Set it to 0 to hide these packets. Only applies to TCP 
+    and UDP packets. Defaults to 0.
+
+option: showdata	type: integer
+    If set to 1 the display will show packets that do contain TCP or UDP
+    payload data. Set it to 0 to hide these packets. Only applies to TCP
+    and UDP packets. Defaults to 1.
+
+options: showcontrol	type: integer
+    If set to 1 the display will show TCP control packets (syn, fin, rst).
+    Set it to 0 to hide these packets. This only applies to TCP, and 
+    overrides the showdata and shownondata options. Defaults to 1.
+
+
+
+
+Troubleshooting bsod server
+----------------------------------
+----------------------------------
+
+
+Problem:
+/usr/local/bsod/bin/bsod_server: error while loading shared libraries: libtrace.so.2: cannot open shared object file: No such file or directory
+
+Solution:
+This will happen if libtrace hasn't been completely set up. After installing
+libtrace, you must configure your library search paths. One way to do this is
+to add the directory where libtrace is installed to your LD_LIBRARY_PATH before
+running the server. In bash, this can be done with the command:
+
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+
+Alternatively, you can (as root) add /usr/local/lib to your /etc/ld.so.conf 
+and run ldconfig to update this system wide.

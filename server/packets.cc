@@ -267,12 +267,10 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	 */ 
 	bool isTCP = false;
 	bool isICMP = false;
-	if(p->ip_p == 6)
+	if((tcpptr = trace_get_tcp(&packet)))
 	{
 		isTCP = true;
 		hlen = p->ip_hl * 4;
-		tcpptr = trace_get_tcp(&packet);
-		assert(tcpptr);
 
 		datasize = (ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen);
 
@@ -282,11 +280,9 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
 			force_display = 1;
 	}
-	else if(p->ip_p == 17)
+	else if((udpptr = trace_get_udp(&packet)))
 	{
 		hlen = p->ip_hl * 4;
-		udpptr = trace_get_udp(&packet);
-		assert(udpptr);
 
 		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);
 		tmpid.sourceport = ntohs(udpptr->source);

@@ -67,20 +67,25 @@ void CPartFlow::Draw()
 
 void CPartFlow::CreateEndPoints()
 {
+    float size = 0.6f;
+
+    if(start.x == 10.0f)
+	size = -size;
+    
     // Create start and end points
     endpoint_vertices.push_back(Vector3f(0,0,0)+start);
-    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+start);
-    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+start);
-    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+start);
-    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+start);
-    endpoint_vertices.push_back(Vector3f(1.0f,1.0f,0)+start);
+    endpoint_vertices.push_back(Vector3f(size,0,0)+start);
+    endpoint_vertices.push_back(Vector3f(0,size,0)+start);
+    endpoint_vertices.push_back(Vector3f(size,0,0)+start);
+    endpoint_vertices.push_back(Vector3f(0,size,0)+start);
+    endpoint_vertices.push_back(Vector3f(size,size,0)+start);
 
     endpoint_vertices.push_back(Vector3f(0,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+destination);
-    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+destination);
-    endpoint_vertices.push_back(Vector3f(1.0f,1.0f,0)+destination);
+    endpoint_vertices.push_back(Vector3f(-size,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,-size,0)+destination);
+    endpoint_vertices.push_back(Vector3f(-size,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,-size,0)+destination);
+    endpoint_vertices.push_back(Vector3f(-size,-size,0)+destination);
 
     endpoint_tex_coords.push_back(Vector2f(0, 0));
     endpoint_tex_coords.push_back(Vector2f(1, 0));

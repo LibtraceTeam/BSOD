@@ -22,6 +22,7 @@ Changes	    - Integrated 'darknet' support. Internal addresses are divided
 	    - the multiplenet24 position module now uses real numbers rather
 	    than integers to prevent a squashing of the coordinate space with
 	    large numbers of networks.
+	    - macaddrfile is now relative to basedir option
 
 
 

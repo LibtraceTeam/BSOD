@@ -90,14 +90,14 @@ int BungMain(int argc, char *argv[])
 
 	try {
 		int width = 800, height = 600, bpp = 16;
-		string netHost = "localhost:2500";
+		string netHost = "localhost:32500";
 		Vector3f startLoc;
 		float pitch = 0, heading = 0;
 		bool fullScreen = false;
 		float size = 1.0f;
 		float speed = 1.0f;
 		bool jitter = true;
-		bool billboard = true;
+		bool billboard = false;
 		bool do_gcc = true;
 		bool matrix_mode = false;
 		string particle = "data/particle.png";

@@ -9,6 +9,17 @@ research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
 
 
+Version 1.2.2, March 23, 2005
+------------------------------
+
+Changes	    - fixed a bug that would cause the server to exit if a
+	    connected client terminated in a certain situation
+	    - tidied up some pathing issues with where it tried to find
+	    the mac address file
+	    - changed some logic to better work with the libtrace framework,
+	    also helps avoid crashes when trying to view fragmented packets
+
+
 Version 1.2.1, March 22, 2005
 ------------------------------
 

@@ -37,7 +37,7 @@ uint32_t id = 0;
 
 extern int shownondata;
 extern int showdata;
-extern int showsynfin;
+extern int showcontrol;
 
 
 struct flow_id_t {

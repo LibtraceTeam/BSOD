@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #include "stdafx.h"
 #include "bezier.h"
 #include "world.h"

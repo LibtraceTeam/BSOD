@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #include "stdafx.h"
 #include "misc.h"
 #include "display_manager.h"

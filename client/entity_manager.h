@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef __ENTITY_MANAGER_H__
 #define __ENTITY_MANAGER_H__
 

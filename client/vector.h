@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 // Vector3f.h
 // by Sam Jansen, 21/1/2002
 

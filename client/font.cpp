@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #include "stdafx.h"
 #include "font.h"
 #include "vfs.h"

@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #include "stdafx.h"
 #include "action.h"
 #include "entity_manager.h"

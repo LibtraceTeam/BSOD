@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef __ELLISPOID_H__
 #define __ELLISPOID_H__
 

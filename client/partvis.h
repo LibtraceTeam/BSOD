@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef __PARTVIS_H__
 #define __PARTVIS_H__
 

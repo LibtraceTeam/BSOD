@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef __OPCODE_COLLIDER__
 
 class COpcodeCollider : public CCollider

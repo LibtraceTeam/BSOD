@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef _MD3_H_
 #define _MD3_H_
 

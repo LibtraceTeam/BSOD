@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef _octree_H_
 #define _octree_H_
 

@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef _LOADING_SCREEN_H_
 #define _LOADING_SCREEN_H_
 

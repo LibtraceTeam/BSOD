@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 class Q3LevelLoader
 {
 public:

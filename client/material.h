@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef __MATERIAL_H__
 
 class CMaterial

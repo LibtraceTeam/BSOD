@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 // Vector3f.cpp
 // Created 21/1/2002 by Sam Jansen
 

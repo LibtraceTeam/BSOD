@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef _HAWK_NET_DRIVER_H_
 #define _HAWK_NET_DRIVER_H_
 

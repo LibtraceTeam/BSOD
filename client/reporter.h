@@ -1,3 +1,4 @@
+/* $CVSID$ */ 
 #ifndef _REPORTER_H_
 #define _REPORTER_H_
 

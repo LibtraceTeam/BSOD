@@ -48,6 +48,7 @@ int BungMain(int argc, char *argv[])
 		int width = 800, height = 600, bpp = 16;
 		string netHost = "localhost:2500";
 		Vector3f startLoc;
+		float pitch = 0, heading = 0;
 		bool fullScreen = false;
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
@@ -64,6 +65,9 @@ int BungMain(int argc, char *argv[])
 		config->GetGlobal("network_host", &netHost);
 		config->GetGlobal("fullscreen", &fullScreen);
 		config->GetGlobal("start_location", &startLoc);
+		config->GetGlobal("pitch", &pitch);
+		config->GetGlobal("heading", &heading);
+
 		{	string disp("opengl");
 			config->GetGlobal("display", &disp);
 			if(disp.compare("direct3d") == 0 || disp.compare("d3d") == 0)
@@ -87,6 +91,11 @@ int BungMain(int argc, char *argv[])
 		world.entities = new CEntityManager;
 
 		world.entities->GetPlayer()->SetPosition(startLoc);
+		
+		world.entities->GetPlayer()->SetBearing(Vector3f(pitch,heading,0));
+		world.entities->GetPlayer()->GetCamera()->
+			SetBearing(Vector3f(pitch,heading,0));
+
 
 		loadingScreen->AddMessage("Creating particle visualisation...");
 		world.partVis = new CPartVis();

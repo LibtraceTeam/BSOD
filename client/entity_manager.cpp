@@ -22,7 +22,7 @@ CEntityManager::CEntityManager() {
     // displayed (don't want to see your own model, it only gets in the way)
 
 	player->SetPosition(Vector3f(4.0f, 0.0f, 0.0f));
-	player->LookAt(Vector3f(0.0f, 0.0f, 0.0f));
+//	player->LookAt(Vector3f(0.0f, 0.0f, 0.0f));
 
 	player->m_Ghost = true;
 	AddEntity(player);

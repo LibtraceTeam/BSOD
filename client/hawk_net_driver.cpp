@@ -47,7 +47,6 @@ string CHawkNetDriver::GetErrorMessage()
 void CHawkNetDriver::Connect(string address)
 {
     NLaddress nlAddr;
-    int error;
 
     CReporter::Report(CReporter::R_MESSAGE,
 	    "Using HawkNL library: '%s'\n", nlGetString(NL_VERSION));
@@ -137,6 +136,7 @@ void CHawkNetDriver::ReceiveData()
     } while(readlen);
 
    // Log("Databuf.size()=%d\n", databuf.size());
+    world.partVis->BeginUpdate();
 	    
     unsigned char *buf = &databuf[0];
     while(true) {
@@ -211,4 +211,5 @@ void CHawkNetDriver::ReceiveData()
 	}
     }
 
+    world.partVis->EndUpdate();
 }

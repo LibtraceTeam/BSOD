@@ -122,7 +122,7 @@ void CWorld::Draw()
 	strftime(tbuf, 255, "%c", timeptr );
 #else
 	time_t timestamp = partVis->GetLastTimestamp();
-	strftime( tbuf, 255, "%c", localtime(timestamp) );
+	strftime( tbuf, 255, "%c", localtime(&timestamp) );
 #endif
 	
 	// %a %b %d %R %Z %G

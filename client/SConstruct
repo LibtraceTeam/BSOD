@@ -15,7 +15,9 @@ libs = [
     # libz, used for bung archives
     'z', 
     # SDL networking lib for new networking. You'll need to install this
-    'SDL_net'
+    'SDL_net',
+    # needed at least in linux...hope it doesnt break windows
+    'stlport'
 ]
 include_path = [
     '#.',

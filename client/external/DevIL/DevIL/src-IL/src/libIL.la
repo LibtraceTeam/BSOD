@@ -11,10 +11,10 @@ dlname='libIL.so.1'
 library_names='libIL.so.1.0.165 libIL.so.1 libIL.so'
 
 # The name of the static archive.
-old_library=''
+old_library='libIL.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' -lpng -llcms'
+dependency_libs=' -lpng -ltiff /usr/lib/libmng.la -lz /usr/lib/libjpeg.la /usr/lib/liblcms.la -lm'
 
 # Version information for libIL.
 current=1
@@ -29,4 +29,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/lib'
+libdir='/home/sam/Projects/bsod/client/external/DevIL/DevIL/../lib'

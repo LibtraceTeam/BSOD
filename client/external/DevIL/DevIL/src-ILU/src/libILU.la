@@ -11,10 +11,10 @@ dlname='libILU.so.1'
 library_names='libILU.so.1.0.165 libILU.so.1 libILU.so'
 
 # The name of the static archive.
-old_library=''
+old_library='libILU.a'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/root/BuNg/external/DevIL/DevIL/src-IL/src /root/BuNg/external/DevIL/DevIL/src-IL/src/libIL.la -lpng -llcms '
+dependency_libs=' -L/home/sam/Projects/bsod/client/external/DevIL/DevIL/src-IL/src /home/sam/Projects/bsod/client/external/DevIL/DevIL/src-IL/src/libIL.la -lpng -ltiff /usr/lib/libmng.la -lz /usr/lib/libjpeg.la /usr/lib/liblcms.la -lm '
 
 # Version information for libILU.
 current=1
@@ -29,5 +29,5 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/usr/local/lib'
-relink_command="(cd /root/BuNg/external/DevIL/DevIL/src-ILU/src; /bin/sh ../../libtool --mode=relink gcc -Wall -O3 -funroll-loops -ffast-math -fomit-frame-pointer -fexpensive-optimizations -o libILU.la -rpath /usr/local/lib -no-undefined -version-info 1:165:0 -L../../src-IL/src/ ilu_alloc.lo ilu_internal.lo ilu_noise.lo ilu_scale.lo ilu_error.lo ilu_main.lo ilu_rotate.lo ilu_scaling.lo ilu_filter.lo ilu_manip.lo ilu_scale2d.lo ilu_states.lo ilu_filter_rcg.lo ilu_mipmap.lo ilu_scale3d.lo ilu_utilities.lo ilu_region.lo -lIL)"
+libdir='/home/sam/Projects/bsod/client/external/DevIL/DevIL/../lib'
+relink_command="(cd /home/sam/Projects/bsod/client/external/DevIL/DevIL/src-ILU/src; /bin/sh ../../libtool --mode=relink gcc -Wall -O3 -funroll-loops -ffast-math -fomit-frame-pointer -fexpensive-optimizations -o libILU.la -rpath /home/sam/Projects/bsod/client/external/DevIL/DevIL/../lib -no-undefined -version-info 1:165:0 -L../../src-IL/src/ ilu_alloc.lo ilu_internal.lo ilu_noise.lo ilu_scale.lo ilu_error.lo ilu_main.lo ilu_rotate.lo ilu_scaling.lo ilu_filter.lo ilu_manip.lo ilu_scale2d.lo ilu_states.lo ilu_filter_rcg.lo ilu_mipmap.lo ilu_scale3d.lo ilu_utilities.lo ilu_region.lo -lIL)"

@@ -16,7 +16,7 @@ SHELL = /bin/sh
 srcdir = .
 top_srcdir = ../..
 
-prefix = /root/BuNg/external/DevIL/
+prefix = /home/sam/Projects/bsod/client/external/DevIL/DevIL/..
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
@@ -45,7 +45,7 @@ AUTOCONF = autoconf
 AUTOMAKE = automake
 AUTOHEADER = autoheader
 
-INSTALL = /usr/bin/install -c
+INSTALL = /bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_SCRIPT = ${INSTALL}
@@ -70,21 +70,21 @@ HSDL = -I/usr/include/SDL -D_REENTRANT
 LIBALLEGRO = 
 LIBGDI32 = 
 LIBGIF = 
-LIBGL = 
+LIBGL = -lGL
 LIBILUT_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer                -fexpensive-optimizations
 LIBILUT_WIN32LIBPATH = 
 LIBILU_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer                -fexpensive-optimizations
 LIBIL_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer               -fexpensive-optimizations
-LIBJPG = 
+LIBJPG = -ljpeg
 LIBLCMS = -llcms
-LIBMNG = 
+LIBMNG = -lmng
 LIBPNG = -lpng
 LIBSDL = 
-LIBTIFF = 
+LIBTIFF = -ltiff
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 MAINT = #
-MAKEINFO = /root/BuNg/external/DevIL/DevIL/libtools/missing makeinfo
+MAKEINFO = makeinfo
 OBJDUMP = objdump
 OBJEXT = o
 PACKAGE = DevIL
@@ -103,7 +103,7 @@ libIL_la_SOURCES = il_alloc.c     il_doom.c      il_stack.c    il_pcx.c        i
 
 CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer               -fexpensive-optimizations
 libIL_la_LDFLAGS = -no-undefined -version-info 1:165:0
-libIL_la_LIBADD = -lpng     -llcms
+libIL_la_LIBADD = -lpng -ljpeg -ltiff  -lmng -llcms
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/src-IL/include
 mkinstalldirs = $(SHELL) $(top_srcdir)/libtools/mkinstalldirs

@@ -20,11 +20,12 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <dlfcn.h>
-
+#include <errno.h>
 #include <assert.h>
 
 #include "libtrace.h"
 
+#include "lib/config.h"
 #include "bsod_server.h"
 
 
@@ -42,8 +43,8 @@ static void sig_hnd(int signo);
 static jmp_buf  jmpbuf;
 
 char buffer[SCANSIZE];
-int                _fcs_bits = 32;
-
+int  _fcs_bits = 32;
+int restart_config = 0;
 int fdmax;
 
 struct libtrace_t *trace = 0;
@@ -54,12 +55,24 @@ struct timeval nowtime;
 uint32_t ts32 = 0;
 uint32_t startts32 = 0;
 
+char *filterstring = 0;
+char *colourmod = 0;
+char *leftpos = 0;
+char *rightpos = 0;
+char *dirmod = 0;
+char *configfile = "./bsod_server.config";
+static char* uri = 0; // default is chasm
+int port = 32500;
+int loop = 0;
+
+static void sigusr_hnd(int sig);
+void do_configuration(int argc, char **argv);
 
 //void get_colour(uint8_t[3],int,int);
 
 void do_usage(char* name)
 {
-    printf("Usage: %s [-h] [-s <source>] [-p <listenport>] [-f <filter>] [-c <colour module] [-l <left position module] [-r <right position module>] [-d <direction module>]\n", name);
+    printf("Usage: %s [-h] -C <configfile> \n", name);
     exit(0);
 }
 
@@ -67,23 +80,14 @@ void do_usage(char* name)
 //---------------------------------------------------
 int main(int argc, char *argv[])
 {
-	int opt;
-
 	// socket stuff
 	int listen_socket;
-	int port = 32500;
 	fd_set listen_set;
 	struct timeval tv;
-	int new_client;
+	int new_client = 0;
 
 	bool live = true;
-	char *tmp;
 
-	char *filterstring = 0;
-	char *colourmod = "plugins/colour/colours.so";
-	char *leftpos =   "plugins/position/network16.so";
-	char *rightpos =  "plugins/position/radial.so";
-	char *dirmod =    "plugins/direction/interface.so";
 
 	void *colourhandle = 0;
 	void *lefthandle = 0;
@@ -95,7 +99,6 @@ int main(int argc, char *argv[])
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
 	struct libtrace_packet_t packet;
-	static char* uri = 0; // default is chasm
 	int psize;
 	uint64_t ts;
 
@@ -110,6 +113,13 @@ int main(int argc, char *argv[])
 
 
 	// setup signal handlers
+	sigact.sa_handler = sigusr_hnd;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
+		printf("sigaction SIGUSR1: %m\n",errno);
+	}
+	
 	sigact.sa_handler = sig_hnd;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
@@ -137,49 +147,12 @@ int main(int argc, char *argv[])
 	}
 
 	if (setjmp(jmpbuf))
-		//goto goodbye;
-		goto blah;
+		goto goodbye;
 
 	//-------------------------------------------------------
 	// do some command line stuff for ports and things
 
-	while( (opt = getopt(argc, argv, "hs:p:f:c:l:r:d:")) != -1)
-	{
-		switch(opt)
-		{
-			case 'h':
-				do_usage(argv[0]);
-				break;
-			case 's':
-				// should I be doing some checking on this arg?
-				uri = optarg;
-				break;
-			case 'p':
-				// should I be doing some checking on this arg?
-				port = atoi(optarg);
-				break;
-			case 'f':
-				filterstring = optarg;
-				break;
-			case 'c':
-				colourmod = optarg;
-				break;
-			case 'r':
-				rightpos = optarg;
-				break;
-			case 'l':
-				leftpos = optarg;
-				break;
-			case 'd':
-				dirmod = optarg;
-				break;
-			default: do_usage(argv[0]);
-		};
-	}
-	//--------------------------------------------------------
-
-	init_packets();
-
+	do_configuration(argc,argv);
 	//-------Setup listen socket-----------
 	listen_socket = setup_listen_socket(); // set up socket
 	bind_tcp_socket(listen_socket, port); // bind and start listening
@@ -190,6 +163,29 @@ int main(int argc, char *argv[])
 
 	hax_fdmax(fdmax);//XXX
 
+
+
+	if (restart_config == 1) {
+restart:
+		if(colourhandle) {
+			dlclose(colourhandle);
+		}
+		if(lefthandle) {
+			dlclose(lefthandle);
+		}
+		if(righthandle) {
+			dlclose(righthandle);
+		}
+		if(trace) {
+			trace_destroy(trace);
+		}
+		do_configuration(argc,argv);
+
+	}
+	restart_config = 0;
+	//--------------------------------------------------------
+
+	init_packets();
 
 
 	//------- Load up modules -----------
@@ -230,8 +226,12 @@ int main(int argc, char *argv[])
 
 	//------- ---------------------------
 
-	check_clients(true);// keep rtclient from starting till someone connects
-
+	// keep rtclient from starting till someone connects
+	// but if we already have clients, don't bother
+	if (new_client == 0) {
+		new_client = check_clients(true);
+	}
+	
 
 	//------- Connect RTClient ----------
 	trace = trace_create(uri);
@@ -241,92 +241,87 @@ int main(int argc, char *argv[])
 	if (filterstring) {
 		printf("setting filter %s\n",filterstring);
 		filter = trace_bpf_setfilter(filterstring);
+	} else {
+		if (filter)
+			free(filter);
+		filter = 0;
 	}
 
-	// hax to make it only slow down saved trace files...looks for a '/'
-	for(tmp=uri; *tmp != '\0'; tmp++)
-		if(*tmp == '/')
-		{
-			printf("Attempting to replay trace in real time\n");
-			live = false;
-			break;
-		}
+	if ((!strncmp(uri,"erf:",4)) || (!strncmp(uri,"pcap:",5))) {
+		// erf or pcap trace, slow down!
+		printf("Attempting to replay trace in real time\n");
+		live = false;
+	}
 
 	// someone explain why i have 2 loops here...think its cause I did
 	// have some clean up code which left/moved, and how it fitted in
 	// with signal handlers
 	while(1)
 	{
-		// loop till something breaks
+		/* check for new clients */
+		if (restart_config == 1) {
+			expire_flows(ts32+5);
+			goto restart;
+		}
+		new_client = check_clients(false);
+		if(new_client > 0)// is zero valid?
+			send_flows(new_client);
 
-		for(;;) 
+		/* get a packet, and process it */
+		if((psize = trace_read_packet(trace, &packet)) <= 0)
 		{
-			/* check for new clients */
-			new_client = check_clients(false);
-			if(new_client > 0)// is zero valid?
-				send_flows(new_client);
+			perror("libtrace_read_packet");
+			break;
+		}
 
-			/* get a packet, and process it */
-			if((psize = trace_read_packet(trace, &packet)) <= 0)
+		if (filter)  
+			if (!trace_bpf_filter(filter,&packet)) 
+				continue;
+
+		ts = trace_get_erf_timestamp(&packet);
+
+		/* this time checking only matters when reading from a prerecorded
+		 * trace file. It limits it to a seconds worth of data a second,
+		 * which is still a large chunk*/
+		if(!live)
+		{
+			if(startts32 == 0)
+				startts32 = ts >> 32;
+
+			ts32 = ts >> 32;
+			gettimeofday(&nowtime, 0);
+
+			// check that we are in the right second, and arent 
+			// getting ahead of ourselves
+			while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
 			{
-				perror("libtrace_read_packet");
-				break;
-			}
-
-			if (filter)  
-				if (!trace_bpf_filter(filter,&packet)) 
-					continue;
-
-			ts = trace_get_erf_timestamp(&packet);
-
-			/* this time checking only matters when reading from a prerecorded
-			 * trace file. It limits it to a seconds worth of data a second,
-			 * which is still a large chunk*/
-			if(!live)
-			{
-				if(startts32 == 0)
-					startts32 = ts >> 32;
-
-				ts32 = ts >> 32;
+				usleep(10);	
 				gettimeofday(&nowtime, 0);
 
-				// check that we are in the right second, and arent 
-				// getting ahead of ourselves
-				while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
-				{
-					usleep(10);	
-					gettimeofday(&nowtime, 0);
-
-				}
-
-				//check that we are in the right part of the second and arent
-				//getting ahead of ourselves. could go into more detail
-				//here, but is not super important
-				uint32_t dagparts_hax = 0;
-				if(ts & 0x0000000080000000)
-					dagparts_hax += 500000;
-				if(ts & 0x0000000040000000)
-					dagparts_hax += 250000;
-				if(ts & 0x0000000020000000)
-					dagparts_hax += 125000;
-
-				while((uint32_t)(nowtime.tv_usec) < dagparts_hax)
-				{
-					usleep(1);
-					gettimeofday(&nowtime, 0);
-				}
 			}
-			// if sending fails, assume we just lost a client
-			if(per_packet(packet, ts, &modptrs) != 0)
-				break;
 
+			//check that we are in the right part of the second and arent
+			//getting ahead of ourselves. could go into more detail
+			//here, but is not super important
+			uint32_t dagparts_hax = 0;
+			if(ts & 0x0000000080000000)
+				dagparts_hax += 500000;
+			if(ts & 0x0000000040000000)
+				dagparts_hax += 250000;
+			if(ts & 0x0000000020000000)
+				dagparts_hax += 125000;
+
+			while((uint32_t)(nowtime.tv_usec) < dagparts_hax)
+			{
+				usleep(1);
+				gettimeofday(&nowtime, 0);
+			}
 		}
-blah:
-		// any individual clean up could go here...maybe not useful?
-		printf("Cleaning up...\n");
-		//destroy_rtclient(rtclient);
+		// if sending fails, assume we just lost a client
+		if(per_packet(packet, ts, &modptrs) != 0)
+			break;
 	}
-	//goodbye:
+goodbye:
 	printf("Destroying libtrace...\n");
 	trace_destroy(trace);
 	printf("Removing flow information...\n");
@@ -355,3 +350,57 @@ void sig_hnd( int signo )
     longjmp(jmpbuf, 1);
 }
 
+static void sigusr_hnd(int signo) {
+	printf("siguser handler\n");
+	restart_config = 1;
+}
+
+void set_defaults() {
+	uri = 0;
+	filterstring = 0;
+	colourmod = 0;
+	rightpos = 0;
+	leftpos = 0;
+	dirmod = 0;
+	loop = 0;
+}
+
+void do_configuration(int argc, char **argv) {
+	int opt;
+
+	set_defaults();
+
+	config_t main_config[] = {
+		{"source", TYPE_STR|TYPE_NULL, &uri},
+		{"listenport", TYPE_INT|TYPE_NULL, &port},
+		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
+		{"colour_module",TYPE_STR|TYPE_NULL, &colourmod},
+		{"rpos_module",TYPE_STR|TYPE_NULL, &rightpos},
+		{"lpos_module",TYPE_STR|TYPE_NULL, &leftpos},
+		{"dir_module",TYPE_STR|TYPE_NULL, &dirmod},
+		{"loop",TYPE_INT|TYPE_NULL, &loop},
+		{0,0,0}
+
+	};
+	while( (opt = getopt(argc, argv, "hs:p:f:c:l:r:d:LC:")) != -1)
+	{
+		switch(opt)
+		{
+			case 'h':
+				do_usage(argv[0]);
+				break;
+			case 'C':
+				configfile = optarg;
+				break;
+			default: do_usage(argv[0]);
+		};
+	}
+
+	if (configfile) {
+		if (parse_config(main_config,configfile)) {
+			fprintf(stderr,"Bad config file %s, giving up\n",
+					configfile);
+			exit(1);
+		}
+	}
+}

@@ -1,4 +1,7 @@
-/* $CVSID$ */ 
+/* $Header$ $Log$
+/* $Header$ Revision 1.4  2004/02/17 01:59:08  stj2
+/* $Header$ w00t
+/* $Header$ */ 
 #include "stdafx.h"
 
 #include "vector.h"

@@ -50,7 +50,22 @@ env = Environment(
         LIBS = libs,
         LINKFLAGS = libflags
 )
-env.Program(target = executable, source = sources)
+output = env.Program(target = executable, source = sources)
+env.Clean('clean', output)
+
+# The texture manager requires DevIL headers:
+env.Depends('texture_manager.o', 'external/DevIL/lib/libIL.a')
+# And lua_script requires lua headers:
+env.Depends('lua_script.o', 'external/lua/lib/liblua.a')
+
+
+# Build DevIL. The action all needs to be executed as a single action
+# because the path is not shared between shell invocations.
+env.Command('external/DevIL/lib/libIL.a', '',
+	[ 'cd external/DevIL/DevIL; ./configure --prefix=`pwd`/.. '\
+  	+ '--enable-static=yes; make clean install' ])
+env.Command('external/lua/lib/liblua.a', '',
+	[ 'cd external/lua; make' ])
 
 # Configure stuff:
 # This is cached in options.cache. Delete options.cache for the configure

@@ -9,17 +9,6 @@ Make sure OpenGL of some sort is also installed, you may need to install
 Mesa if the build fails to find OpenGL or GLU. You'll also need Python
 installed.
 
-Build DevIL and lua:
- * DevIL:
-    cd external/DevIL/DevIL
-    ./configure --prefix=`pwd`/.. --enable-static=yes
-    make clean install
-    cd ../..
- * lua:
-    cd external/lua
-    make
-    cd ../..
-
 Build bsod-client:
  * make
 
@@ -27,4 +16,4 @@ Configure bsod-client:
  * vi data/config.lua
 
 Run:
- * ./bsod-client
+ * ./runbsod.sh

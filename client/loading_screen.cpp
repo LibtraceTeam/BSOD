@@ -13,6 +13,8 @@
 #include <io.h>
 #endif
 
+#include <unistd.h>
+
 void CLoadingScreen::Redraw()
 {
     world.display->BeginFrame2();

@@ -5,4 +5,4 @@ all:
 	@python scons-local/scons.py -Q
 
 clean:
-	@python scons-local/scons.py -Qc
+	@python scons-local/scons.py -Qc clean

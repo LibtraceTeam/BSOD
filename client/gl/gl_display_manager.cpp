@@ -57,6 +57,7 @@ void CGLDisplayManager::Initialise()
 	// Start Of User Initialization
 
 	glClearColor (0.0f, 0.0f, 0.0f, 0.5f);					
+	//glClearColor (1.0f,10.0f, 1.0f, 0.5f);					
 
 	glClearDepth (1.0f); // Depth Buffer Setup
 	glDepthFunc (GL_LEQUAL); // The Type Of Depth Testing (Less Or Equal)

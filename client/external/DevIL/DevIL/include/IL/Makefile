@@ -78,7 +78,7 @@ LIBIL_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer      
 LIBJPG = 
 LIBLCMS = 
 LIBMNG = 
-LIBPNG = 
+LIBPNG = -lpng
 LIBSDL = 
 LIBTIFF = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -92,7 +92,7 @@ RANLIB = ranlib
 STRIP = strip
 VERSION = 1.6.5
 VERSIONINFO = -version-info 1:165:0
-X_CFLAGS =  -I/usr/X11R6/include
+X_CFLAGS = 
 allegro_config = no
 sdl_config = yes
 

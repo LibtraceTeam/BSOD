@@ -51,6 +51,7 @@
 #include <iostream>
 
 #include "position.h"
+#include <libtrace.h>
 #define SIDE_LENGTH 8
 #define MAX_SIZE 10000
 
@@ -60,9 +61,20 @@
  * determine an angle around the circle, and the last two are used to give a
  * length
  */
-void mod_get_position(float coord[3], struct in_addr ip) { 
+extern "C"
+int mod_get_position(float coord[3], int iface, 
+		struct libtrace_packet_t *packet) { 
 	
-	
+	struct libtrace_ip *ipptr = trace_get_ip(packet);
+	if (!ipptr)
+		return 1;
+
+	struct in_addr ip;
+	if (0 == iface)
+		ip = ipptr->ip_src;
+	else
+		ip = ipptr->ip_dst;
+
 	float length, angle; 
 	ip.s_addr = ntohl(ip.s_addr); 
 	angle = ((ip.s_addr & 0xffff0000) >> 16) % MAX_SIZE; 
@@ -73,5 +85,6 @@ void mod_get_position(float coord[3], struct in_addr ip) {
 	coord[2] = angle/MAX_SIZE * cos( (2* M_PI * length) / MAX_SIZE) 
 	    * SIDE_LENGTH;
 
+	return 0;
 }
 

@@ -193,28 +193,30 @@ short get_port(uint8_t protocol, uint16_t source, uint16_t dest)
 }
 	
 //-------------------------------------------------------------
-int get_start_pos(float start[3], struct in_addr source, int iface, struct modptrs_t *modptrs)
+int get_start_pos(float start[3], struct libtrace_packet_t *packet, 
+		int iface, struct modptrs_t *modptrs)
 {
 	if(iface == 0) {
 		start[0] = -10;
-		modptrs->left(start, source);
+		modptrs->left(start, 0, packet);
 	} else if(iface == 1) {
 		start[0] = 10;
-		modptrs->right(start,source);
+		modptrs->right(start, 1, packet);
 	} else
 		return 1;
 
 	return 0;
 }
 //------------------------------------------------------------
-int get_end_pos(float end[3], struct in_addr dest, int iface, struct modptrs_t *modptrs)
+int get_end_pos(float end[3], struct libtrace_packet_t *packet, 
+		int iface, struct modptrs_t *modptrs)
 {
 	if(iface == 0) {
 		end[0] = 10;
-		modptrs->right(end,dest);
+		modptrs->right(end,1,packet);
 	} else if(iface == 1) {
 		end[0] = -10;
-		modptrs->left(end,dest);
+		modptrs->left(end,0,packet);
 	} else
 		return 1;
 
@@ -319,20 +321,18 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	{
 		flow_info_t flow_info;
 
-		direction = modptrs->direction(packet);
+		direction = modptrs->direction(&packet);
 
 		// populate start and end arrays
 		// also checks that we want traffic from this iface
 		if(get_start_pos(start, 
-				tmpid.sourceip, 
+				&packet,
 				direction,
-				/*erfptr->flags.iface,*/
 				modptrs) != 0)
 			return 0;
 		if(get_end_pos(end, 
-				tmpid.destip, 
+				&packet,
 				direction,
-				/*erfptr->flags.iface,*/
 				modptrs) != 0)
 			return 0;
 
@@ -346,9 +346,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		flow_info.end[2] = end[2];
 
 		modptrs->colour(&(flow_info.id_num), 
-				get_port(p->ip_p, tmpid.sourceport, 
-				    tmpid.destport), 
-				p->ip_p);
+				&packet);
 		
 		id++;
 

@@ -1,5 +1,9 @@
 #include "colours.h"
-#include <stdint.h>
+#include <libtrace.h>
+#include <inttypes.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stddef.h>
 #include <string.h>
 
 // ENUMs for the protocols. Number = id used when packets are sent.
@@ -41,6 +45,41 @@ static uint8_t countercolours[][3] = {
 	{255,192,203}  /* OTHER   pink		*/
 };
 
+struct ports_t {
+	uint32_t src;
+	uint32_t dst;
+};
+
+#define SW_IP_OFFMASK 0xff1f
+
+static uint16_t get_source_port(struct libtrace_ip *ip)
+{
+	if (0 != ip->ip_p
+	  && 17 != ip->ip_p)
+		return 0;
+	if (0 != ip->ip_off & SW_IP_OFFMASK)
+		return 0;
+
+	struct ports_t *port;
+	port = (struct ports_t *)((ptrdiff_t)ip + (ip->ip_hl * 4));
+
+	return htons(port->src);
+}
+
+static uint16_t get_destination_port(struct libtrace_ip *ip)
+{
+	if (0 != ip->ip_p
+	  && 17 != ip->ip_p)
+		return 0;
+	if (0 != ip->ip_off & SW_IP_OFFMASK)
+		return 0;
+
+	struct ports_t *port;
+	port = (struct ports_t *)((ptrdiff_t)ip + (ip->ip_hl * 4));
+
+	return htons(port->dst);
+}
+
 // Define the names displayed on the client when a filter is applied:
 char counternames [][256] = {
 	"TCP",
@@ -64,10 +103,23 @@ char counternames [][256] = {
 * Sets the colour array (RGB) to be the colour appropriate to the 
 * port/protocol being used.
 */
-void mod_get_colour(unsigned char *id_num, int port, int protocol)
+extern "C"
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 {
 
 	int i;
+	struct libtrace_ip *ip = trace_get_ip(packet);
+	if (!ip)
+		return 1;
+
+	int protocol = ip->ip_p;
+	int port = trace_get_server_port(
+			protocol,
+			get_source_port(ip),
+			get_destination_port(ip)) == USE_SOURCE 
+		? get_source_port(ip)
+		: get_destination_port(ip);
+
 
 	switch(port)
 	{
@@ -188,6 +240,8 @@ void mod_get_colour(unsigned char *id_num, int port, int protocol)
 		};break;
 	};
 	//printf("%u %u %u \n", colour[0], colour[1], colour[2]);
+	//
+	return 0;
 
 }
 

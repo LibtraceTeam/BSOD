@@ -49,6 +49,7 @@
 #include <iostream>
 
 #include "position.h"
+#include "libtrace.h"
 
 
 /**
@@ -57,10 +58,25 @@
  * octets are used for placement.  One dimension is based on the third octet, 
  * the other is based on the last octet.
  */
-void mod_get_position(float coord[3], struct in_addr ip) {
+extern "C"
+int mod_get_position(float coord[3], int iface, 
+		struct libtrace_packet_t *packet) {
+	struct libtrace_ip *ipptr = trace_get_ip(packet);
+	struct in_addr ip;
+	if (!ipptr)
+		return 1;
+
+	if (0 == iface) {
+		ip = ipptr->ip_src;
+	}
+	else {
+		ip = ipptr->ip_dst;
+	}
 
 	coord[1] = ((float) ((ntohl(ip.s_addr) & 0x0000ff00) >> 8)/12.8) - 10;
 
 	coord[2] = ((float) (ntohl(ip.s_addr) & 0x000000ff)/12.8) - 10;
+
+	return 0;
 }
 

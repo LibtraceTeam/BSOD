@@ -38,10 +38,14 @@
  * @param[out] coord[3] The 3d coordinate of the position (x,y,z), z is ignored.
  * @param[in] ip 	The IP address.
  *
+ * @returns 1 on failure, 0 on success
+ *
  * This function should take an ip address and return a position on a 2d plane.
  * x and y are stored in coord[0] and coord[1].  coord[2] is ignored.
  * coord[0] and coord[1] must be in the range -10..10.
  */
-extern "C" void mod_get_position(float coord[3], struct in_addr ip);
+extern "C" int mod_get_position(float coord[3], 
+		int iface,
+		struct libtrace_packet_t *packet);
 
 #endif // _POSITION_H

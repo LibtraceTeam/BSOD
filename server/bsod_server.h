@@ -36,10 +36,10 @@
 #include <stdint.h>
 #include "libtrace.h"
 
-typedef void (* colfptr)(unsigned char*,int,int);
+typedef void (* colfptr)(unsigned char*,struct libtrace_packet_t *);
 typedef void (* inffptr)(uint8_t*,char[256],int);
-typedef int (* posfptr)(float[3],struct in_addr);
-typedef int (* dirfptr)(struct libtrace_packet_t );
+typedef int (* posfptr)(float[3], int iface, struct libtrace_packet_t *);
+typedef int (* dirfptr)(struct libtrace_packet_t *);
 typedef void (* initdirfptr)(char* );
 struct modptrs_t {
 	colfptr colour;

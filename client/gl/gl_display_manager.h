@@ -123,6 +123,7 @@ public:
 
 	virtual void SetWireframe(bool w);
 	virtual void SetBackfaceCull(bool b);
+	virtual void SetDepthTest(bool on);
 };
 
 #endif

@@ -651,9 +651,7 @@ void CGLDisplayManager::DrawTriangles2(float *vertices, float *tex_coords, int n
 	glVertexPointer(3, GL_FLOAT, 0, vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
 
-	glDisable(GL_DEPTH_TEST);
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-	glEnable(GL_DEPTH_TEST);
 
 	triangles_drawn += num_triangles;
 	meshs_drawn++;
@@ -667,11 +665,7 @@ void CGLDisplayManager::DrawTriangles2(float *vertices, float *tex_coords, byte 
 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, colours);
 
 	glEnableClientState(GL_COLOR_ARRAY);
-	glDisable(GL_DEPTH_TEST);
-	//Log("pre glDrawArrays:%d   ", glGetError());
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
-	//Log("post glDrawArrays:%d\n", glGetError());
-	glEnable(GL_DEPTH_TEST);
 	glDisableClientState(GL_COLOR_ARRAY);
 
 	triangles_drawn += num_triangles;
@@ -698,6 +692,14 @@ void CGLDisplayManager::DrawTriangleStrip(float *vertices, float *tex_coords, in
 	
 	triangles_drawn += num_triangles;
 	meshs_drawn++;
+}
+
+void CGLDisplayManager::SetDepthTest(bool on)
+{
+    if(on)
+	glEnable(GL_DEPTH_TEST);
+    else
+	glDisable(GL_DEPTH_TEST);
 }
 
 void CGLDisplayManager::WindowResized(int new_width, int new_height)

@@ -55,6 +55,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <map>
 
+#define NO_STLPOR
+
 #ifdef _WIN32
 #pragma warning(disable:4786)
 #endif

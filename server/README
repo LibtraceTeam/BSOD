@@ -175,6 +175,17 @@ Troubleshooting bsod server
 ----------------------------------
 ----------------------------------
 
+Problem:
+Everything builds and runs fine, but when the client connects it doesn't
+see any traffic
+
+Solution:
+The primary cause of this is using the wrong direction module in the server.
+If you are using a DAG capture card or reading from erf traces, make sure
+that the 'interface' module is used. If reading straight from a network
+interface or a pcap trace, the 'destmac' direction module should be used,
+and the mac_addrs config file should contain local mac addresses.
+
 
 Problem:
 /usr/local/bsod/bin/bsod_server: error while loading shared libraries: libtrace.so.2: cannot open shared object file: No such file or directory

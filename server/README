@@ -16,6 +16,7 @@ bsod was written to make use of the libtrace traffic processing library
 also developed by the WAND research group. This means that it can 
 understand and visualise live traffic capture from devices such as pcap
 and DAG interfaces, as well as traces stored in erf and pcap formats.
+The bsod server has been tested on and is known to run in Debian GNU/Linux.
 
 
 It is licensed under ...

@@ -1,8 +1,3 @@
-/*
- * Picking a location on each plane still doesn't feel very good. It's
- * like a super hack that won't go away.
- */ 
-
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
@@ -271,8 +266,10 @@ int get_end_pos(float end[3], struct in_addr dest, int iface)
 	length = (dest.s_addr & 0xffff) % MAX_SIZE;
 
 	end[0] = 10;
-	end[1] = angle/MAX_SIZE * sin( (2* M_PI * length) / MAX_SIZE) * SIDE_LENGTH;
-	end[2] = angle/MAX_SIZE * cos( (2* M_PI * length) / MAX_SIZE) * SIDE_LENGTH;
+	end[1] = angle/MAX_SIZE * sin( (2* M_PI * length) / MAX_SIZE) 
+	    * SIDE_LENGTH;
+	end[2] = angle/MAX_SIZE * cos( (2* M_PI * length) / MAX_SIZE) 
+	    * SIDE_LENGTH;
     }
     else if(iface == 1)
     {

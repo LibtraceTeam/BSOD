@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
     bool live = true;
     char *tmp;
 
-
     // rt stuff
     static struct rt_client_t *rtclient;
     static char* hostname = "chasm.cs.waikato.ac.nz"; // default is chasm
@@ -116,7 +115,6 @@ int main(int argc, char *argv[])
     }
     */
     
-    
     if(sigaction(SIGPIPE, &sigact, NULL) < 0) {
 	perror("sigaction");
 	exit(-1);
@@ -129,7 +127,7 @@ int main(int argc, char *argv[])
     //-------------------------------------------------------
     // do some command line stuff for ports and things
 
-    while( (opt = getopt(argc, argv, "s:p:l:r:")) != -1)
+    while( (opt = getopt(argc, argv, "s:p:")) != -1)
     {
 	switch(opt)
 	{

@@ -36,15 +36,13 @@ void CPartFlow::Draw()
 
     packets_drawn += num_triangles / 2;
 
-    d->SetBlend(true);
-    d->SetBlendMode(CDisplayManager::Transparent2);
     d->BindTexture(tex);
 
     if(endpoint_vertices.size() == 0)
 	CreateEndPoints();
 
     // Draw start and end points
-    //d->SetColour(colours[0], colours[1], colours[2], (vertices.back() - start).Length() / (destination - start).Length());
+    //d->SetColour(colours[0], colours[1], colours[2], (translation - start).Length() / (destination - start).Length());
     d->SetColour(colours[0], colours[1], colours[2], colours[3]);
     d->DrawTriangles2(
 	(float *)&endpoint_vertices[0],
@@ -62,7 +60,6 @@ void CPartFlow::Draw()
 	num_triangles);
     d->PopMatrix();
 
-    d->SetBlend(false);
 }
 
 void CPartFlow::CreateEndPoints()
@@ -221,11 +218,18 @@ void CPartVis::Draw()
 {
     FlowMap::const_iterator i = flows.begin();
     CDisplayManager *d = world.display;
+
+    // Common state for all flows:
+    d->SetBlend(true);
+    d->SetBlendMode(CDisplayManager::Transparent2);
+    d->SetDepthTest(false);
     
     // Draw the flows
     for(; i != flows.end(); ++i) {
 	i->second->Draw();
     }
+
+    d->SetDepthTest(true);
 
     // Draw the left, then the right sides of the display.
     d->SetBlend(true);

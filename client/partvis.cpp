@@ -289,7 +289,7 @@ CPartVis::CPartVis()
     right->texCoords.push_back(Vector2f(1, 1));
     right->vertices.push_back(Vector3f(10, -10, -10));	
     right->texCoords.push_back(Vector2f(0, 1));
-    right->tex = CTextureManager::tm.LoadTexture("data/right.png");
+    right->tex = CTextureManager::tm.LoadTexture("data/earth.png");
 }
 
 void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)

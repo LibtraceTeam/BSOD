@@ -23,8 +23,8 @@ Ensure that libtrace is properly installed (refer to the
 documentation that comes with it for information on how to do this).
 
 
-tar xzvf bsod-release-x.y.z.tar.gz
-cd bsod-release-x.y.z
+tar xzvf bsod-x.y.z.tar.gz
+cd bsod-x.y.z
 cd server
 make
 (as root)

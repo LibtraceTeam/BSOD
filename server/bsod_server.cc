@@ -103,6 +103,7 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *macaddrfile = 0;
+char *blacklistdir = 0;
 char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
 
@@ -137,9 +138,10 @@ int main(int argc, char *argv[])
 {
 	// RTTMap:
 	RTTMap *rttmap = new RTTMap();
-	// Blacklist:
-	blacklist *theList = new blacklist( "./blist/", 5, 600 );
     
+	// Blacklist:
+	blacklist *theList;
+	
 	// socket stuff
 	int listen_socket;
 	fd_set listen_set, event_set;
@@ -218,7 +220,13 @@ int main(int argc, char *argv[])
 			close_modules();
 			do_configuration(0,0);
 			load_modules();
-		}
+		} 
+		
+		/* set up directory where we should store our blacklist stuff */
+		char tmp[4096];
+		snprintf(tmp,4096,"%s%s",basedir,blacklistdir);
+		Log(LOG_DAEMON|LOG_INFO,"Saving blacklist info to '%s'\n", tmp);
+		theList = new blacklist( tmp, 5, 600 );
 
 		//------- ---------------------------
 		// keep rtclient from starting till someone connects
@@ -362,6 +370,8 @@ void fix_defaults() {
 		pidfile=strdup("/var/run/bsod_server.pid");
 	if (!macaddrfile)
 		macaddrfile=strdup("/usr/local/bsod/etc/mac_addrs");
+	if (!blacklistdir)
+		blacklistdir=strdup("blist/");
 
 	
 }
@@ -389,6 +399,7 @@ void do_configuration(int argc, char **argv) {
 		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
 		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
 		{"macaddrfile", TYPE_STR|TYPE_NULL, &macaddrfile},
+		{"blacklistdir", TYPE_STR|TYPE_NULL, &blacklistdir},
 		{0,0,0}
 	};
 
@@ -494,7 +505,8 @@ static void load_modules() {
 	 * would be nice to use _init here, but there's no easy way
 	 * to pass it the information it needs 
 	 */
-	modptrs.init_dir(macaddrfile);
+	snprintf(tmp,4096,"%s%s",basedir,macaddrfile);
+	modptrs.init_dir(tmp);
 
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = (char*)dlerror()) != NULL) {

@@ -38,12 +38,13 @@
 /**
  * interface just looks at the interface bit in the erf header
  */
-int mod_get_direction(struct libtrace_packet_t packet)
+extern "C"
+int mod_get_direction(struct libtrace_packet_t *packet)
 {
-	return trace_get_direction(&packet);
+	return trace_get_direction(packet);
 }
 
-
+extern "C"
 void mod_init_dir(char* filename)
 {
     /* empty */

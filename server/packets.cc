@@ -425,6 +425,14 @@ void get_colour(uint8_t color[3], int port, int protocol)
 }
 
 
+uint16_t getTotalLength(const ip_t *packet, uint32_t len)
+{
+    if (len<4)
+	return 0;
+    return *((uint16_t *)(packet+2));
+}
+
+
 
 //------------------------------------------------------------
 int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
@@ -455,11 +463,40 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
 	printf("bling\n");
 	expire_flows(ts32);
     }
+    //-----------------------------------
+    // check if this is an ack
+    //printf("size %i\n", ntohs(p->ip_len)); 
+    
+    
+    // some of this is doubled up...work out why it didnt work before
+    // TODO
+    /*
+    struct tcphdr *t = 0;
+    int h;
+    h = p->ip_hl * 4;
+
+    if(p->ip_p == 6)
+    {
+	t = (struct tcphdr *) ( (uint8_t *)p + h);
+
+	//printf("len %i, tcp %i, ip %i\n", ntohs(p->ip_len), t->doff*4, h);
+
+	if((ntohs(p->ip_len)) - (t->doff*4 + h) == 0)
+	{
+	    //printf("ack\n");
+	    return 0;
+	}
+    }
+*/
+    //-----------------------------------
 
     // get identifying information
     hlen = p->ip_hl * 4;
-    tcpptr = (struct tcphdr *) ( p  + hlen);
+    tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
+    //tcpptr = (struct tcphdr *) (p  + hlen);
     assert(tcpptr);
+
+    printf("len %i, tcp %i, ip %i\n", ntohs(p->ip_len), tcpptr->doff*4, hlen);//XXX
 
     sport = ntohs(tcpptr->source);
     dport = ntohs(tcpptr->dest);
@@ -483,10 +520,6 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
     {
 	flow_info_t flow_info;
 	
-	/*
-	printf("sending flow %i - %f %f %f -> %f %f %f\n", id,
-	    start[0],start[1],start[2],end[0],end[1],end[2]);
-*/
 	flow_info.id = id;
 	flow_info.time = ts32; 
 	flow_info.start[0] = start[0];

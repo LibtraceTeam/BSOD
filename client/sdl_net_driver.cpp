@@ -104,6 +104,34 @@ void CSDLNetDriver::Connect(string address)
 	throw CException(SDLNet_GetError());
     
     Log("Connected!\n");
+
+    char version;
+    if(SDLNet_TCP_Recv(clientsock, &version, 1) != 1) {
+	    Log("Unable to read server version\n");
+	    throw CException("Unable to read server version\n");
+    }
+
+    /* Versions lower than 0x12 are ancient */
+    if (version < 0x10) {
+	    Log("Server version is ancient\n");
+	    throw CException("Server version is ancient\n");
+    }
+
+    const int min_version = 0x12; // Minimum version known
+    const int max_version = 0x12; // Maximum version known
+
+    if (version < min_version) {
+	    throw CException(bsprintf("Server version is %i.%i, need at least %i.%i\n",
+			    version>>4,version&0x0F,
+			    min_version>>4,max_version&0x0f));
+    }
+
+    // Maximum protocol version known is uh, 1.2
+    if (version > max_version) {
+	    throw CException(bsprintf("Server version is %i.%i, client version is only %i.%i\n",
+			    version>>4,version&0x0F,
+			    max_version>>4,max_version&0x0f));
+    }
     
 }
 

@@ -4,25 +4,30 @@ dagcdir= /usr/local/dag-2.4.11/utils/
 CXX=g++-3.0
 CC=g++-3.0
 CPPFLAGS = -Wall -Wimplicit -Wformat -pipe -g
-INCLUDE = -I$(include) -I/usr/local/wand/include -I$(dagcdir)
+INCLUDE = -I$(include) -I/usr/local/wand/include -I$(dagcdir) -I.
 
 CPPFLAGS += $(INCLUDE)
-LDLIBS = -lpcap -lm -lrtclient2 -lz -L/usr/local/wand/lib
+LDLIBS =  -lm -ltrace -lz -lpcap -L/usr/local/wand/lib -ldl -rdynamic 
 
-BINS = test
+BINS = bsod_server
 OBJS = socket.o packets.o
 
-.PHONY: all clean distclean install depend
+.PHONY: all clean distclean install depend plugins
 
-all: $(BINS) 
+all: $(BINS) plugins
 
-clean:
+clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)
 
-distclean:
-	$(RM) *~ *.o $(BINS) $(OBJS)
+distclean: clean
+	
 
 
-test: $(OBJS) test.o
+bsod_server: $(OBJS) bsod_server.o
 
+plugins:
+	cd plugins; make; cd ..
+
+plugins-clean:
+	cd plugins; make clean; cd ..
 # vim: noet ts=8 sw=8

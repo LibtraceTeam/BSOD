@@ -5,7 +5,7 @@
 
 typedef void (* colfptr)(uint8_t[3],int,int);
 typedef int (* posfptr)(float[3],struct in_addr);
-typedef int (* dirfptr)(struct libtrace_t *, void *, int);
+typedef int (* dirfptr)(struct libtrace_packet_t );
 struct modptrs_t {
 	colfptr colour;
 	posfptr left;

@@ -8,7 +8,7 @@
  * interface just looks at the interface bit in the erf header
  */
 
-extern "C" int mod_get_direction(struct libtrace_t *trace, void *buffer, int caplen);
+extern "C" int mod_get_direction(struct libtrace_packet_t packet);
 
 
 #endif // _INTERFACE_H

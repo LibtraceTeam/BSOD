@@ -94,11 +94,10 @@ int main(int argc, char *argv[])
 
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
-	static char* uri = "rtclient:chasm.cs.waikato.ac.nz"; // default is chasm
+	struct libtrace_packet_t packet;
+	static char* uri = 0; // default is chasm
 	int psize;
-	int status = 0;
 	uint64_t ts;
-	dag_record_t *erfptr = 0;
 
 	char *error = 0;
 
@@ -235,13 +234,13 @@ int main(int argc, char *argv[])
 
 
 	//------- Connect RTClient ----------
-	trace = create_trace(uri);
+	trace = trace_create(uri);
 	printf("Connected to data source: %s\n", uri);
 
 	//------- Create filter -------------
 	if (filterstring) {
 		printf("setting filter %s\n",filterstring);
-		filter = libtrace_bpf_setfilter(filterstring);
+		filter = trace_bpf_setfilter(filterstring);
 	}
 
 	// hax to make it only slow down saved trace files...looks for a '/'
@@ -268,18 +267,17 @@ int main(int argc, char *argv[])
 				send_flows(new_client);
 
 			/* get a packet, and process it */
-			if((psize = libtrace_read_packet(trace, buffer,SCANSIZE, &status)) <= 0)
+			if((psize = trace_read_packet(trace, &packet)) <= 0)
 			{
 				perror("libtrace_read_packet");
 				break;
 			}
 
 			if (filter)  
-				if (!libtrace_bpf_filter(trace,filter,buffer,SCANSIZE)) 
+				if (!trace_bpf_filter(filter,&packet)) 
 					continue;
 
-			ts = get_erf_timestamp(trace,buffer,SCANSIZE);
-			erfptr = (dag_record_t *)buffer;
+			ts = trace_get_erf_timestamp(&packet);
 
 			/* this time checking only matters when reading from a prerecorded
 			 * trace file. It limits it to a seconds worth of data a second,
@@ -319,7 +317,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			// if sending fails, assume we just lost a client
-			if(per_packet(buffer, psize, ts, &modptrs,trace) != 0)
+			if(per_packet(packet, ts, &modptrs) != 0)
 				break;
 
 		}
@@ -330,7 +328,7 @@ blah:
 	}
 	//goodbye:
 	printf("Destroying libtrace...\n");
-	destroy_trace(trace);
+	trace_destroy(trace);
 	printf("Removing flow information...\n");
 	//empty_flows();
 	printf("Closing socket...\n");

@@ -6,9 +6,9 @@
 /**
  * interface just looks at the interface bit in the erf header
  */
-int mod_get_direction(struct libtrace_t *trace, void *buffer, int caplen)
+int mod_get_direction(struct libtrace_packet_t packet)
 {
-	return get_direction(trace,buffer,caplen);
+	return trace_get_direction(&packet);
 }
 
 

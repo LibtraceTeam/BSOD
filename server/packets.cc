@@ -203,7 +203,7 @@ int get_end_pos(float end[3], struct in_addr dest, int iface, struct modptrs_t *
 }
 
 //------------------------------------------------------------
-int per_packet(void *buffer, uint32_t caplen, uint64_t ts, struct modptrs_t *modptrs, struct libtrace_t *trace)
+int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs)
 {
 
 	int hlen = 0;
@@ -218,10 +218,14 @@ int per_packet(void *buffer, uint32_t caplen, uint64_t ts, struct modptrs_t *mod
 	flow_id_t tmpid;
 	flow_info_t current;
 
-	assert(buffer != NULL);
-	assert(caplen > 0);
+	assert(packet.buffer != NULL);
+	assert(packet.size > 0);
 
-	struct libtrace_ip *p = get_ip(trace,buffer,caplen);
+	struct libtrace_ip *p = trace_get_ip(&packet);
+
+	if (!p) {
+		return 0;
+	}
 	//ip_t *p = (ip_t *) erfptr->rec.eth.pload;
 	ts32 = ts >> 32;
 	assert(ts32-lastts >= 0);
@@ -284,7 +288,7 @@ int per_packet(void *buffer, uint32_t caplen, uint64_t ts, struct modptrs_t *mod
 	{
 		flow_info_t flow_info;
 
-		direction = modptrs->direction(trace, buffer,caplen);
+		direction = modptrs->direction(packet);
 
 		// populate start and end arrays
 		// also checks that we want traffic from this iface

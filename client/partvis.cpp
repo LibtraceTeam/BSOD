@@ -1,10 +1,4 @@
-/* $Header$ $Log$
-/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $ Revision 1.5  2004/02/17 02:05:21  stj2
-/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $ Still trying to get cvs tags correct.
-/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $
- $Header$ Revision 1.4  2004/02/17 01:59:08  stj2
- $Header$ w00t
- $Header$ */ 
+// $Header$
 #include "stdafx.h"
 
 #include "vector.h"

@@ -34,6 +34,3 @@ Supported network protocols: NL_IP NL_LOOP_BACK
 Lookup up id address for 'voodoo:32500'
 Connecting...
 Connected!
-Adding packet to non-existant flow -1
-Adding packet to non-existant flow -1
-Adding packet to non-existant flow -1

@@ -27,14 +27,14 @@
 # TODO: use sdl-config
 # notes: pthread is needed for openal
 
-EXECUTABLE := BuNg
+EXECUTABLE := bsod-client
 LIBS := IL ILU stlport_gcc GL GLU SDL NL lua  enet z
 LINK_FLAGS := -Lexternal/DevIL/lib -Lexternal/HawkNL/lib -Lexternal/OPCODE \
 	-Lexternal/lua/lib -Lexternal/OpenAL/linux/src -Lexternal/ode/lib \
     -Lexternal/enet -Lexternal/GL
 
 # Now alter any implicit rules' variables if you like, e.g.:
-CFLAGS := -g -Wall `linux/copts` 
+CFLAGS := -g -Wall `linux/copts`
 #-O3 -m486 -g -mathlon-xp
 CXXFLAGS := $(CFLAGS)
 
@@ -65,8 +65,8 @@ deps : $(DEPS)
 objs : $(OBJS)
 
 clean :
-	@$(RM-F) *.o
-	@$(RM-F) *.d
+	@$(RM-F) $(OBJS)
+	@$(RM-F) $(DEPS)
 
 veryclean: clean
 	@$(RM-F) $(EXECUTABLE)

@@ -28,7 +28,7 @@
 # notes: pthread is needed for openal
 
 EXECUTABLE := BuNg
-LIBS := IL ILU stlport_gcc GL GLU SDL NL opcode lua openal ode pthread enet z
+LIBS := IL ILU stlport_gcc GL GLU SDL NL lua  enet z
 LINK_FLAGS := -Lexternal/DevIL/lib -Lexternal/HawkNL/lib -Lexternal/OPCODE \
 	-Lexternal/lua/lib -Lexternal/OpenAL/linux/src -Lexternal/ode/lib \
     -Lexternal/enet -Lexternal/GL
@@ -48,9 +48,9 @@ RM-F := rm -f
 
 # You shouldn't need to change anything below this point.
 
-SOURCE := $(wildcard *.c) $(wildcard *.cpp) $(wildcard gl/*.cpp) $(wildcard linux/*.cpp)
-OBJS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCE)))
-DEPS := $(patsubst %.o,%.d,$(OBJS))
+SOURCE := $(wildcard *.cpp) $(wildcard gl/*.cpp) $(wildcard linux/*.cpp)
+OBJS := $(patsubst %.cpp,%.o,$(SOURCE))
+DEPS := $(patsubst %.o,%.d,$(foreach o,$(OBJS),$(notdir $o)))
 MISSING_DEPS := $(filter-out $(wildcard $(DEPS)),$(DEPS))
 MISSING_DEPS_SOURCES := $(wildcard $(patsubst %.d,%.c,$(MISSING_DEPS)) \
                                    $(patsubst %.d,%.cpp,$(MISSING_DEPS)))

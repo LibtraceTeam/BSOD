@@ -241,7 +241,13 @@ int main(int argc, char *argv[])
 		init_packets();
 
 		//------- Connect trace ----------
-		trace = trace_create(uri);
+		if( (trace = trace_create(uri)) == NULL)
+		{
+		    Log(LOG_DAEMON|LOG_ALERT, 
+			    "Unable to connect to data source: %s\n", uri);
+		    exit(1);
+		}
+
 		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
 		gettimeofday(&starttime, 0); // XXX
 

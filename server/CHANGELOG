@@ -9,6 +9,14 @@ research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
 
 
+Version 1.2.1, March 22, 2005
+------------------------------
+
+Changes	    - server now sends version information when clients connect
+	    to help prevent client/server mismatch.
+
+
+
 ------------------------------
 Version 1.2.0, March 18, 2005
 

@@ -5,5 +5,4 @@ extern int send_new_flow(float start[3], float end[3], uint32_t count);
 extern int send_update_flow(int fd, float start[3], float end[3], uint32_t count);
 extern int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3], uint16_t size);
 extern int send_kill_flow(uint32_t id);
-extern void add_fd(int fd);
 void hax_fdmax(int fd);

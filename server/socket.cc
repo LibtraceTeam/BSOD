@@ -46,12 +46,18 @@ struct flow_remove_t {
     uint32_t id;
 } __attribute__((packed));
 
+union pack_union {
+    struct flow_update_t flow;
+    struct pack_update_t packet;
+    struct flow_remove_t rem;
+};
+
 int listen_socket;
 fd_set read_fds;
 int fd_max;
 
 
-/* hack to get the max fd in here, do it a better way */
+/* hack to get the max fd in here, do it a better way...global? */
 void hax_fdmax(int fd)
 {
     fd_max = fd;
@@ -89,54 +95,28 @@ void remove_fd(struct client *tmp)
 {
     printf("Removing client on fd %i\n", tmp->fd);
 
+    FD_CLR(tmp->fd, &read_fds);
     close(tmp->fd);
 
     if(tmp->next == NULL && tmp->prev == NULL) // only item
     {
-	printf("first and only\n");
 	clients = NULL;
-	free(tmp);
-	return;
     }
-
-    if(tmp->next != NULL && tmp->prev == NULL) // first item
+    else if(tmp->next != NULL && tmp->prev == NULL) // first item
     {
 	tmp->next->prev = NULL;
 	clients = tmp->next;
-	free(tmp);
-	return;
     }
-    
-    if(tmp->next == NULL && tmp->prev != NULL) // last item
+    else if(tmp->next == NULL && tmp->prev != NULL) // last item
     {
 	tmp->prev->next = NULL;
-	free(tmp);
-	return;
-
     }
-
-    if(tmp->next != NULL && tmp->prev != NULL) // middle item
+    else if(tmp->next != NULL && tmp->prev != NULL) // middle item
     {
 	tmp->next->prev = tmp->prev;
 	tmp->prev->next = tmp->next;
-	free(tmp);
-	return;
     }
-    /*
-    if(tmp->next != NULL || tmp->prev != NULL)
-    {
-	if(tmp->next != NULL)
-	    tmp->next->prev = tmp->prev;
-	if(tmp->prev != NULL)
-	    tmp->prev->next = tmp->next;
-    }
-    ////////////////////
-    else if(tmp->next == NULL && tmp->prev == NULL)
-    {
-	printf("first and only (SHOULD)\n");
-	clients = tmp->next;
-    }
-*/
+
     free(tmp);
 }
 
@@ -192,7 +172,7 @@ int bind_tcp_socket(int listener, int port)
 
 
 //-----------------------------------------------------------------
-// pickup any new clients
+/* Pickup any new clients. */
 int check_clients(bool wait)
 {
     struct sockaddr_in remoteaddr;
@@ -233,8 +213,8 @@ int check_clients(bool wait)
 	    if (newfd > fd_max) {    // keep track of the maximum
 		fd_max = newfd;
 	    }
-	    printf("server: new connection from %s on "
-		    "socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
+	    printf("server: new connection from %s\n", 
+		    inet_ntoa(remoteaddr.sin_addr));
 	}
 	return newfd;
     }
@@ -243,29 +223,51 @@ int check_clients(bool wait)
 }
 
 
-// make a nice function to send to all that can be plugged in
-
-//-------------------------------------
-int send_kill_flow(uint32_t id)
+/*
+ * Takes a packet as part of a union, works out which one it is and
+ * sends it to all clients.
+ */
+int send_all(pack_union *data)
 {
     struct client *tmp = clients;
-    struct flow_remove_t update;
-    update.type = 0x02;
-    update.id = id;
+    int size = 0;
 
+    if(data->flow.type == 0x00)
+	size = sizeof(flow_update_t);
+    else if(data->flow.type == 0x01)
+	size = sizeof(pack_update_t);
+    else if(data->flow.type == 0x02)
+	size = sizeof(flow_remove_t);
+    else
+    {
+	printf("Bad packet type\n");
+	return 1;
+    }
    // send to all clients 
     while(tmp != NULL)
     {
-	if(send(tmp->fd, &update, sizeof(struct flow_remove_t), 0) 
-		!= sizeof(struct flow_remove_t )){
-	    perror("send_kill_flow");
+	if(send(tmp->fd, data, size, 0) != size){
+	    perror("send_all");
 	    printf("Couldn't send all data - broken pipe?\n");
 	    remove_fd(tmp);
 	    return 1;
 	}
 	tmp = tmp->next;
     }
-    
+
+    return 0;
+}
+
+//-------------------------------------
+int send_kill_flow(uint32_t id)
+{
+    struct flow_remove_t update;
+    update.type = 0x02;
+    update.id = id;
+
+    union pack_union *punion;
+    punion = (pack_union *)&update;
+    send_all(punion);
 
     return 0;
 }
@@ -273,7 +275,6 @@ int send_kill_flow(uint32_t id)
 //------------------------------------------------------------------
 int send_new_flow(float start[3], float end[3], uint32_t id)
 {
-    struct client *tmp = clients;
     struct flow_update_t update;
     update.type = 0x00;
     update.x1 = start[0];
@@ -284,18 +285,10 @@ int send_new_flow(float start[3], float end[3], uint32_t id)
     update.z2 = end[2];
     update.count = id;
 
-    // send to all clients
-    while(tmp != NULL)
-    {
-	if(send(tmp->fd, &update, sizeof(struct flow_update_t), 0) 
-		!= sizeof(struct flow_update_t )){
-	    perror("send_new_flow");
-	    printf("Couldn't send all data - broken pipe?\n");
-	    remove_fd(tmp);
-	    return 1;
-	}
-	tmp = tmp->next;
-    }
+    union pack_union *punion;
+    punion = (pack_union *)&update;
+    send_all(punion);
+    
     return 0;
 }
 //-------------------------------------------------------------------
@@ -313,7 +306,6 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
     update.z2 = end[2];
     update.count = id;
 
-
     // send to single client 
     if(send(fd, &update, sizeof(struct flow_update_t), 0) 
 	    != sizeof(struct flow_update_t )){
@@ -321,13 +313,13 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 	printf("Couldn't send all data - broken pipe?\n");
 	return 1;
     }
+
     return 0;
 }
 
 //-------------------------------------------------------------------
 int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size)
 {
-    struct client *tmp = clients;
     struct pack_update_t update;
     update.type = 0x01;
     update.ts = ts;
@@ -337,17 +329,9 @@ int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size)
     update.colour[2] = colour[2];
     update.size = size;
 
-    // send to all clients
-    while(tmp != NULL)
-    {
-	if(send(tmp->fd, &update, sizeof(struct pack_update_t), 0) 
-		!= sizeof(struct pack_update_t )){
-	    perror("send_new_packet");
-	    printf("Couldn't send all data - broken pipe?\n");
-	    remove_fd(tmp);
-	    return 1;
-	}
-	tmp = tmp->next;
-    }
+    union pack_union *punion;
+    punion = (pack_union *)&update;
+    send_all(punion);
+
     return 0;
 }

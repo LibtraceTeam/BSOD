@@ -86,7 +86,6 @@ int main(int argc, char *argv[])
 
     
     // setup signal handlers
-    
     sigact.sa_handler = sig_hnd;
     sigemptyset(&sigact.sa_mask);
     sigact.sa_flags = 0;
@@ -147,7 +146,7 @@ int main(int argc, char *argv[])
     fdmax = listen_socket; // biggest file descriptor
     printf("Waiting for connection on port %i...\n", port);
 
-    hax_fdmax(fdmax);
+    hax_fdmax(fdmax);//XXX
 
     check_clients(true);// keep rtclient from starting till someone connects
 
@@ -183,7 +182,7 @@ int main(int argc, char *argv[])
 	    ts32 = ts >> 32;
 	    gettimeofday(&nowtime, 0);
 
-	    while( ((nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
+	    while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
 	    {
 		usleep(10);	
 		gettimeofday(&nowtime, 0);

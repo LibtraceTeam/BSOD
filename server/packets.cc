@@ -31,9 +31,6 @@ extern "C" {
 
 #include "socket.h" // but breaks in a different place if i leave one out
 
-#define SHOW_SRC 1
-#define SHOW_DST 1
-
 typedef struct ip ip_t;
 uint32_t lastts = 0;
 uint32_t id = 0;
@@ -57,7 +54,7 @@ typedef enum counters {
 
 static uint8_t countercolours[][3] = {
     {100,  0,100}, /* TCP     purple		*/
-    { 20, 20,255}, /* HTTP    blue		*/
+    {  0,  0,200}, /* HTTP    blue		*/
     {150,150,240}, /* HTTPS   light blue/purple	*/
     {200,  0,  0}, /* MAIL    red		*/
     {  0,200,  0}, /* FTP     green		*/
@@ -68,7 +65,7 @@ static uint8_t countercolours[][3] = {
     {150,100, 50}, /* UDP     light brown	*/
     {  0,250,200}, /* ICMP    teal		*/
     {240,230,140}, /* IRC     khaki brown	*/
-    {255,145,  0}, /* WINDOWS orange		*/
+    {200,100,  0}, /* WINDOWS orange		*/
     {255,192,203}  /* OTHER   pink		*/
 };
 
@@ -230,22 +227,19 @@ int get_start_pos(float start[3], struct in_addr source, int iface)
        start[1] = compact2( source, 1);
        start[0] = -10;
        start[2] = compact2( source, 0 );
-       /*
-       start[0] = -10;  
-       start[1] = (((float)(source.s_addr & 0xff))/12.8) - 10;
-       start[2] = (((float)( (source.s_addr & 0x0000ff00)>>8  ))/12.8) - 10;
-       */
    }
    else if(iface == 1)
    {
+       source.s_addr = ntohl(source.s_addr);
+       /*
        start[1] = compact( source, 1);
        start[0] = 10;
        start[2] = compact( source, 0 );
-       /*
-       start[0] = 10;  
-       start[1] = (((float)(source.s_addr & 0xffff))/3276.8) - 10;
-       start[2] = (((float)( (source.s_addr & 0xffff0000)>>16  ))/3276.8) - 10;
        */
+       start[0] = 10;
+       start[1] = (((float)((source.s_addr & 0xffff) % 20000)) / 1000) - 10;
+       start[2] = (((float)(((source.s_addr & 0xffff0000)>>16) % 20000)) 
+			/ 1000) - 10;
    }
    else
        return 1;
@@ -259,25 +253,21 @@ int get_end_pos(float end[3], struct in_addr dest, int iface)
 {
     if(iface == 0)
     {
+	/*
 	end[1] = compact( dest , 1 );
 	end[0] = 10;
 	end[2] = compact( dest , 0 );
-	/*
-	end[0] = 10;
-	end[1] = (((float)(dest.s_addr & 0xffff))/3276.8) - 10;
-	end[2] = (((float)( (dest.s_addr & 0xffff0000)>>16  ))/3276.8) - 10;
 	*/
+       end[0] = 10;
+       end[1] = (((float)((dest.s_addr & 0xffff) % 20000)) / 1000) - 10;
+       end[2] = (((float)(((dest.s_addr & 0xffff0000)>>16) % 20000)) 
+			/ 1000) - 10;
     }
     else if(iface == 1) // only uses last half(ends locally)
     {
 	end[1] = compact2( dest, 1 );
 	end[0] = -10;
 	end[2] = compact2( dest , 0 );
-	/*
-	end[0] = -10; 
-	end[1] = (((float)(dest.s_addr & 0xff))/12.8) - 10;
-	end[2] = (((float)( (dest.s_addr & 0x0000ff00)>>8  ))/12.8) - 10;
-	*/
     }
     else
 	return 1;
@@ -477,8 +467,11 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
 	tmpid.sourceport = 0;
 	tmpid.destport = 0;
     }
-    else
-	return 0;
+    else //for now, set the ports to zero and let the protocol count instead
+    {
+	tmpid.sourceport = 0;
+	tmpid.destport = 0;
+    }
 
     tmpid.sourceip = p->ip_src;
     tmpid.destip = p->ip_dst;

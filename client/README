@@ -7,8 +7,8 @@ research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
 
 
-This is the Windows binary release of the bsod client software. To download
-the bsod source or the bsod server, see http://research.wand.net.nz/. To use
+This is the source release of the bsod client software. To download
+the bsod server, see http://research.wand.net.nz/. To use
 this software you must have access to a machine running the bsod server.
 
 The bsod client is based on the BuNg 3d engine written by Sam Jansen and

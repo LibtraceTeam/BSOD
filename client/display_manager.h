@@ -129,6 +129,7 @@ public:
 	virtual bool GetWireframe() { return wireframe; }
 	virtual void SetBackfaceCull(bool b) { backfaceCull = b; }
 	virtual bool GetBackfaceCull() { return backfaceCull; }
+	virtual void SetDepthTest(bool) = 0;
 
 	virtual int GetNumTrianglesDrawn() = 0;
 	virtual int GetNumMeshesDrawn() = 0;

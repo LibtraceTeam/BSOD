@@ -24,19 +24,18 @@
 # (e.g. alleg, stdcx, iostr, etc). You can override these on make's
 # command line of course, if you prefer to do it that way.
 
-# TODO: use sdl-config
-# notes: pthread is needed for openal
-
 EXECUTABLE := bsod-client
-LIBS := IL ILU stlport_gcc GL GLU SDL NL lua  enet z
-LINK_FLAGS := -Lexternal/DevIL/lib -Lexternal/HawkNL/lib -Lexternal/OPCODE \
-	-Lexternal/lua/lib -Lexternal/OpenAL/linux/src -Lexternal/ode/lib \
-    -Lexternal/enet -Lexternal/GL
+LIBS := IL ILU stlport GL GLU SDL NL lua  enet z SDL_net
+LINK_FLAGS := -Lexternal/DevIL/lib -Lexternal/HawkNL/lib \
+	-Lexternal/lua/lib -Lexternal/enet -Lexternal/GL `sdl-config --libs`
 
 # Now alter any implicit rules' variables if you like, e.g.:
 CFLAGS := -g -Wall `linux/copts`
 #-O3 -m486 -g -mathlon-xp
 CXXFLAGS := $(CFLAGS)
+
+CXX := g++
+
 
 # The next bit checks to see whether rm is in your djgpp bin
 # directory; if not it uses del instead, but this can cause (harmless)
@@ -81,4 +80,4 @@ endif
 -include $(DEPS)
 
 $(EXECUTABLE) : $(OBJS)
-	g++ -o $(EXECUTABLE) $(OBJS) $(LINK_FLAGS) $(addprefix -l,$(LIBS))
+	$(CXX) -o $(EXECUTABLE) $(OBJS) $(LINK_FLAGS) $(addprefix -l,$(LIBS))

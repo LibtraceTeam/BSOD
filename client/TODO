@@ -1,8 +1,14 @@
-* Persistant particles at start (end?) of flows.
+* Look into quick and cheap billboarding. Was a little harder than my first
+  go...
+
+-----------------------------------------------------------------------------
+Done:
+
+* Persistant particles at start (end?) of flows. DONE
+* More efficiency improvements. DONE
 * Fix networking dodginess: when the server dies, the client gets stuffed.
-* Client says it is connected when it isn't. -- FIXED, uses blocking io now
+* Client says it is connected when it isn't. 
 * Use better networking (library) perhaps. HawkNL allows it to be cross
   platform, but seems kinda nasty and I don't think it is updated anymore.
   Some basic BSD sockets code would do, it would allow for better error
   checking I believe.
-* Look into quick and cheap billboarding.

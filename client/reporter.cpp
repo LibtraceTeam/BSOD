@@ -9,7 +9,7 @@
 #endif
 
 static CReporter cr;
-static char *reportLevelName[] = { "Fatal Error", "", "Error", "Warning", "Msg", "Dbg" };
+//static char *reportLevelName[] = { "Fatal Error", "", "Error", "Warning", "Msg", "Dbg" };
 const int CReporter::reportMaxLogSize = 10;
 
 void CReporter::SetReportLevel(int iReportLevel)
@@ -77,7 +77,7 @@ void CReporter::SimpleReport(ReportLevel dbgLevel, const string &msg)
 	fflush(cr.out);
 
 	cr.reportLog.push_front(msg);
-	if(cr.reportLog.size() > cr.reportMaxLogSize)
+	if(cr.reportLog.size() > (unsigned)cr.reportMaxLogSize)
 		cr.reportLog.pop_back();
 
 #ifdef _WIN32

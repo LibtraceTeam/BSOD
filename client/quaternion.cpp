@@ -281,9 +281,10 @@ void CQuaternion::BuildFromMatrix3x3(const float *data)
 
 void CQuaternion::BuildFromMatrix(const CMatrix4f &matrix)
 {
-	float copy[3], sqr;
+	float sqr;
 
-	int next_pos[3] = {1, 2, 0};
+	//copy[3],
+	//int next_pos[3] = {1, 2, 0};
 
 	float diag = matrix[0] + matrix[5] + matrix[10] + 1; /// +1 added - Sam
 

@@ -7,8 +7,8 @@
 
 CFont::CFont()
 	: max_char(0), min_char(0), italic_start(0), italic_end(0)
-	, bold_start(0), bold_end(0), tex(0), start(0)
-	, cur_italic(false), cur_bold(false)
+	, bold_start(0), bold_end(0)
+	, cur_italic(false), cur_bold(false), start(0), tex(0)
 {
 }
 

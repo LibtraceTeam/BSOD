@@ -6,88 +6,63 @@
 #include "player.h"
 #include "partvis.h"
 
-// Hawk NL network lib
-#include "external/HawkNL/include/nl.h"
-#include "hawk_net_driver.h"
+#include <SDL.h>
+#include <SDL_net.h>
 
-/*CNetDriver *CNetDriver::Create()
+#include "sdl_net_driver.h"
+
+CNetDriver *CNetDriver::Create()
 {
-	return new CHawkNetDriver();
-}*/
+    return new CSDLNetDriver();
+}
 ////////////////////////////////////////////////////////////////////////
-CHawkNetDriver::CHawkNetDriver()
+CSDLNetDriver::CSDLNetDriver()
 {
-	if(!nlInit())
-		throw CException(GetErrorMessage());
-
-	if(!nlSelectNetwork(NL_IP))
-        throw CException(GetErrorMessage());
+    // Assumes SDL_Init() has been called
+    if(SDLNet_Init() == -1)
+	throw CException(SDLNet_GetError());
 }
 
-CHawkNetDriver::~CHawkNetDriver()
+CSDLNetDriver::~CSDLNetDriver()
 {
-	nlClose(clientsock);
-	nlShutdown();
+    SDLNet_Quit();
 }
 
-string CHawkNetDriver::GetErrorMessage()
+
+void CSDLNetDriver::Connect(string address)
 {
-    NLenum err = nlGetError();
+    string::size_type c = address.find(':', 0);
+    string host = address.substr(0, c);
+    string port = address.substr(c+1, string::npos);
+    IPaddress ip;
+
+    Log("Connecting to Host: '%s' Port: '%s'\n", host.c_str(), port.c_str());
     
-    if(err == NL_SYSTEM_ERROR)
-    {
-        return string(nlGetSystemErrorStr(nlGetSystemError()));
-    }
-    else
-    {
-        return string(nlGetErrorStr(err));
-    }
-}
-
-void CHawkNetDriver::Connect(string address)
-{
-    NLaddress nlAddr;
-
-    CReporter::Report(CReporter::R_MESSAGE,
-	    "Using HawkNL library: '%s'\n", nlGetString(NL_VERSION));
-    CReporter::Report(CReporter::R_MESSAGE,
-	    "Supported network protocols: %s\n", nlGetString(NL_NETWORK_TYPES));
-
-
-    /* create a client socket */
-    clientsock = nlOpen(0, NL_RELIABLE); /* let the system assign the port number */
-
-    CReporter::Report(CReporter::R_MESSAGE, "Lookup up id address for '%s'\n", address.c_str());
-    nlGetAddrFromName((NLchar *)address.c_str(), &nlAddr);
-
-    if(nlAddr.valid == NL_FALSE)
-    {
-	// Not sure if error message works all the time for this?
-	throw CException(GetErrorMessage());
+    if(SDLNet_ResolveHost(&ip, (char *)host.c_str(), 
+		(unsigned short)atoi(port.c_str())) == -1) {
+	throw CException(SDLNet_GetError());
     }
 
-    CReporter::Report(CReporter::R_MESSAGE, "Connecting...\n");
+    clientsock = SDLNet_TCP_Open(&ip);
 
-    /* Blocking! */
-    nlEnable(NL_BLOCKING_IO);
-    /* now connect */
-    if(nlConnect(clientsock, &nlAddr) == NL_FALSE)
-    {
-	nlClose(clientsock);
-	throw CException(GetErrorMessage());
-    }
-    /* Disable blocking */
-    nlDisable(NL_BLOCKING_IO);
+    if(!clientsock)
+	throw CException(SDLNet_GetError());
+
+    set = SDLNet_AllocSocketSet(16);
+    if(!set)
+	throw CException(SDLNet_GetError());
+
+    if(SDLNet_TCP_AddSocket(set, clientsock) == -1)
+	throw CException(SDLNet_GetError());
     
-    // The above never seems to fail. ?????  -- because it does in the background!
-    CReporter::Report(CReporter::R_MESSAGE, "Connected!\n");
-
-    // TODO: Send 'Hello' packet and such if needed
-
+    Log("Connected!\n");
+    
 }
 
-void CHawkNetDriver::SendData(CPlayer *p)
+void CSDLNetDriver::SendData(CPlayer *p)
 {
+    throw CException("CSDLNetDriver::SendData: This function is currently not"
+	    " implemented!");
 }
 
 struct flow_update_t {
@@ -120,20 +95,23 @@ union fp_union {
     struct flow_remove_t rem;
 };
 
-void CHawkNetDriver::ReceiveData()
+void CSDLNetDriver::ReceiveData()
 {
-    NLbyte buffer[1024];
-    NLint  readlen;
+    byte buffer[1024];
+    int  readlen;
     union fp_union *fp;
 
-    do {
-	if((readlen = nlRead(clientsock, buffer, 1024)) > 0)
+    while(SDLNet_CheckSockets(set, 0) > 0)
+    {
+	if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
 	{
 	    int sam = databuf.size();
 	    databuf.resize( sam + readlen );
 	    memcpy(&databuf[sam], buffer, readlen);
 	}
-    } while(readlen);
+	if(readlen == 0)
+	    break;
+    }
 
    // Log("Databuf.size()=%d\n", databuf.size());
     world.partVis->BeginUpdate();

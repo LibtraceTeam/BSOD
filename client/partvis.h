@@ -65,6 +65,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 typedef hash_map<unsigned int, CPartFlow *> FlowMap;
+typedef list<CPartFlow*> FlowList;
 
 class CPartVis : public CEntity
 {
@@ -79,9 +80,11 @@ private:
 	CTexture *helptex;
 	float colour_table[256]; // Lookup for colour/255.0f to get 0.0f-1.0f
 	bool show_help;
+	IterList active_nodes;
+	FlowList partflow_pool;
     
 public:
-    CPartVis();
+    CPartVis( bool mm );
     virtual ~CPartVis() {}
 
     virtual void Draw();
@@ -99,11 +102,30 @@ public:
 	void ToggleShowDark();
 	void ToggleBackFilter();
 	void ToggleHelp();
-	int NumFLows();
+	int NumFlows();
+	void ChangeSpeed( bool faster );
+	void KillAll();
+	IterList::iterator AddActiveFlow( const FlowMap::iterator i );
+	void RemoveActiveFlow( const FlowMap::iterator i );
+	CPartFlow *AllocPartFlow();
+	void FreePartFlow( CPartFlow *flow );
+	void GCPartFlows();
+	void BillboardBegin();
+	void BillboardEnd();
+
 
 	int packetsFrame;
 	float diff;
 	float fps;
+	float last_gc;
+	bool do_gcc;
+	bool matrix_mode;
+	
+	float global_size;
+	float global_speed;
+	bool jitter;
+	bool billboard;
+	string particle_img;
 
     CPartFlow * make_flow(int);
 

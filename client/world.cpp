@@ -159,7 +159,7 @@ void CWorld::Draw()
 		display->DrawString2(10, 10, 
 			bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s Flows: %d", fps, 
 				COctree::nodes_drawn, display->GetNumMeshesDrawn(),
-				display->GetNumTrianglesDrawn(), tbuf, partVis->NumFLows() )
+				display->GetNumTrianglesDrawn(), tbuf, partVis->NumFlows() )
 			);
 
 		display->DrawString2(10, 35, 
@@ -185,9 +185,12 @@ void CWorld::Draw()
 		float w = 330, h = 20;
 		float x = 0, y = display->GetHeight() - h;
 		string str;
+		char buff[32];
+		sprintf( buff, " (speed = %.1f)", partVis->global_speed );
 
 		str = tbuf;
-		
+		str += buff;
+
 		display->Begin2D();
 		display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
 		display->BindTexture(NULL);

@@ -126,6 +126,8 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_COMMA ] = &CActionHandler::ToggleBackFilter;
 	keyUpMap[ BKC_SLASH ] = &CActionHandler::ToggleShowDark;
 	keyUpMap[ BKC_F1 ] = &CActionHandler::ToggleHelp;
+	keyUpMap[ BKC_EQUALS ] = &CActionHandler::Faster;
+	keyUpMap[ BKC_MINUS ] = &CActionHandler::Slower;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -295,4 +297,14 @@ void CActionHandler::ToggleShowDark()
 void CActionHandler::ToggleHelp()
 {
 	world.partVis->ToggleHelp();
+}
+
+void CActionHandler::Faster()
+{
+	world.partVis->ChangeSpeed( true );
+}
+
+void CActionHandler::Slower()
+{
+	world.partVis->ChangeSpeed( false );
 }

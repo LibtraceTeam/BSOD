@@ -64,6 +64,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include "vector.h"
 #include "polygon.h"
 #include "world.h"
@@ -73,6 +76,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "entity.h"
 #include "texture_manager.h"
 #include "exception.h"
+#include "system_driver.h"
 
 #include "partflow.h"
 #include "partvis.h"
@@ -81,7 +85,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Particle visualisation file
 
 
-CPartVis::CPartVis()
+CPartVis::CPartVis( bool mm )
 : paused(false)
 {
 	// Need to create a couple of quads, one with the uni logo, another
@@ -89,15 +93,17 @@ CPartVis::CPartVis()
 	filter_state = 0;
 	packetsFrame = 0;
 	diff = 0.0f;
+	last_gc = world.sys->TimerGetTime();
 	show_dark = 0;
 	fps = 0.0f;
 	show_help = false;
+	global_speed = 1.0f;
+	do_gcc = true;
+	matrix_mode = mm;
 
-	// Build table:
+	// Build colour lookup table:
 	for( int i=0; i<256; i++ )
-	{
 		colour_table[i] = (float)i/255.0f;
-	}
 
 	left = new CTriangleFan();
 	left->vertices.push_back(Vector3f(-10, 10, -10));	
@@ -110,7 +116,10 @@ CPartVis::CPartVis()
 	left->texCoords.push_back(Vector2f(0, 1));
 	left->texCoords.push_back(Vector2f(1, 1));
 
-	left->tex = CTextureManager::tm.LoadTexture("data/left.png");
+	if( matrix_mode )
+		left->tex = CTextureManager::tm.LoadTexture("data/matrix_left_.png");
+	else
+		left->tex = CTextureManager::tm.LoadTexture("data/left.png");
 
 	right = new CTriangleFan();
 	right->vertices.push_back(Vector3f(10, 10, -10));	
@@ -121,7 +130,10 @@ CPartVis::CPartVis()
 	right->texCoords.push_back(Vector2f(1, 1));
 	right->vertices.push_back(Vector3f(10, -10, -10));	
 	right->texCoords.push_back(Vector2f(0, 1));
-	right->tex = CTextureManager::tm.LoadTexture("data/right.png");
+	if( matrix_mode )
+		right->tex = CTextureManager::tm.LoadTexture("data/matrix_right.png");
+	else
+		right->tex = CTextureManager::tm.LoadTexture("data/right.png");
 
 	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
 	helptex = CTextureManager::tm.LoadTexture( "data/help.png" );
@@ -130,45 +142,152 @@ CPartVis::CPartVis()
 // The "container" class implementation
 void CPartVis::Draw()
 {
-    FlowMap::const_iterator i = flows.begin();
+    //FlowMap::const_iterator i = flows.begin();
+	IterList::iterator i = active_nodes.begin();
     CDisplayManager *d = world.display;
 
     // Common state for all flows:
     d->SetBlend(true);
     d->SetBlendMode(CDisplayManager::Transparent2);
     d->SetDepthTest(false);
+
+	// Alternative draw:
+	//BillboardBegin();
+	for( ; i != active_nodes.end(); ++i )
+	{
+		(*i)->second->ResetCounter();
+		if( !paused )
+		{
+			(*i)->second->Update(diff);
+			if( (*i)->second->packets == 0 )
+			{
+				IterList::iterator tmp = i;
+				tmp--;
+
+				// DEBUG
+				//if( (*i)->second->active_flow_ptr == NULL )
+				//	exit(-99);
+				// END_DEBUG
+
+				active_nodes.erase( (*i)->second->active_flow_ptr );
+				//(*i)->second->active_flow_ptr = NULL;
+				i = tmp;
+				continue;
+			}
+		}
+
+		/*if( matrix_mode )
+		{
+			(*i)->second->Draw();
+		}
+		else */
+		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
+		{
+			switch( filter_state ) 
+			{
+			case 0: // Display all packets:
+				(*i)->second->Draw();
+				break;
+			case 1: // Display only packets with RTT data:
+				if( (*i)->second->speed != 1.0f )
+					(*i)->second->Draw();
+				break;
+			case 2: // TCP
+				if( (*i)->second->flow_colour[0] == 100 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 100 )
+					(*i)->second->Draw();
+				break;
+			case 3: // HTTP
+				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 200 )
+					(*i)->second->Draw();
+				break;
+			case 4: // HTTPS
+				if( (*i)->second->flow_colour[0] == 150 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 240 )
+					(*i)->second->Draw();
+				break;
+			case 5: // MAIL
+				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 0 )
+					(*i)->second->Draw();
+				break;
+			case 6: // FTP
+				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 0 )
+					(*i)->second->Draw();
+				break;
+			case 7: // VPN
+				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 250 && (*i)->second->flow_colour[2] == 0 )
+					(*i)->second->Draw();
+				break;
+			case 8: // DNS
+				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 200 && (*i)->second->flow_colour[2] == 0 )
+					(*i)->second->Draw();
+				break;
+			case 9: // NTP
+				if( (*i)->second->flow_colour[0] == 30 && (*i)->second->flow_colour[1] == 85 && (*i)->second->flow_colour[2] == 30 )
+					(*i)->second->Draw();
+				break;
+			case 10: // SSH
+				if( (*i)->second->flow_colour[0] == 110 && (*i)->second->flow_colour[1] == 110 && (*i)->second->flow_colour[2] == 110 )
+					(*i)->second->Draw();
+				break;
+			case 11: // UDP
+				if( (*i)->second->flow_colour[0] == 150 && (*i)->second->flow_colour[1] == 100 && (*i)->second->flow_colour[2] == 50 )
+					(*i)->second->Draw();
+				break;
+			case 12: // ICMP
+				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 250 && (*i)->second->flow_colour[2] == 200 )
+					(*i)->second->Draw();
+				break;
+			case 13: // IRC
+				if( (*i)->second->flow_colour[0] == 240 && (*i)->second->flow_colour[1] == 230 && (*i)->second->flow_colour[2] == 140 )
+					(*i)->second->Draw();
+				break;
+			case 14: // Windows
+				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 100 && (*i)->second->flow_colour[2] == 0 )
+					(*i)->second->Draw();
+				break;
+			case 15: // P2P
+				if( (*i)->second->flow_colour[0] == 50 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 50 )
+					(*i)->second->Draw();
+				break;
+			case 16: // Other
+				if( (*i)->second->flow_colour[0] == 255 && (*i)->second->flow_colour[1] == 192 && (*i)->second->flow_colour[2] == 203 )
+					(*i)->second->Draw();
+				break;
+			default: // All packets are shown:
+				(*i)->second->Draw();
+			}
+		}
+	}
+	//BillboardEnd();
     
     // Draw the flows
-	for( ; i != flows.end(); ++i )
+	/*for( ; i != flows.end(); ++i )
 	{
 		i->second->ResetCounter();
 		if( !paused )
+		{
 			i->second->Update(diff);
+			if( i->second->packets == 0 )
+				RemoveActiveFlow( i );
+		}
 
 		if( (show_dark == 0) || ( (show_dark == 1) && i->second->dark) || ( (show_dark == 2) && !i->second->dark) ) 
 		{
-
-		    /* 
-		     * XXX only works if colours stay the same...
-		     * this is the only real information the client gets atm, a
-		     * better solution would be to have the server send more info
-		     */
-		    switch( filter_state ) 
-		    {
+			switch( filter_state ) 
+			{
 			case 0: // Display all packets:
-			    i->second->Draw();
+				i->second->Draw();
 				break;
 			case 1: // Display only packets with RTT data:
 				if( i->second->speed != 1.0f )
-				    i->second->Draw();
+					i->second->Draw();
 				break;
 			case 2: // TCP
 				if( i->second->colours[0] == 100 && i->second->colours[1] == 0 && i->second->colours[2] == 100 )
-				    i->second->Draw();
+					i->second->Draw();
 				break;
 			case 3: // HTTP
 				if( i->second->colours[0] == 0 && i->second->colours[1] == 0 && i->second->colours[2] == 200 )
-				    i->second->Draw();
+					i->second->Draw();
 				break;
 			case 4: // HTTPS
 				if( i->second->colours[0] == 150 && i->second->colours[1] == 150 && i->second->colours[2] == 240 )
@@ -226,7 +345,7 @@ void CPartVis::Draw()
 				i->second->Draw();
 			}
 		}
-	}
+	}*/
     /*for(; i != flows.end(); ++i) 
 	{
 		i->second->Draw();
@@ -335,7 +454,10 @@ void CPartVis::Draw()
 		d->SetBlendMode(CDisplayManager::Multiply);
 		d->SetBlend(false);
 		d->SetColour(1.0f, 1.0f, 1.0f);
-		d->DrawString2( 5, 5, "F1 for help.");
+		if( matrix_mode )
+			d->DrawString2( 5, 5, "MATRIX!");
+		else
+			d->DrawString2( 5, 5, "F1 for help.");
 	}
 	d->BindTexture(NULL);
 	d->SetBlendMode(CDisplayManager::Multiply);
@@ -354,41 +476,93 @@ void CPartVis::Update(float diff)
 		return;
 
 	this->diff = diff;
-    /*FlowMap::const_iterator i = flows.begin();
 
-    
-    
+    /*FlowMap::const_iterator i = flows.begin();
     for(; i != flows.end(); ++i) {
 	i->second->Update(diff);
     }*/
+	if( do_gcc )
+	{
+		if( (world.sys->TimerGetTime() - last_gc) > 360000.0f )
+		{
+			last_gc = world.sys->TimerGetTime();
+			GCPartFlows(); 
+		}
+	}
 }
 
 void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 {
-    FlowMap::const_iterator i = flows.find(flow_id);
+    //FlowMap::const_iterator i = flows.find(flow_id);
 
-    if(i == flows.end()) {
+    //if(i == flows.end()) {
 		//if( fps < 30.0f )//flows.size() > 10000 )
 		//	return;
 		//flows.size();
 	// If the flow does not already exist (it shouldn't at this point)
-		CPartFlow *flow = new CPartFlow();
-		flow->start = v1;
-		flow->destination = v2;
+		//CPartFlow *flow = new CPartFlow();
+		CPartFlow *flow = AllocPartFlow();
+		flow->start = v1;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
+		flow->destination = v2;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
 		flow->length = (v2 - v1).Length();
-		flow->tex = CTextureManager::tm.LoadTexture("data/particle.png");
+		//flow->CreateEndPoints();
+		/*if( matrix_mode )
+		{
+			// Pick random matrix code character (this is per flow only atm)
+			// Might be able to update to be per char or maybe based on flow
+			// type (HTTP/UDP/TCP/etc...)
+			int select = rand()%9;
+			switch( select ) 
+			{
+			case 0:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_01.png");
+				break;
+			case 1:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_02.png");
+				break;
+			case 2:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_03.png");
+				break;
+			case 3:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_04.png");
+				break;
+			case 4:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_05.png");
+				break;
+			case 5:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_06.png");
+				break;
+			case 6:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_07.png");
+				break;
+			case 7:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_08.png");
+				break;
+			case 8:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_09.png");
+				break;
+			case 9:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
+				break;
+			default:
+				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
+				break;
+			}
+		}
+		else
+			flow->tex = CTextureManager::tm.LoadTexture(particle_img); */
 		flows.insert(FlowMap::value_type(flow_id, flow));
-	} else {
+	/*} else {
 		// Found
 		Log("UpdateFlow called on flow that already exits (flow=%d)\n",
 			flow_id);
-    }
+    }*/
 }
 
 void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 	byte g, byte b, unsigned short size, float speed, bool dark)
 {
-    FlowMap::const_iterator i = flows.find(flow_id);
+    FlowMap::iterator i = flows.find(flow_id);
 
 	if(i == flows.end()) {
 		return;//Log("Adding packet to non-existant flow %d\n", flow_id);
@@ -406,8 +580,19 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 		
 		// Log( "Flow speedz: %f", speed );
 		// Log( "R = %c G = %c B = %c", r, g, b );
+		flow->flow_colour[0] = r;
+		flow->flow_colour[1] = g;
+		flow->flow_colour[2] = b;
+		if( matrix_mode )
+		{
+			r = b = 36;
+			g = 132;
+		}
 
-		flow->AddParticle(r, g, b, size, speed, dark);
+		if( flow->AddParticle(r, g, b, size, speed, dark) && (flow->packets == 1) )
+		{
+			flow->active_flow_ptr = AddActiveFlow( i );
+		}
 	}
 
     last_timestamp = timestamp;
@@ -423,7 +608,11 @@ void CPartVis::RemoveFlow(unsigned int id)
     } 
 	else 
 	{
-        delete i->second;
+		//RemoveActiveFlow( i );
+		if( i->second->packets != 0 )
+			active_nodes.erase( i->second->active_flow_ptr );
+        //delete i->second;
+		FreePartFlow( i->second );
 		flows.erase(i);
     }
 }
@@ -471,7 +660,7 @@ void CPartVis::ToggleShowDark()
 		show_dark = 0;
 }
 
-int CPartVis::NumFLows()
+int CPartVis::NumFlows()
 {
 	return( (int)flows.size() );
 }
@@ -479,4 +668,145 @@ int CPartVis::NumFLows()
 void CPartVis::ToggleHelp()
 {
 	show_help = !show_help;
+}
+
+void CPartVis::ChangeSpeed( bool faster )
+{
+	if( faster )
+	{
+		if( global_speed >= 1.0f )
+		{
+			global_speed += 1.0f;
+			if( global_speed > 5.0f )
+				global_speed = 5.0f;
+			return;
+		}
+		global_speed += 0.1f;
+		return;
+	}
+
+	if( global_speed < 2.0f )
+	{
+		global_speed -= 0.1f;
+		if( global_speed < 0.5f )
+			global_speed = 0.5f;
+		return;
+	}
+	global_speed -= 1.0f;
+}
+
+void CPartVis::KillAll()
+{
+	active_nodes.clear();
+
+	FlowMap::iterator i = flows.begin();
+	
+	for( ; i != flows.end(); i++ )
+	{
+		FreePartFlow( i->second );
+	}
+
+	flows.clear();
+	//partflow_pool.clear();
+}
+
+IterList::iterator CPartVis::AddActiveFlow( const FlowMap::iterator i )
+{
+	//active_nodes.push_back( i );
+	//return( active_nodes.end()-- );
+	active_nodes.push_front( i );
+	return( active_nodes.begin() );
+}
+
+void CPartVis::RemoveActiveFlow( const FlowMap::iterator i )
+{
+	active_nodes.remove( i );
+}
+
+CPartFlow *CPartVis::AllocPartFlow()
+{
+	if( partflow_pool.empty() )
+		return( new CPartFlow() );
+	
+	CPartFlow *ret = *(partflow_pool.begin());
+	partflow_pool.pop_front();
+
+	ret->ReInitialize();
+	return( ret );
+}
+
+void CPartVis::FreePartFlow( CPartFlow *flow )
+{
+	flow->gc_count = 0;
+	partflow_pool.push_front( flow );
+}
+
+void CPartVis::GCPartFlows()
+{
+
+	// Garbage collect:
+	if( partflow_pool.size() > 10 )
+	{
+		FlowList::iterator i = partflow_pool.begin();
+		FlowList::iterator last;
+		CPartFlow *tmp;
+		for( ; i != partflow_pool.end(); )
+		{
+			if( (*i)->gc_count == 2 )
+			{
+				tmp = (*i);
+				last = i;
+				i++;
+				partflow_pool.erase( last );
+				delete tmp;
+				continue;
+			}
+			else
+			{
+				(*i)->gc_count++;
+			}
+			i++;
+		}
+	}
+
+	// If there are oer than 10 items in the pool clean some out:
+	/*if( partflow_pool.size() > 10 )
+	{
+		CPartFlow *ptr;
+		for( int i=0; i<10; i++ )
+		{
+			ptr = partflow_pool.begin();
+			partflow_pool.pop_front();
+			delete ptr;
+		}
+	}*/
+}
+
+void CPartVis::BillboardBegin()
+{
+	float modelview[16];
+
+	// Save current view:
+	glPushMatrix();
+
+	// Get current view:
+	glGetFloatv( GL_MODELVIEW_MATRIX, modelview );
+
+	// Undo all rotations:
+	for( int i=0; i<3; i++ )
+	{
+		for( int j=0; j<3; j++ )
+		{
+			if( i==j )
+				modelview[i*4+j] = 1.0;
+			else
+				modelview[i*4*j] = 0.0;
+		}
+	}
+	glLoadMatrixf( modelview );
+}
+
+void CPartVis::BillboardEnd()
+{
+	glPopMatrix();
 }

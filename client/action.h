@@ -118,6 +118,8 @@ public:
 	void ToggleShowDark();
 	void ToggleBackFilter();
 	void ToggleHelp();
+	void Faster();
+	void Slower();
 
 	void TurnUp();
 	void TurnDown();

@@ -94,6 +94,13 @@ int BungMain(int argc, char *argv[])
 		Vector3f startLoc;
 		float pitch = 0, heading = 0;
 		bool fullScreen = false;
+		float size = 1.0f;
+		float speed = 1.0f;
+		bool jitter = true;
+		bool billboard = true;
+		bool do_gcc = true;
+		bool matrix_mode = false;
+		string particle = "data/particle.png";
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
 		Log("Parsing config file.\n");
@@ -111,6 +118,13 @@ int BungMain(int argc, char *argv[])
 		config->GetGlobal("start_location", &startLoc);
 		config->GetGlobal("pitch", &pitch);
 		config->GetGlobal("heading", &heading);
+		config->GetGlobal("speed", &speed );
+		config->GetGlobal("size", &size );
+		config->GetGlobal("jitter", &jitter );
+		config->GetGlobal("billboard", &billboard );
+		config->GetGlobal("particle", &particle );
+		config->GetGlobal("do_gcc", &do_gcc );
+		config->GetGlobal("matrix_mode", &matrix_mode );
 
 		{	string disp("opengl");
 			config->GetGlobal("display", &disp);
@@ -148,15 +162,14 @@ int BungMain(int argc, char *argv[])
 		world.netDriver->Connect(netHost);
 
 		loadingScreen->AddMessage("Creating particle visualisation...");
-		world.partVis = new CPartVis();
+		world.partVis = new CPartVis( matrix_mode );
 		world.entities->AddEntity(world.partVis);
-
-
-		//loadingScreen->AddMessage("Loading level archive...");
-		//CVFS::LoadArchive("data/bung.barc");
-
-		//loadingScreen->AddMessage("Loading texture archive...");
-		//CVFS::LoadArchive("data/textures.barc");
+		world.partVis->global_speed = speed;
+		world.partVis->global_size = size;
+		world.partVis->jitter = jitter;
+		world.partVis->billboard = billboard;
+		world.partVis->particle_img = particle;
+		world.partVis->do_gcc = do_gcc;
 	}
 	catch(string error)
 	{

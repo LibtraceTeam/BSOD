@@ -31,9 +31,10 @@ int num_flows = 0;*/
 
 // An actual flow:
 CPartFlow::CPartFlow()
-: offset(0)
+: offset(0)//, vertices(20*6), tex_coords(20*6), colours(20*6*4)
 {
 	//	num_flows++;
+	active_flow_ptr = NULL;
 
 	// Reserve some space for 20 packets worth
 	vertices.reserve(20*6);
@@ -41,6 +42,8 @@ CPartFlow::CPartFlow()
 	colours.reserve(20*6*4);
 
 	sam_count = 0;
+	packets = 0;
+	gc_count = 0;
 
 	speed = 1.0f;
 }
@@ -53,6 +56,8 @@ CPartFlow::~CPartFlow()
 
 void CPartFlow::Draw()
 {
+	if( packets == 0 )
+		return;
 	CDisplayManager *d = world.display;
 	const int vertex_offset = offset * 6;
 	const int num_triangles = ((const int)vertices.size() - vertex_offset) / 3;
@@ -64,43 +69,112 @@ void CPartFlow::Draw()
 
 //	packets_drawn += num_triangles / 2;
 
-	d->BindTexture(tex);
-
 	if(endpoint_vertices.size() == 0)
 		CreateEndPoints();
 
-	// Draw start and end points
-	//d->SetColour(colours[0], colours[1], colours[2], (translation - start).Length() / (destination - start).Length());
-	//byte c = (byte)((destination - start).Length() - (vertices.back() + translation).Length());
-	//d->SetColour(colours[0] / 255.0f, colours[1] / 255.0f, colours[2] / 255.0f, 0.15f);
-	d->SetColour( world.partVis->colour_table[colours[0]], world.partVis->colour_table[colours[1]], world.partVis->colour_table[colours[2]], 0.15f );
-	d->DrawTriangles2(
-		(float *)&endpoint_vertices[0],
-		(float *)&endpoint_tex_coords[0],
-		4);
-	d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+	d->BindTexture(tex);
 
-	// Draw the actual flow
-	d->PushMatrix();
-	d->Translate(translation);
-	d->DrawTriangles2(
-		(float *)&vertices[vertex_offset],
-		(float *)&tex_coords[vertex_offset],
-		(byte *)&colours[vertex_offset*4],
-		num_triangles);
-	d->PopMatrix();
+	if( world.partVis->billboard )
+	{
+		// This is how will our point sprite's size will be modified by distance from the viewer.
+		/*float quadratic[] =  { 1.0f, 0.0f, 0.01f };
+		glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
+		// The alpha of a point is calculated to allow the fading of points 
+		//glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
 
+		//float fAdjustedSize = m_fSize / 4.0f;
+
+		//glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f );
+		//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, fAdjustedSize );
+
+		// Specify point sprite texture coordinate replacement mode for each texture unit
+		glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
+		
+		// Render point sprites:
+		glEnable( GL_POINT_SPRITE_ARB );
+		//glPointSize( m_fSize );
+
+		// Draw as point sprites:
+		// Endpoints:
+		d->SetColour( world.partVis->colour_table[colours[0]], world.partVis->colour_table[colours[1]], world.partVis->colour_table[colours[2]], 0.15f );
+		glBegin( GL_POINTS );
+		{
+			// Render each particle...
+			/*while( pParticle )
+			{
+				glVertex3f( pParticle->m_vCurPos.x,
+					pParticle->m_vCurPos.y,
+					pParticle->m_vCurPos.z );
+
+				pParticle = pParticle->m_pNext;
+			}
+		}
+		glEnd();
+
+		// Flow:
+		d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		glBegin( GL_POINTS );
+		{
+			// Render each particle...
+			/*while( pParticle )
+			{
+				glVertex3f( pParticle->m_vCurPos.x,
+					pParticle->m_vCurPos.y,
+					pParticle->m_vCurPos.z );
+
+				pParticle = pParticle->m_pNext;
+			}
+		}
+		glEnd();
+
+		glDisable( GL_POINT_SPRITE_ARB );*/
+	}
+	else
+	{
+		// Draw start and end points
+		d->SetColour( world.partVis->colour_table[colours[0]], world.partVis->colour_table[colours[1]], world.partVis->colour_table[colours[2]], 0.15f );
+		d->DrawTriangles2( (float *)&endpoint_vertices[0], (float *)&endpoint_tex_coords[0], 4);
+		d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// Draw the actual flow
+		d->PushMatrix();
+		d->Translate(translation);
+		d->DrawTriangles2(
+			(float *)&vertices[vertex_offset],
+			(float *)&tex_coords[vertex_offset],
+			(byte *)&colours[vertex_offset*4],
+			num_triangles);
+		d->PopMatrix();
+	}
 }
 
 void CPartFlow::CreateEndPoints()
 {
-	const float size = 0.3f;
-	const Vector3f offset(0, 0.15f, 0);
+    const float size = 0.3f * world.partVis->global_size;
+    const Vector3f offset( -(0.5f * size), (0.5f * size), 0);
 
-	//if(start.x == 10.0f)
-	//	size = -size;
+    //if(start.x == 10.0f)
+    //	size = -size;
 
-	// Create start and end points
+    // Create start and end points
+    if( world.partVis->billboard )
+    {
+	endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
+	endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+	endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,size)+start+offset);
+
+	endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
+	endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+	endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+	endpoint_vertices.push_back(Vector3f(0,size,size)+destination+offset);
+    }
+    else
+    {
 	endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
 	endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
 	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
@@ -114,7 +188,26 @@ void CPartFlow::CreateEndPoints()
 	endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
 	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
 	endpoint_vertices.push_back(Vector3f(size,size,0)+destination+offset);
+    }
 
+    if( (destination.x < start.x) || (world.partVis->matrix_mode) )
+    {
+	endpoint_tex_coords.push_back(Vector2f(1, 1));
+	endpoint_tex_coords.push_back(Vector2f(0, 1));
+	endpoint_tex_coords.push_back(Vector2f(1, 0));
+	endpoint_tex_coords.push_back(Vector2f(0, 1));
+	endpoint_tex_coords.push_back(Vector2f(1, 0));
+	endpoint_tex_coords.push_back(Vector2f(0, 0));
+
+	endpoint_tex_coords.push_back(Vector2f(1, 1));
+	endpoint_tex_coords.push_back(Vector2f(0, 1));
+	endpoint_tex_coords.push_back(Vector2f(1, 0));
+	endpoint_tex_coords.push_back(Vector2f(0, 1));
+	endpoint_tex_coords.push_back(Vector2f(1, 0));
+	endpoint_tex_coords.push_back(Vector2f(0, 0));
+    }
+    else
+    {
 	endpoint_tex_coords.push_back(Vector2f(0, 0));
 	endpoint_tex_coords.push_back(Vector2f(1, 0));
 	endpoint_tex_coords.push_back(Vector2f(0, 1));
@@ -128,13 +221,51 @@ void CPartFlow::CreateEndPoints()
 	endpoint_tex_coords.push_back(Vector2f(1, 0));
 	endpoint_tex_coords.push_back(Vector2f(0, 1));
 	endpoint_tex_coords.push_back(Vector2f(1, 1));
+    }
+
+    // Load texture:
+    if( world.partVis->matrix_mode )
+    {
+	if( flow_colour[0] == 100 && flow_colour[1] == 0 && flow_colour[2] == 100 ) // TCP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_01.png");
+	else if( flow_colour[0] == 0 && flow_colour[1] == 0 && flow_colour[2] == 200 ) // HTTP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_02.png");
+	else if( flow_colour[0] == 150 && flow_colour[1] == 150 && flow_colour[2] == 240 ) // HTTPS
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_03.png");
+	else if( flow_colour[0] == 200 && flow_colour[1] == 0 && flow_colour[2] == 0 ) // MAIL
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_04.png");
+	else if( flow_colour[0] == 0 && flow_colour[1] == 150 && flow_colour[2] == 0 ) // FTP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_05.png");
+	else if( flow_colour[0] == 0 && flow_colour[1] == 250 && flow_colour[2] == 0 ) // VPN
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_06.png");
+	else if( flow_colour[0] == 200 && flow_colour[1] == 200 && flow_colour[2] == 0 ) // DNS
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_07.png");
+	else if( flow_colour[0] == 30 && flow_colour[1] == 85 && flow_colour[2] == 30 ) // NTP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_08.png");
+	else if( flow_colour[0] == 110 && flow_colour[1] == 110 && flow_colour[2] == 110 ) // SSH
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_09.png");
+	else if( flow_colour[0] == 150 && flow_colour[1] == 100 && flow_colour[2] == 50 ) // UDP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
+	else if( flow_colour[0] == 0 && flow_colour[1] == 250 && flow_colour[2] == 200 ) // ICMP
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_11.png");
+	else if( flow_colour[0] == 240 && flow_colour[1] == 230 && flow_colour[2] == 140 ) // IRC
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_12.png");
+	else if( flow_colour[0] == 200 && flow_colour[1] == 100 && flow_colour[2] == 0 ) // WINDOWS
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_13.png");
+	else if( flow_colour[0] == 50 && flow_colour[1] == 150 && flow_colour[2] == 50 ) // P2P
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_14.png");
+	else
+	    tex = CTextureManager::tm.LoadTexture("data/matrix_15.png"); // OTHER
+    }
+    else
+	tex = CTextureManager::tm.LoadTexture(world.partVis->particle_img);
 }
 
 void CPartFlow::Update(float diff)
 {
 	float percent = diff / time_to_live;
 	Vector3f d = destination - start;
-	d *= (percent * speed);
+	d *= (percent * (speed * world.partVis->global_speed));
 
 	translation += d;
 
@@ -145,10 +276,12 @@ void CPartFlow::Update(float diff)
 		Vector3f e = (vertices[offset*6]) + translation - jitter[offset];
 		//Vector3f m = destination - start;
 		if( (e - start).Length() > length )//m.Length() ) 
+		//if( vertices[offset*6].x < destination.x )
 		{
 			offset++;
 			lengthV = (unsigned)6*(offset+1);
 //			num_particles--;
+			packets--;
 		} 
 		else 
 			break;
@@ -174,59 +307,98 @@ void CPartFlow::Update(float diff)
 }
 
 
-void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float speed, bool dark)
+bool CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float speed, bool dark)
 {
 	//Log("flow %p count %x\n", this, sam_count);
 	if(sam_count > 4)
-		return;
-	sam_count++;
+		return( false );
+	//sam_count++;
 
 	// -------------------------------------------------------------
-	float percent = world.partVis->diff / time_to_live;
-	Vector3f d = destination - start;
-	d *= (percent * speed);
-	float v_jitter = (float)rand()/RAND_MAX;
-	d *= v_jitter;
-	//d.z = 0.0f;
-	
+	Vector3f d;
+	if( world.partVis->jitter )
+	{
+		float percent = world.partVis->diff / time_to_live;
+		d = destination - start;
+		d *= (percent * (speed * world.partVis->global_speed));
+		float v_jitter = (float)rand()/RAND_MAX;
+		d *= v_jitter;		
+		//d.z = 0.0f;
+	}
 	// --------------------------------------------------------------
 
 	float size;
 
 	if(_size <= 512)
-		size = 0.6f; // was 0.8f
+		size = 0.6f * world.partVis->global_size;
 	else if(_size < 1024)
-		size = 0.8f; // was 1.0f
+		size = 0.8f * world.partVis->global_size;
 	else
-		size = 1.0f; // was 1.2f
+		size = 1.0f * world.partVis->global_size;
 
 	if( vertices.size() > 0 )
 	{
 		//if( vertices.back().Length() > (Vector3f(size,size,0)+start-d-translation).Length() )
-		if( vertices.back().x < (Vector3f(size,size,0)+start-d-translation).x )
+		if( destination.x > start.x )
 		{
-			return;
+			if( vertices.back().x < (Vector3f(size,size,0)+start-d-translation).x )
+				return( false );
 		}
+		else if( vertices.back().x > (Vector3f(size,size,0)+start-d-translation).x )
+			return( false );
 	}
 	jitter.push_back(d);
 
-	// Triangle 1:
-	vertices.push_back(Vector3f(0,0,0)+start-d-translation);
-	vertices.push_back(Vector3f(size,0,0)+start-d-translation);
-	vertices.push_back(Vector3f(0,size,0)+start-d-translation);
 
-	// Triangle 2:
-	vertices.push_back(Vector3f(size,0,0)+start-d-translation);
-	vertices.push_back(Vector3f(0,size,0)+start-d-translation);
-	vertices.push_back(Vector3f(size,size,0)+start-d-translation);
 
-	tex_coords.push_back(Vector2f(0, 0));
-	tex_coords.push_back(Vector2f(1, 0));
-	tex_coords.push_back(Vector2f(0, 1));
+	// -----------------------------------------------------------
+	// HAX:
+	if( world.partVis->billboard )
+	{
+		// Triangle 1:
+		vertices.push_back(Vector3f(0,0,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,0,size)+start-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
 
-	tex_coords.push_back(Vector2f(1, 0));
-	tex_coords.push_back(Vector2f(0, 1));
-	tex_coords.push_back(Vector2f(1, 1));
+		// Triangle 2:
+		vertices.push_back(Vector3f(0,0,size)+start-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,size,size)+start-d-translation);
+		// -------------------------------------------------------------
+	}
+	else
+	{
+		// Triangle 1:
+		vertices.push_back(Vector3f(0,0,0)+start-d-translation);
+		vertices.push_back(Vector3f(size,0,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
+
+		// Triangle 2:
+		vertices.push_back(Vector3f(size,0,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
+		vertices.push_back(Vector3f(size,size,0)+start-d-translation);
+	}
+
+	if( (destination.x < start.x) || (world.partVis->matrix_mode) )
+	{
+		tex_coords.push_back(Vector2f(1, 1));
+		tex_coords.push_back(Vector2f(0, 1));
+		tex_coords.push_back(Vector2f(1, 0));
+
+		tex_coords.push_back(Vector2f(0, 1));
+		tex_coords.push_back(Vector2f(1, 0));
+		tex_coords.push_back(Vector2f(0, 0));
+	}
+	else
+	{
+		tex_coords.push_back(Vector2f(0, 0));
+		tex_coords.push_back(Vector2f(1, 0));
+		tex_coords.push_back(Vector2f(0, 1));
+
+		tex_coords.push_back(Vector2f(1, 0));
+		tex_coords.push_back(Vector2f(0, 1));
+		tex_coords.push_back(Vector2f(1, 1));
+	}
 
 	// alpha was 80
 
@@ -245,9 +417,39 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float 
 	colours.push_back(140);
 
 //	num_particles++;
+	packets++;
 	this->dark = dark;
 	if( speed > 0.0f )
 	{
 		this->speed = speed;
 	}
+
+	return( true );
+}
+
+void CPartFlow::ReInitialize()
+{
+	//	num_flows++;
+	active_flow_ptr = NULL;
+
+	// Reserve some space for 20 packets worth
+	vertices.clear();
+	tex_coords.clear();
+	colours.clear();
+	//vertices.reserve(20*6);
+	//tex_coords.reserve(20*6);
+	//colours.reserve(20*6*4);
+
+	translation.x = translation.y = translation.z = 0.0f;
+	start.x = start.y = start.z = 0.0f;
+	destination.x = destination.y = destination.z = 0.0f;
+
+	sam_count = 0;
+	packets = 0;
+	offset = 0;
+
+	speed = 1.0f;
+
+	endpoint_vertices.clear();
+	endpoint_tex_coords.clear();
 }

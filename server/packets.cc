@@ -37,6 +37,7 @@ uint32_t id = 0;
 
 extern int shownondata;
 extern int showdata;
+extern int showsynfin;
 
 
 struct flow_id_t {
@@ -218,6 +219,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	float end[3];
 	int direction = -1;
 	int datasize = -1;
+	int force_display = 0;
 
 
 	flow_id_t tmpid;
@@ -260,6 +262,9 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 
 		tmpid.sourceport = ntohs(tcpptr->source);
 		tmpid.destport = ntohs(tcpptr->dest);
+		
+		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
+			force_display = 1;
 	}
 	else if(p->ip_p == 17)
 	{
@@ -282,14 +287,13 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		tmpid.destport = 0;
 	}
 
-	if (datasize > -1) {
+	if (datasize > -1 && !force_display) {
 		// if we don't show non-data, and datasize is 0, return early
 		if ((shownondata == 0) && (datasize == 0))
 			return 0;
 		// if we don't show data, and datasize is > 0, return early
 		if ((showdata == 0) && (datasize > 0))
 			return 0;
-
 	
 	}
 

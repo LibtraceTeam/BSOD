@@ -65,6 +65,7 @@ int port = 32500;
 int loop = 0;
 int shownondata = 0;
 int showdata = 1;
+int showcontrol = 1;
 
 static void sigusr_hnd(int sig);
 void do_configuration(int argc, char **argv);
@@ -274,6 +275,7 @@ void set_defaults() {
 	loop = 0;
 	shownondata = 0;
 	showdata = 1;
+	showcontrol = 1;
 }
 
 void do_configuration(int argc, char **argv) {
@@ -292,6 +294,7 @@ void do_configuration(int argc, char **argv) {
 		{"loop",TYPE_INT|TYPE_NULL, &loop},
 		{"shownondata", TYPE_INT|TYPE_NULL, &shownondata},
 		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
+		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
 		{0,0,0}
 
 	};

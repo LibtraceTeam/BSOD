@@ -31,7 +31,7 @@
  * determine an angle around the circle, and the last two are used to give a
  * length
  */
-void get_position(float coord[3], struct in_addr ip) { 
+void mod_get_position(float coord[3], struct in_addr ip) { 
 	
 	
 	float length, angle; 

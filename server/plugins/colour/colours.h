@@ -9,7 +9,7 @@
  */
 
 extern "C" {
-void get_colour(uint8_t colour[3], int port, int protocol);
+void mod_get_colour(uint8_t colour[3], int port, int protocol);
 }
 
 

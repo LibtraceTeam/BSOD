@@ -50,7 +50,7 @@ static int check_subnet(uint32_t net) {
 	return -1;
 }
 
-void get_position(float coord[3], struct in_addr ip) {
+void mod_get_position(float coord[3], struct in_addr ip) {
 
 	int index = -1;
 	uint32_t net = 0;

@@ -40,7 +40,7 @@ static uint8_t countercolours[][3] = {
  * Sets the colour array (RGB) to be the colour appropriate to the 
  * port/protocol being used.
  */
-void get_colour(uint8_t colour[3], int port, int protocol)
+void mod_get_colour(uint8_t colour[3], int port, int protocol)
 {
 
     int i;

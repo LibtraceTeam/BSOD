@@ -159,6 +159,7 @@ void mod_get_colour(uint8_t colour[3], int port, int protocol)
 			case 50:
 			case 51: for (i=0;i<3; i++)
 					 colour[i] = countercolours[VPN][i];
+				 break;
 		      	default: for(i=0;i<3;i++)
 				   colour[i] = countercolours[OTHER][i]; 
 			       break;

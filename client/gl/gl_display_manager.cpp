@@ -651,7 +651,9 @@ void CGLDisplayManager::DrawTriangles2(float *vertices, float *tex_coords, int n
 	glVertexPointer(3, GL_FLOAT, 0, vertices);
 	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
 
+	glDisable(GL_DEPTH_TEST);
 	glDrawArrays(GL_TRIANGLES, 0, num_triangles * 3);
+	glEnable(GL_DEPTH_TEST);
 
 	triangles_drawn += num_triangles;
 	meshs_drawn++;

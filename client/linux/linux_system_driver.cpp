@@ -60,6 +60,7 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 int CLinuxSystemDriver::RunMessageLoop()
 {
 	float start_time, carry_time;
+	bool first_time = true;
 
 	start_time = TimerGetTime();
 
@@ -67,6 +68,9 @@ int CLinuxSystemDriver::RunMessageLoop()
 	SDL_WarpMouse(world.display->GetWidth() / 2, 
 			      world.display->GetHeight() / 2);
 	
+	world.entities->GetPlayer()->mpos.x = 0;
+	world.entities->GetPlayer()->mpos.y = 0;
+
 	while ( ! done ) {
 		world.Draw();
 
@@ -101,8 +105,14 @@ int CLinuxSystemDriver::RunMessageLoop()
 					
 					int xrel, yrel;
 
-					xrel = -(event.motion.x - w);
-					yrel = -(event.motion.y - h);
+					if(first_time) {
+						xrel = 0;
+						yrel = 0;
+						first_time = false;
+					} else {
+						xrel = -(event.motion.x - w);
+						yrel = -(event.motion.y - h);
+					}
 
 					world.entities->GetPlayer()->mpos.x = yrel; //event.motion.xrel; 
 					world.entities->GetPlayer()->mpos.y = xrel; //event.motion.yrel;

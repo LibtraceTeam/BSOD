@@ -19,12 +19,14 @@ levels = {
 
 level_name		= levels[13]
 
-start_location	= {0,0,0}
+start_location	= {-3.50,1.53,24.0}
+pitch = 0.8
+heading = -10.3
 
 display			=  "opengl" -- "d3d" -- 
 fullscreen		= "no"
-width			= 640 
-height			= 480
+width			= 640
+height			= 480 
 bpp				= 32
 
 -- Hawk net driver can use "host:port" notation

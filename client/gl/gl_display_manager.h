@@ -112,7 +112,7 @@ public:
 	virtual void DrawTriangleStrip(float *vertices, float *tex_coords, int num_triangles);
 	//virtual void DrawSphere(Vector3f offset, float radius);
 	//virtual void DrawBox(Vector3f offset, float ?);
-
+	
 	// Other misc functions
 	/** Called by the System Driver whenever the user resizes the window. This
 	 * func just resets the viewport and matrices for a larger window and updates

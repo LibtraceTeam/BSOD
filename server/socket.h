@@ -33,13 +33,14 @@
 #define _SOCKET_H
 int setup_listen_socket();
 int bind_tcp_socket(int listener, int port);
-int check_clients(bool wait);
+int check_clients(struct modptrs_t *modptrs, bool wait);
 int send_new_flow(float start[3], float end[3], uint32_t count);
 int send_update_flow(int fd, float start[3], float end[3], uint32_t count);
-int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3], 
+int send_new_packet(uint64_t ts, uint32_t id, unsigned char id_num, 
 	uint16_t size, float speed, bool dark);
 int send_kill_flow(uint32_t id);
 void hax_fdmax(int fd);
 int send_kill_all();
+int send_colour_table(struct modptrs_t *modptrs);
 
 #endif // _SOCKET_H

@@ -43,6 +43,7 @@
 #include "socket.h"
 #include "debug.h"
 #include <syslog.h>
+#include "bsod_server.h"
 
 
 extern int fd_max;
@@ -69,8 +70,8 @@ struct flow_update_t {
 struct pack_update_t {
 	unsigned char type;
 	uint64_t ts;
-	uint32_t id;
-	uint8_t colour[3];
+	uint32_t id; // Flow id
+	unsigned char id_num; // packet type id
 	uint16_t size;
 	float speed; // This affects the speed of the entire flow based on RTT
 	bool dark;
@@ -87,6 +88,13 @@ struct kill_all_t {
     unsigned char type;
 } __attribute__((packed));
 
+// Colour table
+struct flow_descriptor_t {
+	unsigned char type;
+	unsigned char id;
+	uint8_t colour[3];
+	char name[256];
+} __attribute__((packed));
 
 /* a packet can be any one of these types - an enum would be nice here */
 union pack_union {
@@ -94,6 +102,7 @@ union pack_union {
 	struct pack_update_t packet;
 	struct flow_remove_t rem;
 	struct kill_all_t kall;
+	struct flow_descriptor_t fdesc;
 };
 
 int listen_socket;
@@ -210,17 +219,17 @@ int bind_tcp_socket(int listener, int port)
 
 //-----------------------------------------------------------------
 /* Pickup any new clients. */
-int check_clients(bool wait)
+int check_clients(struct modptrs_t *modptrs, bool wait)
 {
-	/* Protocol version is a single byte, the upper nybble is the 
-	 * major version, and the lower nybble is the minor
+	/* Protocol version is a single byte, the upper nibble is the 
+	 * major version, and the lower nibble is the minor
 	 * version.  The number is the lowest release version that can
 	 * understand this protocol.
 	 * examples:
 	 *  1.2 == 0x12
 	 *  10.13 = 0xad
 	 */
-	char protocol_version = 0x12;
+	char protocol_version = 0x13;
 	struct sockaddr_in remoteaddr;
 	socklen_t sock_size;
 	int newfd;
@@ -253,15 +262,23 @@ int check_clients(bool wait)
 		if ((newfd = accept(listen_socket, (struct sockaddr *)&remoteaddr,
 						&sock_size)) == -1) { 
 			perror("accept");
-		} else {
+		} 
+		else 
+		{
 			FD_SET(newfd, &read_fds);
 			write(newfd,&protocol_version,1);
 			add_fd(newfd);
-			if (newfd > fd_max) {    // keep track of the maximum
+			if (newfd > fd_max) 
+			{    
+				// keep track of the maximum
 				fd_max = newfd;
 			}
 			printf("server: new connection from %s\n", 
 					inet_ntoa(remoteaddr.sin_addr));
+			send_colour_table(modptrs);	// Update all clients with the colour table
+									// so that the new client gets it.
+									// This could be done better by targeting only the
+									// new client.
 		}
 		return newfd;
 	}
@@ -287,6 +304,8 @@ int send_all(pack_union *data)
 		size = sizeof(flow_remove_t);
 	else if(data->flow.type == 0x03)
 	    size = sizeof(kill_all_t);
+	else if(data->flow.type == 0x04)
+		size = sizeof(flow_descriptor_t);
 	else
 	{
 		Log(LOG_DAEMON|LOG_ALERT,"Bad packet type\n");
@@ -367,16 +386,14 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size,
+int send_new_packet(uint64_t ts, uint32_t id, unsigned char id_num, uint16_t size,
 	float speed, bool dark)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
 	update.ts = ts;
 	update.id = id;
-	update.colour[0] = colour[0];
-	update.colour[1] = colour[1];
-	update.colour[2] = colour[2];
+	update.id_num = id_num;
 	update.size = size;
 	update.speed = speed;
 	update.dark = dark;
@@ -397,7 +414,34 @@ int send_kill_all()
     union pack_union *punion;
     punion = (pack_union *)&kall;
     send_all(punion);
-    printf( "sent kill all signal!\n" );
+    printf( "Sent kill all signal!\n" );
 
     return 0;
+}
+
+// Sends a table of colours, their associated protocol names and id number
+int send_colour_table(struct modptrs_t *modptrs)
+{
+	uint8_t colour[3];
+	char name[256];
+	int i = 0;
+	do 
+	{
+		modptrs->info( colour, name, i );
+		struct flow_descriptor_t fd;
+		fd.type = 0x04;
+		fd.colour[0] = colour[0];
+		fd.colour[1] = colour[1];
+		fd.colour[2] = colour[2];
+		strcpy( fd.name, name );
+		fd.id = i;
+		union pack_union *punion;
+		punion = (pack_union *)&fd;
+		send_all(punion);
+		i++;
+		if( i > 256 ) // Sanity check.
+			exit( -99 );
+	} while( !(colour[0]==0 && colour[1]==0 && colour[2]==0) );
+
+	return( 0 );
 }

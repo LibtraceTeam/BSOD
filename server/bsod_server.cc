@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 		// keep rtclient from starting till someone connects
 		// but if we already have clients, don't bother
 		if (new_client == 0) {
-			new_client = check_clients(true);
+			new_client = check_clients(&modptrs, true);
 		}
 
 		// reset the timers and packet objects
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 			}
 			
 			/* check for new clients */
-			new_client = check_clients(false);
+			new_client = check_clients(&modptrs, false);
 			if(new_client > 0)// is zero valid?
 				send_flows(new_client);
 
@@ -461,7 +461,11 @@ static void load_modules() {
 		assert(modptrs.colour);
 	}
 
-
+	modptrs.info = (inffptr) dlsym(colourhandle, "mod_get_info");
+	if ((error = (char*)dlerror()) != NULL) {
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		assert(modptrs.info);
+	}
 	
 	snprintf(tmp,4096,"%s%s",basedir,leftpos);
 	lefthandle = dlopen(tmp,RTLD_LAZY);

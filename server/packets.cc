@@ -88,7 +88,7 @@ struct flow_id_t {
 struct flow_info_t {
 	uint32_t id;
 	uint32_t time; 
-	uint8_t colour[3];
+	unsigned char id_num; // Type of flow.
 	float start[3];
 	float end[3];
 };
@@ -345,7 +345,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		flow_info.end[1] = end[1];
 		flow_info.end[2] = end[2];
 
-		modptrs->colour(flow_info.colour, 
+		modptrs->colour(&(flow_info.id_num), 
 				get_port(p->ip_p, tmpid.sourceport, 
 				    tmpid.destport), 
 				p->ip_p);
@@ -462,14 +462,14 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	if( theList->poke( &packet ) == 1 )
 	{
 	    /* darknet traffic - going to address with no machine */
-	    if(send_new_packet(ts, current.id, current.colour, 
+	    if(send_new_packet(ts, current.id, current.id_num, 
 			ntohs(p->ip_len), speed, true) !=0)
 		return 1;
 	}
 	else
 	{
 	    /* normal traffic - going to address with a machine */
-	    if(send_new_packet(ts, current.id, current.colour, 
+	    if(send_new_packet(ts, current.id, current.id_num, 
 			ntohs(p->ip_len), speed, false) !=0)
 		return 1;
 	}

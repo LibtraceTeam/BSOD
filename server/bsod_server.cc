@@ -396,8 +396,6 @@ static void init_times() {
 
 
 void offline_delay(struct timeval tv){
-	uint32_t dagparts_hax = 0;
-	uint64_t ts = 0;
 	struct timeval diff;
 	struct timeval delta;
 
@@ -426,34 +424,3 @@ void offline_delay(struct timeval tv){
 	return;
 
 }
-/*
-	// check that we are in the right second, and arent 
-	// getting ahead of ourselves
-	while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
-	{
-		usleep(100);	
-		gettimeofday(&nowtime, 0);
-
-	}
-
-
-	//check that we are in the right part of the second and arent
-	//getting ahead of ourselves. could go into more detail
-	//here, but is not super important
-      //if(ts & 0x0000000080000000)
-	if(ts & 0x0000000080000000)
-		dagparts_hax += 500000;
-	if(ts & 0x0000000040000000)
-		dagparts_hax += 250000;
-	if(ts & 0x0000000020000000)
-		dagparts_hax += 125000;
-
-	while((uint32_t)(nowtime.tv_usec) < dagparts_hax)
-	{
-		usleep(100);
-		
-		gettimeofday(&nowtime, 0);
-	}
-
-}
-*/

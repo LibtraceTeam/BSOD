@@ -10,6 +10,8 @@
 
 #include "socket.h"
 
+
+extern int fd_max;
 /* list of file descriptors for all connected clients */
 struct client {
     int fd;
@@ -52,14 +54,7 @@ union pack_union {
 
 int listen_socket;
 fd_set read_fds;
-int fd_max;
 
-
-/* hack to get the max fd in here, do it a better way...global? */
-void hax_fdmax(int fd)
-{
-    fd_max = fd;
-}
 
 /* Creates a new structure containing a file descriptor */
 struct client* create_fd(int fd)

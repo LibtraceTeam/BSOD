@@ -1,20 +1,21 @@
 CXX=g++-3.0
 CC=g++-3.0
 CPPFLAGS = -Wall -Wimplicit -Wformat -pipe -g
-INCLUDE =  -I/usr/local/wand/include  -I. -I./lib
+INCLUDE =  -I/usr/local/include  -I. -I./lib
 
 CPPFLAGS += $(INCLUDE)
-LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/wand/lib -ldl -rdynamic -lconfig -lfl
+LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfig -lfl
 
 BINS = bsod_server
 OBJS = socket.o packets.o
 
-libconfig:
-	cd lib && $(MAKE) 
 
 .PHONY: all clean distclean install depend plugins
 
-all: $(BINS) plugins libconfig
+all: libconfig $(BINS) plugins 
+
+libconfig:
+	cd lib && $(MAKE)  || exit 1
 
 
 clean: plugins-clean
@@ -25,7 +26,7 @@ distclean: clean
 	
 
 
-bsod_server: $(OBJS) bsod_server.o
+bsod_server: $(OBJS) bsod_server.o 
 
 
 plugins:

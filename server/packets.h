@@ -10,6 +10,7 @@
 
 
 int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs);
+
 void expire_flows(uint32_t time);
 void init_packets();
 int send_flows(int fd);

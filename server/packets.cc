@@ -35,6 +35,9 @@ typedef struct ip ip_t;
 uint32_t lastts = 0;
 uint32_t id = 0;
 
+extern int shownondata;
+extern int showdata;
+
 
 struct flow_id_t {
 	struct in_addr sourceip;
@@ -90,6 +93,7 @@ flow_lru_t flows;
 void init_packets()
 {
 	id = 0;
+	lastts = 0;
 	while(!flows.empty())
 		flows.erase(flows.front().first);
 }
@@ -213,6 +217,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	float start[3];
 	float end[3];
 	int direction = -1;
+	int datasize = -1;
 
 
 	flow_id_t tmpid;
@@ -235,7 +240,6 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	// expire old flows - once a second is often enough for now
 	if(ts32-lastts > 0)
 	{
-		printf("bling: %i\n", ts32);
 		expire_flows(ts32);
 	}
 
@@ -252,9 +256,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
 		assert(tcpptr);
 
-		/* bail out if this packet has no data */
-		if((ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen) == 0)
-			return 0; 
+		datasize = (ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen);
 
 		tmpid.sourceport = ntohs(tcpptr->source);
 		tmpid.destport = ntohs(tcpptr->dest);
@@ -265,6 +267,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		udpptr = (struct udphdr *) ((uint8_t *)p  + hlen);
 		assert(udpptr);
 
+		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);
 		tmpid.sourceport = ntohs(udpptr->source);
 		tmpid.destport = ntohs(udpptr->dest);
 	}
@@ -277,6 +280,17 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	{
 		tmpid.sourceport = 0;
 		tmpid.destport = 0;
+	}
+
+	if (datasize > -1) {
+		// if we don't show non-data, and datasize is 0, return early
+		if ((shownondata == 0) && (datasize == 0))
+			return 0;
+		// if we don't show data, and datasize is > 0, return early
+		if ((showdata == 0) && (datasize > 0))
+			return 0;
+
+	
 	}
 
 	tmpid.sourceip = p->ip_src;

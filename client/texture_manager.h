@@ -39,6 +39,7 @@ public:
 	void UnloadTexture(string texName);
 	void UnloadTexture(CTexture *tex);
 	CTexture *FindTexture(string texName);
+	void SaveScreenshot(string fileName);
 };
 
 

@@ -41,7 +41,7 @@ void CPlayer::Draw()
 void CPlayer::Jump()
 {
 	//if(this->m_InContact)
-	SetVelocity(GetVelocity() + Vector3f(0.0f, 5.0f, 0.0f));
+	SetPosition(GetPosition() + Vector3f(0.0f, 5.0f, 0.0f));
 }
 
 

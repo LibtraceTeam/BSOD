@@ -8,6 +8,8 @@
 #include "octree.h"
 #include "reporter.h"
 #include "player.h"
+#include "texture_manager.h"
+#include "partvis.h"
 
 #include <hash_map>
 
@@ -48,11 +50,13 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_R ] = &CActionHandler::ToggleWireframe;
 	keyUpMap[ BKC_B ] = &CActionHandler::ToggleBackfaceCull;
 	keyUpMap[ BKC_O ] = &CActionHandler::ToggleOctreeBoxes;
-	keyDownMap[ BKC_SPACE ] = &CActionHandler::Jump;
+	keyDownMap[ BKC_SPACE ] = &CActionHandler::Pause;
 
 	keyDownMap[ BKC_G ] = &CActionHandler::ToggleGhostMode;
 
 	keyDownMap[ BKC_LEFTMOUSEBUT ] = &CActionHandler::Fire;
+
+	keyUpMap[ BKC_M ] = &CActionHandler::Screenshot;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -139,9 +143,9 @@ void CActionHandler::ToggleOctreeBoxes()
 	world.tree->drawOctreeBoxes = !world.tree->drawOctreeBoxes;
 }
 
-void CActionHandler::Jump()
+void CActionHandler::Pause()
 {
-	world.entities->GetPlayer()->Jump();
+    world.partVis->TogglePaused();
 }
 
 void CActionHandler::Fire()
@@ -152,4 +156,10 @@ void CActionHandler::Fire()
 void CActionHandler::ToggleGhostMode()
 {
 	world.entities->GetPlayer()->m_Ghost = !world.entities->GetPlayer()->m_Ghost;
+}
+
+void CActionHandler::Screenshot()
+{
+    Log("CActionHandler::Screenshot\n");
+    CTextureManager::tm.SaveScreenshot("screenshot.png");
 }

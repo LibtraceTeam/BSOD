@@ -44,6 +44,7 @@ private:
     FlowMap flows;
     CTriangleFan *left, *right;
     uint32 last_timestamp;
+    bool paused;
     
 public:
     CPartVis();
@@ -59,6 +60,7 @@ public:
     uint32 GetLastTimestamp() { return last_timestamp; }
     void BeginUpdate();
     void EndUpdate();
+    void TogglePaused();
 
     CPartFlow * make_flow(int);
 };

@@ -43,7 +43,8 @@ void CPartFlow::Draw()
 
     // Draw start and end points
     //d->SetColour(colours[0], colours[1], colours[2], (translation - start).Length() / (destination - start).Length());
-    d->SetColour(colours[0], colours[1], colours[2], colours[3]);
+    byte c = (byte)((destination - start).Length() - (vertices.back() + translation).Length());
+    d->SetColour(colours[0] / 255.0f, colours[1] / 255.0f, colours[2] / 255.0f, 0.15f);
     d->DrawTriangles2(
 	(float *)&endpoint_vertices[0],
 	(float *)&endpoint_tex_coords[0],
@@ -64,10 +65,10 @@ void CPartFlow::Draw()
 
 void CPartFlow::CreateEndPoints()
 {
-    float size = 0.6f;
+    const float size = 0.3f;
 
-    if(start.x == 10.0f)
-	size = -size;
+    //if(start.x == 10.0f)
+    //	size = -size;
     
     // Create start and end points
     endpoint_vertices.push_back(Vector3f(0,0,0)+start);
@@ -78,11 +79,11 @@ void CPartFlow::CreateEndPoints()
     endpoint_vertices.push_back(Vector3f(size,size,0)+start);
 
     endpoint_vertices.push_back(Vector3f(0,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(-size,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(0,-size,0)+destination);
-    endpoint_vertices.push_back(Vector3f(-size,0,0)+destination);
-    endpoint_vertices.push_back(Vector3f(0,-size,0)+destination);
-    endpoint_vertices.push_back(Vector3f(-size,-size,0)+destination);
+    endpoint_vertices.push_back(Vector3f(size,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,size,0)+destination);
+    endpoint_vertices.push_back(Vector3f(size,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,size,0)+destination);
+    endpoint_vertices.push_back(Vector3f(size,size,0)+destination);
 
     endpoint_tex_coords.push_back(Vector2f(0, 0));
     endpoint_tex_coords.push_back(Vector2f(1, 0));
@@ -157,11 +158,11 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
     // size = 1; // Old operation
 
     if(_size <= 512)
-	    size = 0.8f;
+	    size = 0.6f; // was 0.8f
     else if(_size < 1024)
-	    size = 1.0f;
+	    size = 0.8f; // was 1.0f
     else
-	    size = 1.2f;
+	    size = 0.9f; // was 1.2f
     
     vertices.push_back(Vector3f(0,0,0)+start-translation);
     vertices.push_back(Vector3f(size,0,0)+start-translation);
@@ -179,19 +180,20 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
     tex_coords.push_back(Vector2f(0, 1));
     tex_coords.push_back(Vector2f(1, 1));
 
+    // alpha was 80
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
 
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(80);
+    colours.push_back(140);
 
     num_particles++;
 }
@@ -246,24 +248,31 @@ void CPartVis::Draw()
 void CPartVis::Update(float diff)
 {
     FlowMap::const_iterator i = flows.begin();
+
+    if(paused)
+	return;
+    
     for(; i != flows.end(); ++i) {
 	i->second->Update(diff);
     }
 }
 
 CPartVis::CPartVis()
+    : paused(false)
 {
     // Need to create a couple of quads, one with the uni logo, another
     // without the logo.
     left = new CTriangleFan();
     left->vertices.push_back(Vector3f(-10, 10, -10));	
-    left->texCoords.push_back(Vector2f(0, 0));
     left->vertices.push_back(Vector3f(-10, 10, 10));	
-    left->texCoords.push_back(Vector2f(1, 0));
     left->vertices.push_back(Vector3f(-10, -10, 10));	
-    left->texCoords.push_back(Vector2f(1, 1));
     left->vertices.push_back(Vector3f(-10, -10, -10));	
+
+    left->texCoords.push_back(Vector2f(1, 0));
+    left->texCoords.push_back(Vector2f(0, 0));
     left->texCoords.push_back(Vector2f(0, 1));
+    left->texCoords.push_back(Vector2f(1, 1));
+    
     left->tex = CTextureManager::tm.LoadTexture("data/uni-logo.png");
 
     right = new CTriangleFan();
@@ -341,4 +350,9 @@ void CPartVis::BeginUpdate()
 
 void CPartVis::EndUpdate()
 {
+}
+
+void CPartVis::TogglePaused()
+{
+    paused = !paused;
 }

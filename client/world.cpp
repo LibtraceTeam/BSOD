@@ -15,11 +15,6 @@
 #include "sound.h"
 #include "partvis.h"
 
-// temp
-#include "gl/gl_display_manager.h"
-// temp for resource manager
-#include "md3.h"
-
 CWorld world;
 
 #include "actor.h"
@@ -62,8 +57,6 @@ void CWorld::Cleanup()
 		delete actionHandler;
 	if(soundProvider)
 		delete soundProvider;
-	if(resources)
-		delete resources;
 
 }
 
@@ -94,6 +87,7 @@ void CWorld::Draw()
 		frames = 0;
 	}
 	
+#if 0
 	display->Begin2D();
 	display->SetColour(0.2f, 0.1f, 0.3f, 0.8f);
 	display->BindTexture(NULL);
@@ -123,7 +117,7 @@ void CWorld::Draw()
 	display->DrawString2(10, 60, CReporter::GetLog().front());
 
 	display->End2D();
-
+#endif
 	display->EndFrame2();
 }
 

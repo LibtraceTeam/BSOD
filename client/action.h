@@ -62,7 +62,8 @@ public:
 	void ToggleBackfaceCull();
 	void ToggleOctreeBoxes();
 	void ToggleGhostMode();
-	void Jump();
+	void Pause();
+	void Screenshot();
 };
 
 #endif // _ACTION_H_

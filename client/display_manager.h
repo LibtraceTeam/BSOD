@@ -133,6 +133,9 @@ public:
 
 	virtual int GetNumTrianglesDrawn() = 0;
 	virtual int GetNumMeshesDrawn() = 0;
+
+
+    virtual void Screenshot(vector<byte> &buf, uint32 &w, uint32 &h) = 0;
 };
 
 typedef CDisplayManager::DisplayBlendMode BlendMode;

@@ -3,7 +3,7 @@
 #include "exception.h"
 #include "reporter.h"
 #include "misc.h"
-#include "external/zlib/zlib.h"
+#include <zlib.h>
 
 static CVFS vfs;
 

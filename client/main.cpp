@@ -96,14 +96,14 @@ int BungMain(int argc, char *argv[])
 		world.entities->GetPlayer()->GetCamera()->
 			SetBearing(Vector3f(pitch,heading,0));
 
+		loadingScreen->AddMessage("Initialising network and connecting...");
+		world.netDriver = CNetDriver::Create();
+		world.netDriver->Connect(netHost);
 
 		loadingScreen->AddMessage("Creating particle visualisation...");
 		world.partVis = new CPartVis();
 		world.entities->AddEntity(world.partVis);
 
-		loadingScreen->AddMessage("Initialising network and connecting...");
-		world.netDriver = CNetDriver::Create();
-		world.netDriver->Connect(netHost);
 
 		//loadingScreen->AddMessage("Loading level archive...");
 		//CVFS::LoadArchive("data/bung.barc");

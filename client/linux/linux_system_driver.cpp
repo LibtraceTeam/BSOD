@@ -1,16 +1,16 @@
-#include "../stdafx.h"
-#include "../system_driver.h"
-#include "../world.h"
-#include "../exception.h"
-#include "../reporter.h"
-#include "../action.h"
-#include "../entity_manager.h"
-#include "../camera.h"
-#include "../player.h"
+#include "stdafx.h"
+#include "system_driver.h"
+#include "world.h"
+#include "exception.h"
+#include "reporter.h"
+#include "action.h"
+#include "entity_manager.h"
+#include "camera.h"
+#include "player.h"
 #include "linux_system_driver.h"
 
-#include "../gl/gl_display_manager.h"
-#include "../misc.h"
+#include "gl/gl_display_manager.h"
+#include "misc.h"
 
 #include "SDL/SDL.h"
 
@@ -96,139 +96,238 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 
 int CLinuxSystemDriver::RunMessageLoop()
 {
-	float start_time, carry_time;
-	bool first_time = true;
+    float start_time, carry_time;
+    bool first_time = true;
 
-	start_time = TimerGetTime();
+    start_time = TimerGetTime();
 
-	SDL_ShowCursor(0);
-	SDL_WarpMouse(world.display->GetWidth() / 2, 
-			      world.display->GetHeight() / 2);
-	
-	world.entities->GetPlayer()->mpos.x = 0;
-	world.entities->GetPlayer()->mpos.y = 0;
+    SDL_ShowCursor(0);
+    SDL_WarpMouse(world.display->GetWidth() / 2, 
+            world.display->GetHeight() / 2);
 
-	while ( ! done ) {
-		world.Draw();
+    world.entities->GetPlayer()->mpos.x = 0;
+    world.entities->GetPlayer()->mpos.y = 0;
 
-		{ 
-			SDL_Event event;
-			while ( SDL_PollEvent(&event) ) 
-			{
-				if ( event.type == SDL_QUIT ) 
-				{
-					done = true;
-				}
-				else if ( event.type == SDL_KEYDOWN ) 
-				{
-					if ( event.key.keysym.sym == SDLK_ESCAPE ) {
-						done = true;
-					}
-					world.actionHandler->KeyDown( 
-							(CActionHandler::Keycode)event.key.keysym.sym );
-				}
-				else if ( event.type == SDL_KEYUP )
-				{
-					world.actionHandler->KeyUp( 
-							(CActionHandler::Keycode)event.key.keysym.sym );
-				}
-				else if ( event.type == SDL_MOUSEMOTION )
-				{
-					int w = world.display->GetWidth() / 2,
-					    h = world.display->GetHeight() / 2;
-						
-					if((event.motion.x == w) && (event.motion.y == h))
-						continue;
-					
-					int xrel, yrel;
+    while ( ! done ) {
+        world.Draw();
 
-					if(first_time) {
-						xrel = 0;
-						yrel = 0;
-						first_time = false;
-					} else {
-						xrel = -(event.motion.x - w);
-						yrel = -(event.motion.y - h);
-					}
+        { 
+            SDL_Event event;
+            while ( SDL_PollEvent(&event) ) 
+            {
+                if ( event.type == SDL_QUIT ) 
+                {
+                    done = true;
+                }
+                else if ( event.type == SDL_KEYDOWN ) 
+                {
+                    if ( event.key.keysym.sym == SDLK_ESCAPE ) {
+                        done = true;
+                    }
+                    world.actionHandler->KeyDown( 
+                            (CActionHandler::Keycode)event.key.keysym.sym );
+                }
+                else if ( event.type == SDL_KEYUP )
+                {
+                    world.actionHandler->KeyUp( 
+                            (CActionHandler::Keycode)event.key.keysym.sym );
+                }
+                else if ( event.type == SDL_MOUSEMOTION )
+                {
+                    int w = world.display->GetWidth() / 2,
+                        h = world.display->GetHeight() / 2;
 
-					world.entities->GetPlayer()->mpos.x = yrel; //event.motion.xrel; 
-					world.entities->GetPlayer()->mpos.y = xrel; //event.motion.yrel;
+                    if((event.motion.x == w) && (event.motion.y == h))
+                        continue;
 
-					SDL_WarpMouse(world.display->GetWidth() / 2, 
-							      world.display->GetHeight() / 2);
-				}
-				else if ( event.type == SDL_MOUSEBUTTONDOWN )
-				{
-					world.actionHandler->KeyDown(CActionHandler::BKC_LEFTMOUSEBUT);
-				}
-				else if ( event.type == SDL_MOUSEBUTTONUP )
-				{
-					world.actionHandler->KeyUp(CActionHandler::BKC_LEFTMOUSEBUT);
-				}
-			}
-		}
+                    int xrel, yrel;
 
-		carry_time = TimerGetTime();
-		world.Update( (carry_time - start_time) / 1000.0f );
-		start_time = carry_time;
+                    if(first_time) {
+                        xrel = 0;
+                        yrel = 0;
+                        first_time = false;
+                    } else {
+                        xrel = -(event.motion.x - w);
+                        yrel = -(event.motion.y - h);
+                    }
 
-		world.entities->GetPlayer()->mpos.x = 0;
-		world.entities->GetPlayer()->mpos.y = 0;
-	}
+                    world.entities->GetPlayer()->mpos.x = yrel; //event.motion.xrel; 
+                    world.entities->GetPlayer()->mpos.y = xrel; //event.motion.yrel;
 
-	SDL_Quit();
+                    SDL_WarpMouse(world.display->GetWidth() / 2, 
+                            world.display->GetHeight() / 2);
+                }
+                else if ( event.type == SDL_MOUSEBUTTONDOWN )
+                {
+                    world.actionHandler->KeyDown(CActionHandler::BKC_LEFTMOUSEBUT);
+                }
+                else if ( event.type == SDL_MOUSEBUTTONUP )
+                {
+                    world.actionHandler->KeyUp(CActionHandler::BKC_LEFTMOUSEBUT);
+                }
+            }
+        }
 
-	return 0;
+        carry_time = TimerGetTime();
+        world.Update( (carry_time - start_time) / 1000.0f );
+        start_time = carry_time;
+
+        world.entities->GetPlayer()->mpos.x = 0;
+        world.entities->GetPlayer()->mpos.y = 0;
+    }
+
+    SDL_Quit();
+
+    return 0;
 }
 
 void CLinuxSystemDriver::ResizeWindow(int width, int height)
 {
-	fprintf(stderr, "Warning: Resizing window not supported yet! (%d,%d)\n",
-			width, height);
+    fprintf(stderr, "Warning: Resizing window not supported yet! (%d,%d)\n",
+            width, height);
 }
 
 void CLinuxSystemDriver::Quit()
 {
-	fprintf(stdout, "Quit() called. BuNg exiting.\n\n");
-	done = true;
+    done = true;
 }
 
 void CLinuxSystemDriver::TimerInit(void)
 {
 }
 
-#ifdef LINUX
-#include <sys/time.h>
-#endif
-
 float CLinuxSystemDriver::TimerGetTime()
 {
 	// TODO: make a higher resolution timer here: apparently SDL_GetTicks() isn't the greatest (?)
-#if 0
-	struct timeval tv;
-	
-	if( gettimeofday(&tv, NULL) == 0 ) {
-		return tv.tv_sec * 1000 + (tv.tv_usec / 1000.0f);
-	}
-#else
 	return SDL_GetTicks();
-#endif
 }
 
 void CLinuxSystemDriver::ForceWindowDraw()
 {
-	SDL_GL_SwapBuffers();
+    SDL_GL_SwapBuffers();
+}
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+/* Code from FreeBSD which(1) program. */
+static int
+g_is_there(char *candidate)
+{
+    struct stat fin;
+
+    /* XXX work around access(2) false positives for superuser */
+    if (access(candidate, X_OK) == 0 &&
+            stat(candidate, &fin) == 0 &&
+            S_ISREG(fin.st_mode) &&
+            (getuid() != 0 ||
+             (fin.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)) {
+        return (1);
+    }
+    return (0);
+}
+
+static int
+g_which(char *path, char *filename)
+{
+    char candidate[PATH_MAX];
+    const char *d;
+
+    if (strchr(filename, '/') != NULL) 
+        return (g_is_there(filename) ? 0 : -1);
+    while ((d = strsep(&path, ":")) != NULL) {
+        if (*d == '\0')
+            d = ".";
+        if (snprintf(candidate, sizeof(candidate), "%s/%s", d,
+                    filename) >= (int)sizeof(candidate))
+            continue;
+        if (g_is_there(candidate)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+string g_escape(string str)
+{
+    for(string::iterator i = str.begin(); i != str.end(); ++i) {
+        if(*i == '\'' || *i == '"') {
+            i = str.insert(i, '\\');
+            i++;
+        }
+    }
+    return str;
 }
 
 void CLinuxSystemDriver::ErrorMessageBox(string title, string message)
 {
-//	fprintf(stderr, "%s : %s\n", title.c_str(), message.c_str());
-	string tcl = bsprintf("tk_messageBox -title \"%s\" -message \"%s\" "
-			"-type ok -icon error\nexit\n", title.c_str(), message.c_str());
-	string command = bsprintf("echo '%s' | wish", tcl.c_str());
+    char *p = getenv("PATH");
+    char *path;
+    string p_msg = g_escape(message);
+    string p_title = g_escape(title);
 
-	fprintf(stderr, "%s\n", command.c_str());
-	system( command.c_str() );
+    // Go back to desktop/clean up SDL
+    SDL_Quit();
+
+    // zenity is used to create gtk apps; prefer this. It is quick and
+    // nice.
+    path = strdup(p);
+    if(g_which(path, "zenity")) {
+        system(
+            bsprintf("zenity --error --title=\"%s\" --text=\"%s\"", 
+                p_title.c_str(),
+                p_msg.c_str()).c_str()
+            );
+        free(path);
+        return;
+    }
+    free(path);
+    // kdialog can potentially take some time to load if it exists and
+    // kde is not already running. Fall back to this if zenity doesn't
+    // exist.
+    path = strdup(p);
+    if(g_which(path, "kdialog")) {
+        system(
+            bsprintf("kdialog --title \"%s\" --error \"%s\"",
+                p_title.c_str(),
+                p_msg.c_str()).c_str()
+            );
+        free(path);
+        return;
+    }
+    free(path);
+    // xdialog is not as nice as zenity or kdialog, but if it exists it
+    // is the only remaining reasonable option.
+    path = strdup(p);
+    if(g_which(path, "Xdialog")) {
+        system(
+            bsprintf("Xdialog --title \"%s\" --msgbox \"%s\" 10 50",
+                p_title.c_str(),
+                p_msg.c_str()).c_str()
+            );
+        free(path);
+        return;
+    }
+    free(path);
+    // Fall back to attempting to create a tk dialog with the wish
+    // interpreter. Not very nice, but it works.
+    path = strdup(p);
+    if(g_which(path, "wish")) {
+        system(
+            bsprintf("echo 'tk_messageBox -title \"%s\" -message \"%s\" "
+                "-type ok -icon error\nexit\n' | wish", 
+                p_title.c_str(), 
+                p_msg.c_str()).c_str()
+            );
+        free(path);
+        return;
+    }
+    free(path);
+    
+    // If we get to here there is nothing nice installed to make
+    // dialogs for us, we can only print out to stderr.
+    fprintf(stderr, "%s: %s\n", title.c_str(), message.c_str());
 }
 
 

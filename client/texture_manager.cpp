@@ -6,8 +6,8 @@
 #include "exception.h"
 
 #include <math.h>
-#include "external/DevIL/include/il/il.h"
-#include "external/DevIL/include/il/ilu.h"
+#include "IL/il.h"
+#include "IL/ilu.h"
 
 // Singleton object instantiation
 CTextureManager CTextureManager::tm;

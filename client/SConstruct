@@ -20,9 +20,10 @@ libs = [
     'SDL_net' 
 ]
 include_path = [
+    '#.',
     '/usr/include/stlport',
     'external/DevIL/include',
-    '/usr/lib/opengl/nvidia/include'
+    'external/lua/include'
 ]
 lib_path = [ 
     'external/DevIL/lib', 

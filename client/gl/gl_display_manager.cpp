@@ -1,4 +1,4 @@
-#include "../stdafx.h"
+#include "stdafx.h"
 
 #include "gl_display_manager.h"
 
@@ -13,26 +13,26 @@
 #include <math.h>
 #include <stdarg.h>
 
-#include "../world.h"
-#include "../octree.h"
-#include "../camera.h"
-#include "../vfs.h"
-#include "../system_driver.h"
-#include "../matrix.h"
-#include "../bezier.h"
-#include "../texture_manager.h"
-#include "../entity_manager.h"
-#include "../exception.h"
-#include "../font.h"
+#include "world.h"
+#include "octree.h"
+#include "camera.h"
+#include "vfs.h"
+#include "system_driver.h"
+#include "matrix.h"
+#include "bezier.h"
+#include "texture_manager.h"
+#include "entity_manager.h"
+#include "exception.h"
+#include "font.h"
 
-#include "../matrix.h"
-#include "../quaternion.h"
+#include "matrix.h"
+#include "quaternion.h"
 
-#include "../md3.h"					// Temporary
+#include "md3.h"					// Temporary
 
 // DevIL Image Library used to open textures
-#include "../external/DevIL/include/il/il.h"
-#include "../external/DevIL/include/il/ilu.h"
+#include "IL/il.h"
+#include "IL/ilu.h"
 
 #ifdef _WIN32
 #pragma comment( lib, "opengl32.lib" )

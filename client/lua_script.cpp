@@ -7,8 +7,7 @@
 #include <errno.h>
 
 extern "C" {
-	#include "external/lua/include/lua.h"
-	//#include "external/lua/include/lualib.h"
+	#include "lua.h"
 }
 
 class CLuaScript : public CScript

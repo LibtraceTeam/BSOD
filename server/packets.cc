@@ -18,6 +18,8 @@
 #include <numeric>
 #include <iostream>
 #include <syslog.h>
+#include <map>
+
 
 #include "lru"
 
@@ -31,7 +33,10 @@
 #include "socket.h" 
 #include "bsod_server.h"
 
+#include "RTTMap.h"
 
+
+#define EXPIRE_SECS 20
 
 typedef struct ip ip_t;
 uint32_t lastts = 0;
@@ -105,16 +110,17 @@ void init_packets()
 //------------------------------------------------------------
 
 /**
- * A little bit hax - a flow can only be expired after all its packets
- * have left the clients display. Currently a packet takes 4.5 seconds
- * to travel the clients display space, and the server is removing them
- * after 5 seconds of inactivity.
+ * A flow can only be expired after a number of seconds of inactivity.
+ * This should be longer than they are displayed on the clients visualisation
+ * otherwise they might be deleted too early and have them disappear from
+ * the display.
  */
 void expire_flows(uint32_t time)
 {
 	uint32_t tmpid; 
 	//remove flows till we find one that hasnt expired
-	while( !flows.empty() && (time - flows.front().second.time > 4)) 
+	while( !flows.empty() && 
+		(time - flows.front().second.time > EXPIRE_SECS)) 
 	{
 		tmpid = flows.front().second.id;
 		flows.erase(flows.front().first);	
@@ -185,7 +191,7 @@ int get_end_pos(float end[3], struct in_addr dest, int iface, struct modptrs_t *
 }
 
 //------------------------------------------------------------
-int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs)
+int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map)
 {
 
 	int hlen = 0;
@@ -228,8 +234,11 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	/*
 	 * Find the port numbers in the packet
 	 */ 
+	bool isTCP = false;
+	bool isICMP = false;
 	if(p->ip_p == 6)
 	{
+		isTCP = true;
 		hlen = p->ip_hl * 4;
 		tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
 		assert(tcpptr);
@@ -254,6 +263,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	}
 	else if(p->ip_p == 1)
 	{
+		isICMP = true;
 		tmpid.sourceport = 0;
 		tmpid.destport = 0;
 	}
@@ -327,9 +337,136 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		flows[tmpid].time = ts32; // update time last seen
 		current = flows[tmpid];
 	}
-	if(send_new_packet(ts, current.id, current.colour, ntohs(p->ip_len)) !=0)
-		return 1;
+
+	// RTT calculation stuff:
+	static long int pcount = 0;
+	//static long int pcount_nortt = 0;
+	pcount++;
+	double now = trace_get_seconds( &packet );
+	static double last = now;
+	PacketTS pts = map->GetTimeStamp( &packet );
+	Flow *rtt_flow = new Flow( tmpid.sourceip.s_addr, tmpid.destip.s_addr, 
+		tmpid.sourceport, tmpid.destport );
+	Flow *rtt_flow_inverse = new Flow( tmpid.destip.s_addr, 
+		tmpid.sourceip.s_addr, tmpid.destport, tmpid.sourceport );
+	double the_time = 0.0;
+	float speed = -2.0f; // Default. (1.0f)
+
+	if( pts.ts > 0 )
+	{
+	    // Add packet:
+	    map->Add( rtt_flow, pts.ts, now );
+	}
+	else if( isTCP )
+	{
+	    libtrace_tcp *tcpInfo = trace_get_tcp( &packet );
+	    if( tcpInfo != NULL )
+	    {
+		if( tcpInfo->syn == 1 && tcpInfo->ack == 0 )
+		{
+		    // SYN:
+		    map->Add( rtt_flow, htonl(tcpInfo->seq), now );
+		}
+		else if( tcpInfo->syn == 1 && tcpInfo->ack == 1 )
+		{
+		    // SYN/ACK:
+		    map->Update( rtt_flow_inverse, htonl(tcpInfo->ack_seq) - 1,
+			    htonl(tcpInfo->seq) );
+
+		}
+		else if( tcpInfo->syn == 0 && tcpInfo->ack == 1 )
+		{
+		    // ACK:
+		    if( (the_time = map->Retrieve( rtt_flow, 
+				    htonl(tcpInfo->ack_seq) - 1 )) >= 0.0f )
+		    {
+			speed = convert_speed( now-the_time );
+		    }
+		}
+	    }
+	}
+	else if( isICMP )
+	{
+	    // Process packet as ICMP:
+	    libtrace_icmp *icmpInfo = trace_get_icmp( &packet );
+	    if( icmpInfo != NULL )
+	    {
+		if( icmpInfo->type == 0 )
+		{
+		    // Echo reply:
+		    if( (the_time = map->Retrieve( rtt_flow_inverse, 
+				    icmpInfo->un.echo.id ) ) >= 0.0f )
+			speed = convert_speed(now-the_time);
+		}
+		else if( icmpInfo->type == 8 )
+		{
+		    // Echo:
+		    map->Add( rtt_flow, icmpInfo->un.echo.id, now );
+		}
+	    }
+	}
+
+
+	if( pts.ts_echo > 0 )
+	{
+	    if((the_time = map->Retrieve(rtt_flow_inverse, pts.ts_echo)) >= 0.0)
+	    {	
+		// Calculate a sensible speed value 
+		// (2.0 = fastest, 1.0 = default, 0.0 = stopped)
+		speed = convert_speed( now-the_time );
+	    }
+	    else if( speed == -2.0f )
+	    {
+		speed = -1.0f; // -1 tells the client to keep old values
+	    }
+	}
+
+	delete rtt_flow;
+	delete rtt_flow_inverse;
+
+	if( now - last > 60 )
+	{
+	    int dropped = map->Flush( now );
+	    pcount -= dropped;
+	    last = now;
+	}
+
+
+	if(send_new_packet(ts, current.id, current.colour, ntohs(p->ip_len),
+		    speed) !=0)
+	    return 1;
 
 
 	return 0;
+}
+
+
+
+float convert_speed( float speed )
+{
+	if( speed <= 0.0005f )
+		return( 4.0f );
+
+	if( speed <= 0.005f )
+		return( 3.0f );
+
+	if( speed <= 0.05f )
+		return( 2.0f );
+
+	if( speed <= 0.25f )
+		return( 1.75f );
+
+	if( speed <= 0.5f )
+		return( 1.5f );
+
+	if( speed <= 1.0f )
+		return( 1.25f );
+
+	if( speed <= 2.5f )
+		return( 1.01f );
+
+	if( speed <= 5.0f )
+		return( 0.75f );
+
+	return( 0.5f );
 }

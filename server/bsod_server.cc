@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <syslog.h>
+#include <map>
 
 #include <libtrace.h>
 
@@ -36,6 +37,8 @@
 #include "packets.h"
 #include "daemons.h"
 #include "debug.h"
+
+#include "RTTMap.h"
 
 typedef struct ip ip_t;
 
@@ -98,6 +101,9 @@ static void offline_delay(struct timeval tv);
 
 int main(int argc, char *argv[])
 {
+	// RTTMap:
+	RTTMap *rttmap = new RTTMap();
+    
 	// socket stuff
 	int listen_socket;
 	fd_set listen_set, event_set;
@@ -251,7 +257,7 @@ int main(int argc, char *argv[])
 			}
 			
 			// if sending fails, assume we just lost a client
-			if(per_packet(packet, ts, &modptrs) != 0)
+			if(per_packet(packet, ts, &modptrs, rttmap) != 0)
 				continue;
 		}
 		// We've finished with this trace
@@ -271,6 +277,7 @@ goodbye:
 	close(listen_socket);
 
 	close_modules();
+	delete rttmap;
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 	exit(0);
 

@@ -40,6 +40,7 @@ struct pack_update_t {
 	uint32_t id;
 	uint8_t colour[3];
 	uint16_t size;
+	float speed; // This affects the speed of the entire flow based on RTT
 } __attribute__((packed));
 
 /* structure for expire flow packets */
@@ -113,7 +114,7 @@ void remove_fd(struct client *tmp)
 		tmp->prev->next = tmp->next;
 	}
 
-	free(tmp);
+	delete tmp;
 }
 
 //----------------------------------------------------------
@@ -314,7 +315,8 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size)
+int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size,
+	float speed)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
@@ -324,6 +326,7 @@ int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size)
 	update.colour[1] = colour[1];
 	update.colour[2] = colour[2];
 	update.size = size;
+	update.speed = speed;
 
 	union pack_union *punion;
 	punion = (pack_union *)&update;

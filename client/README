@@ -29,7 +29,7 @@ Changes to the client since the first release:
 *	Particles are jittered in low framerate situations making the 
 	visualization look more pleasing.
 *	New particle alpha map (looks nicer and creates dots, not squares, when 
-	particles are pilled on top of each other).
+	particles are piled on top of each other).
 *	Added the ability to toggle between all traffic and darknet traffic, 
 	allowing you to see scans and other "garbage" traffic more easily.
 
@@ -233,7 +233,8 @@ The machine being used to develop BSOD has the following specs:
 AMD AthlonXP 1800+, 512MB RAM, nVidia GF4-MX. BSOD should run on nearly any 
 system with an OpenGL compatible 3D card but running it on anything less than 
 the above is not recommended unless you are only monitoring a very low 
-traffic network. 
+traffic network. On about 8Mbps worth of traffic, our machine sits at a steady
+40 frames per second.
 
 If you are running BSOD on a large network take into account that having a 
 large number of flows is CPU intensive while having a large number of packets 

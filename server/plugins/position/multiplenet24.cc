@@ -95,8 +95,8 @@ void mod_get_position(float coord[3], struct in_addr ip) {
 	}
 	
 
-	coord[1] = ((float) (20 / (NETCOUNT-1)) * index) - 10; 
-	//coord[1] = ((float) ((ntohl(ip.s_addr) & 0x0000ff00) >> 8)/12.8) - 10;
+	coord[1] = 20.0 * index / (NETCOUNT-1) - 10;
+	
 
 	coord[2] = ((float) (ntohl(ip.s_addr) & 0x000000ff)/12.8) - 10;
 }

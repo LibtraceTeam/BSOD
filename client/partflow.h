@@ -38,6 +38,7 @@ private:
 	int packets;
 	IterList::iterator active_flow_ptr;
 	byte flow_colour[3];
+	unsigned char type;
 
 public:
 	CPartFlow();
@@ -46,7 +47,7 @@ public:
 	void Update(float diff);
 	//void Update_ServerTime(timestamp);
 
-	bool AddParticle(byte r, byte g, byte b, unsigned short size, float speed, bool dark);
+	bool AddParticle(unsigned char id, byte r, byte g, byte b, unsigned short size, float speed, bool dark);
 	inline void ResetCounter() { sam_count = 0; }
 	void CreateEndPoints();
 	void ReInitialize();

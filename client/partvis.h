@@ -64,8 +64,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma warning( disable : 4996 )
 #endif
 
+struct FlowDescriptor 
+{
+	byte colour[3];
+	char name[256];
+};
+
 typedef hash_map<unsigned int, CPartFlow *> FlowMap;
 typedef list<CPartFlow*> FlowList;
+typedef hash_map<unsigned char, FlowDescriptor *>FlowDescMap;
 
 class CPartVis : public CEntity
 {
@@ -91,8 +98,8 @@ public:
     virtual void Update(float diff);
 
     void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2);
-    void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size, float speed, bool dark);
+    void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
+		unsigned short size, float speed, bool dark);
     void RemoveFlow(unsigned int id);
     uint32 GetLastTimestamp() { return last_timestamp; }
     void BeginUpdate();
@@ -128,6 +135,7 @@ public:
 	string particle_img;
 
     CPartFlow * make_flow(int);
+	FlowDescMap fdmap;
 
 	friend class CPartFlow;
 };

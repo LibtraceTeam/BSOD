@@ -182,7 +182,7 @@ void CWorld::Draw()
 
 		display->End2D();
     } else {
-		float w = 330, h = 20;
+		float w = 360, h = 20;
 		float x = 0, y = display->GetHeight() - h;
 		string str;
 		char buff[32];

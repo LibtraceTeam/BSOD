@@ -90,7 +90,7 @@ CPartVis::CPartVis( bool mm )
 {
 	// Need to create a couple of quads, one with the uni logo, another
 	// without the logo.
-	filter_state = 0;
+	filter_state = -1;
 	packetsFrame = 0;
 	diff = 0.0f;
 	last_gc = world.sys->TimerGetTime();
@@ -151,7 +151,6 @@ void CPartVis::Draw()
     d->SetBlendMode(CDisplayManager::Transparent2);
     d->SetDepthTest(false);
 
-	// Alternative draw:
 	//BillboardBegin();
 	for( ; i != active_nodes.end(); ++i )
 	{
@@ -164,11 +163,6 @@ void CPartVis::Draw()
 				IterList::iterator tmp = i;
 				tmp--;
 
-				// DEBUG
-				//if( (*i)->second->active_flow_ptr == NULL )
-				//	exit(-99);
-				// END_DEBUG
-
 				active_nodes.erase( (*i)->second->active_flow_ptr );
 				//(*i)->second->active_flow_ptr = NULL;
 				i = tmp;
@@ -178,173 +172,13 @@ void CPartVis::Draw()
 
 		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
 		{
-			switch( filter_state ) 
-			{
-			case 0: // Display all packets:
+			if( filter_state == -1 )
 				(*i)->second->Draw();
-				break;
-			case 1: // Display only packets with RTT data:
-				if( (*i)->second->speed != 1.0f )
-					(*i)->second->Draw();
-				break;
-			case 2: // TCP
-				if( (*i)->second->flow_colour[0] == 100 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 100 )
-					(*i)->second->Draw();
-				break;
-			case 3: // HTTP
-				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 200 )
-					(*i)->second->Draw();
-				break;
-			case 4: // HTTPS
-				if( (*i)->second->flow_colour[0] == 150 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 240 )
-					(*i)->second->Draw();
-				break;
-			case 5: // MAIL
-				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 0 && (*i)->second->flow_colour[2] == 0 )
-					(*i)->second->Draw();
-				break;
-			case 6: // FTP
-				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 0 )
-					(*i)->second->Draw();
-				break;
-			case 7: // VPN
-				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 250 && (*i)->second->flow_colour[2] == 0 )
-					(*i)->second->Draw();
-				break;
-			case 8: // DNS
-				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 200 && (*i)->second->flow_colour[2] == 0 )
-					(*i)->second->Draw();
-				break;
-			case 9: // NTP
-				if( (*i)->second->flow_colour[0] == 30 && (*i)->second->flow_colour[1] == 85 && (*i)->second->flow_colour[2] == 30 )
-					(*i)->second->Draw();
-				break;
-			case 10: // SSH
-				if( (*i)->second->flow_colour[0] == 110 && (*i)->second->flow_colour[1] == 110 && (*i)->second->flow_colour[2] == 110 )
-					(*i)->second->Draw();
-				break;
-			case 11: // UDP
-				if( (*i)->second->flow_colour[0] == 150 && (*i)->second->flow_colour[1] == 100 && (*i)->second->flow_colour[2] == 50 )
-					(*i)->second->Draw();
-				break;
-			case 12: // ICMP
-				if( (*i)->second->flow_colour[0] == 0 && (*i)->second->flow_colour[1] == 250 && (*i)->second->flow_colour[2] == 200 )
-					(*i)->second->Draw();
-				break;
-			case 13: // IRC
-				if( (*i)->second->flow_colour[0] == 240 && (*i)->second->flow_colour[1] == 230 && (*i)->second->flow_colour[2] == 140 )
-					(*i)->second->Draw();
-				break;
-			case 14: // Windows
-				if( (*i)->second->flow_colour[0] == 200 && (*i)->second->flow_colour[1] == 100 && (*i)->second->flow_colour[2] == 0 )
-					(*i)->second->Draw();
-				break;
-			case 15: // P2P
-				if( (*i)->second->flow_colour[0] == 50 && (*i)->second->flow_colour[1] == 150 && (*i)->second->flow_colour[2] == 50 )
-					(*i)->second->Draw();
-				break;
-			case 16: // Other
-				if( (*i)->second->flow_colour[0] == 255 && (*i)->second->flow_colour[1] == 192 && (*i)->second->flow_colour[2] == 203 )
-					(*i)->second->Draw();
-				break;
-			default: // All packets are shown:
+			else if( filter_state == (*i)->second->type )
 				(*i)->second->Draw();
-			}
 		}
 	}
 	//BillboardEnd();
-    
-    // Draw the flows
-	/*for( ; i != flows.end(); ++i )
-	{
-		i->second->ResetCounter();
-		if( !paused )
-		{
-			i->second->Update(diff);
-			if( i->second->packets == 0 )
-				RemoveActiveFlow( i );
-		}
-
-		if( (show_dark == 0) || ( (show_dark == 1) && i->second->dark) || ( (show_dark == 2) && !i->second->dark) ) 
-		{
-			switch( filter_state ) 
-			{
-			case 0: // Display all packets:
-				i->second->Draw();
-				break;
-			case 1: // Display only packets with RTT data:
-				if( i->second->speed != 1.0f )
-					i->second->Draw();
-				break;
-			case 2: // TCP
-				if( i->second->colours[0] == 100 && i->second->colours[1] == 0 && i->second->colours[2] == 100 )
-					i->second->Draw();
-				break;
-			case 3: // HTTP
-				if( i->second->colours[0] == 0 && i->second->colours[1] == 0 && i->second->colours[2] == 200 )
-					i->second->Draw();
-				break;
-			case 4: // HTTPS
-				if( i->second->colours[0] == 150 && i->second->colours[1] == 150 && i->second->colours[2] == 240 )
-					i->second->Draw();
-				break;
-			case 5: // MAIL
-				if( i->second->colours[0] == 200 && i->second->colours[1] == 0 && i->second->colours[2] == 0 )
-					i->second->Draw();
-				break;
-			case 6: // FTP
-				if( i->second->colours[0] == 0 && i->second->colours[1] == 150 && i->second->colours[2] == 0 )
-					i->second->Draw();
-				break;
-			case 7: // VPN
-				if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 0 )
-					i->second->Draw();
-				break;
-			case 8: // DNS
-				if( i->second->colours[0] == 200 && i->second->colours[1] == 200 && i->second->colours[2] == 0 )
-					i->second->Draw();
-				break;
-			case 9: // NTP
-				if( i->second->colours[0] == 30 && i->second->colours[1] == 85 && i->second->colours[2] == 30 )
-					i->second->Draw();
-				break;
-			case 10: // SSH
-				if( i->second->colours[0] == 110 && i->second->colours[1] == 110 && i->second->colours[2] == 110 )
-					i->second->Draw();
-				break;
-			case 11: // UDP
-				if( i->second->colours[0] == 150 && i->second->colours[1] == 100 && i->second->colours[2] == 50 )
-					i->second->Draw();
-				break;
-			case 12: // ICMP
-				if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 200 )
-					i->second->Draw();
-				break;
-			case 13: // IRC
-				if( i->second->colours[0] == 240 && i->second->colours[1] == 230 && i->second->colours[2] == 140 )
-					i->second->Draw();
-				break;
-			case 14: // Windows
-				if( i->second->colours[0] == 200 && i->second->colours[1] == 100 && i->second->colours[2] == 0 )
-					i->second->Draw();
-				break;
-			case 15: // P2P
-				if( i->second->colours[0] == 50 && i->second->colours[1] == 150 && i->second->colours[2] == 50 )
-					i->second->Draw();
-				break;
-			case 16: // Other
-				if( i->second->colours[0] == 255 && i->second->colours[1] == 192 && i->second->colours[2] == 203 )
-					i->second->Draw();
-				break;
-			default: // All packets are shown:
-				i->second->Draw();
-			}
-		}
-	}*/
-    /*for(; i != flows.end(); ++i) 
-	{
-		i->second->Draw();
-    }*/
 
     d->SetDepthTest(true);
 
@@ -359,61 +193,14 @@ void CPartVis::Draw()
 
 	// Display current toggle state:
 	char outstr[256];
-	switch( filter_state ) 
+
+	if( filter_state == -1 )
+		strcpy( outstr, "All packets." );
+	else
 	{
-	case 0: // Display all packets:
-		strcpy( outstr, "All packets." );
-		break;
-	case 1: // Display only packets with RTT data:
-		strcpy( outstr, "Flows with RTT data." );	
-		break;
-	case 2: // TCP
-		strcpy( outstr, "TCP." );
-		break;
-	case 3: // HTTP
-		strcpy( outstr, "HTTP." );
-		break;
-	case 4: // HTTPS
-		strcpy( outstr, "HTTPS." );
-		break;
-	case 5: // MAIL
-		strcpy( outstr, "Mail." );
-		break;
-	case 6: // FTP
-		strcpy( outstr, "FTP." );
-		break;
-	case 7: // VPN
-		strcpy( outstr, "VPN." );
-		break;
-	case 8: // DNS
-		strcpy( outstr, "DNS." );
-		break;
-	case 9: // NTP
-		strcpy( outstr, "NTP." );
-		break;
-	case 10: // SSH
-		strcpy( outstr, "SSH." );
-		break;
-	case 11: // UDP
-		strcpy( outstr, "UDP." );
-		break;
-	case 12: // ICMP
-		strcpy( outstr, "ICMP." );
-		break;
-	case 13: // IRC
-		strcpy( outstr, "IRC." );
-		break;
-	case 14: // Windows
-		strcpy( outstr, "Windows." );
-		break;
-	case 15: // P2P
-		strcpy( outstr, "P2P." );
-		break;
-	case 16: // Other
-		strcpy( outstr, "Other." );
-		break;
-	default: // All packets are shown:
-		strcpy( outstr, "All packets." );
+		FlowDescMap::iterator iter;
+		if( (iter = fdmap.find(filter_state) ) != fdmap.end() )
+			strcpy( outstr, iter->second->name );
 	}
 
 	if( show_dark == 0 )
@@ -423,7 +210,7 @@ void CPartVis::Draw()
 	else
 		strcat( outstr, " - Sans darknet" );
 
-	float w = 330, h = 40;
+	float w = 360, h = 40;
 	float x = 0, y = d->GetHeight() - h;
 	string str;
 
@@ -500,52 +287,7 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 		flow->start = v1;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
 		flow->destination = v2;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
 		flow->length = (v2 - v1).Length();
-		//flow->CreateEndPoints();
-		/*if( matrix_mode )
-		{
-			// Pick random matrix code character (this is per flow only atm)
-			// Might be able to update to be per char or maybe based on flow
-			// type (HTTP/UDP/TCP/etc...)
-			int select = rand()%9;
-			switch( select ) 
-			{
-			case 0:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_01.png");
-				break;
-			case 1:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_02.png");
-				break;
-			case 2:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_03.png");
-				break;
-			case 3:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_04.png");
-				break;
-			case 4:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_05.png");
-				break;
-			case 5:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_06.png");
-				break;
-			case 6:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_07.png");
-				break;
-			case 7:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_08.png");
-				break;
-			case 8:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_09.png");
-				break;
-			case 9:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
-				break;
-			default:
-				flow->tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
-				break;
-			}
-		}
-		else
-			flow->tex = CTextureManager::tm.LoadTexture(particle_img); */
+
 		flows.insert(FlowMap::value_type(flow_id, flow));
 	/*} else {
 		// Found
@@ -554,8 +296,8 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
     }*/
 }
 
-void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size, float speed, bool dark)
+void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
+							unsigned short size, float speed, bool dark)
 {
     FlowMap::iterator i = flows.find(flow_id);
 
@@ -564,31 +306,43 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 	} else {
 		CPartFlow *flow = i->second;
 
-		//flow->Update_ServerTime(timestamp);
 		// XXX: at this point we could use the time to make sure the 
 		// particle is in the correct position; if we have lost some amount
 		// of time it might not make sense to have this particle start at
 		// the start position. To make this useful we would really need
 		// time more accurate than second accuracy, though.
 
-		//flow->MoveParticles();
-		
-		// Log( "Flow speedz: %f", speed );
-		// Log( "R = %c G = %c B = %c", r, g, b );
-
-		flow->flow_colour[0] = r;
+		/*flow->flow_colour[0] = r;
 		flow->flow_colour[1] = g;
 		flow->flow_colour[2] = b;
 		if( matrix_mode )
 		{
 			r = b = 36;
 			g = 132;
-		}
+		}*/
 
-		if( flow->AddParticle(r, g, b, size, speed, dark) && (flow->packets == 1) )
+		FlowDescMap::iterator iter;
+		if( (iter = fdmap.find(id_num)) != fdmap.end() )
 		{
-			flow->active_flow_ptr = AddActiveFlow( i );
+			byte r, g, b;
+			if( matrix_mode )
+			{
+				r = b = 36;
+				g = 132;
+			}
+			else
+			{
+				r = iter->second->colour[0];
+				g = iter->second->colour[1];
+				b = iter->second->colour[2];
+			}
+			if( flow->AddParticle(id_num, r, g, b, size, speed, dark) && (flow->packets == 1) )
+			{
+				flow->active_flow_ptr = AddActiveFlow( i );
+			}
 		}
+		else
+			Log( "Received packet that had no descriptor!" );
 	}
 
     last_timestamp = timestamp;
@@ -615,14 +369,6 @@ void CPartVis::RemoveFlow(unsigned int id)
 
 void CPartVis::BeginUpdate()
 {
-    /*FlowMap::iterator i = flows.begin();
-    for(; i != flows.end(); ++i)
-	{
-		//if( (int)(i->second->vertices.size()) == 0 )
-		//	RemoveFlow( i->first );
-		//else
-			i->second->ResetCounter();
-	}*/
 	packetsFrame = 0;
 }
 
@@ -638,15 +384,34 @@ void CPartVis::TogglePaused()
 void CPartVis::ToggleFilter()
 {
 	filter_state++;
-	if( filter_state > MAX_FILTER_STATE )
-		filter_state = 0;
+	FlowDescMap::iterator iter = fdmap.find( filter_state );
+	if( iter == fdmap.end() )
+		filter_state = -1;
+	if( (iter->second->colour[0] == 0) && (iter->second->colour[1] == 0) && (iter->second->colour[2] == 0) )
+		filter_state = -1;
 }
 
 void CPartVis::ToggleBackFilter()
 {
 	filter_state--;
-	if( filter_state < 0 )
-		filter_state = MAX_FILTER_STATE;
+	if( filter_state < -1 )
+	{
+		for( int i=0; i<256; i++ )
+		{
+			FlowDescMap::iterator iter = fdmap.find( i );
+			if( iter == fdmap.end() )
+			{
+				filter_state = i-1;
+				return;
+			}
+			if( (iter->second->colour[0] == 0) && (iter->second->colour[1] == 0) && (iter->second->colour[2] == 0) )
+			{
+				filter_state = i-1; // Should maybe cache this value!
+				return;
+			}
+		}
+		
+	}
 }
 
 void CPartVis::ToggleShowDark()

@@ -117,8 +117,8 @@ void CSDLNetDriver::Connect(string address)
 	    throw CException("Server version is ancient\n");
     }
 
-    const int min_version = 0x12; // Minimum version known
-    const int max_version = 0x12; // Maximum version known
+    const int min_version = 0x13; // Minimum version known
+    const int max_version = 0x13; // Maximum version known
 
     if (version < min_version) {
 	    throw CException(bsprintf("Server version is %i.%i, need at least %i.%i\n",
@@ -164,7 +164,7 @@ struct pack_update_t {
     unsigned char type; // 1
     uint32 ignored, ts;
     unsigned int id;
-    unsigned char colour[3];
+    unsigned char id_num;
     unsigned short size;
     float speed;
 	bool dark;
@@ -179,11 +179,20 @@ struct kill_all_t {
 	bool all; // 3
 } PACKED;
 
+struct flow_descriptor
+{
+	unsigned char type;
+	unsigned char id;
+	byte colour[3];
+	char name[256];
+} PACKED;
+
 union fp_union {
     struct flow_update_t flow;
     struct pack_update_t packet;
     struct flow_remove_t rem;
     struct kill_all_t kall;
+	struct flow_descriptor fdesc;
 };
 
 #ifdef _WIN32
@@ -275,14 +284,11 @@ void CSDLNetDriver::ReceiveData()
 		world.partVis->packetsFrame++;
 		//static uint32 tsfudge = fp->packet.ts;
 		//tsfudge++;
-		//Log( "%\n")
+		//Log( "%d\n", fp->packet.id_num );
 		world.partVis->UpdatePacket(
 			fp->packet.id, 
 			fp->packet.ts,
-			//tsfudge,
-			fp->packet.colour[0],
-			fp->packet.colour[1],
-			fp->packet.colour[2],
+			fp->packet.id_num,
 			fp->packet.size,
 			fp->packet.speed,
 			fp->packet.dark);
@@ -319,6 +325,26 @@ void CSDLNetDriver::ReceiveData()
 	    // Kill all existing flows!
 	    world.partVis->KillAll();
 	    buf += sizeof(kill_all_t);
+	}
+	else if( fp->flow.type == 0x04 )
+	{
+		// Flow descriptor.
+		// Check if we have it already, if we don't add it, if we do
+		// update it if its different, else do nothing.
+		int tempK = fp->fdesc.id;
+		int ppK = tempK;
+		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
+		{
+			// Not in the map yet so lets add it:
+			FlowDescriptor *fd = new FlowDescriptor();
+			fd->colour[0] = fp->fdesc.colour[0];
+			fd->colour[1] = fp->fdesc.colour[1];
+			fd->colour[2] = fp->fdesc.colour[2];
+			strcpy( fd->name, fp->fdesc.name );
+			Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
+			world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
+		}
+		buf += sizeof(flow_descriptor);
 	}
 	else 
 	{

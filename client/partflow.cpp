@@ -44,6 +44,7 @@ CPartFlow::CPartFlow()
 	sam_count = 0;
 	packets = 0;
 	gc_count = 0;
+	type = 0;
 
 	speed = 1.0f;
 }
@@ -307,12 +308,13 @@ void CPartFlow::Update(float diff)
 }
 
 
-bool CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float speed, bool dark)
+bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned short _size, float speed, bool dark)
 {
 	//Log("flow %p count %x\n", this, sam_count);
 	if(sam_count > 4)
 		return( false );
 	//sam_count++;
+	type = id;
 
 	// -------------------------------------------------------------
 	Vector3f d;

@@ -8,7 +8,7 @@ research group. For further information please see http://www.wand.net.nz/.
 
 
 This is the Windows binary release of the bsod client software. To download
-the bsod source or the bsod server, see http://www.wand.net.nz/. To use
+the bsod source or the bsod server, see http://research.wand.net.nz/. To use
 this software you must have access to a machine running the bsod server.
 
 The bsod client is based on the BuNg 3d engine written by Sam Jansen and
@@ -19,6 +19,47 @@ Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information.
 Using the bsod client:
 ----------------------------------
 ----------------------------------
+
+
+What you see:
+----------------------------------
+
+The bsod client displays the packets that the server receives as particles
+moving through the space of the visualisation. The plane on the left hand
+side represents the local address space (however the server determines that)
+and the plane on the right is the remote address space (everywhere else).
+Each IP address corresponds to a fixed point on one of these planes, and the
+packets they send travel from the location of the source address to the
+location of the destination address.
+
+Depending on information available to the server, packets can be drawn at
+different speeds, some faster, others slower. This is based off the estimated
+round trip time between the source and destination machines - packets sent
+between those that are close together will spend less time in the network,
+and so they spend less time in the visualisation.
+
+The colours used in the display represent different types of traffic, with
+the decisions on which colours to use and which traffic to single out with
+unique colours being fairly arbitrary (but based on what was commonly seen
+at our capture point). The colours can be changed by replacing the colour
+plugin the server uses, but the default colours based around port and
+protocol are:
+
+http:		blue
+https:		light blue
+smtp/pop/imap:	red
+ftp:		green
+dns:		yellow
+ssh/telnet:	grey
+windows:	orange
+irc:		khaki brown
+ntp:		matte green
+vpn:		bright green
+
+icmp:		teal
+other tcp:	purple
+other udp:	brown
+unknown:	pink
 
 
 Configuration file:

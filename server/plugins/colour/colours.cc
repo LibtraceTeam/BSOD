@@ -108,7 +108,6 @@ extern "C"
 int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 {
 
-	int i;
 	struct libtrace_ip *ip = trace_get_ip(packet);
 	if (!ip) {
 		*id_num = OTHER;

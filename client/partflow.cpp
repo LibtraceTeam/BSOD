@@ -327,6 +327,7 @@ bool CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float 
 	}
 	// --------------------------------------------------------------
 
+
 	float size;
 
 	if(_size <= 512)
@@ -335,6 +336,9 @@ bool CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float 
 		size = 0.8f * world.partVis->global_size;
 	else
 		size = 1.0f * world.partVis->global_size;
+
+	//const Vector3f offset( -(0.5f * size), (0.5f * size), 0);
+	const Vector3f offset( -(0.5f * size), 0, 0);
 
 	if( vertices.size() > 0 )
 	{
@@ -356,27 +360,27 @@ bool CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float 
 	if( world.partVis->billboard )
 	{
 		// Triangle 1:
-		vertices.push_back(Vector3f(0,0,0)+start-d-translation);
-		vertices.push_back(Vector3f(0,0,size)+start-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
 
 		// Triangle 2:
-		vertices.push_back(Vector3f(0,0,size)+start-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
-		vertices.push_back(Vector3f(0,size,size)+start-d-translation);
+		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,size,size)+start+offset-d-translation);
 		// -------------------------------------------------------------
 	}
 	else
 	{
 		// Triangle 1:
-		vertices.push_back(Vector3f(0,0,0)+start-d-translation);
-		vertices.push_back(Vector3f(size,0,0)+start-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
+		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
 
 		// Triangle 2:
-		vertices.push_back(Vector3f(size,0,0)+start-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start-d-translation);
-		vertices.push_back(Vector3f(size,size,0)+start-d-translation);
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation);
 	}
 
 	if( (destination.x < start.x) || (world.partVis->matrix_mode) )

@@ -580,6 +580,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 		
 		// Log( "Flow speedz: %f", speed );
 		// Log( "R = %c G = %c B = %c", r, g, b );
+
 		flow->flow_colour[0] = r;
 		flow->flow_colour[1] = g;
 		flow->flow_colour[2] = b;

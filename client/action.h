@@ -63,7 +63,7 @@ public:
 		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
 
 		// Function keys
-		BKC_F1,
+		BKC_F1 = 282, // = SDLK_F1
 
 		// Normal ASCII codes:
 		// Alphabet

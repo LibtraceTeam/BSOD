@@ -8,13 +8,14 @@
 #include "reporter.h"
 #include "entity.h"
 #include "texture_manager.h"
-#include "octree.h"
+#include "exception.h"
 
 #include "partvis.h"
 
 // Particle visualisation file
 float CPartFlow::time_to_live = 4.5f; // in seconds
 
+// The following globals are for debugging only
 int flows_drawn = 0;
 int packets_drawn = 0;
 int num_particles = 0;
@@ -29,37 +30,79 @@ void CPartFlow::Draw()
 
     flows_drawn++;
 
-    if(num_triangles > 0) {
-	d->PushMatrix();
-	d->Translate(translation);
+    if(num_triangles == 0)
+	return;
 
-	d->BindTexture(tex);
-	d->SetBlend(true);
-	d->SetBlendMode(CDisplayManager::Transparent2);
+    packets_drawn += num_triangles / 2;
 
-	packets_drawn += num_triangles / 2;
+    d->SetBlend(true);
+    d->SetBlendMode(CDisplayManager::Transparent2);
+    d->BindTexture(tex);
 
-	d->DrawTriangles2(
-	    (float *)&vertices[vertex_offset],
-	    (float *)&tex_coords[vertex_offset],
-	    (byte *)&colours[vertex_offset*4],
-	    num_triangles
-			);
-	
-	d->SetBlend(false);
-	d->PopMatrix();
-    } 
-    /*Log("Drawing flow with %d vertices with offset %d (%d)\n", 
-	    vertices.size(),offset,
-	    (vertices.size() - offset*6)/3    
-	    );*/
+    if(endpoint_vertices.size() == 0)
+	CreateEndPoints();
+
+    // Draw start and end points
+    d->SetColour(colours[0], colours[1], colours[2], (vertices.back() - start).Length() / (destination - start).Length());
+    //d->SetColour(colours[0], colours[1], colours[2], colours[3]);
+    d->DrawTriangles2(
+	(float *)&endpoint_vertices[0],
+	(float *)&endpoint_tex_coords[0],
+	4);
+    d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Draw the actual flow
+    d->PushMatrix();
+    d->Translate(translation);
+    d->DrawTriangles2(
+	(float *)&vertices[vertex_offset],
+	(float *)&tex_coords[vertex_offset],
+	(byte *)&colours[vertex_offset*4],
+	num_triangles);
+    d->PopMatrix();
+
+    d->SetBlend(false);
+}
+
+void CPartFlow::CreateEndPoints()
+{
+    // Create start and end points
+    endpoint_vertices.push_back(Vector3f(0,0,0)+start);
+    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+start);
+    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+start);
+    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+start);
+    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+start);
+    endpoint_vertices.push_back(Vector3f(1.0f,1.0f,0)+start);
+
+    endpoint_vertices.push_back(Vector3f(0,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+destination);
+    endpoint_vertices.push_back(Vector3f(1.0f,0,0)+destination);
+    endpoint_vertices.push_back(Vector3f(0,1.0f,0)+destination);
+    endpoint_vertices.push_back(Vector3f(1.0f,1.0f,0)+destination);
+
+    endpoint_tex_coords.push_back(Vector2f(0, 0));
+    endpoint_tex_coords.push_back(Vector2f(1, 0));
+    endpoint_tex_coords.push_back(Vector2f(0, 1));
+    endpoint_tex_coords.push_back(Vector2f(1, 0));
+    endpoint_tex_coords.push_back(Vector2f(0, 1));
+    endpoint_tex_coords.push_back(Vector2f(1, 1));
+
+    endpoint_tex_coords.push_back(Vector2f(0, 0));
+    endpoint_tex_coords.push_back(Vector2f(1, 0));
+    endpoint_tex_coords.push_back(Vector2f(0, 1));
+    endpoint_tex_coords.push_back(Vector2f(1, 0));
+    endpoint_tex_coords.push_back(Vector2f(0, 1));
+    endpoint_tex_coords.push_back(Vector2f(1, 1));
 }
 
 void CPartFlow::Update(float diff)
 {
     float percent = diff / time_to_live;
+    Vector3f d = destination - start;
+    d *= percent;
 
-    translation += (destination - start) * percent;
+    translation += d;
 
     while(vertices.size() >= (unsigned)6*(offset+1)) {
 	vector<Vector3f>::iterator i = &vertices[offset*6];
@@ -73,6 +116,15 @@ void CPartFlow::Update(float diff)
 	}
     }
 
+    // The number 100 below is just an abitrary number we decided upon
+    // to use. Basically, once you have got to 100 triangles and you have
+    // an offset set, it is time to do some garbage collection. Hopefully
+    // the usual case is for this to never happen and have all the vertex
+    // and so on memory cleaned up when the flow expires.
+    // This is very important for efficiencies sake, be careful when
+    // changing the value here, if it is too low a lot of memory copies
+    // will be taking place.
+    // - Sam, 13/2/2004
     if(vertices.size() > 6*100 && offset) {
 	 vertices.erase( vertices.begin(), &vertices[6*offset] );
 	 tex_coords.erase( tex_coords.begin(), &tex_coords[6*offset] );
@@ -81,8 +133,10 @@ void CPartFlow::Update(float diff)
     }
 }
 
+// deprecated!
 void CPartFlow::MoveParticles()
 {
+    throw CException("MoveParticles is deprecated.");
     vector<Vector3f>::iterator i = &vertices[offset*6];
     for(; i != vertices.end(); ++i) {
 	(*i) += translation;
@@ -90,15 +144,29 @@ void CPartFlow::MoveParticles()
     translation = Vector3f();
 }
 
-void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short size)
+void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
 {
-    vertices.push_back(Vector3f(0,0,0)+start);
-    vertices.push_back(Vector3f(1,0,0)+start);
-    vertices.push_back(Vector3f(0,1,0)+start);
+    count++;
+    if(count > 5)
+	return;
 
-    vertices.push_back(Vector3f(1,0,0)+start);
-    vertices.push_back(Vector3f(0,1,0)+start);
-    vertices.push_back(Vector3f(1,1,0)+start);
+    float size;
+    // size = 1; // Old operation
+
+    if(_size <= 512)
+	    size = 0.8f;
+    else if(_size < 1024)
+	    size = 1.0f;
+    else
+	    size = 1.2f;
+    
+    vertices.push_back(Vector3f(0,0,0)+start-translation);
+    vertices.push_back(Vector3f(size,0,0)+start-translation);
+    vertices.push_back(Vector3f(0,size,0)+start-translation);
+
+    vertices.push_back(Vector3f(size,0,0)+start-translation);
+    vertices.push_back(Vector3f(0,size,0)+start-translation);
+    vertices.push_back(Vector3f(size,size,0)+start-translation);
 
     tex_coords.push_back(Vector2f(0, 0));
     tex_coords.push_back(Vector2f(1, 0));
@@ -108,13 +176,19 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short size)
     tex_coords.push_back(Vector2f(0, 1));
     tex_coords.push_back(Vector2f(1, 1));
 
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
 
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
+    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+    colours.push_back(80);
 
     num_particles++;
 }
@@ -123,6 +197,11 @@ CPartFlow::CPartFlow()
  	: offset(0)
 {
     num_flows++;
+
+    // Reserve some space for 20 packets worth
+    vertices.reserve(20*6);
+    tex_coords.reserve(20*6);
+    colours.reserve(20*6*4);
 }
 
 CPartFlow::~CPartFlow()
@@ -135,13 +214,14 @@ CPartFlow::~CPartFlow()
 void CPartVis::Draw()
 {
     FlowMap::const_iterator i = flows.begin();
-    //Log("CPartVis::Draw() ... flows.size()=%d\n", flows.size());
+    CDisplayManager *d = world.display;
+    
+    // Draw the flows
     for(; i != flows.end(); ++i) {
-	//Log("Drawing flow id=%d\n", i->first);
 	i->second->Draw();
     }
 
-    CDisplayManager *d = world.display;
+    // Draw the left, then the right sides of the display.
     d->SetBlend(true);
     d->SetBlendMode(CDisplayManager::Transparent2);
     d->SetColour(1.0f, 1.0f, 1.0f, 0.35f);
@@ -149,9 +229,6 @@ void CPartVis::Draw()
     right->Draw();
     d->SetColour(1.0f, 1.0f, 1.0f);
     d->SetBlend(false);
-
-    /*Log("flows_drawn:%d num_flows:%d packets_drawn:%d num_packets:%d\n",
-	    flows_drawn, num_flows, packets_drawn, num_particles);*/
 
     flows_drawn = packets_drawn = 0;
 }
@@ -166,18 +243,28 @@ void CPartVis::Update(float diff)
 
 CPartVis::CPartVis()
 {
+    // Need to create a couple of quads, one with the uni logo, another
+    // without the logo.
     left = new CTriangleFan();
-    left->vertices.push_back(Vector3f(-10, 10, -10));	left->texCoords.push_back(Vector2f(0, 0));
-    left->vertices.push_back(Vector3f(-10, 10, 10));	left->texCoords.push_back(Vector2f(1, 0));
-    left->vertices.push_back(Vector3f(-10, -10, 10));	left->texCoords.push_back(Vector2f(1, 1));
-    left->vertices.push_back(Vector3f(-10, -10, -10));	left->texCoords.push_back(Vector2f(0, 1));
+    left->vertices.push_back(Vector3f(-10, 10, -10));	
+    left->texCoords.push_back(Vector2f(0, 0));
+    left->vertices.push_back(Vector3f(-10, 10, 10));	
+    left->texCoords.push_back(Vector2f(1, 0));
+    left->vertices.push_back(Vector3f(-10, -10, 10));	
+    left->texCoords.push_back(Vector2f(1, 1));
+    left->vertices.push_back(Vector3f(-10, -10, -10));	
+    left->texCoords.push_back(Vector2f(0, 1));
     left->tex = CTextureManager::tm.LoadTexture("data/uni-logo.png");
 
     right = new CTriangleFan();
-    right->vertices.push_back(Vector3f(10, 10, -10));	right->texCoords.push_back(Vector2f(0, 0));
-    right->vertices.push_back(Vector3f(10, 10, 10));	right->texCoords.push_back(Vector2f(1, 0));
-    right->vertices.push_back(Vector3f(10, -10, 10));	right->texCoords.push_back(Vector2f(1, 1));
-    right->vertices.push_back(Vector3f(10, -10, -10));	right->texCoords.push_back(Vector2f(0, 1));
+    right->vertices.push_back(Vector3f(10, 10, -10));	
+    right->texCoords.push_back(Vector2f(0, 0));
+    right->vertices.push_back(Vector3f(10, 10, 10));	
+    right->texCoords.push_back(Vector2f(1, 0));
+    right->vertices.push_back(Vector3f(10, -10, 10));	
+    right->texCoords.push_back(Vector2f(1, 1));
+    right->vertices.push_back(Vector3f(10, -10, -10));	
+    right->texCoords.push_back(Vector2f(0, 1));
     right->tex = CTextureManager::tm.LoadTexture("data/right.png");
 }
 
@@ -186,13 +273,12 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
     FlowMap::const_iterator i = flows.find(flow_id);
 
     if(i == flows.end()) {
+	// If the flow does not already exist (it shouldn't at this point)
 	CPartFlow *flow = new CPartFlow();
 	flow->start = v1;
 	flow->destination = v2;
 	flow->tex = CTextureManager::tm.LoadTexture("data/particle.png");
-	flows[flow_id] = flow; // XXX
-
-	//Log("Flows.size()=%d", flows.size());
+	flows.insert(FlowMap::value_type(flow_id, flow));
     } else {
 	// Found
 	Log("UpdateFlow called on flow that already exits (flow=%d)\n",
@@ -211,8 +297,13 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 	CPartFlow *flow = i->second;
 
 	//flow->Update_ServerTime(timestamp);
+	// XXX: at this point we could use the time to make sure the 
+	// particle is in the correct position; if we have lost some amount
+	// of time it might not make sense to have this particle start at
+	// the start position. To make this useful we would really need
+	// time more accurate than second accuracy, though.
 	
-	flow->MoveParticles();
+	//flow->MoveParticles();
 	flow->AddParticle(r, g, b, size);
     }
 
@@ -226,8 +317,18 @@ void CPartVis::RemoveFlow(unsigned int id)
     if(i == flows.end()) {
         Log("Removing non-existant flow %d\n", id);
     } else {
-	//Log("Removing flow: %d\n", id);
         delete i->second;
 	flows.erase(i);
     }
+}
+
+void CPartVis::BeginUpdate()
+{
+    FlowMap::iterator i = flows.begin();
+    for(; i != flows.end(); ++i)
+	i->second->ResetCounter();
+}
+
+void CPartVis::EndUpdate()
+{
 }

@@ -1,0 +1,68 @@
+#ifndef LRU
+#define LRU
+// vim: syntax=cpp
+
+#include <map>
+#include <list>
+
+/* This creates something that looks vaguely like a map<key_t,value_t>
+ * but supports .pop() and .front() to get the oldest modified data
+ */
+
+template <class key_t,class value_t>
+class lru {
+	private: 
+		typedef  std::list<key_t> lru_t;
+		lru_t lru_list;
+		typedef std::map<key_t,std::pair<lru_t::iterator,value_t> > data_t;
+		data_t data;
+
+	public:
+		std::pair<key_t,value_t > front() {
+			key_t & key = lru_list.front();
+			return std::pair<key_t,value_t>(key,data[key].second);
+		}
+		void pop() {
+			key_t key = lru_list.front();
+			lru_list.pop_front();
+			data.erase(key);
+		}
+		bool empty() const {
+			return lru_list.empty();
+		}
+		size_t size() const {
+			return data.size();
+		}
+		data_t::const_iterator find(key_t &key) const {
+			return data.find(key);
+		}
+
+		data_t::const_iterator end(void) const {
+			return data.end();
+		}
+
+		void erase(key_t k) {
+			// Remove from the LRU
+			lru_list.erase(data[k].first);
+			// Remove from the map
+			data.erase(k);
+		}
+		
+		/* Add/update an item, updating the LRU at the same time */
+		value_t &operator[](const key_t &k) {
+			/* Does this already exist? */
+			if (data.find(k) != data.end()) {
+				/* Remove from the LRU */
+				lru_list.erase(data[k].first);
+			}
+			/* Put it on the end */
+			lru_list.push_back(k);
+			/* Update the pointer */
+			data[k].first=lru_list.end();
+			data[k].first--;
+			/* Return the data */
+			return data[k].second;
+		}
+};
+
+#endif

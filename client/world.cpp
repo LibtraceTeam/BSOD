@@ -56,6 +56,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "misc.h"
 #include "player.h"
 #include "sound.h"
+#include "partflow.h"
 #include "partvis.h"
 
 CWorld world;
@@ -139,6 +140,7 @@ void CWorld::Draw()
 	if(now - last > 600.0f)
 	{
 		fps = (float)frames / ((now - last) / 1000.0f);
+		partVis->fps = fps;
 		last = now;
 		frames = 0;
 	}
@@ -155,9 +157,9 @@ void CWorld::Draw()
 		display->SetColour(1.0f, 1.0f, 1.0f);
 
 		display->DrawString2(10, 10, 
-			bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s", fps, 
+			bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s Flows: %d", fps, 
 				COctree::nodes_drawn, display->GetNumMeshesDrawn(),
-				display->GetNumTrianglesDrawn(), tbuf)
+				display->GetNumTrianglesDrawn(), tbuf, partVis->NumFLows() )
 			);
 
 		display->DrawString2(10, 35, 
@@ -180,7 +182,7 @@ void CWorld::Draw()
 
 		display->End2D();
     } else {
-		float w = 270, h = 20;
+		float w = 330, h = 20;
 		float x = 0, y = display->GetHeight() - h;
 		string str;
 

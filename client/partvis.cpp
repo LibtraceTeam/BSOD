@@ -176,11 +176,6 @@ void CPartVis::Draw()
 			}
 		}
 
-		/*if( matrix_mode )
-		{
-			(*i)->second->Draw();
-		}
-		else */
 		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
 		{
 			switch( filter_state ) 

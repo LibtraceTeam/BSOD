@@ -512,3 +512,8 @@ float convert_speed( float speed )
 
 	return( 0.5f );
 }
+
+void kill_all()
+{
+    send_kill_all();
+}

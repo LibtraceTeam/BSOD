@@ -40,5 +40,6 @@ int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],
 	uint16_t size, float speed, bool dark);
 int send_kill_flow(uint32_t id);
 void hax_fdmax(int fd);
+int send_kill_all();
 
 #endif // _SOCKET_H

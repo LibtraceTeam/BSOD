@@ -82,11 +82,18 @@ struct flow_remove_t {
 	uint32_t id;
 } __attribute__((packed));
 
+// Kill all
+struct kill_all_t {
+    unsigned char type;
+} __attribute__((packed));
+
+
 /* a packet can be any one of these types - an enum would be nice here */
 union pack_union {
 	struct flow_update_t flow;
 	struct pack_update_t packet;
 	struct flow_remove_t rem;
+	struct kill_all_t kall;
 };
 
 int listen_socket;
@@ -268,6 +275,8 @@ int send_all(pack_union *data)
 		size = sizeof(pack_update_t);
 	else if(data->flow.type == 0x02)
 		size = sizeof(flow_remove_t);
+	else if(data->flow.type == 0x03)
+	    size = sizeof(kill_all_t);
 	else
 	{
 		Log(LOG_DAEMON|LOG_ALERT,"Bad packet type\n");
@@ -367,4 +376,18 @@ int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size,
 	send_all(punion);
 
 	return 0;
+}
+
+
+int send_kill_all()
+{
+    struct kill_all_t kall;
+    kall.type = 0x03;
+
+    union pack_union *punion;
+    punion = (pack_union *)&kall;
+    send_all(punion);
+    printf( "sent kill all signal!\n" );
+
+    return 0;
 }

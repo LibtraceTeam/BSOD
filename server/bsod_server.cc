@@ -227,6 +227,7 @@ int main(int argc, char *argv[])
 		}
 
 		// reset the timers and packet objects
+		kill_all();
 		init_times();
 		init_packets();
 

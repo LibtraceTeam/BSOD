@@ -14,6 +14,7 @@ PREFIX=/usr/local/bsod
 BINDIR=$(PREFIX)/bin
 CONFDIR=$(PREFIX)/etc
 LIBDIR=$(PREFIX)/plugins
+BLISTDIR=$(PREFIX)/blist
 .PHONY: all clean distclean install depend plugins install-init
 
 all: libconfig $(BINS) plugins 
@@ -43,6 +44,7 @@ install:
 	mkdir -p $(BINDIR)
 	mkdir -p $(CONFDIR)
 	mkdir -p $(LIBDIR)
+	mkdir -p $(BLISTDIR)
 
 	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.conf
 	install -m 644 ./mac_addrs $(CONFDIR)/mac_addrs

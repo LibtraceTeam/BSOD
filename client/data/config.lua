@@ -25,8 +25,8 @@ heading = -10.3
 
 display			=  "opengl" -- "d3d" -- 
 fullscreen		= "no"
-width			= 640
-height			= 480 
+width			= 1024
+height			= 768 
 bpp				= 32
 
 -- Hawk net driver can use "host:port" notation

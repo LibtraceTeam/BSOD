@@ -1,4 +1,5 @@
 # vim: filetype=python
+# $Id$
 import glob, os
 
 # -------------------------------------------------------------------------
@@ -21,12 +22,10 @@ libs = [
 include_path = [
     '/usr/include/stlport',
     'external/DevIL/include',
-    'external/HawkNL/include',
     '/usr/lib/opengl/nvidia/include'
 ]
 lib_path = [ 
     'external/DevIL/lib', 
-    'external/HawkNL/lib', 
     'external/lua/lib',
     'external/GL' 
 ]
@@ -69,6 +68,7 @@ if do_conf:
     conf = env.Configure()
     if not conf.CheckLibWithHeader('stlport_gcc', 'hash_map', 'C++', 
             'std::hash_map< int, int > hmap;', 1):
+        # This needs testing.
         opt.Add('DEFINES', '', 'NO_STLPORT')
 
     check_libs = { 
@@ -78,7 +78,8 @@ if do_conf:
         'SDLNet_Init':'SDL_net',
         'ilInit':'DevIL (IL)',
         'iluInit':'DevIL (ILU)',
-        'uncompress':'zlib/libz'
+        'uncompress':'zlib/libz',
+        'png_access_version_number':'libpng'
     }
     for key in check_libs.keys():
         if not conf.CheckLib(None, key):
@@ -89,3 +90,14 @@ if do_conf:
 
 opt.Update(env)
 opt.Save('options.cache', env)
+
+# Notes:
+# to build DevIL:
+# cd external/DevIL
+# ./configure --prefix=`pwd`/.. --enable-static=yes
+# make clean install
+# cd ../..
+# to build lua:
+# cd external/lua
+# make
+# cd ../..

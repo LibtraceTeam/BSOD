@@ -1,3 +1,4 @@
+// vim: syntax=c
 /*
  *
  * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
@@ -43,12 +44,12 @@ template <class key_t, class value_t>
 class lru_iterator {
 	private: 
 		typedef std::list<key_t> lru_t;
-		typedef std::map<key_t,std::pair<lru_t::iterator,value_t> > data_t;
-		data_t::const_iterator where;
+		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
+		typename data_t::const_iterator where;
 	public:
 		lru_iterator() { };
-		lru_iterator(lru_iterator &x) : where(x.where) {};
-		lru_iterator(data_t::const_iterator &_where) : where(_where) {};
+		lru_iterator(const lru_iterator &x) : where(x.where) {};
+		lru_iterator(typename data_t::const_iterator &_where) : where(_where) {};
 		lru_iterator<key_t,value_t> &operator ++() {
 			++where;
 			return *this;
@@ -91,7 +92,7 @@ class lru {
 	private: 
 		typedef  std::list<key_t> lru_t;
 		lru_t lru_list;
-		typedef std::map<key_t,std::pair<lru_t::iterator,value_t> > data_t;
+		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
 		data_t data;
 
 	public:
@@ -112,19 +113,19 @@ class lru {
 			return data.size();
 		}
 		const_iterator begin(void) const {
-			data_t::const_iterator i = data.begin();
+			typename data_t::const_iterator i = data.begin();
 			const_iterator ci(i);
 			return ci;
 		}
 
 		const_iterator end(void) const {
-			data_t::const_iterator i = data.end();
+			typename data_t::const_iterator i = data.end();
 			const_iterator ci(i);
 			return ci;
 		}
 
 		const_iterator find(key_t &key) const {
-			data_t::const_iterator i =  data.find(key);
+			typename data_t::const_iterator i =  data.find(key);
 			const_iterator ci(i);
 			return ci;
 		}

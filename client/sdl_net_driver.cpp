@@ -5,6 +5,7 @@
 #include "entity_manager.h"
 #include "player.h"
 #include "partvis.h"
+#include "misc.h"
 
 #include <SDL.h>
 #include <SDL_net.h>
@@ -40,7 +41,9 @@ void CSDLNetDriver::Connect(string address)
     
     if(SDLNet_ResolveHost(&ip, (char *)host.c_str(), 
 		(unsigned short)atoi(port.c_str())) == -1) {
-	throw CException(SDLNet_GetError());
+        // Note: SDLNet_GetError() doesn't seem to say anything useful here.
+	throw CException(bsprintf("Error: Unable to resolve host '%s'",
+                    host.c_str()));
     }
 
     clientsock = SDLNet_TCP_Open(&ip);

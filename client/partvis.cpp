@@ -74,227 +74,57 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "texture_manager.h"
 #include "exception.h"
 
+#include "partflow.h"
 #include "partvis.h"
 
 #define MAX_FILTER_STATE 15
 // Particle visualisation file
-float CPartFlow::time_to_live = 4.5f;
 
-// The following globals are for debugging only
-int flows_drawn = 0;
-int packets_drawn = 0;
-int num_particles = 0;
-int num_flows = 0;
 
-// An actual flow:
-void CPartFlow::Draw()
+CPartVis::CPartVis()
+: paused(false)
 {
-    CDisplayManager *d = world.display;
-    const int vertex_offset = offset * 6;
-    const int num_triangles = ((const int)vertices.size() - vertex_offset) / 3;
+	// Need to create a couple of quads, one with the uni logo, another
+	// without the logo.
+	filter_state = 0;
+	packetsFrame = 0;
+	diff = 0.0f;
+	show_dark = 0;
+	fps = 0.0f;
+	show_help = false;
 
-    flows_drawn++;
-
-    if(num_triangles == 0)
-	return;
-
-    packets_drawn += num_triangles / 2;
-
-    d->BindTexture(tex);
-
-    if(endpoint_vertices.size() == 0)
-	CreateEndPoints();
-
-    // Draw start and end points
-    //d->SetColour(colours[0], colours[1], colours[2], (translation - start).Length() / (destination - start).Length());
-    //byte c = (byte)((destination - start).Length() - (vertices.back() + translation).Length());
-    d->SetColour(colours[0] / 255.0f, colours[1] / 255.0f, colours[2] / 255.0f, 0.15f);
-    d->DrawTriangles2(
-	(float *)&endpoint_vertices[0],
-	(float *)&endpoint_tex_coords[0],
-	4);
-    d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
-
-    // Draw the actual flow
-    d->PushMatrix();
-    d->Translate(translation);
-    d->DrawTriangles2(
-	(float *)&vertices[vertex_offset],
-	(float *)&tex_coords[vertex_offset],
-	(byte *)&colours[vertex_offset*4],
-	num_triangles);
-    d->PopMatrix();
-
-}
-
-void CPartFlow::CreateEndPoints()
-{
-    const float size = 0.3f;
-    const Vector3f offset(0, 0.15f, 0);
-
-    //if(start.x == 10.0f)
-    //	size = -size;
-    
-    // Create start and end points
-    endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
-    endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
-    endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-    endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
-    endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-    endpoint_vertices.push_back(Vector3f(size,size,0)+start+offset);
-
-    endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
-    endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
-    endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-    endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
-    endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-    endpoint_vertices.push_back(Vector3f(size,size,0)+destination+offset);
-
-    endpoint_tex_coords.push_back(Vector2f(0, 0));
-    endpoint_tex_coords.push_back(Vector2f(1, 0));
-    endpoint_tex_coords.push_back(Vector2f(0, 1));
-    endpoint_tex_coords.push_back(Vector2f(1, 0));
-    endpoint_tex_coords.push_back(Vector2f(0, 1));
-    endpoint_tex_coords.push_back(Vector2f(1, 1));
-
-    endpoint_tex_coords.push_back(Vector2f(0, 0));
-    endpoint_tex_coords.push_back(Vector2f(1, 0));
-    endpoint_tex_coords.push_back(Vector2f(0, 1));
-    endpoint_tex_coords.push_back(Vector2f(1, 0));
-    endpoint_tex_coords.push_back(Vector2f(0, 1));
-    endpoint_tex_coords.push_back(Vector2f(1, 1));
-}
-
-void CPartFlow::Update(float diff)
-{
-    float percent = diff / time_to_live;
-    Vector3f d = destination - start;
-    d *= (percent * speed);
-
-    translation += d;
-
-    while(vertices.size() >= (unsigned)6*(offset+1)) 
-    {
-	Vector3f e = (vertices[offset*6]) + translation;
-	Vector3f m = destination - start;
-	if( (e - start).Length() > m.Length() ) 
+	// Build table:
+	for( int i=0; i<256; i++ )
 	{
-	    offset++;
-	    num_particles--;
-	} 
-	else 
-	    break;
-    }
-
-    // The number 100 below is just an abitrary number we decided upon
-    // to use. Basically, once you have got to 100 triangles and you have
-    // an offset set, it is time to do some garbage collection. Hopefully
-    // the usual case is for this to never happen and have all the vertex
-    // and so on memory cleaned up when the flow expires.
-    // This is very important for efficiencies sake, be careful when
-    // changing the value here, if it is too low a lot of memory copies
-    // will be taking place.
-    // - Sam, 13/2/2004
-    if(vertices.size() > 6*100 && offset) {
-	 vertices.erase( vertices.begin(), vertices.begin()+(6*offset) );
-	 tex_coords.erase( tex_coords.begin(), tex_coords.begin()+(6*offset) );
-	 colours.erase( colours.begin(), colours.begin()+(6*4*offset) );
-	 offset = 0;
-    }
-}
-
-// deprecated!
-void CPartFlow::MoveParticles()
-{
-    throw CException("MoveParticles is deprecated.");
-    vector<Vector3f>::iterator i = vertices.begin()+(offset*6);
-    for(; i != vertices.end(); ++i) {
-	(*i) += translation;
-    }
-    translation = Vector3f();
-}
-
-void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float speed)
-{
-	//Log("flow %p count %x\n", this, sam_count);
-    sam_count++;
-    if(sam_count > 5)
-		return;
-
-    float size;
-    // size = 1; // Old operation
-
-	// Some colour voodoo magic:
-	// Only keep blue (port 80) traffic.
-	//if( b < 200 )
-	//	return;
-
-    if(_size <= 512)
-	    size = 0.6f; // was 0.8f
-    else if(_size < 1024)
-	    size = 0.8f; // was 1.0f
-    else
-	    size = 0.9f; // was 1.2f
-    
-    vertices.push_back(Vector3f(0,0,0)+start-translation);
-    vertices.push_back(Vector3f(size,0,0)+start-translation);
-    vertices.push_back(Vector3f(0,size,0)+start-translation);
-
-    vertices.push_back(Vector3f(size,0,0)+start-translation);
-    vertices.push_back(Vector3f(0,size,0)+start-translation);
-    vertices.push_back(Vector3f(size,size,0)+start-translation);
-
-    tex_coords.push_back(Vector2f(0, 0));
-    tex_coords.push_back(Vector2f(1, 0));
-    tex_coords.push_back(Vector2f(0, 1));
-
-    tex_coords.push_back(Vector2f(1, 0));
-    tex_coords.push_back(Vector2f(0, 1));
-    tex_coords.push_back(Vector2f(1, 1));
-
-	//r = g = b = 255;
-
-    // alpha was 80
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-    colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-    colours.push_back(140);
-
-    num_particles++;
-	if( speed > 0.0f )
-	{
-		this->speed = speed;
+		colour_table[i] = (float)i/255.0f;
 	}
-}
 
-CPartFlow::CPartFlow()
- 	: offset(0)
-{
-	num_flows++;
+	left = new CTriangleFan();
+	left->vertices.push_back(Vector3f(-10, 10, -10));	
+	left->vertices.push_back(Vector3f(-10, 10, 10));	
+	left->vertices.push_back(Vector3f(-10, -10, 10));	
+	left->vertices.push_back(Vector3f(-10, -10, -10));	
 
-	// Reserve some space for 20 packets worth
-	vertices.reserve(20*6);
-	tex_coords.reserve(20*6);
-	colours.reserve(20*6*4);
+	left->texCoords.push_back(Vector2f(1, 0));
+	left->texCoords.push_back(Vector2f(0, 0));
+	left->texCoords.push_back(Vector2f(0, 1));
+	left->texCoords.push_back(Vector2f(1, 1));
 
-	sam_count = 0;
+	left->tex = CTextureManager::tm.LoadTexture("data/left.png");
 
-	speed = 1.0f;
-}
+	right = new CTriangleFan();
+	right->vertices.push_back(Vector3f(10, 10, -10));	
+	right->texCoords.push_back(Vector2f(0, 0));
+	right->vertices.push_back(Vector3f(10, 10, 10));	
+	right->texCoords.push_back(Vector2f(1, 0));
+	right->vertices.push_back(Vector3f(10, -10, 10));	
+	right->texCoords.push_back(Vector2f(1, 1));
+	right->vertices.push_back(Vector3f(10, -10, -10));	
+	right->texCoords.push_back(Vector2f(0, 1));
+	right->tex = CTextureManager::tm.LoadTexture("data/right.png");
 
-CPartFlow::~CPartFlow()
-{
-    num_particles -= (const int)vertices.size() / 6 - offset;
-    num_flows--;
+	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
+	helptex = CTextureManager::tm.LoadTexture( "data/help.png" );
 }
 
 // The "container" class implementation
@@ -311,83 +141,94 @@ void CPartVis::Draw()
     // Draw the flows
 	for( ; i != flows.end(); ++i )
 	{
-		/* 
-		 * XXX only works if colours stay the same...
-		 * this is the only real information the client gets atm, a
-		 * better solution would be to have the server send more info
-		 */
-		switch( filter_state ) 
+		i->second->ResetCounter();
+		if( !paused )
+			i->second->Update(diff);
+
+		if( (show_dark == 0) || ( (show_dark == 1) && i->second->dark) || ( (show_dark == 2) && !i->second->dark) ) 
 		{
-		case 0: // Display all packets:
-			i->second->Draw();
-			break;
-		case 1: // Display only packets with RTT data:
-			if( i->second->speed != 1.0f )
+
+		    /* 
+		     * XXX only works if colours stay the same...
+		     * this is the only real information the client gets atm, a
+		     * better solution would be to have the server send more info
+		     */
+		    switch( filter_state ) 
+		    {
+			case 0: // Display all packets:
+			    i->second->Draw();
+				break;
+			case 1: // Display only packets with RTT data:
+				if( i->second->speed != 1.0f )
+				    i->second->Draw();
+				break;
+			case 2: // TCP
+				if( i->second->colours[0] == 100 && i->second->colours[1] == 0 && i->second->colours[2] == 100 )
+				    i->second->Draw();
+				break;
+			case 3: // HTTP
+				if( i->second->colours[0] == 0 && i->second->colours[1] == 0 && i->second->colours[2] == 200 )
+				    i->second->Draw();
+				break;
+			case 4: // HTTPS
+				if( i->second->colours[0] == 150 && i->second->colours[1] == 150 && i->second->colours[2] == 240 )
+					i->second->Draw();
+				break;
+			case 5: // MAIL
+				if( i->second->colours[0] == 200 && i->second->colours[1] == 0 && i->second->colours[2] == 0 )
+					i->second->Draw();
+				break;
+			case 6: // FTP
+				if( i->second->colours[0] == 0 && i->second->colours[1] == 150 && i->second->colours[2] == 0 )
+					i->second->Draw();
+				break;
+			case 7: // VPN
+				if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 0 )
+					i->second->Draw();
+				break;
+			case 8: // DNS
+				if( i->second->colours[0] == 200 && i->second->colours[1] == 200 && i->second->colours[2] == 0 )
+					i->second->Draw();
+				break;
+			case 9: // NTP
+				if( i->second->colours[0] == 30 && i->second->colours[1] == 85 && i->second->colours[2] == 30 )
+					i->second->Draw();
+				break;
+			case 10: // SSH
+				if( i->second->colours[0] == 110 && i->second->colours[1] == 110 && i->second->colours[2] == 110 )
+					i->second->Draw();
+				break;
+			case 11: // UDP
+				if( i->second->colours[0] == 150 && i->second->colours[1] == 100 && i->second->colours[2] == 50 )
+					i->second->Draw();
+				break;
+			case 12: // ICMP
+				if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 200 )
+					i->second->Draw();
+				break;
+			case 13: // IRC
+				if( i->second->colours[0] == 240 && i->second->colours[1] == 230 && i->second->colours[2] == 140 )
+					i->second->Draw();
+				break;
+			case 14: // Windows
+				if( i->second->colours[0] == 200 && i->second->colours[1] == 100 && i->second->colours[2] == 0 )
+					i->second->Draw();
+				break;
+			case 15: // P2P
+				if( i->second->colours[0] == 50 && i->second->colours[1] == 150 && i->second->colours[2] == 50 )
+					i->second->Draw();
+				break;
+			case 16: // Other
+				if( i->second->colours[0] == 255 && i->second->colours[1] == 192 && i->second->colours[2] == 203 )
+					i->second->Draw();
+				break;
+			default: // All packets are shown:
 				i->second->Draw();
-			break;
-		case 2: // TCP
-			if( i->second->colours[0] == 100 && i->second->colours[1] == 0 && i->second->colours[2] == 100 )
-				i->second->Draw();
-			break;
-		case 3: // HTTP
-			if( i->second->colours[0] == 0 && i->second->colours[1] == 0 && i->second->colours[2] == 200 )
-				i->second->Draw();
-			break;
-		case 4: // HTTPS
-			if( i->second->colours[0] == 150 && i->second->colours[1] == 150 && i->second->colours[2] == 240 )
-				i->second->Draw();
-			break;
-		case 5: // MAIL
-			if( i->second->colours[0] == 200 && i->second->colours[1] == 0 && i->second->colours[2] == 0 )
-				i->second->Draw();
-			break;
-		case 6: // FTP
-			if( i->second->colours[0] == 0 && i->second->colours[1] == 150 && i->second->colours[2] == 0 )
-				i->second->Draw();
-			break;
-		case 7: // VPN
-			if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 0 )
-				i->second->Draw();
-			break;
-		case 8: // DNS
-			if( i->second->colours[0] == 200 && i->second->colours[1] == 200 && i->second->colours[2] == 0 )
-				i->second->Draw();
-			break;
-		case 9: // NTP
-			if( i->second->colours[0] == 30 && i->second->colours[1] == 85 && i->second->colours[2] == 30 )
-				i->second->Draw();
-			break;
-		case 10: // SSH
-			if( i->second->colours[0] == 110 && i->second->colours[1] == 110 && i->second->colours[2] == 110 )
-				i->second->Draw();
-			break;
-		case 11: // UDP
-			if( i->second->colours[0] == 150 && i->second->colours[1] == 100 && i->second->colours[2] == 50 )
-				i->second->Draw();
-			break;
-		case 12: // ICMP
-			if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 200 )
-				i->second->Draw();
-			break;
-		case 13: // IRC
-			if( i->second->colours[0] == 240 && i->second->colours[1] == 230 && i->second->colours[2] == 140 )
-				i->second->Draw();
-			break;
-		case 14: // Windows
-			if( i->second->colours[0] == 200 && i->second->colours[1] == 100 && i->second->colours[2] == 0 )
-				i->second->Draw();
-			break;
-		case 15: // Other
-			if( i->second->colours[0] == 255 && i->second->colours[1] == 192 && i->second->colours[2] == 203 )
-				i->second->Draw();
-			break;
-		default: // All packets are shown:
-			i->second->Draw();
+			}
 		}
 	}
     /*for(; i != flows.end(); ++i) 
 	{
-
 		i->second->Draw();
     }*/
 
@@ -451,14 +292,24 @@ void CPartVis::Draw()
 	case 14: // Windows
 		strcpy( outstr, "Windows." );
 		break;
-	case 15: // Other
+	case 15: // P2P
+		strcpy( outstr, "P2P." );
+		break;
+	case 16: // Other
 		strcpy( outstr, "Other." );
 		break;
 	default: // All packets are shown:
 		strcpy( outstr, "All packets." );
 	}
 
-	float w = 270, h = 40;
+	if( show_dark == 0 )
+		strcat( outstr, " - All" );
+	else if( show_dark == 1 )
+		strcat( outstr, " - Darknet" );
+	else
+		strcat( outstr, " - Sans darknet" );
+
+	float w = 330, h = 40;
 	float x = 0, y = d->GetHeight() - h;
 	string str;
 
@@ -473,6 +324,19 @@ void CPartVis::Draw()
 	d->BindTexture(wandlogo);
 	d->SetColour(1.0f, 1.0f, 1.0f, 0.8f);
 	d->Draw2DQuad( d->GetWidth() - 160, d->GetHeight() - 65, d->GetWidth(), d->GetHeight() );
+	if( show_help )
+	{
+		d->BindTexture( helptex );
+		d->Draw2DQuad( 0, 0, 516, 480 );
+	}
+	else
+	{
+		d->BindTexture(NULL);
+		d->SetBlendMode(CDisplayManager::Multiply);
+		d->SetBlend(false);
+		d->SetColour(1.0f, 1.0f, 1.0f);
+		d->DrawString2( 5, 5, "F1 for help.");
+	}
 	d->BindTexture(NULL);
 	d->SetBlendMode(CDisplayManager::Multiply);
 	d->SetBlend(false);
@@ -481,53 +345,22 @@ void CPartVis::Draw()
 	
 	d->End2D();
 
-    flows_drawn = packets_drawn = 0;
+    //flows_drawn = packets_drawn = 0;
 }
 
 void CPartVis::Update(float diff)
 {
-    FlowMap::const_iterator i = flows.begin();
+	if(paused)
+		return;
 
-    if(paused)
-	return;
+	this->diff = diff;
+    /*FlowMap::const_iterator i = flows.begin();
+
+    
     
     for(; i != flows.end(); ++i) {
 	i->second->Update(diff);
-    }
-}
-
-CPartVis::CPartVis()
-    : paused(false)
-{
-    // Need to create a couple of quads, one with the uni logo, another
-    // without the logo.
-	filter_state = 0;
-
-    left = new CTriangleFan();
-    left->vertices.push_back(Vector3f(-10, 10, -10));	
-    left->vertices.push_back(Vector3f(-10, 10, 10));	
-    left->vertices.push_back(Vector3f(-10, -10, 10));	
-    left->vertices.push_back(Vector3f(-10, -10, -10));	
-
-    left->texCoords.push_back(Vector2f(1, 0));
-    left->texCoords.push_back(Vector2f(0, 0));
-    left->texCoords.push_back(Vector2f(0, 1));
-    left->texCoords.push_back(Vector2f(1, 1));
-    
-    left->tex = CTextureManager::tm.LoadTexture("data/left.png");
-
-    right = new CTriangleFan();
-    right->vertices.push_back(Vector3f(10, 10, -10));	
-    right->texCoords.push_back(Vector2f(0, 0));
-    right->vertices.push_back(Vector3f(10, 10, 10));	
-    right->texCoords.push_back(Vector2f(1, 0));
-    right->vertices.push_back(Vector3f(10, -10, 10));	
-    right->texCoords.push_back(Vector2f(1, 1));
-    right->vertices.push_back(Vector3f(10, -10, -10));	
-    right->texCoords.push_back(Vector2f(0, 1));
-    right->tex = CTextureManager::tm.LoadTexture("data/right.png");
-
-	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
+    }*/
 }
 
 void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
@@ -535,10 +368,14 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
     FlowMap::const_iterator i = flows.find(flow_id);
 
     if(i == flows.end()) {
+		//if( fps < 30.0f )//flows.size() > 10000 )
+		//	return;
+		//flows.size();
 	// If the flow does not already exist (it shouldn't at this point)
 		CPartFlow *flow = new CPartFlow();
 		flow->start = v1;
 		flow->destination = v2;
+		flow->length = (v2 - v1).Length();
 		flow->tex = CTextureManager::tm.LoadTexture("data/particle.png");
 		flows.insert(FlowMap::value_type(flow_id, flow));
 	} else {
@@ -549,12 +386,12 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 }
 
 void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size, float speed)
+	byte g, byte b, unsigned short size, float speed, bool dark)
 {
     FlowMap::const_iterator i = flows.find(flow_id);
 
 	if(i == flows.end()) {
-		Log("Adding packet to non-existant flow %d\n", flow_id);
+		return;//Log("Adding packet to non-existant flow %d\n", flow_id);
 	} else {
 		CPartFlow *flow = i->second;
 
@@ -570,7 +407,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 		// Log( "Flow speedz: %f", speed );
 		// Log( "R = %c G = %c B = %c", r, g, b );
 
-		flow->AddParticle(r, g, b, size, speed);
+		flow->AddParticle(r, g, b, size, speed, dark);
 	}
 
     last_timestamp = timestamp;
@@ -580,19 +417,28 @@ void CPartVis::RemoveFlow(unsigned int id)
 {
     FlowMap::iterator i = flows.find(id);
 
-    if(i == flows.end()) {
-        Log("Removing non-existant flow %d\n", id);
-    } else {
+    if(i == flows.end()) 
+	{
+        return;//Log("Removing non-existant flow %d\n", id);
+    } 
+	else 
+	{
         delete i->second;
-	flows.erase(i);
+		flows.erase(i);
     }
 }
 
 void CPartVis::BeginUpdate()
 {
-    FlowMap::iterator i = flows.begin();
+    /*FlowMap::iterator i = flows.begin();
     for(; i != flows.end(); ++i)
-	i->second->ResetCounter();
+	{
+		//if( (int)(i->second->vertices.size()) == 0 )
+		//	RemoveFlow( i->first );
+		//else
+			i->second->ResetCounter();
+	}*/
+	packetsFrame = 0;
 }
 
 void CPartVis::EndUpdate()
@@ -616,4 +462,21 @@ void CPartVis::ToggleBackFilter()
 	filter_state--;
 	if( filter_state < 0 )
 		filter_state = MAX_FILTER_STATE;
+}
+
+void CPartVis::ToggleShowDark()
+{
+	show_dark++;// = !show_dark;
+	if( show_dark > 2 )
+		show_dark = 0;
+}
+
+int CPartVis::NumFLows()
+{
+	return( (int)flows.size() );
+}
+
+void CPartVis::ToggleHelp()
+{
+	show_help = !show_help;
 }

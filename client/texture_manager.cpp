@@ -61,6 +61,7 @@ CTexture *CTextureManager::LoadTexture(string texName)
     buf = new char [reader->GetLength()];
     reader->Read(buf, reader->GetLength());
 
+    Log("Loading texture: '%s'\n", texName.c_str());
     if(! ilLoadL(IL_TYPE_UNKNOWN, buf, reader->GetLength()) )
     {
 	Log("Error %d\n", ilGetError());

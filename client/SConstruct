@@ -17,7 +17,7 @@ libs = [
     # libz, used for bung archives
     'z', 
     # SDL networking lib for new networking. You'll need to install this
-    'SDL_net' 
+    'SDL_net'
 ]
 include_path = [
     '#.',
@@ -55,10 +55,10 @@ env.Program(target = executable, source = sources)
 # Configure stuff:
 # This is cached in options.cache. Delete options.cache for the configure
 # stuff to be rerun.
-do_conf = True
+do_conf = 1
 try: 
     f = open('options.cache', 'r')
-    do_conf = False
+    do_conf = 0
     close(f)
 except:
     pass
@@ -79,9 +79,15 @@ if do_conf:
         'SDLNet_Init':'SDL_net',
         'ilInit':'DevIL (IL)',
         'iluInit':'DevIL (ILU)',
-        'uncompress':'zlib/libz',
-        'png_access_version_number':'libpng'
+        'uncompress':'zlib/libz'
     }
+    
+    if not conf.CheckLib('png', 'png_access_version_number'):
+    	print "libpng-dev not installed. PNG support is necessary in the "
+	print "image library DevIL. Please install libpng-dev and reinstall "
+	print "DevIL as the README describes."
+	Exit(1)
+    
     for key in check_libs.keys():
         if not conf.CheckLib(None, key):
             print "Critical library '%s' not found!" % (check_libs[key])

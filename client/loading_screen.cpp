@@ -21,7 +21,7 @@ void CLoadingScreen::Redraw()
     world.display->BindTexture(background);
 
     float nw, nh;
-    if(background->orig_width < width || background->orig_height < height)
+    if(background->orig_width > width || background->orig_height > height)
     {
         // Find out optimal scaling for the image so it is as large as possible but
         // the aspect is still the same.

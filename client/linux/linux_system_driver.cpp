@@ -252,7 +252,7 @@ g_which(char *path, char *filename)
 string g_escape(string str)
 {
     for(string::iterator i = str.begin(); i != str.end(); ++i) {
-        if(*i == '\'' || *i == '"') {
+        if(*i == '\'') {
             i = str.insert(i, '\\');
             i++;
         }
@@ -264,8 +264,8 @@ void CLinuxSystemDriver::ErrorMessageBox(string title, string message)
 {
     char *p = getenv("PATH");
     char *path;
-    string p_msg = g_escape(message);
-    string p_title = g_escape(title);
+    string p_msg = message;
+    string p_title = title;
 
     // Go back to desktop/clean up SDL
     SDL_Quit();
@@ -317,8 +317,8 @@ void CLinuxSystemDriver::ErrorMessageBox(string title, string message)
         system(
             bsprintf("echo 'tk_messageBox -title \"%s\" -message \"%s\" "
                 "-type ok -icon error\nexit\n' | wish", 
-                p_title.c_str(), 
-                p_msg.c_str()).c_str()
+                g_escape(p_title).c_str(), 
+                g_escape(p_msg).c_str()).c_str()
             );
         free(path);
         return;

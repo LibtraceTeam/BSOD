@@ -1,4 +1,3 @@
-
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
@@ -120,7 +119,10 @@ bool operator == (const flow_id_t &a, const flow_id_t &b) {
 typedef lru<flow_id_t,flow_info_t> flow_lru_t;
 flow_lru_t flows;
 
-/* zeroes id and empties flows. maybe useful if all clients  disconnect? */
+/* 
+ * zeroes id and empties flows. maybe useful if all clients  disconnect
+ * and we want to close the connection to the data source?
+ * */
 void init_packets()
 {
     id = 0;
@@ -162,7 +164,7 @@ int send_flows(int fd)
 {
     flow_lru_t::const_iterator flow_iterator;
 
-    printf("SENDING OLD FLOWS\n");
+    printf("Updating new client with all flows in progress...\n");
     for(flow_iterator =flows.begin();flow_iterator!=flows.end();flow_iterator++)
     {
 	if(send_update_flow(fd, (*flow_iterator).second.start, 
@@ -197,6 +199,7 @@ float compact(struct in_addr ip, int offset)
 
     }
 
+    // hard coded range -10 -> +10
     return (((float)sum / 32.7675) / 100) - 10;
 }
 //---------------------------------------------------------------
@@ -215,16 +218,14 @@ float compact2(struct in_addr ip, int offset)
     else
 	number = number & 0x000000ff;
 
+    // hard coded range -10 -> +10
     return ((float)number / 12.8) - 10;
-
 }
 
 //-------------------------------------------------------------
 int get_start_pos(float start[3], struct in_addr source, int iface)
 {
-    //source.s_addr = ntohl(source.s_addr);
-    
-   if(iface == 0)// only uses last half
+   if(iface == 0)// only uses last half(starts locally)
    {
        start[1] = compact2( source, 1);
        start[0] = -10;
@@ -256,8 +257,6 @@ int get_start_pos(float start[3], struct in_addr source, int iface)
 //------------------------------------------------------------
 int get_end_pos(float end[3], struct in_addr dest, int iface)
 {
-    //dest.s_addr = ntohl(dest.s_addr);
-
     if(iface == 0)
     {
 	end[1] = compact( dest , 1 );
@@ -269,7 +268,7 @@ int get_end_pos(float end[3], struct in_addr dest, int iface)
 	end[2] = (((float)( (dest.s_addr & 0xffff0000)>>16  ))/3276.8) - 10;
 	*/
     }
-    else if(iface == 1) // only uses last half
+    else if(iface == 1) // only uses last half(ends locally)
     {
 	end[1] = compact2( dest, 1 );
 	end[0] = -10;
@@ -300,21 +299,9 @@ static int  is_server_port(int port) {
 }
 
 //------------------------------------------------------------
-short get_port(ip_t *ipptr){
-    int port1 = 0, port2 = 0;
+short get_port(int port1, int port2)
+{
     int sport1 = 0, sport2 = 0;
-    int hlen = 0;
-    struct tcphdr *tcpptr = 0;
-
-    hlen = ipptr->ip_hl * 4;
-
-    tcpptr = (struct tcphdr *) ( (uint8_t *)ipptr + hlen);
-
-    assert(ipptr);
-    port1 = ntohs(tcpptr->source);
-    port2 = ntohs(tcpptr->dest);
-
-   // printf("port 1 = %i, port 2 = %i\n", port1, port2);
 
     sport1 = is_server_port(port1);
     sport2 = is_server_port(port2);
@@ -425,12 +412,6 @@ void get_colour(uint8_t color[3], int port, int protocol)
 }
 
 
-uint16_t getTotalLength(const ip_t *packet, uint32_t len)
-{
-    if (len<4)
-	return 0;
-    return *((uint16_t *)(packet+2));
-}
 
 
 
@@ -438,10 +419,9 @@ uint16_t getTotalLength(const ip_t *packet, uint32_t len)
 int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
 {
 
-    int sport = 0, dport = 0;
-    struct in_addr sourceip, destip;
     int hlen = 0;
     struct tcphdr *tcpptr = 0;
+    struct udphdr *udpptr = 0;
     uint32_t ts32;
     float start[3];
     float end[3];
@@ -451,7 +431,6 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
 
     assert(erfptr != NULL);
     assert(caplen > 0);
-
     
     ip_t *p = (ip_t *) erfptr->rec.eth.pload;
     ts32 = ts >> 32;
@@ -460,66 +439,62 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
     // expire old flows - once a second is often enough for now
     if(ts32-lastts > 0)
     {
-	printf("bling\n");
+	printf("bling: %i\n", ts32);
 	expire_flows(ts32);
     }
-    //-----------------------------------
-    // check if this is an ack
-    //printf("size %i\n", ntohs(p->ip_len)); 
-    
-    
-    // some of this is doubled up...work out why it didnt work before
-    // TODO
-    /*
-    struct tcphdr *t = 0;
-    int h;
-    h = p->ip_hl * 4;
 
+    lastts = ts32;
+
+    /*
+     * Ports are in the same place in the udp and tcp headers, but they
+     * should probably be seperated in case something changes, and to 
+     * allow new protocols to be included easy
+     */
     if(p->ip_p == 6)
     {
-	t = (struct tcphdr *) ( (uint8_t *)p + h);
+	hlen = p->ip_hl * 4;
+	tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
+	assert(tcpptr);
 
-	//printf("len %i, tcp %i, ip %i\n", ntohs(p->ip_len), t->doff*4, h);
-
-	if((ntohs(p->ip_len)) - (t->doff*4 + h) == 0)
-	{
-	    //printf("ack\n");
-	    return 0;
-	}
+	/* bail out if this packet has no data */
+	if((ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen) == 0)
+	    return 0; 
+	
+	tmpid.sourceport = ntohs(tcpptr->source);
+	tmpid.destport = ntohs(tcpptr->dest);
     }
-*/
-    //-----------------------------------
+    else if(p->ip_p == 17)
+    {
+	hlen = p->ip_hl * 4;
+	udpptr = (struct udphdr *) ((uint8_t *)p  + hlen);
+	assert(udpptr);
 
-    // get identifying information
-    hlen = p->ip_hl * 4;
-    tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
-    //tcpptr = (struct tcphdr *) (p  + hlen);
-    assert(tcpptr);
-
-    printf("len %i, tcp %i, ip %i\n", ntohs(p->ip_len), tcpptr->doff*4, hlen);//XXX
-
-    sport = ntohs(tcpptr->source);
-    dport = ntohs(tcpptr->dest);
-    sourceip = p->ip_src;
-    destip = p->ip_dst;
-
-    // populate start and end arrays
-    // also checks that we want this iface
-    if(get_start_pos(start, sourceip, erfptr->flags.iface) != 0)
-	return 0;
-    if(get_end_pos(end, destip, erfptr->flags.iface) != 0)
+	tmpid.sourceport = ntohs(udpptr->source);
+	tmpid.destport = ntohs(udpptr->dest);
+    }
+    else if(p->ip_p == 1)
+    {
+	tmpid.sourceport = 0;
+	tmpid.destport = 0;
+    }
+    else
 	return 0;
 
-    tmpid.sourceip = sourceip;
-    tmpid.destip = destip;
-    tmpid.sourceport = sport;
-    tmpid.destport = dport;
+    tmpid.sourceip = p->ip_src;
+    tmpid.destip = p->ip_dst;
 
 
     if ( flows.find(tmpid) == flows.end() ) // this is a new flow
     {
 	flow_info_t flow_info;
 	
+	// populate start and end arrays
+	// also checks that we want traffic from this iface
+	if(get_start_pos(start, tmpid.sourceip, erfptr->flags.iface) != 0)
+	    return 0;
+	if(get_end_pos(end, tmpid.destip, erfptr->flags.iface) != 0)
+	    return 0;
+
 	flow_info.id = id;
 	flow_info.time = ts32; 
 	flow_info.start[0] = start[0];
@@ -528,7 +503,9 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
 	flow_info.end[0] = end[0];
 	flow_info.end[1] = end[1];
 	flow_info.end[2] = end[2];
-	get_colour(flow_info.colour, get_port(p), p->ip_p);
+
+	get_colour(flow_info.colour, 
+		get_port(tmpid.sourceport, tmpid.destport), p->ip_p);
 	id++;
 
 	flows[tmpid] = flow_info;
@@ -546,7 +523,6 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
     if(send_new_packet(ts, current.id, current.colour, ntohs(p->ip_len)) !=0)
 	return 1;
 
-    lastts = ts32;
 
     return 0;
 }

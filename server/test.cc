@@ -1,3 +1,7 @@
+/*
+ * main loop(s) and the signal handlers may need looking at?
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +46,6 @@ char buffer[SCANSIZE];
 int                _fcs_bits = 32;
 
 int fdmax;
-//int new_fd;
 
 struct timeval starttime;
 struct timeval nowtime;
@@ -104,6 +107,8 @@ int main(int argc, char *argv[])
 	exit(-1);
     }
     */
+    
+    
     if(sigaction(SIGPIPE, &sigact, NULL) < 0) {
 	perror("sigaction");
 	exit(-1);
@@ -149,9 +154,11 @@ int main(int argc, char *argv[])
     //------- Connect RTClient ----------
     rtclient = create_rtclient(hostname,0);
     printf("Connected to data source: %s\n", hostname);
-    while(1)
+
+    while(1)// someone explain why i have 2 loops here...
     {
 	// loop till something breaks
+	
 	for(;;) 
 	{
 	    /* check for new clients */
@@ -184,8 +191,9 @@ int main(int argc, char *argv[])
 	    }
 	    
 	    // if sending fails, assume we just lost a client
-	    if(per_packet(erfptr, psize, ts/*, new_fd*/) != 0)
+	    if(per_packet(erfptr, psize, ts) != 0)
 		break;
+
 	}
 blah:
 	// any individual clean up could go here...maybe not useful?

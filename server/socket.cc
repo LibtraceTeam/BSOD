@@ -78,6 +78,7 @@ void add_fd(int fd)
     else
     {
 	tmp->next = clients;
+	clients->prev = tmp;
 	clients = tmp;
     }
 
@@ -86,18 +87,56 @@ void add_fd(int fd)
 /* Removes a given structure from the list of file descriptors */
 void remove_fd(struct client *tmp)
 {
-    printf("Removing client on socket %i\n", tmp->fd);
+    printf("Removing client on fd %i\n", tmp->fd);
 
     close(tmp->fd);
-    
-    if(tmp->next != NULL)
-	tmp->next->prev = tmp->prev;
 
-    if(tmp->prev != NULL)
-	tmp->prev->next = tmp->next;
-    else
+    if(tmp->next == NULL && tmp->prev == NULL) // only item
+    {
+	printf("first and only\n");
+	clients = NULL;
+	free(tmp);
+	return;
+    }
+
+    if(tmp->next != NULL && tmp->prev == NULL) // first item
+    {
+	tmp->next->prev = NULL;
 	clients = tmp->next;
+	free(tmp);
+	return;
+    }
+    
+    if(tmp->next == NULL && tmp->prev != NULL) // last item
+    {
+	tmp->prev->next = NULL;
+	free(tmp);
+	return;
 
+    }
+
+    if(tmp->next != NULL && tmp->prev != NULL) // middle item
+    {
+	tmp->next->prev = tmp->prev;
+	tmp->prev->next = tmp->next;
+	free(tmp);
+	return;
+    }
+    /*
+    if(tmp->next != NULL || tmp->prev != NULL)
+    {
+	if(tmp->next != NULL)
+	    tmp->next->prev = tmp->prev;
+	if(tmp->prev != NULL)
+	    tmp->prev->next = tmp->next;
+    }
+    ////////////////////
+    else if(tmp->next == NULL && tmp->prev == NULL)
+    {
+	printf("first and only (SHOULD)\n");
+	clients = tmp->next;
+    }
+*/
     free(tmp);
 }
 
@@ -131,7 +170,7 @@ int bind_tcp_socket(int listener, int port)
 {
     struct sockaddr_in myaddr;     // server address
     
-    assert(port > 0); // care is less than 1024?
+    assert(port > 0); // care if it is less than 1024?
     assert(listener >= 0);// starts at 0? 
     
     myaddr.sin_family = AF_INET;
@@ -180,6 +219,7 @@ int check_clients(bool wait)
 	}
     }
 
+    /* if listen_socket is in the set, we have a new client */
     if (FD_ISSET(listen_socket, &read_fds)) 
     {
 	// handle new connections
@@ -213,7 +253,7 @@ int send_kill_flow(uint32_t id)
     update.type = 0x02;
     update.id = id;
 
-    // send to all clients 
+   // send to all clients 
     while(tmp != NULL)
     {
 	if(send(tmp->fd, &update, sizeof(struct flow_remove_t), 0) 

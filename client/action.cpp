@@ -161,7 +161,9 @@ void CActionHandler::ToggleGhostMode()
 
 void CActionHandler::Screenshot()
 {
-    CTextureManager::tm.SaveScreenshot("screenshot.png");
+    char buffer[1024];
+    snprintf(buffer,sizeof(buffer),"screenshot-%u.png",(unsigned int)time(NULL));
+    CTextureManager::tm.SaveScreenshot(buffer);
 }
 
 void CActionHandler::ToggleDebugDisplay()

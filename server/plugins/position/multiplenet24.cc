@@ -27,11 +27,11 @@
 #define NETCOUNT 50  
 
 
-/**
- * This is used when you have a B-class or /16 CIDR network you wish you
- * visualalise on one side. The first two octets are the same, so the last two
- * octets are used for placement.  One dimension is based on the octet, the
- * other is based on the last octet.
+/** 
+ * This is used if you have multiple C-class or /24 CIDR networks you wish
+ * to visualise on one side. Different networks are spread across the 
+ * vertical axis, and the last octect in each address is used to determine
+ * the horizontal position
  */
 
 uint32_t nets[NETCOUNT] = {0};

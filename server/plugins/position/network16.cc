@@ -23,8 +23,8 @@
 /**
  * This is used when you have a B-class or /16 CIDR network you wish you
  * visualalise on one side. The first two octets are the same, so the last two
- * octets are used for placement.  One dimension is based on the octet, the
- * other is based on the last octet.
+ * octets are used for placement.  One dimension is based on the third octet, 
+ * the other is based on the last octet.
  */
 void mod_get_position(float coord[3], struct in_addr ip) {
 

@@ -124,6 +124,8 @@ public:
 	virtual void SetWireframe(bool w);
 	virtual void SetBackfaceCull(bool b);
 	virtual void SetDepthTest(bool on);
+
+    virtual void Screenshot(vector<byte> &buf, uint32 &w, uint32 &h);
 };
 
 #endif

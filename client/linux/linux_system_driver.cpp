@@ -39,22 +39,27 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 		bool fullScreen, 
 		DisplayType type)
 {
-	if(type != DISPLAY_OPENGL)
-		throw CException("Unknown display type requested!");
-	
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );	
-	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-	
-	/* The mouse isn't much use unless we have a display for reference */
-    if ( SDL_SetVideoMode(width, height, 0, SDL_OPENGL) == NULL ) {
-		throw CException("Couldn't set video mode!");
-//        SDL_GetError()
+    int flags = SDL_OPENGL;
+
+    if(type != DISPLAY_OPENGL)
+	throw CException("Unknown display type requested!");
+
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );	
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
+
+    if(fullScreen)
+	flags |= SDL_FULLSCREEN;
+
+    /* The mouse isn't much use unless we have a display for reference */
+    if ( SDL_SetVideoMode(width, height, 0, flags) == NULL ) {
+	throw CException("Couldn't set video mode!");
+	//        SDL_GetError()
     }
 
-	CGLDisplayManager *gl = new CGLDisplayManager;
-	gl->WindowResized(width, height);
+    CGLDisplayManager *gl = new CGLDisplayManager;
+    gl->WindowResized(width, height);
 
-	return gl;
+    return gl;
 }
 
 int CLinuxSystemDriver::RunMessageLoop()

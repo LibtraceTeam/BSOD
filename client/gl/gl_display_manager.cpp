@@ -740,3 +740,17 @@ void CGLDisplayManager::SetBackfaceCull(bool b)
 	else
 		glDisable(GL_CULL_FACE);
 }
+
+void CGLDisplayManager::Screenshot(vector<byte> &buf, uint32 &w, uint32 &h)
+{
+    int ViewPort[4];
+    
+    glGetIntegerv(GL_VIEWPORT, ViewPort);
+
+    w = ViewPort[2];
+    h = ViewPort[3];
+    
+    buf.resize(w * h * 3);
+
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, buf.begin());
+}

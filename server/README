@@ -168,6 +168,12 @@ options: showcontrol	type: integer
     Set it to 0 to hide these packets. This only applies to TCP, and 
     overrides the showdata and shownondata options. Defaults to 1.
 
+option: blacklistdir	type: string
+    Specifies the directory where the blacklist information should be stored.
+    This is used so that it can be reloaded at a later date without having
+    to be regenerated. Blacklist info can be used to show/hide 'legitimate'
+    traffic. Defaults to blist/ based off the base directory.
+
 
 
 

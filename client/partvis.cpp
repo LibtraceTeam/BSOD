@@ -784,7 +784,7 @@ void CPartVis::GCPartFlows()
 
 void CPartVis::BillboardBegin()
 {
-	float modelview[16];
+	/*float modelview[16];
 
 	// Save current view:
 	glPushMatrix();
@@ -803,10 +803,10 @@ void CPartVis::BillboardBegin()
 				modelview[i*4*j] = 0.0;
 		}
 	}
-	glLoadMatrixf( modelview );
+	glLoadMatrixf( modelview );*/
 }
 
 void CPartVis::BillboardEnd()
 {
-	glPopMatrix();
+	//glPopMatrix();
 }

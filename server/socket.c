@@ -27,7 +27,7 @@ struct flow_update_t {
 
 struct pack_update_t {
     unsigned char type;
-    double ts;
+    uint64_t ts;
     uint32_t id;
     char colour[3];
     uint16_t size;
@@ -116,7 +116,6 @@ int send_kill_flow(int new_fd, uint32_t id)
 //------------------------------------------------------------------
 int send_new_flow(int new_fd, float start[3], float end[3], uint32_t id)
 {
-
     struct flow_update_t update;
     update.type = 0x00;
     update.x1 = start[0];
@@ -126,6 +125,8 @@ int send_new_flow(int new_fd, float start[3], float end[3], uint32_t id)
     update.y2 = end[1];
     update.z2 = end[2];
     update.count = id;
+
+    //printf("----sending flow %i\n", id);
 
     if(send(new_fd, &update, sizeof(struct flow_update_t), 0) 
 	    != sizeof(struct flow_update_t )){
@@ -137,7 +138,7 @@ int send_new_flow(int new_fd, float start[3], float end[3], uint32_t id)
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(int new_fd, double ts, uint32_t id, char colour[3],uint16_t size)
+int send_new_packet(int new_fd, uint64_t ts, uint32_t id, char colour[3],uint16_t size)
 {
 
     struct pack_update_t update;
@@ -148,6 +149,8 @@ int send_new_packet(int new_fd, double ts, uint32_t id, char colour[3],uint16_t 
     update.colour[1] = colour[1];
     update.colour[2] = colour[2];
     update.size = size;
+
+    //printf("----sending packet %i\n", id);
 
     if(send(new_fd, &update, sizeof(struct pack_update_t), 0) 
 	    != sizeof(struct pack_update_t )){

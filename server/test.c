@@ -41,6 +41,11 @@ int                _fcs_bits = 32;
 int fdmax;
 int new_fd;
 
+struct timeval starttime;
+struct timeval nowtime;
+
+uint32_t ts32 = 0;
+uint32_t startts32 = 0;
 
 
 //---------------------------------------------------
@@ -61,8 +66,12 @@ int main(int argc, char *argv[])
     //static char* hostname = "/scratch/bcj3/slammer.trace";
     int psize;
     int status = 0;
-    uint32_t ts;
+    uint64_t ts;
     dag_record_t *erfptr = 0;
+
+
+    gettimeofday(&starttime, 0); // XXX
+    
 
     // setup signal handlers
     sigact.sa_handler = sig_hnd;
@@ -86,7 +95,8 @@ int main(int argc, char *argv[])
     }
 
     if (setjmp(jmpbuf))
-	goto goodbye;
+	//goto goodbye;
+	goto blah;
 
     //-------------------------------------------------------
     // do some command line stuff for ports and things
@@ -130,6 +140,7 @@ int main(int argc, char *argv[])
     
     while(1)
     {
+
 	//-------Setup listen socket-----------
 	listen_socket = setup_listen_socket(); // set up socket
 	bind_tcp_socket(listen_socket, port); // bind and start listening
@@ -146,11 +157,11 @@ int main(int argc, char *argv[])
 	}
 	printf("Received connection from: %s\n",inet_ntoa(remoteaddr.sin_addr));
 
-
 	//------- Connect RTClient ----------
 	rtclient = create_rtclient(hostname,0);
 	printf("Data source Connected to: %s\n", hostname);
 
+	init_flow_hash(new_fd);
 	// loop till something breaks
 	for(;;) 
 	{
@@ -162,17 +173,35 @@ int main(int argc, char *argv[])
 	    }
 	    erfptr = (dag_record_t *)buffer;
 	    //p = (ip_t *) erfptr->rec.eth.pload;
-	    ts = erfptr->ts>>32;
-	    if(per_packet(erfptr, psize, ts, new_fd) != 0)
+	    ts = erfptr->ts;//i dont need to pass this btw
+
+	    ////////////////////
+	    if(startts32 == 0)
+		startts32 = ts >> 32;
+
+	    ts32 = ts >> 32;
+	    gettimeofday(&nowtime, 0);
+
+	    //printf("now %li, start %li -- now %i, start %i\n... %li vs %i", nowtime.tv_sec ,starttime.tv_sec,ts32 ,startts32,nowtime.tv_sec - starttime.tv_sec, ts32 - startts32) ;
+
+	    while( ((nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
+	    {
+		usleep(10);	
+		gettimeofday(&nowtime, 0);
+
+	    }
+	    
+	    ////////////////////////
+	    if(per_packet(erfptr, psize, ts/*, new_fd*/) != 0)
 		break;
 	}
-
+blah:
 	printf("Cleaning up...\n");
 	destroy_rtclient(rtclient);
 	empty_flows();
 	close(listen_socket);
     }
-goodbye:
+//goodbye:
 	printf("Destroying RTClient...\n");
 	destroy_rtclient(rtclient);
 	printf("Removing flow information...\n");

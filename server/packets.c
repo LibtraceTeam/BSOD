@@ -26,6 +26,8 @@
 
 #include "packets.h"
 #include "socket.h"
+#include <glib.h>
+
 
 #define LENGTH 20;
 #define SHOW_SRC 1
@@ -35,6 +37,7 @@
 typedef struct ip ip_t;
 uint32_t lastts = 0;
 uint32_t count = 0;
+int total = 0;//XXX
 
 struct quaduple_t {
     struct in_addr sourceip;
@@ -47,6 +50,9 @@ struct quaduple_t {
     struct quaduple_t *next;
 } *head = NULL;
 
+
+GHashTable *flow_hash = NULL;
+int new_fd;
 
 typedef enum counters {
     TCP = 0,
@@ -81,6 +87,77 @@ static unsigned char countercolours[][3] = {
     {255,145,  0}, /* WINDOWS orange		*/
     {255,192,203}  /* OTHER   pink		*/
 };
+
+
+
+guint id_hash(gconstpointer id)
+{
+    
+    const struct quaduple_t *p1 = (struct quaduple_t *)id;
+    return (p1->destip.s_addr + p1->sourceip.s_addr 
+		+ p1->sourceport + p1->destport) % 2000;
+
+    /*
+    const struct quaduple_t *p1 = (struct quaduple_t *)id;
+
+    return p1->id;
+    */
+}
+
+
+gboolean id_equal_func(gconstpointer a, gconstpointer b)
+{
+    
+    const struct quaduple_t *p1 = (struct quaduple_t *)a;
+    const struct quaduple_t *p2 = (struct quaduple_t *)b;
+
+    if (p1->sourceip.s_addr != p2->sourceip.s_addr)
+	return FALSE;	
+    if (p1->destport != p2->destport)
+	return FALSE;	
+    if (p1->destip.s_addr != p2->destip.s_addr)
+	return FALSE;	
+    if (p1->sourceport != p2->sourceport)
+	return FALSE;	
+
+    return TRUE;
+/*
+    const struct quaduple_t *p1 = (struct quaduple_t *)a;
+    const struct quaduple_t *p2 = (struct quaduple_t *)b;
+
+    return (p1->id == p2->id);
+    */
+}
+
+
+gboolean expire_flow(gpointer key, gpointer value, gpointer user_data)
+{
+    const struct quaduple_t *p1 = (struct quaduple_t *)key;
+    const uint32_t *time = (uint32_t *) user_data;
+
+    //printf("time = %i\n", *time);
+    
+    if(*time - p1->time >= 5)
+    {
+	printf("removing flow %i\n", p1->id);
+	send_kill_flow(new_fd, p1->id);
+	free(p1);
+	return TRUE;
+    }
+    
+    return FALSE;
+}
+
+void init_flow_hash(int fd)
+{
+    assert(flow_hash == NULL);
+    flow_hash = g_hash_table_new(id_hash, id_equal_func);
+
+    new_fd = fd;
+}
+
+
+
 
 
 
@@ -390,53 +467,36 @@ int get_end_pos(float end[3], struct in_addr dest, int iface)
 
 
 //-----------------------------------------------------------
-int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint32_t ts, int new_fd)
+
+int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts/*, int new_fd*/)
 {
     ip_t *p = (ip_t *) erfptr->rec.eth.pload;
     int sport = 0, dport = 0;
     struct in_addr sourceip, destip;
     int hlen = 0;
     struct tcphdr *tcpptr = 0;
-    struct quaduple_t *tmp;
-    struct quaduple_t *prev = NULL;
-    uint32_t tmpid;
+    struct quaduple_t *tmp, *saved;
+    //struct quaduple_t *prev = NULL;
+    //uint32_t tmpid;
+    uint32_t ts32;
+    uint32_t *tsptr;
+
+    ts32 = ts >> 32;
+    tsptr = &ts32;
 
     // hardocded hacks
     //uint16_t size = 10; ////
 
     assert(erfptr != NULL);
     assert(caplen > 0);
-    assert(ts-lastts >= 0);
+    assert(ts32-lastts >= 0);
 
     
     // check for expired flows every second
-    if(ts-lastts > 0)
-    {
-	tmp = head;
-	while(tmp != NULL)
-	{
-	    if(ts - tmp->time>= 5)
-	    {
-		tmpid = tmp->id;
-		//printf("removing flow= %i, %d %d\n", tmp->id, tmp->time, ts);
 
-		if(prev != NULL)
-		    prev->next = tmp->next;
-		else
-		{
-		    prev = tmp->next;
-		    head = prev;
-		}
-		free(tmp);
-		tmp = prev;
-		if(send_kill_flow(new_fd, tmpid) != 0)
-		    return 1;
-	    }
-	    prev = tmp;
-	    tmp = tmp->next;
-	}
-    }
-
+    if(ts32 - lastts > 0)
+	g_hash_table_foreach_remove (flow_hash, expire_flow, tsptr);
+    
     
 
     hlen = p->ip_hl * 4;
@@ -464,6 +524,7 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint32_t ts, int new
     }
 
     // look for a match
+    /*
     for(tmp=head;tmp;tmp=tmp->next) {
 	if (tmp->sourceip.s_addr != sourceip.s_addr)
 	    continue;
@@ -476,8 +537,10 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint32_t ts, int new
 	//printf("found packet id = %i\n", tmp->id);
 	break;
     }
+*/
 
-    if (tmp == NULL) {
+    
+    //if (tmp == NULL) {
 	float start[3];
 	float end[3];
 
@@ -494,30 +557,42 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint32_t ts, int new
 	    return 0;
 	}
 
-	/* We didn't find it */
+	// We didn't find it 
 	tmp = malloc(sizeof(struct quaduple_t));
 	tmp->sourceip=sourceip;
 	tmp->destip=destip;
 	tmp->sourceport=sport;
 	tmp->destport=dport;
 	tmp->next=head;
-	tmp->id = count;
-	tmp->time = ts;
+	//tmp->id = count;
+	tmp->time = ts32;
 
 	get_colour(tmp->colour, get_port(p), p->ip_p);
 
-	head=tmp;
+	//head=tmp;
+	saved = g_hash_table_lookup (flow_hash, tmp);
 
-
-	// send NEW FLOW thing
-	//printf("flow = %i\n", count);
-	if(send_new_flow(new_fd, start, end, count) != 0)
-	    return 1;
-	count++;
-    }
-    tmp->time = ts;// update with time we saw this packet
-    //printf("packet: %i\n", tmp->id);
-    if(send_new_packet(new_fd, ts, tmp->id, tmp->colour, caplen) !=0)
+	if(saved == NULL)
+	{
+	    printf("CREATING FLOW %i\n", count);
+	    tmp->id = count;
+	    g_hash_table_insert ( flow_hash, tmp, tmp);
+	    
+	    if(send_new_flow(new_fd, start, end, count) != 0)
+		return 1;
+	    count++;
+	    total++;
+	    //printf("current flows = %i\n", total);
+	    saved = tmp;//just for now
+	}
+    //}
+    //tmp->time = ts32;// update with time we saw this packet
+    //printf("packet: %i\n", saved->id);
+    if(send_new_packet(new_fd, ts, saved->id, saved->colour, caplen) !=0)
 	return 1;
+
+    //blah = &ts32;
+    //expire_flow(saved, saved, blah);
+    
     return 0;
 }

@@ -269,8 +269,10 @@ int main(int argc, char *argv[])
 
 			/* get a packet, and process it */
 			if((psize = trace_read_packet(trace, &packet)) <= 0) {
+			    if (psize < 0) {
 				perror("libtrace_read_packet");
-				break;
+			    }
+			    break;
 			}
 
 			// if we have a filter, and if the filter doesn't match, 

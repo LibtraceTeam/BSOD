@@ -9,8 +9,12 @@ LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfi
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o
 
+PREFIX=/usr/local/bsod
 
-.PHONY: all clean distclean install depend plugins
+BINDIR=$(PREFIX)/bin
+CONFDIR=$(PREFIX)/etc
+LIBDIR=$(PREFIX)/plugins
+.PHONY: all clean distclean install depend plugins instlal-init
 
 all: libconfig $(BINS) plugins 
 
@@ -34,4 +38,17 @@ plugins:
 
 plugins-clean:
 	cd plugins; make clean; cd ..
+
+install:
+	mkdir -p $(BINDIR)
+	mkdir -p $(CONFDIR)
+	mkdir -p $(LIBDIR)
+
+	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server
+	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
+
+	cd plugins; make install; cd ..
+
+install-init:
+	install -m 755 ./bsod_server.init /etc/init.d/bsod_server
 # vim: noet ts=8 sw=8

@@ -59,12 +59,13 @@ uint32_t startts32 = 0;
 int background = 0;
 char *pidfile = 0;
 
+char *basedir = 0;
 char *filterstring = 0;
 char *colourmod = 0;
 char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
-char *configfile = "./bsod_server.config";
+char *configfile = "/usr/local/bsod/etc/bsod_server";
 static char* uri = 0; 
 
 int port = 32500;
@@ -291,6 +292,7 @@ void set_defaults() {
 	rightpos = 0;
 	leftpos = 0;
 	dirmod = 0;
+	basedir = 0;
 	loop = 0;
 	shownondata = 0;
 	showdata = 1;
@@ -298,6 +300,8 @@ void set_defaults() {
 }
 
 void fix_defaults() {
+	if (!basedir)
+		basedir=strdup("/usr/local/bsod/");
 	if (!colourmod)
 		colourmod=strdup("plugins/colour/colours.so");
 	if (!leftpos)
@@ -308,6 +312,7 @@ void fix_defaults() {
 		dirmod=strdup("plugins/direction/interface.so");
 	if (!pidfile)
 		pidfile=strdup("/var/run/bsod_server.pid");
+
 	
 }
 
@@ -321,6 +326,7 @@ void do_configuration(int argc, char **argv) {
 	config_t main_config[] = {
 		{"pidfile", TYPE_STR|TYPE_NULL, &pidfile},
 		{"background", TYPE_INT|TYPE_NULL, &background},
+		{"basedir", TYPE_STR|TYPE_INT, &basedir},
 		{"source", TYPE_STR|TYPE_NULL, &uri},
 		{"listenport", TYPE_INT|TYPE_NULL, &port},
 		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
@@ -370,38 +376,65 @@ void do_configuration(int argc, char **argv) {
 
 static void load_modules() {
 	char *error = 0;
+	char tmp[4096];
 
 	//------- Load up modules -----------
-	colourhandle = dlopen(colourmod,RTLD_LAZY);
-	assert(colourhandle);
+	
+	snprintf(tmp,4096,"%s%s",basedir,colourmod);
+	colourhandle = dlopen(tmp,RTLD_LAZY);
+	if (!colourhandle) {
+		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		assert(colourhandle);
+	}
 
 	modptrs.colour = (colfptr) dlsym(colourhandle, "mod_get_colour");
 	if ((error = dlerror()) != NULL) {
-		printf("%s\n",error);
+		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.colour);
 	}
 
-	lefthandle = dlopen(leftpos,RTLD_LAZY);
-	assert(lefthandle);
+
+	
+	snprintf(tmp,4096,"%s%s",basedir,leftpos);
+	lefthandle = dlopen(tmp,RTLD_LAZY);
+	if (!lefthandle) {
+		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		assert(lefthandle);
+	}
+
 	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
 	if ((error = dlerror()) != NULL) {
-		printf("%s\n",error);
+		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.left);
 	}
 
-	righthandle = dlopen(rightpos,RTLD_LAZY);
-	assert(righthandle);
+
+	
+	snprintf(tmp,4096,"%s%s",basedir,rightpos);
+	righthandle = dlopen(tmp,RTLD_LAZY);
+	if (!righthandle) {
+		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		assert(righthandle);
+	}
+	
 	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
 	if ((error = dlerror()) != NULL) {
-		printf("%s\n",error);
+		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.right);
 	}
 
-	dirhandle = dlopen(dirmod,RTLD_LAZY);
-	assert(dirhandle);
+
+	
+	snprintf(tmp,4096,"%s%s",basedir,dirmod);
+	dirhandle = dlopen(tmp,RTLD_LAZY);
+	if (!dirhandle) {
+		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		assert(dirhandle);
+	}
+
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = dlerror()) != NULL) {
-		printf("%s\n",error);
+		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.direction);
 	}
 

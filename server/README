@@ -94,7 +94,8 @@ option: listenport	type: integer
 
 option: filter		type: string
     BPF style filter to apply to the source URI. Works on any URI but is only
-    tested on ethernets.
+    tested on ethernets. Try the tcpdump man page for a handy explanation
+    of BPF filters.
 
 option: colour_module	type: string
     Specify the shared library that should be loaded to supply the colour

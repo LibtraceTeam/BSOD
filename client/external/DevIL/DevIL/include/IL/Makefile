@@ -16,7 +16,7 @@ SHELL = /bin/sh
 srcdir = .
 top_srcdir = ../..
 
-prefix = /root/FOO/bsod/client/external/DevIL/DevIL/..
+prefix = /home/sam/Projects/bsod/client/external/DevIL/DevIL/..
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
@@ -45,7 +45,7 @@ AUTOCONF = autoconf
 AUTOMAKE = automake
 AUTOHEADER = autoheader
 
-INSTALL = /usr/bin/install -c
+INSTALL = /bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_SCRIPT = ${INSTALL}
@@ -75,12 +75,12 @@ LIBILUT_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer    
 LIBILUT_WIN32LIBPATH = 
 LIBILU_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer                -fexpensive-optimizations
 LIBIL_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer               -fexpensive-optimizations
-LIBJPG = 
-LIBLCMS = 
-LIBMNG = 
+LIBJPG = -ljpeg
+LIBLCMS = -llcms
+LIBMNG = -lmng
 LIBPNG = -lpng
 LIBSDL = 
-LIBTIFF = 
+LIBTIFF = -ltiff
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 MAINT = #

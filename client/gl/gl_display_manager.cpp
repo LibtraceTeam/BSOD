@@ -43,12 +43,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $Id$
 #include "stdafx.h"
 
-#include "gl_display_manager.h"
-
 // Windows OpenGL needs windows.h to be included
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
+#include "gl_display_manager.h"
+
+
 
 #include <GL/gl.h>
 #include <GL/glu.h>

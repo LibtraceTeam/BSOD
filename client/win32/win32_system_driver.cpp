@@ -99,11 +99,11 @@ int CWin32SystemDriver::RunMessageLoop()
 			// Draw The Scene.  Watch For ESC Key And Quit Messages From DrawGLScene()
 			if (active)								// Program Active?
 			{
-				//POINT temp_mouse;
-				/*GetCursorPos(&temp_mouse);
-				SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);*/
-				//world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
-				//world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
+				POINT temp_mouse;
+				GetCursorPos(&temp_mouse);
+				SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
+				world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
+				world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
 				
 				carry_time = TimerGetTime ();			// Get The Tick Count
 				world.Update ((carry_time - start_time)/1000);	// Update The Counter

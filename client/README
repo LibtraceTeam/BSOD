@@ -98,13 +98,18 @@ visualizations of large amounts of traffic more readable. The default values
 are optimal for the University of Waikato capture, for other networks these 
 values should be changed appropiately.
 
+
+option: network_host	type: string
+Specify the host running the bsod server that will provide data to this 
+client. Takes a string of the form "host:port". The server must be running
+and connected to its data source before the client connects to the server.
+
 option:	start_location	type: {real, real, real}
 start_location is a triple specifying the X, Y and Z coordinates that the
 camera should initially be positioned at. Pressing the 'H' key while the
 client is running will display the current location, which can be useful
 for getting the coordinates of the position you would like to have the
 camera start at.
-
 
 option:	pitch			type: real
 Specify the pitch the camera should have when at its initial position.
@@ -173,6 +178,9 @@ not implemented.
 option: particle		type: string
 Sets the path and filename of the alpha texture to use for the particles.
 
+option: matrix_mode		type: string
+Just for fun, changes the images used as particles to be characters from
+a Matrix style font. Set to "yes" to enable, "no" to disable.
 
 option: do_gcc			type: string
 Every 10 minuted a garbage collection will be performed to throw away old,
@@ -181,10 +189,6 @@ collector runs. Setting this option to "no" may be a good idea if you have
 a lot of memory and periodically restart the client anyway.
 
 
-option: network_host	type: string
-Specify the host running the bsod server that will provide data to this 
-client. Takes a string of the form "host:port". The server must be running
-and connected to its data source before the client connects to the server.
 
 
 

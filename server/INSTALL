@@ -21,7 +21,7 @@ tar xzvf bsod-server-x.y.z.tar.gz
 cd bsod-x.y.z
 cd server
 make
-(as root - make sure the config file is correct BEFORE doing this!)
+(as root )
 make install 
 
 

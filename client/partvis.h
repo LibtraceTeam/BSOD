@@ -1,4 +1,20 @@
 /*
+ * This file is part of bsod-client
+ *
+ * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Authors: Sam Jansen
+ *	    Sebastian Dusterwald
+ *          
+ * All rights reserved.
+ *
+ * This code has been developed by the University of Waikato WAND 
+ * research group. For further information please see http://www.wand.net.nz/
+ *
+ * bsod-client includes software developed by Sam Jansen and Jesse Baker 
+ * (see http://www.wand.net.nz/~stj2/bung).
+ */
+
+/*
 Copyright (c) Sam Jansen and Jesse Baker.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

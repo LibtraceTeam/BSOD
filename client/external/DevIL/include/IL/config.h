@@ -14,10 +14,10 @@
 /* #undef IL_NO_GIF */
 /* #undef IL_NO_ICO */
 /* #undef IL_NO_JPG */
-/* #undef IL_NO_LCMS */
+#define IL_NO_LCMS 1
 /* #undef IL_NO_LIF */
 /* #undef IL_NO_MDL */
-/* #undef IL_NO_MNG */
+#define IL_NO_MNG 1
 /* #undef IL_NO_PCD */
 /* #undef IL_NO_PCX */
 /* #undef IL_NO_PIC */
@@ -40,7 +40,7 @@
 /* #undef ILUT_USE_ALLEGRO */
 /* #undef ILUT_USE_DIRECTX8 */
 #define ILUT_USE_OPENGL 1
-#define ILUT_USE_SDL 1
+/* #undef ILUT_USE_SDL */
 /* #undef ILUT_USE_WIN32 */
 
 

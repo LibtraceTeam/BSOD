@@ -16,7 +16,7 @@ SHELL = /bin/sh
 srcdir = .
 top_srcdir = ../..
 
-prefix = /home/sam/Projects/bsod/client/external/DevIL/DevIL/..
+prefix = /home/stj2/bsod/client/external/DevIL/DevIL/..
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
@@ -45,7 +45,7 @@ AUTOCONF = autoconf
 AUTOMAKE = automake
 AUTOHEADER = autoheader
 
-INSTALL = /bin/install -c
+INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_SCRIPT = ${INSTALL}
@@ -66,7 +66,7 @@ DLLTOOL = dlltool
 ECHO = echo
 EXEEXT = 
 HALLEGRO = 
-HSDL = -I/usr/include/SDL -D_REENTRANT
+HSDL = 
 LIBALLEGRO = 
 LIBGDI32 = 
 LIBGIF = 
@@ -76,8 +76,8 @@ LIBILUT_WIN32LIBPATH =
 LIBILU_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer                -fexpensive-optimizations
 LIBIL_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer               -fexpensive-optimizations
 LIBJPG = -ljpeg
-LIBLCMS = -llcms
-LIBMNG = -lmng
+LIBLCMS = 
+LIBMNG = 
 LIBPNG = -lpng
 LIBSDL = 
 LIBTIFF = -ltiff
@@ -94,7 +94,7 @@ VERSION = 1.6.5
 VERSIONINFO = -version-info 1:165:0
 X_CFLAGS =  -I/usr/X11R6/include
 allegro_config = no
-sdl_config = yes
+sdl_config = no 
 
 noinst_HEADERS = ilut_allegro.h   ilut_internal.h  ilut_opengl.h                   ilut_states.h
 

@@ -2,6 +2,7 @@ Bulding bsod-client.
 
 Install:
  * libsdl-devel
+ * SDL_net-devel
  * zlib-devel
 
 Make sure OpenGL of some sort is also installed, you may need to install
@@ -10,7 +11,7 @@ installed.
 
 Build DevIL and lua:
  * DevIL:
-    cd external/DevIL
+    cd external/DevIL/DevIL
     ./configure --prefix=`pwd`/.. --enable-static=yes
     make clean install
     cd ../..

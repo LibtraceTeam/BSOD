@@ -34,6 +34,14 @@
 #define _POSITION_H
 
 #include <netinet/in.h>
+/** mod_get_position
+ * @param[out] coord[3] The 3d coordinate of the position (x,y,z), z is ignored.
+ * @param[in] ip 	The IP address.
+ *
+ * This function should take an ip address and return a position on a 2d plane.
+ * x and y are stored in coord[0] and coord[1].  coord[2] is ignored.
+ * coord[0] and coord[1] must be in the range -10..10.
+ */
 extern "C" void mod_get_position(float coord[3], struct in_addr ip);
 
 #endif // _POSITION_H

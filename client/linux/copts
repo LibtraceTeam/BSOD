@@ -1,6 +1,7 @@
 #!/bin/bash
-echo "-Wno-non-template-friend -I/usr/include/stlport \
+echo -n "-Wno-non-template-friend -I/usr/include/stlport \
 	  -I./external/DevIL/include -I./external/HawkNL/include \
 	  -I./external/ode/include -I./external/OpenAL/include \
           -I/usr/lib/opengl/nvidia/include -I./external \
-          -Iexternal/enet/include -DLINUX"
+          -Iexternal/enet/include -DLINUX " 
+sdl-config --cflags

@@ -14,6 +14,12 @@
 
 #include "SDL/SDL.h"
 
+#include "SDL/SDL_syswm.h"//added to force window position - Brendon
+#include <getopt.h>
+
+int Xpos = 0;
+int Ypos = 0; //again a lazy hack - Brendon
+
 int main(int argc, char *argv[])
 {
 	/* Initialize the SDL library (starts the event loop) */
@@ -21,6 +27,18 @@ int main(int argc, char *argv[])
         fprintf(stderr,
                 "Couldn't initialize SDL: %s\n", SDL_GetError());
         exit(1);
+    }
+    /* Do getopt stuff for window position - Brendon */
+    int opt;
+    while( (opt = getopt(argc, argv, "x:y:")) != -1)
+    {
+	switch(opt)
+	{
+	    case 'x': Xpos = atoi(optarg); break;
+	    case 'y': Ypos = atoi(optarg); break;
+	    default: fprintf(stderr, "Usage: %s [-x pos] [-y pos]\n", argv[0]);
+		     exit(1);
+	};
     }
 	
 	/* Set the title bar in environments that support it */
@@ -55,6 +73,20 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 	throw CException("Couldn't set video mode!");
 	//        SDL_GetError()
     }
+
+    /* Begin Brendon hack for window positioning */
+    if(!fullScreen)
+    {
+	SDL_SysWMinfo info;
+	// ignore the checking that we should be doing here...
+	SDL_VERSION(&info.version);
+	SDL_GetWMInfo(&info);
+
+	info.info.x11.lock_func();
+	XMoveWindow(info.info.x11.display, info.info.x11.wmwindow, Xpos, Ypos);
+	info.info.x11.unlock_func();
+    }
+    /* End Brendon hack */
 
     CGLDisplayManager *gl = new CGLDisplayManager;
     gl->WindowResized(width, height);

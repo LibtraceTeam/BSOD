@@ -127,9 +127,10 @@ void expire_flows(uint32_t time)
 
 //--------------------------------------------------------
 
-/* This iterator was causing problems when using the '->' operator 
- * rather than (*flow_iterator).
- */
+/*
+ * When a new client connects, send them information about every flow that is
+ * in progress.
+ */ 
 int send_flows(int fd)
 {
 	flow_lru_t::const_iterator flow_iterator;
@@ -145,39 +146,13 @@ int send_flows(int fd)
 	return 0;
 }
 
-static int  is_server_port(int port) {
-	if (port <= 0)
-		return -1;
-	assert(port > 0);
-	if (port < 1024 || port == 6667) // hack to get irc
-		return port;
-	return 0;
-}
-
 //------------------------------------------------------------
-short get_port(int port1, int port2)
+short get_port(uint8_t protocol, uint16_t source, uint16_t dest)
 {
-	int sport1 = 0, sport2 = 0;
+    if(trace_get_server_port(protocol, source, dest) == USE_DEST)
+	return dest;
 
-	sport1 = is_server_port(port1);
-	sport2 = is_server_port(port2);
-
-	if(sport1 & sport2) {
-		if(sport1 == 6667)
-			return sport1;
-		if(sport2 == 6667)
-			return sport2;
-
-		if (sport1 < sport2)
-			return port1;
-		else
-			return port2;
-	}
-	if(sport1)
-		return port1;
-	if(sport2)
-		return port2;
-	return 0;
+    return source;
 }
 	
 //-------------------------------------------------------------
@@ -249,11 +224,10 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 
 	lastts = ts32;
 
+
 	/*
-	 * Ports are in the same place in the udp and tcp headers, but they
-	 * should probably be seperated in case something changes, and to 
-	 * allow new protocols to be included easy
-	 */
+	 * Find the port numbers in the packet
+	 */ 
 	if(p->ip_p == 6)
 	{
 		hlen = p->ip_hl * 4;
@@ -335,7 +309,8 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		flow_info.end[2] = end[2];
 
 		modptrs->colour(flow_info.colour, 
-				get_port(tmpid.sourceport, tmpid.destport), 
+				get_port(p->ip_p, tmpid.sourceport, 
+				    tmpid.destport), 
 				p->ip_p);
 		
 		id++;

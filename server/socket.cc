@@ -48,6 +48,7 @@ struct flow_remove_t {
 	uint32_t id;
 } __attribute__((packed));
 
+/* a packet can be any one of these types */
 union pack_union {
 	struct flow_update_t flow;
 	struct pack_update_t packet;
@@ -133,7 +134,7 @@ int setup_listen_socket()
 		exit(1);
 	}
 
-	// reset the set and add the listening socket to it, we'll need it later
+	// reset the set and add the listening socket to it
 	FD_ZERO(&read_fds);
 	FD_SET(listen_socket, &read_fds);
 
@@ -145,7 +146,7 @@ int bind_tcp_socket(int listener, int port)
 {
 	struct sockaddr_in myaddr;     // server address
 
-	assert(port > 0); // care if it is less than 1024?
+	assert(port > 0);
 	assert(listener >= 0);// starts at 0? 
 
 	myaddr.sin_family = AF_INET;

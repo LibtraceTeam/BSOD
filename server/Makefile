@@ -14,7 +14,7 @@ PREFIX=/usr/local/bsod
 BINDIR=$(PREFIX)/bin
 CONFDIR=$(PREFIX)/etc
 LIBDIR=$(PREFIX)/plugins
-.PHONY: all clean distclean install depend plugins instlal-init
+.PHONY: all clean distclean install depend plugins install-init
 
 all: libconfig $(BINS) plugins 
 

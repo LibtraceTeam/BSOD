@@ -65,6 +65,7 @@ char *colourmod = 0;
 char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
+char *macaddrfile = 0;
 char *configfile = "/usr/local/bsod/etc/bsod_server";
 static char* uri = 0; 
 
@@ -312,6 +313,8 @@ void fix_defaults() {
 		dirmod=strdup("plugins/direction/interface.so");
 	if (!pidfile)
 		pidfile=strdup("/var/run/bsod_server.pid");
+	if (!macaddrfile)
+		macaddrfile=strdup("/usr/local/bsod/etc/mac_addrs");
 
 	
 }
@@ -326,7 +329,7 @@ void do_configuration(int argc, char **argv) {
 	config_t main_config[] = {
 		{"pidfile", TYPE_STR|TYPE_NULL, &pidfile},
 		{"background", TYPE_INT|TYPE_NULL, &background},
-		{"basedir", TYPE_STR|TYPE_INT, &basedir},
+		{"basedir", TYPE_STR|TYPE_NULL, &basedir},
 		{"source", TYPE_STR|TYPE_NULL, &uri},
 		{"listenport", TYPE_INT|TYPE_NULL, &port},
 		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
@@ -338,6 +341,7 @@ void do_configuration(int argc, char **argv) {
 		{"shownondata", TYPE_INT|TYPE_NULL, &shownondata},
 		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
 		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
+		{"macaddrfile", TYPE_STR|TYPE_NULL, &macaddrfile},
 		{0,0,0}
 	};
 
@@ -432,6 +436,19 @@ static void load_modules() {
 		assert(dirhandle);
 	}
 
+	modptrs.init_dir = (initdirfptr) dlsym(dirhandle,"mod_init_dir");
+	if ((error = dlerror()) != NULL) {
+		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		assert(modptrs.init_dir);
+	}
+
+	/* 
+	 * initialise the mac addresses we are looking for.
+	 * would be nice to use _init here, but there's no easy way
+	 * to pass it the information it needs 
+	 */
+	modptrs.init_dir(macaddrfile);
+
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = dlerror()) != NULL) {
 		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
@@ -458,6 +475,7 @@ static void close_modules() {
 	if(dirhandle) {
 		dlclose(dirhandle);
 	}
+	modptrs.init_dir = 0;
 	modptrs.direction = 0;
 }	
 

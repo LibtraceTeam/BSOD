@@ -1,3 +1,20 @@
+/*
+ * This file is part of bsod-client
+ *
+ * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Authors: Sam Jansen
+ *	    Sebastian Dusterwald
+ *          
+ * All rights reserved.
+ *
+ * This code has been developed by the University of Waikato WAND 
+ * research group. For further information please see http://www.wand.net.nz/
+ *
+ * bsod-client includes software developed by Sam Jansen and Jesse Baker 
+ * (see http://www.wand.net.nz/~stj2/bung).
+ */
+
+
 // $Header$
 #include "stdafx.h"
 
@@ -252,6 +269,11 @@ void CPartVis::Draw()
     // Draw the flows
 	for( ; i != flows.end(); ++i )
 	{
+		/* 
+		 * XXX only works if colours stay the same...
+		 * this is the only real information the client gets atm, a
+		 * better solution would be to have the server send more info
+		 */
 		switch( filter_state ) 
 		{
 		case 0: // Display all packets:

@@ -12,7 +12,8 @@ the bsod source or the bsod server, see http://research.wand.net.nz/. To use
 this software you must have access to a machine running the bsod server.
 
 The bsod client is based on the BuNg 3d engine written by Sam Jansen and
-Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information.
+Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information
+and read the BUNG_LICENSE included with this release.
 
 
 

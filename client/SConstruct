@@ -1,0 +1,91 @@
+# vim: filetype=python
+import glob, os
+
+# -------------------------------------------------------------------------
+# User modifyable options:
+executable = 'bsod-client'
+libs = [ 
+    # Image libraries that should be in external/
+    'IL', 'ILU', 
+    # stl lib. Sometimes stlport and sometimes stlport_gcc ?
+    'stlport_gcc', 
+    # opengl and opengl utility lib.
+    'GL', 'GLU', 
+    # lua programming language, should be in external/
+    'lua', 
+    # libz, used for bung archives
+    'z', 
+    # SDL networking lib for new networking. You'll need to install this
+    'SDL_net' 
+]
+include_path = [
+    '/usr/include/stlport',
+    'external/DevIL/include',
+    'external/HawkNL/include',
+    '/usr/lib/opengl/nvidia/include'
+]
+lib_path = [ 
+    'external/DevIL/lib', 
+    'external/HawkNL/lib', 
+    'external/lua/lib',
+    'external/GL' 
+]
+src_dirs = [ '.', 'gl', 'linux' ]
+cflags = '-Wall -g -Wno-non-template-friend -DLINUX '
+libflags = ''
+
+# -------------------------------------------------------------------------
+# Programmatic stuff follows:
+# We could use env.ParseConfig below but I found it buggy
+cflags += os.popen('sdl-config --cflags').read()[:-1]
+libflags += os.popen('sdl-config --static-libs').read()[:-1]
+
+sources = []
+for i in src_dirs: sources += glob.glob(i + '/*.cpp')
+
+env = Environment(
+        CPPPATH = include_path,
+        LIBPATH = lib_path,
+        CCFLAGS = cflags,
+        LIBS = libs,
+        LINKFLAGS = libflags
+)
+env.Program(target = executable, source = sources)
+
+# Configure stuff:
+# This is cached in options.cache. Delete options.cache for the configure
+# stuff to be rerun.
+do_conf = True
+try: 
+    f = open('options.cache', 'r')
+    do_conf = False
+    close(f)
+except:
+    pass
+
+opt = Options('options.cache', ARGUMENTS)
+
+if do_conf:
+    conf = env.Configure()
+    if not conf.CheckLibWithHeader('stlport_gcc', 'hash_map', 'C++', 
+            'std::hash_map< int, int > hmap;', 1):
+        opt.Add('DEFINES', '', 'NO_STLPORT')
+
+    check_libs = { 
+        'lua_open':'lua', 
+        'glBegin':'OpenGL',
+        'gluBuild2DMipmaps':'OpenGL (GLU)',
+        'SDLNet_Init':'SDL_net',
+        'ilInit':'DevIL (IL)',
+        'iluInit':'DevIL (ILU)',
+        'uncompress':'zlib/libz'
+    }
+    for key in check_libs.keys():
+        if not conf.CheckLib(None, key):
+            print "Critical library '%s' not found!" % (check_libs[key])
+            Exit(1)
+
+    env = conf.Finish()
+
+opt.Update(env)
+opt.Save('options.cache', env)

@@ -212,6 +212,15 @@ int bind_tcp_socket(int listener, int port)
 /* Pickup any new clients. */
 int check_clients(bool wait)
 {
+	/* Protocol version is a single byte, the upper nybble is the 
+	 * major version, and the lower nybble is the minor
+	 * version.  The number is the lowest release version that can
+	 * understand this protocol.
+	 * examples:
+	 *  1.2 == 0x12
+	 *  10.13 = 0xad
+	 */
+	char protocol_version = 0x12;
 	struct sockaddr_in remoteaddr;
 	socklen_t sock_size;
 	int newfd;
@@ -246,6 +255,7 @@ int check_clients(bool wait)
 			perror("accept");
 		} else {
 			FD_SET(newfd, &read_fds);
+			write(newfd,&protocol_version,1);
 			add_fd(newfd);
 			if (newfd > fd_max) {    // keep track of the maximum
 				fd_max = newfd;

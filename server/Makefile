@@ -24,7 +24,7 @@ libconfig:
 
 clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)
-	cd lib && $(MAKE) || exit 1
+	cd lib && make clean || exit 1
 
 distclean: clean
 	

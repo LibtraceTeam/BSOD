@@ -16,8 +16,13 @@ Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information
 and read the BUNG_LICENSE included with this release.
 
 
+Changes to the client between 1.2.0 and 1.2.1
+==============================================
 
-Changes to the client since the first release:
+*	Now checks the version of the server to help prevent server/client
+	mismatch.
+
+Changes to the client between 1.1.0 and 1.2.0
 ==============================================
 
 *	Vastly better performance when a lot of flows are created and destroyed 

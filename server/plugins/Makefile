@@ -1,6 +1,6 @@
 CXX=g++
 CC=g++
-INCLUDE = -I/usr/local/wand/include
+INCLUDE = -I/usr/local/include
 #CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g -fPIC
 CXXFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -pedantic
 CXXFLAGS += $(INCLUDE)

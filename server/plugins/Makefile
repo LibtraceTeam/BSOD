@@ -10,6 +10,8 @@ SOURCES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))
 
 OBJS := $(patsubst %.cc, %.so, $(SOURCES))
 
+PREFIX=/usr/local/bsod
+LIBDIR=$(PREFIX)/plugins
 
 #all: $(OUT)
 
@@ -30,5 +32,8 @@ clean:
 #$(CC) --shared -Wl,-export-all-symbols $^ -o $@
 #ld -x --shared $< -o $@
 
+install:
+	for dir in $(DIRS); do mkdir -p $(LIBDIR)/$$dir; done
+	for obj in $(OBJS); do install -m 644 $$obj $(LIBDIR)/$$(echo $$obj | cut -d "/" -f 1) ; done
 	
 # vim: noet ts=8 sw=8

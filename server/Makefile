@@ -7,7 +7,7 @@ CPPFLAGS = -Wall -Wimplicit -Wformat -pipe -g
 INCLUDE = -I$(include) -I/usr/local/wand/include -I$(dagcdir)
 
 CPPFLAGS += $(INCLUDE)
-LDLIBS = -lpcap -lm -lrtclient -lz -L/usr/local/wand/lib
+LDLIBS = -lpcap -lm -lrtclient2 -lz -L/usr/local/wand/lib
 
 BINS = test
 OBJS = socket.o packets.o

@@ -303,6 +303,11 @@ short get_port(int port1, int port2)
     sport2 = is_server_port(port2);
 
     if(sport1 & sport2) {
+	if(sport1 == 6667)
+	    return sport1;
+	if(sport2 == 6667)
+	    return sport2;
+
 	if (sport1 < sport2)
 	    return port1;
 	else

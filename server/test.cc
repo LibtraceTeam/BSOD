@@ -22,11 +22,11 @@
 #include <assert.h>
 
 extern "C" {
-#include "rtclient.h"
+#include "rtclient2.h"
 
 
 #include <dagnew.h>
-#include <dagapi.h>
+#include "dagformat.h"
 #include "utils.h"
 #include "outputs.h"
 #include "inputs.h"
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     check_clients(true);// keep rtclient from starting till someone connects
 
     //------- Connect RTClient ----------
-    rtclient = create_rtclient(hostname,0);
+    rtclient = create_rtclient(hostname);
     printf("Connected to data source: %s\n", hostname);
 
     // hax to make it only slow down saved trace files...looks for a '/'
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 		send_flows(new_client);
 
 	    /* get a packet, and process it */
-	    if((psize = rtclient_read_packet(rtclient, buffer, &status)) <= 0)
+	    if((psize = rtclient_read_packet(rtclient, buffer,SCANSIZE, &status)) <= 0)
 	    {
 		perror("rtclient_read_packet");
 		break;

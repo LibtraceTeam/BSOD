@@ -8,10 +8,6 @@
 #include <net/ethernet.h>
 #include <err.h>
 
-#include <libconfig.h>
-#include <libtrace.h>
-#include <dagformat.h>
-
 #include "../../debug.h"
 #include <syslog.h>
 

@@ -10,6 +10,7 @@ Install:
  * SDL_net-dev
  * zlib-dev
  * libpng-dev
+ * libstlport-dev
 
 Make sure OpenGL of some sort is also installed, you may need to install
 Mesa if the build fails to find OpenGL or GLU. You'll also need Python

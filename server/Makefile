@@ -1,9 +1,9 @@
 CXX=g++-3.0
 CC=g++-3.0
-CPPFLAGS = -Wall -Wimplicit -Wformat -pipe -g
+CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g
 INCLUDE =  -I/usr/local/include  -I. -I./lib
 
-CPPFLAGS += $(INCLUDE)
+CXXFLAGS += $(INCLUDE)
 LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfig -lfl
 
 BINS = bsod_server
@@ -44,7 +44,7 @@ install:
 	mkdir -p $(CONFDIR)
 	mkdir -p $(LIBDIR)
 
-	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server
+	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.dist
 	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
 
 	cd plugins; make install; cd ..

@@ -61,6 +61,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "loading_screen.h"
 #include "player.h"
 #include "sound.h"
+#include "partflow.h"
 #include "partvis.h"
 
 
@@ -83,7 +84,7 @@ int BungMain(int argc, char *argv[])
 	auto_ptr<CScript> config = auto_ptr<CScript>(CScript::Create());
 	auto_ptr<CLoadingScreen> loadingScreen;
 
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	CMesh::InitIndices();
 	//CCollider::Initialise();
 
@@ -121,8 +122,11 @@ int BungMain(int argc, char *argv[])
 
 		world.actionHandler = new CActionHandler;
 
+		char title[512];
+		strcpy( title, "BSOD: " );
+		strcat( title, netHost.c_str() );
 		world.display = world.sys->InitDisplay(width, height, bpp, fullScreen, 
-				dispType);
+				dispType, title);
 		world.display->Initialise();
 		
 		loadingScreen = auto_ptr<CLoadingScreen>(new CLoadingScreen(width, height));

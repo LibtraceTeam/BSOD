@@ -133,7 +133,7 @@ int CWin32SystemDriver::RunMessageLoop()
 
 
 CDisplayManager *CWin32SystemDriver::InitDisplay(int width, int height, int bpp, 
-												 bool full_screen, CSystemDriver::DisplayType type)
+												 bool full_screen, CSystemDriver::DisplayType type, char *title)
 {
 	
 	fullScreen = full_screen;
@@ -145,7 +145,8 @@ CDisplayManager *CWin32SystemDriver::InitDisplay(int width, int height, int bpp,
 		openGL = true;
 
 		// Create Our OpenGL Window
-		if (!CreateGLWindow("BuNg", width, height, bpp))
+		
+		if (!CreateGLWindow(title, width, height, bpp))
 		{
 			throw CException("Unable to create display manager.");
 		}
@@ -430,6 +431,7 @@ void CWin32SystemDriver::DI_KeymapInit()
 	keyMap[ DIK_RIGHT ] = CActionHandler::BKC_RIGHT;
 	keyMap[ DIK_UP ] = CActionHandler::BKC_UP;
 	keyMap[ DIK_DOWN ] = CActionHandler::BKC_DOWN;
+	keyMap[ DIK_F1 ] = CActionHandler::BKC_F1;
 }
 
 void CWin32SystemDriver::DI_Initialise()

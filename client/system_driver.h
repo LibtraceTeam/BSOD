@@ -55,7 +55,7 @@ public:
 	enum DisplayType { DISPLAY_OPENGL, DISPLAY_DIRECT3D };
 
 	virtual CDisplayManager *InitDisplay(int width, int height, int bpp, bool fullScreen, 
-		DisplayType type) = 0;
+		DisplayType type, char *title) = 0;
 	virtual int RunMessageLoop() = 0;
 	virtual void ResizeWindow(int width, int height) = 0;
 	virtual void Quit() = 0;

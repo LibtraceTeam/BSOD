@@ -47,6 +47,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "exception.h"
 #include "entity_manager.h"
 #include "player.h"
+#include "partflow.h"
 #include "partvis.h"
 #include "misc.h"
 
@@ -138,6 +139,7 @@ struct pack_update_t {
     unsigned char colour[3];
     unsigned short size;
     float speed;
+	bool dark;
 } PACKED;
 
 struct flow_remove_t {
@@ -167,7 +169,7 @@ void CSDLNetDriver::ReceiveData()
 	{
 		if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
 		{
-			int sam = databuf.size();
+			int sam = (int)databuf.size();
 			databuf.resize( sam + readlen );
 			memcpy(&databuf[sam], buffer, readlen);
 
@@ -183,16 +185,20 @@ void CSDLNetDriver::ReceiveData()
 	world.partVis->BeginUpdate();
 
 	unsigned char *buf = &databuf[0];
-	while(true) {
-		const unsigned int s = &databuf[databuf.size()] - &buf[0];
+	while( true ) 
+	{
+		const unsigned int s = (const unsigned int)(&databuf[databuf.size()] - &buf[0]);
 		fp = (fp_union *)buf;
-		if(s == 0) {
+		if(s == 0) 
+		{
 			databuf.erase(databuf.begin(), databuf.end());
 			break;
 		}
-		if(fp->flow.type == 0x00) {
+		if(fp->flow.type == 0x00) 
+		{
 			// Flow
-			if(sizeof(flow_update_t) <= s) {
+			if(sizeof(flow_update_t) <= s) 
+			{
 #ifdef NET_DEBUG
 				Log("Flow: (%f,%f,%f)->(%f,%f,%f):%u\n", 
 				fp->flow.x1,
@@ -210,13 +216,16 @@ void CSDLNetDriver::ReceiveData()
 					Vector3f(fp->flow.x2, fp->flow.y2, fp->flow.z2));
 
 				buf += sizeof(flow_update_t);
-			} else {
+			} 
+			else 
+			{
 				if(buf != &databuf[0])
-					databuf.erase(databuf.begin(), databuf.begin() 
-					+ (buf - &databuf[0]));
+					databuf.erase(databuf.begin(), databuf.begin() + (buf - &databuf[0]));
 				break;
 			}
-		} else if(fp->flow.type == 0x01) {
+		} 
+		else if(fp->flow.type == 0x01) 
+		{
 			// Packet
 			if(sizeof(pack_update_t) <= s) {
 #ifdef NET_DEBUG
@@ -228,34 +237,46 @@ void CSDLNetDriver::ReceiveData()
 				(int)fp->packet.colour[2],
 				fp->packet.size);
 #endif
-
-				world.partVis->UpdatePacket(
-					fp->packet.id, fp->packet.ts,
-					fp->packet.colour[0],
-					fp->packet.colour[1],
-					fp->packet.colour[2],
-					fp->packet.size,
-					fp->packet.speed);
+				//if( world.partVis->fps > 30.0f )//world.partVis->packetsFrame < 25 )
+				//{
+					world.partVis->packetsFrame++;
+					world.partVis->UpdatePacket(
+						fp->packet.id, fp->packet.ts,
+						fp->packet.colour[0],
+						fp->packet.colour[1],
+						fp->packet.colour[2],
+						fp->packet.size,
+						fp->packet.speed,
+						fp->packet.dark);
+				//}
 
 				buf += sizeof(pack_update_t);
-			} else {
+			} 
+			else 
+			{
 				if(buf != &databuf[0])
 					databuf.erase(databuf.begin(), databuf.begin() 
 					+ (buf - &databuf[0]));
 				break;
 			}
-		} else if(fp->flow.type == 0x02) {
-			if(sizeof(flow_remove_t) <= s) {
+		} 
+		else if(fp->flow.type == 0x02) 
+		{
+			if(sizeof(flow_remove_t) <= s) 
+			{
 				world.partVis->RemoveFlow(fp->rem.id);
 
 				buf += sizeof(flow_remove_t);
-			} else {
+			} 
+			else 
+			{
 				if(buf != &databuf[0])
 					databuf.erase(databuf.begin(), databuf.begin() 
 					+ (buf - &databuf[0]));
 				break;
 			}
-		} else {
+		} else 
+		{
 			Log("Unknown packet type...s:%u r:%u d:%u \n",
 				databuf.size(), 
 				(int)(buf-&databuf[0]), 

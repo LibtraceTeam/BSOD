@@ -53,6 +53,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "entity_manager.h"
 #include "sound.h"
 
+#include "partflow.h"
 #include "partvis.h"
 
 CEntityManager::CEntityManager() {

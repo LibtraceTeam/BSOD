@@ -56,11 +56,14 @@ public:
 	enum Keycode {
 		//
 		BKC_ESCAPE = 256, BKC_BACKSPACE, BKC_RETURN, BKC_TAB,
-		// Mouse clicks arent exactly keys but they might as well be handled as such
+		// Mouse clicks aren't exactly keys but they might as well be handled as such
 		BKC_LEFTMOUSEBUT,
 		
 		// Arrow keys
 		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
+
+		// Function keys
+		BKC_F1,
 
 		// Normal ASCII codes:
 		// Alphabet
@@ -112,7 +115,9 @@ public:
 	void Screenshot();
     void ToggleDebugDisplay();
 	void ToggleFilter();
+	void ToggleShowDark();
 	void ToggleBackFilter();
+	void ToggleHelp();
 
 	void TurnUp();
 	void TurnDown();

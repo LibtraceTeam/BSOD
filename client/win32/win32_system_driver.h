@@ -99,7 +99,7 @@ public:
 	enum DisplayType { DISPLAY_OPENGL, DISPLAY_DIRECT3D };
 
 	virtual CDisplayManager *InitDisplay(int width, int height, int bpp, 
-										 bool full_screen, CSystemDriver::DisplayType type);
+										 bool full_screen, CSystemDriver::DisplayType type, char *title);
 	virtual int RunMessageLoop();
 	virtual void ResizeWindow(int width, int height);
 	virtual void Quit();

@@ -52,6 +52,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "reporter.h"
 #include "player.h"
 #include "texture_manager.h"
+#include "partflow.h"
 #include "partvis.h"
 
 #ifdef NO_STLPORT
@@ -107,7 +108,7 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_L ] = &CActionHandler::TurnRight;
 
 	keyDownMap[ BKC_ESCAPE ] = &CActionHandler::Quit;
-	keyDownMap[ BKC_Q ] = &CActionHandler::Quit;
+	//keyDownMap[ BKC_Q ] = &CActionHandler::Quit;
 
 	keyUpMap[ BKC_R ] = &CActionHandler::ToggleWireframe;
 	keyUpMap[ BKC_B ] = &CActionHandler::ToggleBackfaceCull;
@@ -123,6 +124,8 @@ CActionHandler::CActionHandler()
 
 	keyUpMap[ BKC_PERIOD ] = &CActionHandler::ToggleFilter;
 	keyUpMap[ BKC_COMMA ] = &CActionHandler::ToggleBackFilter;
+	keyUpMap[ BKC_SLASH ] = &CActionHandler::ToggleShowDark;
+	keyUpMap[ BKC_F1 ] = &CActionHandler::ToggleHelp;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -282,4 +285,14 @@ void CActionHandler::ToggleFilter()
 void CActionHandler::ToggleBackFilter()
 {
 	world.partVis->ToggleBackFilter();
+}
+
+void CActionHandler::ToggleShowDark()
+{
+	world.partVis->ToggleShowDark();
+}
+
+void CActionHandler::ToggleHelp()
+{
+	world.partVis->ToggleHelp();
 }

@@ -85,7 +85,7 @@ struct modptrs_t modptrs;
 
 void do_usage(char* name)
 {
-    printf("Usage: %s [-h] -C <configfile> \n", name);
+    printf("Usage: %s [-h] [-b] -C <configfile> \n", name);
     exit(0);
 }
 
@@ -337,11 +337,11 @@ void do_configuration(int argc, char **argv) {
 
 	// read cmdline opts
 	
-	while( argv && (opt = getopt(argc, argv, "hdC:")) != -1)
+	while( argv && (opt = getopt(argc, argv, "hbC:")) != -1)
 	{
 		switch(opt)
 		{
-			case 'd':
+			case 'b':
 				background = 1;
 				break;
 			case 'h':

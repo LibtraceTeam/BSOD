@@ -1,0 +1,3 @@
+* Persistant particles at start (end?) of flows.
+* Fix networking dodginess: when the server dies, the client gets stuffed.
+* Client says it is connected when it isn't. -- FIXED, uses blocking io now

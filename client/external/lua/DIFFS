@@ -1,0 +1,97 @@
+diff -r lua-4.0/include/lua.h lua/include/lua.h
+2c2
+< ** $Id$
+---
+> ** $Id$
+25c25
+< #define LUA_VERSION	"Lua 4.0"
+---
+> #define LUA_VERSION	"Lua 4.0.1"
+diff -r lua-4.0/src/lapi.c lua/src/lapi.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+488c488
+<   TString *ts = luaS_newudata(L, size, NULL);
+---
+>   TString *ts = luaS_newudata(L, (size==0) ? 1 : size, NULL);
+diff -r lua-4.0/src/ldo.c lua/src/ldo.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+247c247,249
+<   luaC_checkGC(L);
+---
+>   /* before parsing, give a (good) chance to GC */
+>   if (L->nblocks/8 >= L->GCthreshold/10)
+>     luaC_collectgarbage(L);
+277,278c279,280
+<   filename = lua_tostring(L, -1);  /* filename = '@'..filename */
+<   lua_pop(L, 1);  /* OK: there is no GC during parser */
+---
+>   c = lua_gettop(L);
+>   filename = lua_tostring(L, c);  /* filename = '@'..filename */
+280a283
+>   lua_remove(L, c);  /* remove `filename' from the stack */
+diff -r lua-4.0/src/lgc.c lua/src/lgc.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+339c339
+< static void luaC_collectgarbage (lua_State *L) {
+---
+> void luaC_collectgarbage (lua_State *L) {
+diff -r lua-4.0/src/lgc.h lua/src/lgc.h
+2c2
+< ** $Id$
+---
+> ** $Id$
+14a15
+> void luaC_collectgarbage (lua_State *L);
+diff -r lua-4.0/src/lib/lbaselib.c lua/src/lib/lbaselib.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+168c168
+<   lua_rawget(L, -2);
+---
+>   lua_rawget(L, 1);
+176c176
+<   lua_rawset(L, -3);
+---
+>   lua_rawset(L, 1);
+260c260
+<   if (*s == '\27')  /* binary files start with ESC... */
+---
+>   if (*s == '\33')  /* binary files start with ESC... */
+diff -r lua-4.0/src/lparser.c lua/src/lparser.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+1000c1000
+<   if (!block_follow(ls->t.token))
+---
+>   if (!block_follow(ls->t.token) && ls->t.token != ';')
+diff -r lua-4.0/src/lstring.c lua/src/lstring.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+122c122
+<   ts->u.d.value = (udata == NULL) ? uts+1 : udata;
+---
+>   ts->u.d.value = (s > 0) ? uts+1 : udata;
+diff -r lua-4.0/src/lvm.c lua/src/lvm.c
+2c2
+< ** $Id$
+---
+> ** $Id$
+82c82
+<     luaD_lineHook(L, base-2, newline, linehook);
+---
+>     luaD_lineHook(L, base-1, newline, linehook);

@@ -1,0 +1,62 @@
+The BuNg TODO file.
+
+- Stuff:
+* Fix bounding box of level -- x,y,z ordered incorrectly? -- DONE. -- one level still is a bit stuffed up
+* Fix beziers: some of them seem to miss a bit?  Only shows up in dm1
+* Look into shaders for more texture info
+* Get lightmaps out
+* MD3 files - Somewhat done - Jesse
+* A lot of code isn't exception safe yet.  Use auto_ptr<> to solve this. (somewhat done)
+  -- also, a lot doesn't seem to be cleaned up upon exit -- Fixed mostly
+* Find use for pig -- Powerup?  It's gonna need a name.
+* Put external components into .DLL's and .so's (linux).  This means we have completely
+  replacable components, a "good thing" in OO programming.  If we load these at run-time,
+  or after startup anyway, we can only load those that are necessary thereby conserving
+  memory.
+
+#########################################################################################################
+- More important stuff
+* MD2's need drawing fixes
+* For fixing collision detection:
+  * If the new position is D away from the current position, do a ray-collision (this stops large
+    velocities from going through walls.  Where D is the diameter of the collision sphere.
+* GET RID OF DEGENERATE TRIANGLES IN BUNGMAP.  I AM SHOUTING SO THIS MUST BE IMPORTANT! 
+	(used to be: * See colldet.cpp (bad normal)) -- Hmm, this may not matter at all anymore ????? doesn't matter ????
+* Networking! -- Somewhat done (Sam) -- look into NLU??
+* D3D renderer. -- Somewhat done (Sam) - This needs fixing
+* Fix bouncing in collision response! - Jesse is onto this
+* Allow shooting a rocket. Yes, a rocket. A slow rocket that dies when it hits something. - Sam
+* (Very) simple gui? Allow buttons and text entry (add chat feature to networking). - Probably Sam
+
+
+
+The camera should be able to transform local/object coordinates to world space coordinates.
+
+Billboard entities.
+
+Texture/resource management.
+
+Factories for models.
+
+Better lightmap management.
+
+
+
+#########################################################################################################
+- Everything below here is finished
+* Normals from .bsp files - bungmap's job -- DONE
+* MD2 files - DONE
+* Fix insertion of CMesh's into the octree -- bounding box calc. function -- DONE
+* Load quake meshes in -- DONE
+* Textures seem to have incorrect indices (some do anyway) -- DONE
+* Clean up bezier code - half done - need to add dynamic level of detail (not just 11x11) -- DONE
+* Collision detection and response!  This is the next big thing. -- DONE to a satisfactory level 16-6-02
+* Fix up namespace issues and warning with Opcode (processing (Sam)) -- DONE 18-6-02
+* Fix beziers: drawing and collision detection -- DONE 21-6-02
+* 24 June 2002 -- 6402 Lines of Code in total for BuNg!
+* Fix up Vectors once and for all(mostly done, probably needs testing).  Also check for consts. -- DONE 29-6-02
+* Better font handling -- DONE
+* Configuration file handler - Done - Sam! - 22-07-02
+* Set up blending mode shit in an API neutral way (drawing the box for a text-backdrop needs a different
+    blending mode)
+* Linux system driver (SDL ?) - Done

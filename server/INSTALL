@@ -18,8 +18,7 @@ documentation that comes with it for information on how to do this).
 Linux:
 
 tar xzvf bsod-server-x.y.z.tar.gz
-cd bsod-x.y.z
-cd server
+cd bsod-server-x.y.z
 make
 (as root )
 make install 

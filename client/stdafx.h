@@ -54,6 +54,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <string>
 #include <map>
+#include <hash_map>
 
 #define NO_STLPORT
 

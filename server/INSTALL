@@ -37,10 +37,11 @@ next release which will solve this problem.
 ----------------------------------
 Running the bsod server:
 
-It is very likely that you will need to edit the default configuration
-file in order to get a meaningful visualisation. See the appropriate 
-section in the README for more information on the format of the file 
-and the options that can be configured.
+You will have need to edit the default configuration in to get a meaningful
+visualisation. At least the direction module will have to be configured
+otherwise you will see a blank visualisation.  See the appropriate section in
+the README for more information on the format of the file and the options that
+can be configured.
 
 Usage: /usr/local/bsod/bin/bsod_server [-h] [-b] -C <configfile>
     -h			this help screen

@@ -1,6 +1,8 @@
 #include "colours.h"
 #include <stdint.h>
+#include <string.h>
 
+// ENUMs for the protocols. Number = id used when packets are sent.
 typedef enum counters {
 	TCP = 0,
 	HTTP = 1,
@@ -16,9 +18,11 @@ typedef enum counters {
 	IRC = 11,
 	WINDOWS = 12,
 	P2P = 13,
-	OTHER = 14
+	OTHER = 14,
+	LAST = 15 // This must always be the last value in the enum to mark how many items there are!
 } counters_t;
 
+// Define colours to use for the various protocols
 static uint8_t countercolours[][3] = {
 	{100,  0,100}, /* TCP     purple		*/
 	{  0,  0,200}, /* HTTP    blue		*/
@@ -37,25 +41,43 @@ static uint8_t countercolours[][3] = {
 	{255,192,203}  /* OTHER   pink		*/
 };
 
+// Define the names displayed on the client when a filter is applied:
+char counternames [][256] = {
+	"TCP",
+	"HTTP",
+	"HTTPS",
+	"Mail",
+	"FTP",
+	"VPN",
+	"DNS",
+	"NTP",
+	"SSH",
+	"UDP",
+	"ICMP",
+	"IRC",
+	"Windows",
+	"P2P",
+	"Other"
+};
 
 /*
 * Sets the colour array (RGB) to be the colour appropriate to the 
 * port/protocol being used.
 */
-void mod_get_colour(uint8_t colour[3], int port, int protocol)
+void mod_get_colour(unsigned char *id_num, int port, int protocol)
 {
 
 	int i;
 
 	switch(port)
 	{
-	case 80: for(i=0;i<3;i++)
-				 colour[i] = countercolours[HTTP][i];
+	case 80:
+		*id_num = HTTP;
 		break;
 
 	case 21: 
 	case 20: for(i=0;i<3;i++)
-				 colour[i] = countercolours[FTP][i];
+		*id_num = FTP;
 		break;
 
 	case 110: /* pop3 */
@@ -64,45 +86,39 @@ void mod_get_colour(uint8_t colour[3], int port, int protocol)
 	case 993: /* imap over ssl */
 	case 995: /* pop3 over ssl */
 	case 465: /* smtp over ssl */
-	case 25: for(i=0;i<3;i++)
-				 colour[i] = countercolours[MAIL][i];
+	case 25:
+		*id_num = MAIL;
 		break;
 
-		/* white is just too confusing when other things blend */
-		/*
-		case 119: for(i=0;i<3;i++)
-		colour[i] = countercolours[NNTP][i];
-		break;
-		*/
-	case 53: for(i=0;i<3;i++)
-				 colour[i] = countercolours[DNS][i];
+	case 53:
+		*id_num = DNS;
 		break;
 
 	case 22:
-	case 23: for(i=0;i<3;i++)
-				 colour[i] = countercolours[SSH][i];
+	case 23:
+		*id_num = SSH;
 		break;
 
-	case 443: for(i=0;i<3;i++)
-				  colour[i] = countercolours[HTTPS][i];
+	case 443:
+		*id_num = HTTPS;
 		break;
 
-	case 6667: for(i=0;i<3;i++)
-				   colour[i] = countercolours[IRC][i];
+	case 6667:
+		*id_num = IRC;
 		break;
-	case 10000: for(i=0;i<3;i++)
-					colour[i] = countercolours[VPN][i];
+	case 10000:
+		*id_num = VPN;
 		break;
-	case 123: for(i=0;i<3;i++)
-				  colour[i] = countercolours[NTP][i];
+	case 123:
+		*id_num = NTP;
 		break;
 	case 135:
 	case 136:
 	case 137:
 	case 138:
 	case 139:
-	case 445: for(i=0;i<3;i++)
-				  colour[i] = countercolours[WINDOWS][i];
+	case 445:
+		*id_num = WINDOWS;
 		break;
 
 		// P2P:
@@ -137,24 +153,24 @@ void mod_get_colour(uint8_t colour[3], int port, int protocol)
 	case 6898:
 	case 6899:
 	case 6900:
-	case 6901:	for(i=0;i<3;i++)
-					colour[i] = countercolours[P2P][i];
+	case 6901:
+		*id_num = P2P;
 		break;
 
 		// if not a port that I'm counting give a colour based on protocol
 	default:  
 		switch(protocol)
 		{
-		case 6: for(i=0;i<3;i++)
-					colour[i] = countercolours[TCP][i];	
+		case 6:
+			*id_num = TCP;
 			break;
 
-		case 17: for(i=0;i<3;i++)
-					 colour[i] = countercolours[UDP][i];
+		case 17:
+			*id_num = UDP;
 			break;
 
-		case 1: for(i=0;i<3;i++)
-					colour[i] = countercolours[ICMP][i]; 
+		case 1:
+			*id_num = ICMP;
 			break;
 			/* 
 			case 41: for(i=0;i<3;i++)
@@ -163,11 +179,11 @@ void mod_get_colour(uint8_t colour[3], int port, int protocol)
 			*/
 		case 37:
 		case 50:
-		case 51: for (i=0;i<3; i++)
-					 colour[i] = countercolours[VPN][i];
+		case 51:
+			*id_num = VPN;
 			break;
-		default: for(i=0;i<3;i++)
-					 colour[i] = countercolours[OTHER][i]; 
+		default:
+			*id_num = OTHER;
 			break;
 		};break;
 	};
@@ -175,4 +191,18 @@ void mod_get_colour(uint8_t colour[3], int port, int protocol)
 
 }
 
-
+void mod_get_info(uint8_t colours[3], char name[256], int id )
+{
+	if( id >= LAST )
+	{
+		// We never want anything to be pure black (it would be invisible)
+		// so we mark the end of the list with pure black RGB=0,0,0).
+		colours[0] = colours[1] = colours[2] = 0;
+		strcpy( name, "<NULL>" );
+		return;
+	}
+	colours[0] = countercolours[id][0];
+	colours[1] = countercolours[id][1];
+	colours[2] = countercolours[id][2];
+	strcpy( name, counternames[id] );
+}

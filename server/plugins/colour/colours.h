@@ -39,7 +39,8 @@
  */
 
 extern "C" {
-void mod_get_colour(uint8_t colour[3], int port, int protocol);
+void mod_get_colour(unsigned char *id_num, int port, int protocol);
+void mod_get_info(uint8_t colours[3], char name[256], int id );
 }
 
 

@@ -9,6 +9,53 @@
  * but supports .pop() and .front() to get the oldest modified data
  */
 
+template <class key_t, class value_t>
+class lru_iterator {
+	private: 
+		typedef std::list<key_t> lru_t;
+		typedef std::map<key_t,std::pair<lru_t::iterator,value_t> > data_t;
+		data_t::const_iterator where;
+	public:
+		lru_iterator() { };
+		lru_iterator(lru_iterator &x) : where(x.where) {};
+		lru_iterator(data_t::const_iterator &_where) : where(_where) {};
+		lru_iterator<key_t,value_t> &operator ++() {
+			++where;
+			return *this;
+		}
+		lru_iterator<key_t,value_t> operator ++(int) {
+			lru_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			++where;
+			return tmp;
+		}
+		lru_iterator<key_t,value_t> &operator --() {
+			--where;
+			return *this;
+		}
+		lru_iterator<key_t,value_t> operator --(int) {
+			lru_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			--where;
+			return tmp;
+		}
+		std::pair<key_t,value_t> operator *() const {
+			return std::pair<key_t,value_t>(where->first,where->second.second);
+		}
+		// We hope that the -> operator will dereference this immediately
+		// and the & will get optimised away.
+		std::pair<key_t,value_t> *operator ->() const {
+			return &(operator *());
+		}
+		bool operator ==( const lru_iterator<key_t,value_t> &b) {
+			return where==b.where;
+		}
+		bool operator !=( const lru_iterator<key_t,value_t> &b) {
+			return where!=b.where;
+		}
+};
+
+
 template <class key_t,class value_t>
 class lru {
 	private: 
@@ -18,6 +65,7 @@ class lru {
 		data_t data;
 
 	public:
+		typedef lru_iterator<key_t,value_t> const_iterator;
 		std::pair<key_t,value_t > front() {
 			key_t & key = lru_list.front();
 			return std::pair<key_t,value_t>(key,data[key].second);
@@ -33,12 +81,22 @@ class lru {
 		size_t size() const {
 			return data.size();
 		}
-		data_t::const_iterator find(key_t &key) const {
-			return data.find(key);
+		const_iterator begin(void) const {
+			data_t::const_iterator i = data.begin();
+			const_iterator ci(i);
+			return ci;
 		}
 
-		data_t::const_iterator end(void) const {
-			return data.end();
+		const_iterator end(void) const {
+			data_t::const_iterator i = data.end();
+			const_iterator ci(i);
+			return ci;
+		}
+
+		const_iterator find(key_t &key) const {
+			data_t::const_iterator i =  data.find(key);
+			const_iterator ci(i);
+			return ci;
 		}
 
 		void erase(key_t k) {

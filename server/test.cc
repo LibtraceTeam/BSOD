@@ -59,25 +59,29 @@ int main(int argc, char *argv[])
     // socket stuff
     int listen_socket;
     int port = 32500;
-    struct sockaddr_in remoteaddr; // client address
-    //int sin_size;
-    socklen_t sock_size;
+    fd_set listen_set;
+    struct timeval tv;
+    int new_client;
 
 
     // rt stuff
     static struct rt_client_t *rtclient;
-    static char* hostname = "chasm.cs.waikato.ac.nz";
-    //static char* hostname = "/scratch/bcj3/slammer.trace";
+    static char* hostname = "chasm.cs.waikato.ac.nz"; // default is chasm
     int psize;
     int status = 0;
     uint64_t ts;
     dag_record_t *erfptr = 0;
 
-    int new_fd;
+    //int new_fd;
 
     gettimeofday(&starttime, 0); // XXX
     
+    FD_ZERO(&listen_set);
 
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+
+    
     // setup signal handlers
     
     sigact.sa_handler = sig_hnd;
@@ -112,29 +116,10 @@ int main(int argc, char *argv[])
     //-------------------------------------------------------
     // do some command line stuff for ports and things
 
-    while( (opt = getopt(argc, argv, "d:s:p:")) != -1)
+    while( (opt = getopt(argc, argv, "s:p:")) != -1)
     {
 	switch(opt)
 	{
-	    case 'd':
-		opt = atoi(optarg);
-		switch(opt)
-		{
-		    case 0:
-			//SHOW_SRC = 1;
-			//SHOW_DST = 0;
-			printf("Drawing outgoing packets only\n");
-			break;
-		    case 1:
-			//SHOW_DST = 1;
-			//SHOW_SRC = 0;
-			printf("Drawing incoming packets only\n");
-			break;
-		    default:
-			//SHOW_DST = SHOW_SRC = 1;
-			printf("Drawing both incoming and outgoing packets\n");
-			break;
-		}; break;
 	    case 's':
 		// should I be doing some checking on this arg?
 		hostname = optarg;
@@ -148,62 +133,49 @@ int main(int argc, char *argv[])
 	};
     }
     //--------------------------------------------------------
-    
+
+    //-------Setup listen socket-----------
+    listen_socket = setup_listen_socket(); // set up socket
+    bind_tcp_socket(listen_socket, port); // bind and start listening
+
+    // add the listening socket to the master set
+    fdmax = listen_socket; // biggest file descriptor
+    printf("Waiting for connection on port %i...\n", port);
+
+    hax_fdmax(fdmax);
+
+    check_clients(true);// keep rtclient from starting till someone connects
+
+    //------- Connect RTClient ----------
+    rtclient = create_rtclient(hostname,0);
+    printf("Connected to data source: %s\n", hostname);
     while(1)
     {
-
-	//-------Setup listen socket-----------
-	listen_socket = setup_listen_socket(); // set up socket
-	bind_tcp_socket(listen_socket, port); // bind and start listening
-
-	// add the listening socket to the master set
-	fdmax = listen_socket; // biggest file descriptor
-	printf("Waiting for connection...\n");
-
-//	sin_size = sizeof(struct sockaddr_in);
-	sock_size = sizeof(struct sockaddr_in);
-	if ((new_fd = accept(listen_socket, (struct sockaddr *)&remoteaddr,
-			&sock_size)) == -1) {
-	    perror("accept");
-	    exit(1);
-	}
-	printf("Received connection from: %s\n",inet_ntoa(remoteaddr.sin_addr));
-	init_packets(new_fd);
-
-	//------- Connect RTClient ----------
-	rtclient = create_rtclient(hostname,0);
-	printf("Data source Connected to: %s\n", hostname);
-
-	//init_flow_hash(new_fd);
 	// loop till something breaks
 	for(;;) 
 	{
-	    //////////////////////////////
-	    
+	    /* check for new clients */
+	    new_client = check_clients(false);
+	    if(new_client > 0)// is zero valid?
+		send_flows(new_client);
 
-
-	    //////////////////////////////
-	    
-	    // get a packet, and do stuff to it
+	    /* get a packet, and process it */
 	    if((psize = rtclient_read_packet(rtclient, buffer, &status)) <= 0)
 	    {
 		perror("rtclient_read_packet");
 		break;
 	    }
 	    erfptr = (dag_record_t *)buffer;
-	    //p = (ip_t *) erfptr->rec.eth.pload;
-	    ts = erfptr->ts;//i dont really need to pass this btw
+	    ts = erfptr->ts;
 
-	    ////////////////////
+	    /* this time checking only matters when reading from a prerecorded
+	     * trace file. It limits it to a seconds worth of data a second */
 	    if(startts32 == 0)
 		startts32 = ts >> 32;
 
 	    ts32 = ts >> 32;
 	    gettimeofday(&nowtime, 0);
 
-	    //printf("now %li, start %li -- now %i, start %i\n... %li vs %i", nowtime.tv_sec ,starttime.tv_sec,ts32 ,startts32,nowtime.tv_sec - starttime.tv_sec, ts32 - startts32) ;
-
-	    
 	    while( ((nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
 	    {
 		usleep(10);	
@@ -211,20 +183,14 @@ int main(int argc, char *argv[])
 
 	    }
 	    
-	    ////////////////////////
-
-	    //ip_t *p = (ip_t *) erfptr->rec.eth.pload;//XXX
-
+	    // if sending fails, assume we just lost a client
 	    if(per_packet(erfptr, psize, ts/*, new_fd*/) != 0)
 		break;
 	}
 blah:
+	// any individual clean up could go here...maybe not useful?
 	printf("Cleaning up...\n");
-	destroy_rtclient(rtclient);
-	//empty_flows();
-	close(listen_socket);
-
-	//exit(0);
+	//destroy_rtclient(rtclient);
     }
 //goodbye:
 	printf("Destroying RTClient...\n");

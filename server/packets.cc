@@ -84,6 +84,8 @@ struct flow_info_t {
 	uint32_t id;
 	uint32_t time; 
 	uint8_t colour[3];
+	float start[3];
+	float end[3];
 };
 
 bool operator < (const flow_id_t &a, const flow_id_t &b) {
@@ -118,29 +120,15 @@ bool operator == (const flow_id_t &a, const flow_id_t &b) {
 typedef lru<flow_id_t,flow_info_t> flow_lru_t;
 flow_lru_t flows;
 
-int new_fd;
-
-void init_packets(int fd)
+/* zeroes id and empties flows. maybe useful if all clients  disconnect? */
+void init_packets()
 {
-    new_fd = fd;
     id = 0;
 
     while(!flows.empty())
 	flows.erase(flows.front().first);
 }
 
-/*
-bool has_expired(uint32_t time, flow_info_t packet)
-{
-    printf("now time %i, then time %i\n", time, packet.time);
-    return true;
-    
-    if(time - packet.time > 4)
-	return true;
-    
-    return false;
-}
-*/
 
 //------------------------------------------------------------
 
@@ -159,9 +147,30 @@ void expire_flows(uint32_t time)
 	tmpid = flows.front().second.id;
 	flows.erase(flows.front().first);	
 		
-	if(send_kill_flow(new_fd, tmpid) != 0)
+	if(send_kill_flow(tmpid) != 0)
 	    return;
     }
+}
+
+
+//--------------------------------------------------------
+
+/* This iterator was causing problems when using the '->' operator 
+ * rather than (*flow_iterator).
+ */
+int send_flows(int fd)
+{
+    flow_lru_t::const_iterator flow_iterator;
+
+    printf("SENDING OLD FLOWS\n");
+    for(flow_iterator =flows.begin();flow_iterator!=flows.end();flow_iterator++)
+    {
+	if(send_update_flow(fd, (*flow_iterator).second.start, 
+				    (*flow_iterator).second.end, 
+				    (*flow_iterator).second.id) != 0)
+	    return 1;
+    }
+    return 0;
 }
 
 //------------------------------------------------------------
@@ -429,19 +438,18 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
     float start[3];
     float end[3];
 
-    ip_t *p = (ip_t *) erfptr->rec.eth.pload;
     flow_id_t tmpid;
     flow_info_t current;
 
-
-    ts32 = ts >> 32;
-
     assert(erfptr != NULL);
     assert(caplen > 0);
-    assert(ts32-lastts >= 0);
 
     
-    // expire old flows - once a second is often enough
+    ip_t *p = (ip_t *) erfptr->rec.eth.pload;
+    ts32 = ts >> 32;
+    assert(ts32-lastts >= 0);
+
+    // expire old flows - once a second is often enough for now
     if(ts32-lastts > 0)
     {
 	printf("bling\n");
@@ -474,28 +482,35 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts)
     if ( flows.find(tmpid) == flows.end() ) // this is a new flow
     {
 	flow_info_t flow_info;
-	//printf("Adding new flow\n");
 	
+	/*
+	printf("sending flow %i - %f %f %f -> %f %f %f\n", id,
+	    start[0],start[1],start[2],end[0],end[1],end[2]);
+*/
 	flow_info.id = id;
 	flow_info.time = ts32; 
+	flow_info.start[0] = start[0];
+	flow_info.start[1] = start[1];
+	flow_info.start[2] = start[2];
+	flow_info.end[0] = end[0];
+	flow_info.end[1] = end[1];
+	flow_info.end[2] = end[2];
 	get_colour(flow_info.colour, get_port(p), p->ip_p);
 	id++;
 
 	flows[tmpid] = flow_info;
 	current = flow_info;
     
-	if(send_new_flow(new_fd, start, end, flow_info.id) != 0)
+	if(send_new_flow(start, end, flow_info.id) != 0)
 	    return 1;
 
     }
     else // this is a flow we've already seen
     {
-	//printf("found flow---------\n");
-	flows[tmpid].time = ts32;
+	flows[tmpid].time = ts32; // update time last seen
 	current = flows[tmpid];
     }
-    printf("size = %i\n", ntohs(p->ip_len)); 
-    if(send_new_packet(new_fd, ts, current.id, current.colour, ntohs(p->ip_len)) !=0)
+    if(send_new_packet(ts, current.id, current.colour, ntohs(p->ip_len)) !=0)
 	return 1;
 
     lastts = ts32;

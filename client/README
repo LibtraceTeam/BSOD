@@ -1,19 +1,130 @@
-Bulding bsod-client.
+---------------------------------------------------------------------------
+Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+All rights reserved.
 
-Install:
- * libsdl-devel
- * SDL_net-devel
- * zlib-devel
+This code has been developed by the University of Waikato WAND
+research group. For further information please see http://www.wand.net.nz/.
+---------------------------------------------------------------------------
 
-Make sure OpenGL of some sort is also installed, you may need to install
-Mesa if the build fails to find OpenGL or GLU. You'll also need Python
-installed.
 
-Build bsod-client:
- * make
+This is the Windows binary release of the bsod client software. To download
+the bsod source or the bsod server, see http://www.wand.net.nz/. To use
+this software you must have access to a machine running the bsod server.
 
-Configure bsod-client:
- * vi data/config.lua
+The bsod client is based on the BuNg 3d engine written by Sam Jansen and
+Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information.
 
-Run:
- * ./runbsod.sh
+
+
+Using the bsod client:
+----------------------------------
+----------------------------------
+
+
+Configuration file:
+----------------------------------
+
+After unzipping the archive and before running the bsod executable, you
+must edit the configuration file to reflect where the bsod server is being
+run. The config file is written in the lua scripting language, and contains
+pairs of the form <key> = <value>. All values are either reals, integers or 
+double quote enclosed strings. Comments can be added with a double hyphen 
+(--), and any text after that point to the end of the line will be ignored.
+
+
+option:	start_location	type: {real, real, real}
+start_location is a triple specifying the X, Y and Z coordinates that the
+camera should initially be positioned at. Pressing the 'H' key while the
+client is running will display the current location, which can be useful
+for getting the coordinates of the position you would like to have the
+camera start at.
+
+
+option:	pitch		type: real
+Specify the pitch the camera should have when at its initial position.
+Pressing the 'H' key while the client is running will display the current 
+pitch, which can be useful for setting the pitch you would like to have the 
+camera start at.
+
+option:	heading		type: real
+Specify the heading the camera should have when at its initial position.
+Pressing the 'H' key while the client is running will display the current 
+heading, which can be useful for setting the heading you would like to have 
+the camera start at.
+
+
+option: display		type: string
+Specify the renderer that should be used when drawing the bsod client.
+Currently only opengl is supported and so this option should always have 
+the value "opengl".
+
+
+option: fullscreen	type: string
+Set this to "yes" to run the bsod client in fullscreen mode, otherwise set
+it to "no" to run it in a window.
+
+
+option: width		type: integer
+Specify the horizontal width (in pixels) that the bsod client should be
+displayed at.
+
+
+option: height		type: integer
+Specify the vertical height (in pixels) that the bsod client should be 
+displayed at.
+
+
+option: bpp		type: integer
+Specify the number of bits per pixel used for colour information.
+
+
+option: network_host	type: string
+Specify the host running the bsod server that will provide data to this 
+client. Takes a string of the form "host:port". The server must be running
+and connected to its data source before the client connects to the server.
+
+
+
+Controls
+----------------------------------
+
+Pitch up/down:		    mouse up/down, up arrow/down arrow
+Heading left/right:	    mouse left/right, left arrow/right arrow
+Forward:		    W
+Back:			    S
+Strafe left:		    A
+Strafe right:		    D
+Cycle traffic types left:   ,
+Cycle traffic types right:  .
+Toggle HUD display:	    H
+Toggle wireframe mode:	    R
+Take screenshot:	    M
+Quit:			    Q, escape
+
+
+The traffic types displayed on the client can be cycled using the ',' and '.'
+keys. It defaults to showing all traffic received from the server, but by 
+cycling it, specific traffic types can be shown in isolation. A small label
+in the bottom left corner shows what traffic is currently being shown.
+Depending on how the server is configured and where it is capturing data
+from, not all traffic types will show anything useful.
+
+The HUD display can be toggled between showing the current date/time and
+the debug hud, which will show the current position, pitch and heading of 
+the camera, as well as frame rate and the last few lines written to the log
+file.
+
+Screenshots will be saved in the bsod client directory as 
+screenshot-TIMESTAMP-COUNT.png
+
+
+
+Customisation
+----------------------------------
+
+You can change the images displayed at either side of the visualisation area
+by replacing the images in the data directory of the bsod client. The side
+that represents local address space (on the left hand side with default
+camera positioning) uses the file data/left.png while the world address space
+(on the right by default), uses the file data/right.png. Each particle 
+travelling through the display space is drawn as the image data/particle.png.

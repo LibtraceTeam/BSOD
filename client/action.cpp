@@ -11,7 +11,11 @@
 #include "texture_manager.h"
 #include "partvis.h"
 
+#ifdef NO_STLPORT
+#include <map>
+#else
 #include <hash_map>
+#endif
 
 // One thing I forgot about when implementing this are the mouse buttons (and mouse wheel)
 // They aren't exactly keys so dont really fit in with 'keycode'.  However, they may as
@@ -23,10 +27,12 @@ typedef void (CActionHandler::*ActionFunc)();
 // are constants or something?  I don't know.  But because of g++, we need to use ints in
 // our hash_map.
 //typedef hash_map<CActionHandler::Keycode, ActionFunc> ActionMap;
+#ifdef NO_STLPORT
+typedef map<int, ActionFunc> ActionMap;
+#else
 typedef hash_map<int, ActionFunc> ActionMap;
+#endif
 
-// Hopefully this is fast enough.  Its a hash-table, so it should be.
-// -- It all seems fast enough.  No reason to change certainly. - Sam
 ActionMap keyDownMap;
 ActionMap keyUpMap;
 
@@ -162,7 +168,9 @@ void CActionHandler::ToggleGhostMode()
 void CActionHandler::Screenshot()
 {
     char buffer[1024];
-    snprintf(buffer,sizeof(buffer),"screenshot-%u.png",(unsigned int)time(NULL));
+    static unsigned int ss_num = 0;
+    snprintf(buffer,sizeof(buffer),"screenshot-%u-%u.png",
+            (unsigned int)time(NULL), ++ss_num);
     CTextureManager::tm.SaveScreenshot(buffer);
 }
 

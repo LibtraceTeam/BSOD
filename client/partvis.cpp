@@ -1,7 +1,10 @@
 /* $Header$ $Log$
-/* $Header$ Revision 1.4  2004/02/17 01:59:08  stj2
-/* $Header$ w00t
-/* $Header$ */ 
+/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $ Revision 1.5  2004/02/17 02:05:21  stj2
+/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $ Still trying to get cvs tags correct.
+/* $Header: /home/cvs/wand-general/bsod/client/partvis.cpp,v 1.4 2004/02/17 01:59:08 stj2 Exp $
+ $Header$ Revision 1.4  2004/02/17 01:59:08  stj2
+ $Header$ w00t
+ $Header$ */ 
 #include "stdafx.h"
 
 #include "vector.h"
@@ -47,8 +50,8 @@ void CPartFlow::Draw()
 	CreateEndPoints();
 
     // Draw start and end points
-    d->SetColour(colours[0], colours[1], colours[2], (vertices.back() - start).Length() / (destination - start).Length());
-    //d->SetColour(colours[0], colours[1], colours[2], colours[3]);
+    //d->SetColour(colours[0], colours[1], colours[2], (vertices.back() - start).Length() / (destination - start).Length());
+    d->SetColour(colours[0], colours[1], colours[2], colours[3]);
     d->DrawTriangles2(
 	(float *)&endpoint_vertices[0],
 	(float *)&endpoint_tex_coords[0],

@@ -1,7 +1,10 @@
 /* $Header$ $Log$
-/* $Header$ Revision 1.3  2004/02/17 01:59:56  stj2
-/* $Header$ Cvs tags will be correct at one point. Surely.
-/* $Header$ */ 
+/* $Header: /home/cvs/wand-general/bsod/client/vector.cpp,v 1.3 2004/02/17 01:59:56 stj2 Exp $ Revision 1.4  2004/02/17 02:05:21  stj2
+/* $Header: /home/cvs/wand-general/bsod/client/vector.cpp,v 1.3 2004/02/17 01:59:56 stj2 Exp $ Still trying to get cvs tags correct.
+/* $Header: /home/cvs/wand-general/bsod/client/vector.cpp,v 1.3 2004/02/17 01:59:56 stj2 Exp $
+ $Header$ Revision 1.3  2004/02/17 01:59:56  stj2
+ $Header$ Cvs tags will be correct at one point. Surely.
+ $Header$ */ 
 // Vector3f.cpp
 // Created 21/1/2002 by Sam Jansen
 

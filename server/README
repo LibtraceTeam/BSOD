@@ -1,4 +1,4 @@
-bsod x.y.z
+bsod-server-x.y.z
 
 ---------------------------------------------------------------------------
 Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
@@ -9,8 +9,9 @@ research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
 
 
-This directory contains source code for bsod, a tool for the visualisation 
-of network traffic captured from live interfaces or from offline traces.
+This directory contains source code for bsod-server, one half of the bsod 
+tool for the visualisation of network traffic captured from live interfaces 
+or from offline traces.
 
 bsod was written to make use of the libtrace traffic processing library
 also developed by the WAND research group. This means that it can 
@@ -19,7 +20,8 @@ and DAG interfaces, as well as traces stored in erf and pcap formats.
 The bsod server has been tested on and is known to run in Debian GNU/Linux.
 
 
-It is licensed under ...
+It is licensed under the GNU General Public License (GPL) version 2. Please
+see the included file GPL for details of this license.
 
 The files CHANGES and TODO contain more information regarding the current
 release.

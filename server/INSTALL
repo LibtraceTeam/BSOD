@@ -1,4 +1,4 @@
-Installing bsod:
+Installing bsod-server:
 
 ----------------------------------
 The bsod server requires:
@@ -9,33 +9,18 @@ The bsod server requires:
 
 
 ----------------------------------
-The bsod client requires:
-
-*
-*
-
-
-
-----------------------------------
 To make and install the bsod server:
 
 Ensure that libtrace is properly installed (refer to the
 documentation that comes with it for information on how to do this).
 
 
-tar xzvf bsod-x.y.z.tar.gz
+tar xzvf bsod-server-x.y.z.tar.gz
 cd bsod-x.y.z
 cd server
 make
 (as root)
 make install 
-
-
-
-----------------------------------
-To make and install the bsod client:
-
-
 
 
 
@@ -52,9 +37,4 @@ Usage: /usr/local/bsod/bin/bsod_server [-h] [-b] -C <configfile>
     -b			background (daemonise) the bsod server
     -C <configfile>	specify an alternate configuration file instead of
 			the default /usr/local/bsod/etc/bsod_server.conf
-
-
-
-----------------------------------
-Running the bsod client:
 

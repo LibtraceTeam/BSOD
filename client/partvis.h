@@ -8,13 +8,16 @@ private:
     vector<Vector2f> tex_coords;
     vector<byte> colours;
     CTexture *tex;
+
+    vector<Vector3f> endpoint_vertices;
+    vector<Vector2f> endpoint_tex_coords;
     
     Vector3f translation;
     Vector3f start;
     Vector3f destination;
 
     unsigned short offset;
-    // CEntity ?
+    unsigned short count;
     
 public:
     CPartFlow();
@@ -25,6 +28,8 @@ public:
 	
     void MoveParticles();
     void AddParticle(byte r, byte g, byte b, unsigned short size);
+    void ResetCounter() { count = 0; }
+    void CreateEndPoints();
 
     static float time_to_live;
 
@@ -52,6 +57,8 @@ public:
 	byte g, byte b, unsigned short size);
     void RemoveFlow(unsigned int id);
     uint32 GetLastTimestamp() { return last_timestamp; }
+    void BeginUpdate();
+    void EndUpdate();
 
     CPartFlow * make_flow(int);
 };

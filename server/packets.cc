@@ -171,10 +171,10 @@ void expire_flows(uint32_t time)
  */ 
 int send_flows(int fd)
 {
-	flow_lru_t::const_iterator flow_iterator;
-
 	Log(LOG_DAEMON|LOG_INFO,"Updating new client with all flows in progress...\n");
-	for(flow_iterator =flows.begin();flow_iterator!=flows.end();flow_iterator++)
+	for(flow_lru_t::const_iterator flow_iterator=flows.begin();
+			flow_iterator!=flows.end();
+			++flow_iterator)
 	{
 		if(send_update_flow(fd, (*flow_iterator).second.start, 
 					(*flow_iterator).second.end, 

@@ -46,18 +46,18 @@ static uint8_t countercolours[][3] = {
 };
 
 struct ports_t {
-	uint32_t src;
-	uint32_t dst;
+	uint16_t src;
+	uint16_t dst;
 };
 
 #define SW_IP_OFFMASK 0xff1f
 
 static uint16_t get_source_port(struct libtrace_ip *ip)
 {
-	if (0 != ip->ip_p
+	if (6 != ip->ip_p
 	  && 17 != ip->ip_p)
 		return 0;
-	if (0 != ip->ip_off & SW_IP_OFFMASK)
+	if (0 != (ip->ip_off & SW_IP_OFFMASK))
 		return 0;
 
 	struct ports_t *port;
@@ -68,10 +68,11 @@ static uint16_t get_source_port(struct libtrace_ip *ip)
 
 static uint16_t get_destination_port(struct libtrace_ip *ip)
 {
-	if (0 != ip->ip_p
+	if (6 != ip->ip_p
 	  && 17 != ip->ip_p)
 		return 0;
-	if (0 != ip->ip_off & SW_IP_OFFMASK)
+
+	if (0 != (ip->ip_off & SW_IP_OFFMASK))
 		return 0;
 
 	struct ports_t *port;
@@ -109,8 +110,10 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 
 	int i;
 	struct libtrace_ip *ip = trace_get_ip(packet);
-	if (!ip)
-		return 1;
+	if (!ip) {
+		*id_num = OTHER;
+		return 0;
+	}
 
 	int protocol = ip->ip_p;
 	int port = trace_get_server_port(
@@ -120,7 +123,6 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 		? get_source_port(ip)
 		: get_destination_port(ip);
 
-
 	switch(port)
 	{
 	case 80:
@@ -128,7 +130,7 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 		break;
 
 	case 21: 
-	case 20: for(i=0;i<3;i++)
+	case 20: 
 		*id_num = FTP;
 		break;
 

@@ -203,7 +203,7 @@ int get_end_pos(float end[3], struct in_addr dest, int iface, struct modptrs_t *
 }
 
 //------------------------------------------------------------
-int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts, struct modptrs_t *modptrs)
+int per_packet(void *buffer, uint32_t caplen, uint64_t ts, struct modptrs_t *modptrs, struct libtrace_t *trace)
 {
 
 	int hlen = 0;
@@ -212,14 +212,17 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts, struct 
 	uint32_t ts32;
 	float start[3];
 	float end[3];
+	int direction = -1;
+
 
 	flow_id_t tmpid;
 	flow_info_t current;
 
-	assert(erfptr != NULL);
+	assert(buffer != NULL);
 	assert(caplen > 0);
 
-	ip_t *p = (ip_t *) erfptr->rec.eth.pload;
+	struct libtrace_ip *p = get_ip(trace,buffer,caplen);
+	//ip_t *p = (ip_t *) erfptr->rec.eth.pload;
 	ts32 = ts >> 32;
 	assert(ts32-lastts >= 0);
 
@@ -276,21 +279,26 @@ int per_packet(const dag_record_t *erfptr, uint32_t caplen, uint64_t ts, struct 
 	tmpid.destip = p->ip_dst;
 
 
+
 	if ( flows.find(tmpid) == flows.end() ) // this is a new flow
 	{
 		flow_info_t flow_info;
 
+		direction = modptrs->direction(trace, buffer,caplen);
+
 		// populate start and end arrays
 		// also checks that we want traffic from this iface
 		if(get_start_pos(start, 
-					tmpid.sourceip, 
-					erfptr->flags.iface,
-					modptrs) != 0)
+				tmpid.sourceip, 
+				direction,
+				/*erfptr->flags.iface,*/
+				modptrs) != 0)
 			return 0;
 		if(get_end_pos(end, 
-					tmpid.destip, 
-					erfptr->flags.iface,
-					modptrs) != 0)
+				tmpid.destip, 
+				direction,
+				/*erfptr->flags.iface,*/
+				modptrs) != 0)
 			return 0;
 
 		flow_info.id = id;

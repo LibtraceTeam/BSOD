@@ -3,6 +3,7 @@
 #include <endian.h>
 #include "libtrace.h"
 
+
 /**
  * interface just looks at the interface bit in the erf header
  */
@@ -12,3 +13,6 @@ int mod_get_direction(struct libtrace_packet_t packet)
 }
 
 
+void mod_init_dir(char* filename)
+{
+}

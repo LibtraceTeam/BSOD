@@ -135,14 +135,14 @@ option: dir_module	type: string
     the erf header to decide between incoming and outgoing traffic. If
     you are using a pcap based format instead of erf, you will want to
     use the module "plugins/direction/destmac.so". If you use this
-    alternate module, you will need to specify the file containing local
+    alternate module, you will need to specify the file containing remote
     mac addresses with the 'macaddrfile' option. Whether the packet is
     destined to or coming from one of these listed mac addresses is used
     to determine which way it is travelling.
 
 option: macaddrfile	type: string
     If using the "plugins/direction/destmac.so" module for direction, then
-    you need to explicitly specify all local mac addresses that could
+    you need to explicitly specify all remote mac addresses that could
     possibly appear in the trace/capture. These should be in the standard
     colon seperated hex notation (eg 00:11:22:33:44:55), one address per 
     line in the file. Defaults to "/usr/local/bsod/etc/mac_addrs".
@@ -190,7 +190,7 @@ The primary cause of this is using the wrong direction module in the server.
 If you are using a DAG capture card or reading from erf traces, make sure
 that the 'interface' module is used. If reading straight from a network
 interface or a pcap trace, the 'destmac' direction module should be used,
-and the mac_addrs config file should contain local mac addresses.
+and the mac_addrs config file should contain remote mac addresses.
 
 
 Problem:

@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 		printf("sigaction SIGUSR1: %d\n",errno);
 	}
 	
-	sigact.sa_handler = sig_hnd;
+	sigact.sa_handler = SIG_IGN;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 

@@ -223,7 +223,7 @@ int get_end_pos(float end[3], struct in_addr dest, int iface, struct modptrs_t *
 }
 
 //------------------------------------------------------------
-int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map)
+int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList )
 {
 
 	int hlen = 0;
@@ -463,11 +463,21 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	    last = now;
 	}
 
-
-	if(send_new_packet(ts, current.id, current.colour, ntohs(p->ip_len),
-		    speed) !=0)
-	    return 1;
-
+	/* check the packet against the addresses in the blacklist */
+	if( theList->poke( &packet ) == 1 )
+	{
+	    /* darknet traffic - going to address with no machine */
+	    if(send_new_packet(ts, current.id, current.colour, 
+			ntohs(p->ip_len), speed, true) !=0)
+		return 1;
+	}
+	else
+	{
+	    /* normal traffic - going to address with a machine */
+	    if(send_new_packet(ts, current.id, current.colour, 
+			ntohs(p->ip_len), speed, false) !=0)
+		return 1;
+	}
 
 	return 0;
 }

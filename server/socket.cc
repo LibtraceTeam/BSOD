@@ -73,6 +73,7 @@ struct pack_update_t {
 	uint8_t colour[3];
 	uint16_t size;
 	float speed; // This affects the speed of the entire flow based on RTT
+	bool dark;
 } __attribute__((packed));
 
 /* structure for expire flow packets */
@@ -348,7 +349,7 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 
 //-------------------------------------------------------------------
 int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size,
-	float speed)
+	float speed, bool dark)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
@@ -359,6 +360,7 @@ int send_new_packet(uint64_t ts, uint32_t id, uint8_t colour[3],uint16_t size,
 	update.colour[2] = colour[2];
 	update.size = size;
 	update.speed = speed;
+	update.dark = dark;
 
 	union pack_union *punion;
 	punion = (pack_union *)&update;

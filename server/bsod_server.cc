@@ -71,6 +71,7 @@
 #include "debug.h"
 
 #include "RTTMap.h"
+#include "Blacklist.h"
 
 typedef struct ip ip_t;
 
@@ -135,6 +136,8 @@ int main(int argc, char *argv[])
 {
 	// RTTMap:
 	RTTMap *rttmap = new RTTMap();
+	// Blacklist:
+	blacklist *theList = new blacklist( "./blist/", 5, 600 );
     
 	// socket stuff
 	int listen_socket;
@@ -289,7 +292,7 @@ int main(int argc, char *argv[])
 			}
 			
 			// if sending fails, assume we just lost a client
-			if(per_packet(packet, ts, &modptrs, rttmap) != 0)
+			if(per_packet(packet,ts, &modptrs, rttmap, theList) !=0)
 				continue;
 		}
 		// We've finished with this trace
@@ -310,6 +313,7 @@ goodbye:
 
 	close_modules();
 	delete rttmap;
+	delete theList;
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 	exit(0);
 

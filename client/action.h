@@ -64,6 +64,7 @@ public:
 	void ToggleGhostMode();
 	void Pause();
 	void Screenshot();
+    void ToggleDebugDisplay();
 };
 
 #endif // _ACTION_H_

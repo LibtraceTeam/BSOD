@@ -34,6 +34,7 @@ public:
 	CResourceManager *resources;
 	CPartVis	*partVis;
 	ISoundProvider	*soundProvider;
+	bool debug_display;
 	
 	void Draw();
 	void Update(float diff);

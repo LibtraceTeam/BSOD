@@ -57,6 +57,7 @@ CActionHandler::CActionHandler()
 	keyDownMap[ BKC_LEFTMOUSEBUT ] = &CActionHandler::Fire;
 
 	keyUpMap[ BKC_M ] = &CActionHandler::Screenshot;
+	keyUpMap[ BKC_H ] = &CActionHandler::ToggleDebugDisplay;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -160,6 +161,10 @@ void CActionHandler::ToggleGhostMode()
 
 void CActionHandler::Screenshot()
 {
-    Log("CActionHandler::Screenshot\n");
     CTextureManager::tm.SaveScreenshot("screenshot.png");
+}
+
+void CActionHandler::ToggleDebugDisplay()
+{
+    world.debug_display = !world.debug_display;
 }

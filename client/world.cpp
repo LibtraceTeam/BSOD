@@ -32,6 +32,7 @@ CWorld::CWorld()
 	entities = NULL;
 	resources = NULL;
 	partVis = NULL;
+	debug_display = false;
 }
 
 CWorld::~CWorld()
@@ -69,7 +70,8 @@ void CWorld::Draw()
 	time_t timestamp = partVis->GetLastTimestamp();
 	char tbuf[256];
 
-	strftime(tbuf, 256, "%a %H:%M:%S", localtime(&timestamp));
+	strftime(tbuf, 256, "%a %b %d %T %Z %G", localtime(&timestamp));
+	// %a %b %d %R %Z %G
 
 	display->BeginFrame2();
 
@@ -87,7 +89,7 @@ void CWorld::Draw()
 		frames = 0;
 	}
 	
-#if 0
+    if(debug_display) {
 	display->Begin2D();
 	display->SetColour(0.2f, 0.1f, 0.3f, 0.8f);
 	display->BindTexture(NULL);
@@ -117,7 +119,27 @@ void CWorld::Draw()
 	display->DrawString2(10, 60, CReporter::GetLog().front());
 
 	display->End2D();
-#endif
+    } else {
+	float w = 270, h = 20;
+	float x = 0, y = display->GetHeight() - 20;
+	string str;
+
+	str = tbuf;
+	
+	display->Begin2D();
+	display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
+	display->BindTexture(NULL);
+	display->SetBlend(true);
+	display->SetBlendMode(CDisplayManager::Transparent);
+	display->Draw2DQuad(x, y, x + w, y + h);
+	display->SetBlendMode(CDisplayManager::Multiply);
+	display->SetBlend(false);
+	display->SetColour(1.0f, 1.0f, 1.0f);
+	display->DrawString2(x+3, y+1, str);
+	display->End2D();
+    }
+
+
 	display->EndFrame2();
 }
 

@@ -53,7 +53,7 @@ public:
 	CLinuxSystemDriver() : done(false) {  }
 
 	virtual CDisplayManager *InitDisplay(int width, int height, int bpp, bool fullScreen, 
-		DisplayType type);
+		DisplayType type, char *title);
 	virtual int RunMessageLoop();
 	virtual void ResizeWindow(int width, int height);
 	virtual void Quit();

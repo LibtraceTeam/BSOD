@@ -98,7 +98,8 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 		int height, 
 		int bpp, 
 		bool fullScreen, 
-		DisplayType type)
+		DisplayType type,
+		char *title/*not used*/)
 {
     int flags = SDL_OPENGL;
 

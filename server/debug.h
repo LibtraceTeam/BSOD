@@ -3,5 +3,5 @@
 
 // $Id$
 
-void log(int priority, char *fmt, ...);
+void Log(int priority, char *fmt, ...);
 #endif // _DEBUG_H_

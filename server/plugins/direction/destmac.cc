@@ -12,6 +12,10 @@
 #include <libtrace.h>
 #include <dagformat.h>
 
+#include "../../debug.h"
+#include <syslog.h>
+
+
 int macsloaded = 0;
 uint64_t *macs = 0;
 
@@ -48,14 +52,17 @@ void mod_init_dir(char* filename)
     char *buffer;
     int lines = 0;
     uint8_t octets[ETH_ALEN];
-    int i = 0;
+    //int i = 0;
     int num = 0;
 
 
     buffer = (char *)malloc(65536);
     if( (fin = fopen(filename,"r")) == NULL)
     {
-	err(1, "Couldn't load mac address file %s, giving up", filename);
+	Log(LOG_DAEMON|LOG_INFO,
+		"Couldn't load mac address file '%s', giving up\n", filename);
+	exit(1);
+	//err(1, "Couldn't load mac address file %s, giving up", filename);
     }
 
     while (fgets(buffer,65536,fin)) {
@@ -81,10 +88,11 @@ void mod_init_dir(char* filename)
 
     free(buffer);
 
+    /*
     for (i = 0 ; i < macsloaded; i ++) {
 	printf("%lld\n",macs[i]);
     }
-
+    */
 
     return;
 

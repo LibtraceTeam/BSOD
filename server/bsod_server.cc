@@ -164,14 +164,14 @@ int main(int argc, char *argv[])
 
 	// add the listening socket to the master set
 	fd_max = listen_socket; // biggest file descriptor
-	log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
+	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
 
 
 
 
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
-			log(LOG_DAEMON|LOG_INFO,"Rereading configuration file upon user request\n");
+			Log(LOG_DAEMON|LOG_INFO,"Rereading configuration file upon user request\n");
 			restart_config = 0;
 			close_modules();
 			do_configuration(0,0);
@@ -191,13 +191,13 @@ int main(int argc, char *argv[])
 
 		//------- Connect trace ----------
 		trace = trace_create(uri);
-		log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
+		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
 		gettimeofday(&starttime, 0); // XXX
 
 		//----- Check live status --------
 		if ((!strncmp(uri,"erf:",4)) || (!strncmp(uri,"pcap:",5))) {
 			// erf or pcap trace, slow down!
-			log(LOG_DAEMON|LOG_INFO,"Attempting to replay trace in real time\n");
+			Log(LOG_DAEMON|LOG_INFO,"Attempting to replay trace in real time\n");
 			live = false;
 		} else {
 			live = true;
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 			free(filter);
 		filter = 0;
 		if (filterstring) {
-			log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
+			Log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
 			filter = trace_bpf_setfilter(filterstring);
 		}
 
@@ -271,7 +271,7 @@ goodbye:
 	close(listen_socket);
 
 	close_modules();
-	log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
+	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 	exit(0);
 
 }
@@ -367,7 +367,7 @@ void do_configuration(int argc, char **argv) {
 	// parse configfile opts
 	if (configfile) {
 		if (parse_config(main_config,configfile)) {
-			log(LOG_DAEMON|LOG_ALERT,"Bad config file %s, giving up\n",
+			Log(LOG_DAEMON|LOG_ALERT,"Bad config file %s, giving up\n",
 					configfile);
 			exit(1);
 		}
@@ -387,13 +387,13 @@ static void load_modules() {
 	snprintf(tmp,4096,"%s%s",basedir,colourmod);
 	colourhandle = dlopen(tmp,RTLD_LAZY);
 	if (!colourhandle) {
-		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		assert(colourhandle);
 	}
 
 	modptrs.colour = (colfptr) dlsym(colourhandle, "mod_get_colour");
 	if ((error = dlerror()) != NULL) {
-		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.colour);
 	}
 
@@ -402,13 +402,13 @@ static void load_modules() {
 	snprintf(tmp,4096,"%s%s",basedir,leftpos);
 	lefthandle = dlopen(tmp,RTLD_LAZY);
 	if (!lefthandle) {
-		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		assert(lefthandle);
 	}
 
 	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
 	if ((error = dlerror()) != NULL) {
-		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.left);
 	}
 
@@ -417,13 +417,13 @@ static void load_modules() {
 	snprintf(tmp,4096,"%s%s",basedir,rightpos);
 	righthandle = dlopen(tmp,RTLD_LAZY);
 	if (!righthandle) {
-		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		assert(righthandle);
 	}
 	
 	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
 	if ((error = dlerror()) != NULL) {
-		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.right);
 	}
 
@@ -432,13 +432,13 @@ static void load_modules() {
 	snprintf(tmp,4096,"%s%s",basedir,dirmod);
 	dirhandle = dlopen(tmp,RTLD_LAZY);
 	if (!dirhandle) {
-		log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		assert(dirhandle);
 	}
 
 	modptrs.init_dir = (initdirfptr) dlsym(dirhandle,"mod_init_dir");
 	if ((error = dlerror()) != NULL) {
-		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.init_dir);
 	}
 
@@ -451,7 +451,7 @@ static void load_modules() {
 
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = dlerror()) != NULL) {
-		log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.direction);
 	}
 

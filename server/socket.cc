@@ -89,7 +89,7 @@ void add_fd(int fd)
 /* Removes a given structure from the list of file descriptors */
 void remove_fd(struct client *tmp)
 {
-	log(LOG_DAEMON|LOG_INFO,"Removing client on fd %i\n", tmp->fd);
+	Log(LOG_DAEMON|LOG_INFO,"Removing client on fd %i\n", tmp->fd);
 
 	FD_CLR(tmp->fd, &read_fds);
 	close(tmp->fd);
@@ -236,7 +236,7 @@ int send_all(pack_union *data)
 		size = sizeof(flow_remove_t);
 	else
 	{
-		log(LOG_DAEMON|LOG_ALERT,"Bad packet type\n");
+		Log(LOG_DAEMON|LOG_ALERT,"Bad packet type\n");
 		return 1;
 	}
 	// send to all clients 
@@ -244,7 +244,7 @@ int send_all(pack_union *data)
 	{
 		if(send(tmp->fd, data, size, 0) != size){
 			perror("send_all");
-			log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
+			Log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
 			remove_fd(tmp);
 			return 1;
 		}
@@ -306,7 +306,7 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 	if(send(fd, &update, sizeof(struct flow_update_t), 0) 
 			!= sizeof(struct flow_update_t )){
 		perror("send_new_flow");
-		log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
 		return 1;
 	}
 

@@ -56,7 +56,8 @@ void CGLDisplayManager::Initialise()
 {
 	// Start Of User Initialization
 
-	//glClearColor (0.05f, 0.05f, 0.17f, 0.5f);					
+	glClearColor (0.0f, 0.0f, 0.0f, 0.5f);					
+
 	glClearDepth (1.0f); // Depth Buffer Setup
 	glDepthFunc (GL_LEQUAL); // The Type Of Depth Testing (Less Or Equal)
 	glEnable (GL_DEPTH_TEST); // Enable Depth Testing
@@ -107,7 +108,8 @@ void CGLDisplayManager::Initialise()
 	default_font.Load(
 			//"font/Times_New_Roman_12");
 			//"font/Arial_12");
-			"font/Verdana_Ref_11");
+			//"font/Verdana_Ref_11");
+			"font/Courier_New_11");
 			//"font/Lucida_Console_11");
 	//default_font.SetBold(true);
 

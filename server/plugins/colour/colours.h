@@ -2,10 +2,9 @@
 #define _COLOURS_H
 
 #include <stdint.h>
-/** get_colour() accepts an array of 3 chars, and the IP protocol and TCP or UDP port 
- * value. It then makes "a decision" on these two parameters, and fills in the color
- * array with appropriate RGB values.
- * 
+/** get_colour() accepts an array of 3 chars, and the IP protocol 
+ *  and TCP or UDP port value. It then makes "a decision" on these two 
+ *  parameters, and fills in the color array with appropriate RGB values.
  */
 
 extern "C" {

@@ -7,7 +7,7 @@ CXXFLAGS += $(INCLUDE)
 LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfig -lfl
 
 BINS = bsod_server
-OBJS = socket.o packets.o daemons.o debug.o RTTMap.o
+OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o
 
 PREFIX=/usr/local/bsod
 

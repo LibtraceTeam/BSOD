@@ -17,6 +17,23 @@ and read the BUNG_LICENSE included with this release.
 
 
 
+Changes to the client since the first release:
+==============================================
+
+*	Vastly better performance when a lot of flows are created and destroyed 
+	in a short period of time.
+*	Performance improvements across the board.
+*	Several new options to play with in the config file (see below).
+*	Added help page (press F1 while the client is running).
+*	P2P ports have their own colour now (for common ports only).
+*	Particles are jittered in low framerate situations making the 
+	visualization look more pleasing.
+*	New particle alpha map (looks nicer and creates dots, not squares, when 
+	particles are pilled on top of each other).
+*	Added the ability to toggle between all traffic and darknet traffic, 
+	allowing you to see scans and other "garbage" traffic more easily.
+
+
 Using the bsod client:
 ----------------------------------
 ----------------------------------
@@ -46,16 +63,19 @@ at our capture point). The colours can be changed by replacing the colour
 plugin the server uses, but the default colours based around port and
 protocol are:
 
-http:		blue
-https:		light blue
+http:			blue
+https:			light blue
 smtp/pop/imap:	red
-ftp:		green
-dns:		yellow
-ssh/telnet:	grey
-windows:	orange
-irc:		khaki brown
-ntp:		matte green
-vpn:		bright green
+ftp:			green
+dns:			yellow
+ssh/telnet:		grey
+windows:		orange
+irc:			khaki brown
+ntp:			matte green
+vpn:			bright green
+p2p:			toxic green (common p2p ports are processed but due to the 
+				large port ranges used by modern p2p apps it is impossible to 
+				mark all p2p traffic)
 
 icmp:		teal
 other tcp:	purple
@@ -73,6 +93,10 @@ pairs of the form <key> = <value>. All values are either reals, integers or
 double quote enclosed strings. Comments can be added with a double hyphen 
 (--), and any text after that point to the end of the line will be ignored.
 
+Tweaking some of these options can yield large performance increases and make
+visualizations of large amounts of traffic more readable. The default values
+are optimal for the University of Waikato capture, for other networks these 
+values should be changed appropiately.
 
 option:	start_location	type: {real, real, real}
 start_location is a triple specifying the X, Y and Z coordinates that the
@@ -82,42 +106,79 @@ for getting the coordinates of the position you would like to have the
 camera start at.
 
 
-option:	pitch		type: real
+option:	pitch			type: real
 Specify the pitch the camera should have when at its initial position.
 Pressing the 'H' key while the client is running will display the current 
 pitch, which can be useful for setting the pitch you would like to have the 
 camera start at.
 
-option:	heading		type: real
+option:	heading			type: real
 Specify the heading the camera should have when at its initial position.
 Pressing the 'H' key while the client is running will display the current 
 heading, which can be useful for setting the heading you would like to have 
 the camera start at.
 
 
-option: display		type: string
+option: display			type: string
 Specify the renderer that should be used when drawing the bsod client.
 Currently only opengl is supported and so this option should always have 
 the value "opengl".
 
 
-option: fullscreen	type: string
+option: fullscreen		type: string
 Set this to "yes" to run the bsod client in fullscreen mode, otherwise set
 it to "no" to run it in a window.
 
 
-option: width		type: integer
+option: width			type: integer
 Specify the horizontal width (in pixels) that the bsod client should be
 displayed at.
 
 
-option: height		type: integer
+option: height			type: integer
 Specify the vertical height (in pixels) that the bsod client should be 
-displayed at.
+displayed at. Lower the width and height to a value such as 640x480 to
+get better performance at the expense of image quality.
 
 
-option: bpp		type: integer
+option: bpp				type: integer
 Specify the number of bits per pixel used for colour information.
+Lowering this to 16 may improve performance on some graphics cards.
+
+
+option: speed			type: real
+Sets a modifier to the speed that packets will travel at. Increasing this 
+will mean fewer packets on the screen at one time and therefore better
+performance. This value should be greater than 0.
+
+
+option: size			type: real
+Sets a modifier to the size of particles. Set this to something smaller such
+as 0.5 (1/2 size) to make particles smaller and improve performance. It will
+also help making a very busy display (lots of traffic) easier to read.
+
+
+option: jitter			type: string
+This option should be set to "yes". It will jitter particles in low framerate
+situations to avoid a banding effect that would otherwise happen and make the
+visualization look better. Setting it to "no" will disable this; doing so is 
+not recommended.
+
+
+option: billboard		type: string
+Can be "yes" or "no". For now this should be set to "no" as the feature is
+not implemented.
+
+
+option: particle		type: string
+Sets the path and filename of the alpha texture to use for the particles.
+
+
+option: do_gcc			type: string
+Every 10 minuted a garbage collection will be performed to throw away old,
+unused flows. This can mean a slight impact in performance when the garbage 
+collector runs. Setting this option to "no" may be a good idea if you have 
+a lot of memory and periodically restart the client anyway.
 
 
 option: network_host	type: string
@@ -130,18 +191,22 @@ and connected to its data source before the client connects to the server.
 Controls
 ----------------------------------
 
-Pitch up/down:		    mouse up/down, up arrow/down arrow
-Heading left/right:	    mouse left/right, left arrow/right arrow
-Forward:		    W
-Back:			    S
-Strafe left:		    A
-Strafe right:		    D
-Cycle traffic types left:   ,
-Cycle traffic types right:  .
-Toggle HUD display:	    H
-Toggle wireframe mode:	    R
-Take screenshot:	    M
-Quit:			    Q, escape
+Help:						F1
+Pitch up/down:				mouse up/down, up arrow/down arrow
+Heading left/right:			mouse left/right, left arrow/right arrow
+Forward:					W
+Back:						S
+Strafe left:				A
+Strafe right:				D
+Cycle traffic types left:	,
+Cycle traffic types right:	.
+Toggle HUD display:			H
+Toggle wireframe mode:		R
+Take screenshot:			M
+Toggle darknet modes:		/
+Increase speed:				=
+Decrease speed:				-
+Quit:						Esc
 
 
 The traffic types displayed on the client can be cycled using the ',' and '.'
@@ -161,6 +226,31 @@ screenshot-TIMESTAMP-COUNT.png
 
 
 
+BSOD recommended system specs:
+==============================
+
+The machine being used to develop BSOD has the following specs: 
+AMD AthlonXP 1800+, 512MB RAM, nVidia GF4-MX. BSOD should run on nearly any 
+system with an OpenGL compatible 3D card but running it on anything less than 
+the above is not recommended unless you are only monitoring a very low 
+traffic network. 
+
+If you are running BSOD on a large network take into account that having a 
+large number of flows is CPU intensive while having a large number of packets 
+is GPU intensive. I.e. if you see many flows with very low packet count 
+(mostly scans and worm traffic) using a fast CPU will be more important than 
+a fast graphics card. If you see fewer flows but with large amounts of 
+packets on them (most normal traffic, especially p2p) a fast graphics card 
+becomes more important. If you see a lot of flows with a lot of packets you 
+will want to use the fastest computer money can buy (BSOD really starts to 
+crawl on large traffic volume networks, we are currently looking at further 
+optimizing it to work better when visualizing these networks). When it comes 
+to graphics card performance fillrate is the bottleneck so this is something 
+to look for (rather than vertex performance) when considering buying a 
+graphics card specifically for BSOD.
+
+
+
 Customisation
 ----------------------------------
 
@@ -170,3 +260,9 @@ that represents local address space (on the left hand side with default
 camera positioning) uses the file data/left.png while the world address space
 (on the right by default), uses the file data/right.png. Each particle 
 travelling through the display space is drawn as the image data/particle.png.
+
+
+
+
+
+vim: ts=4

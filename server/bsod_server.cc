@@ -22,6 +22,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <assert.h>
+#include <syslog.h>
 
 #include <libtrace.h>
 
@@ -33,7 +34,8 @@
 
 #include "socket.h"
 #include "packets.h"
-
+#include "daemons.h"
+#include "debug.h"
 
 typedef struct ip ip_t;
 
@@ -54,13 +56,17 @@ struct timeval nowtime;
 uint32_t ts32 = 0;
 uint32_t startts32 = 0;
 
+int background = 0;
+char *pidfile = 0;
+
 char *filterstring = 0;
 char *colourmod = 0;
 char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *configfile = "./bsod_server.config";
-static char* uri = 0; // default is nothing
+static char* uri = 0; 
+
 int port = 32500;
 int loop = 0;
 int shownondata = 0;
@@ -86,7 +92,7 @@ void do_usage(char* name)
 static void load_modules();
 static void close_modules();
 static void init_times();
-void offline_delay(struct timeval tv);
+static void offline_delay(struct timeval tv);
 
 int main(int argc, char *argv[])
 {
@@ -137,22 +143,36 @@ int main(int argc, char *argv[])
 	// do some command line stuff for ports and things
 
 	do_configuration(argc,argv);
+
+	//-------------------------------------------------------
+	// daemonise, and write out pidfile.
+
+	if (background == 1) {
+		// don't chdir
+		daemonise(argv[0],0);
+		// write out pidfile
+		put_pid(pidfile);
+
+	}
+	
+
 	//-------Setup listen socket-----------
 	listen_socket = setup_listen_socket(); // set up socket
 	bind_tcp_socket(listen_socket, port); // bind and start listening
 
 	// add the listening socket to the master set
 	fd_max = listen_socket; // biggest file descriptor
-	printf("Waiting for connection on port %i...\n", port);
+	log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
 
 
 
 
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
+			log(LOG_DAEMON|LOG_INFO,"Rereading configuration file upon user request\n");
 			restart_config = 0;
 			close_modules();
-			do_configuration(argc,argv);
+			do_configuration(0,0);
 			load_modules();
 		}
 
@@ -169,13 +189,13 @@ int main(int argc, char *argv[])
 
 		//------- Connect trace ----------
 		trace = trace_create(uri);
-		printf("Connected to data source: %s\n", uri);
+		log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
 		gettimeofday(&starttime, 0); // XXX
 
 		//----- Check live status --------
 		if ((!strncmp(uri,"erf:",4)) || (!strncmp(uri,"pcap:",5))) {
 			// erf or pcap trace, slow down!
-			printf("Attempting to replay trace in real time\n");
+			log(LOG_DAEMON|LOG_INFO,"Attempting to replay trace in real time\n");
 			live = false;
 		} else {
 			live = true;
@@ -186,7 +206,7 @@ int main(int argc, char *argv[])
 			free(filter);
 		filter = 0;
 		if (filterstring) {
-			printf("setting filter %s\n",filterstring);
+			log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
 			filter = trace_bpf_setfilter(filterstring);
 		}
 
@@ -230,7 +250,7 @@ int main(int argc, char *argv[])
 			
 			// if sending fails, assume we just lost a client
 			if(per_packet(packet, ts, &modptrs) != 0)
-				break;
+				continue;
 		}
 		// We've finished with this trace
 		trace_destroy(trace);
@@ -249,7 +269,7 @@ goodbye:
 	close(listen_socket);
 
 	close_modules();
-	printf("Exiting...\n");
+	log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 	exit(0);
 
 }
@@ -261,7 +281,6 @@ void sig_hnd( int signo )
 }
 
 static void sigusr_hnd(int signo) {
-	printf("siguser handler\n");
 	restart_config = 1;
 }
 
@@ -278,12 +297,30 @@ void set_defaults() {
 	showcontrol = 1;
 }
 
+void fix_defaults() {
+	if (!colourmod)
+		colourmod=strdup("plugins/colour/colours.so");
+	if (!leftpos)
+		leftpos=strdup("plugins/position/network16.so");
+	if (!rightpos)
+		rightpos=strdup("plugins/position/radial.so");
+	if (!dirmod)
+		dirmod=strdup("plugins/direction/interface.so");
+	if (!pidfile)
+		pidfile=strdup("/var/run/bsod_server.pid");
+	
+}
+
 void do_configuration(int argc, char **argv) {
 	int opt;
 
+	// void everything
 	set_defaults();
 
+	// initialise config parser
 	config_t main_config[] = {
+		{"pidfile", TYPE_STR|TYPE_NULL, &pidfile},
+		{"background", TYPE_INT|TYPE_NULL, &background},
 		{"source", TYPE_STR|TYPE_NULL, &uri},
 		{"listenport", TYPE_INT|TYPE_NULL, &port},
 		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
@@ -296,12 +333,17 @@ void do_configuration(int argc, char **argv) {
 		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
 		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
 		{0,0,0}
-
 	};
-	while( (opt = getopt(argc, argv, "hs:p:f:c:l:r:d:LC:")) != -1)
+
+	// read cmdline opts
+	
+	while( argv && (opt = getopt(argc, argv, "hdC:")) != -1)
 	{
 		switch(opt)
 		{
+			case 'd':
+				background = 1;
+				break;
 			case 'h':
 				do_usage(argv[0]);
 				break;
@@ -312,13 +354,17 @@ void do_configuration(int argc, char **argv) {
 		};
 	}
 
+	// parse configfile opts
 	if (configfile) {
 		if (parse_config(main_config,configfile)) {
-			fprintf(stderr,"Bad config file %s, giving up\n",
+			log(LOG_DAEMON|LOG_ALERT,"Bad config file %s, giving up\n",
 					configfile);
 			exit(1);
 		}
 	}
+	// if any options were omitted from the config file,
+	// set them here
+	fix_defaults();
 }
 
 
@@ -395,7 +441,7 @@ static void init_times() {
 }
 
 
-void offline_delay(struct timeval tv){
+static void offline_delay(struct timeval tv){
 	struct timeval diff;
 	struct timeval delta;
 

@@ -7,7 +7,7 @@ CPPFLAGS += $(INCLUDE)
 LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfig -lfl
 
 BINS = bsod_server
-OBJS = socket.o packets.o
+OBJS = socket.o packets.o daemons.o debug.o
 
 
 .PHONY: all clean distclean install depend plugins

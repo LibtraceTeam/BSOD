@@ -1,0 +1,21 @@
+------------------------------
+Version 1.20 February 18, 2005
+
+Changes	    - Integrated 'darknet' support. Internal addresses are divided 
+	    into two classes...those that have sourced traffic, and those that
+	    have not. Packets are marked, which allows the client to 
+	    distinguish and filter those packets that are travelling to used
+	    addresses or unused addresses. This is updated in real time as
+	    packets are received, and saved to file to be persistant across
+	    runs.
+
+
+
+------------------------------
+Version 1.10, February 4, 2005
+
+First public release.
+Changes	    - rtt estimation
+	    - client side cycling of traffic types
+	    - useful configuration file
+	    - modular system for colour, direction, position

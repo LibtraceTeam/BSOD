@@ -60,6 +60,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <hash_map>
 #endif
 
+#ifdef _WIN32
+#pragma warning( disable : 4996 )
+#endif
 // One thing I forgot about when implementing this are the mouse buttons (and mouse wheel)
 // They aren't exactly keys so dont really fit in with 'keycode'.  However, they may as
 // well just go in as Keycodes.  It's just a bad name.  And stuff. - Sam
@@ -117,6 +120,9 @@ CActionHandler::CActionHandler()
 
 	keyUpMap[ BKC_M ] = &CActionHandler::Screenshot;
 	keyUpMap[ BKC_H ] = &CActionHandler::ToggleDebugDisplay;
+
+	keyUpMap[ BKC_PERIOD ] = &CActionHandler::ToggleFilter;
+	keyUpMap[ BKC_COMMA ] = &CActionHandler::ToggleBackFilter;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -266,4 +272,14 @@ void CActionHandler::TurnRight()
 	Vector3f b(world.entities->GetPlayer()->GetBearing());
 	world.entities->GetPlayer()->SetBearing(
 		Vector3f(b.x, b.y-3, b.z));
+}
+
+void CActionHandler::ToggleFilter()
+{
+	world.partVis->ToggleFilter();
+}
+
+void CActionHandler::ToggleBackFilter()
+{
+	world.partVis->ToggleBackFilter();
 }

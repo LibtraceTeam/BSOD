@@ -137,6 +137,7 @@ struct pack_update_t {
     unsigned int id;
     unsigned char colour[3];
     unsigned short size;
+    float speed;
 } PACKED;
 
 struct flow_remove_t {
@@ -153,6 +154,8 @@ union fp_union {
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
+
+//#define NET_DEBUG
 
 void CSDLNetDriver::ReceiveData()
 {
@@ -231,7 +234,8 @@ void CSDLNetDriver::ReceiveData()
 					fp->packet.colour[0],
 					fp->packet.colour[1],
 					fp->packet.colour[2],
-					fp->packet.size);
+					fp->packet.size,
+					fp->packet.speed);
 
 				buf += sizeof(pack_update_t);
 			} else {

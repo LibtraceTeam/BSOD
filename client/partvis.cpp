@@ -1,6 +1,10 @@
 // $Header$
 #include "stdafx.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "vector.h"
 #include "polygon.h"
 #include "world.h"
@@ -13,8 +17,9 @@
 
 #include "partvis.h"
 
+#define MAX_FILTER_STATE 15
 // Particle visualisation file
-float CPartFlow::time_to_live = 4.5f; // in seconds
+float CPartFlow::time_to_live = 4.5f;
 
 // The following globals are for debugging only
 int flows_drawn = 0;
@@ -27,7 +32,7 @@ void CPartFlow::Draw()
 {
     CDisplayManager *d = world.display;
     const int vertex_offset = offset * 6;
-    const int num_triangles = (vertices.size() - vertex_offset) / 3;
+    const int num_triangles = ((const int)vertices.size() - vertex_offset) / 3;
 
     flows_drawn++;
 
@@ -43,7 +48,7 @@ void CPartFlow::Draw()
 
     // Draw start and end points
     //d->SetColour(colours[0], colours[1], colours[2], (translation - start).Length() / (destination - start).Length());
-    byte c = (byte)((destination - start).Length() - (vertices.back() + translation).Length());
+    //byte c = (byte)((destination - start).Length() - (vertices.back() + translation).Length());
     d->SetColour(colours[0] / 255.0f, colours[1] / 255.0f, colours[2] / 255.0f, 0.15f);
     d->DrawTriangles2(
 	(float *)&endpoint_vertices[0],
@@ -105,19 +110,21 @@ void CPartFlow::Update(float diff)
 {
     float percent = diff / time_to_live;
     Vector3f d = destination - start;
-    d *= percent;
+    d *= (percent * speed);
 
     translation += d;
 
-    while(vertices.size() >= (unsigned)6*(offset+1)) {
+    while(vertices.size() >= (unsigned)6*(offset+1)) 
+    {
 	Vector3f e = (vertices[offset*6]) + translation;
 	Vector3f m = destination - start;
-	if( (e - start).Length() > m.Length() ) {
+	if( (e - start).Length() > m.Length() ) 
+	{
 	    offset++;
 	    num_particles--;
-	} else {
+	} 
+	else 
 	    break;
-	}
     }
 
     // The number 100 below is just an abitrary number we decided upon
@@ -148,7 +155,7 @@ void CPartFlow::MoveParticles()
     translation = Vector3f();
 }
 
-void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
+void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size, float speed)
 {
 	//Log("flow %p count %x\n", this, sam_count);
     sam_count++;
@@ -157,6 +164,11 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
 
     float size;
     // size = 1; // Old operation
+
+	// Some colour voodoo magic:
+	// Only keep blue (port 80) traffic.
+	//if( b < 200 )
+	//	return;
 
     if(_size <= 512)
 	    size = 0.6f; // was 0.8f
@@ -199,24 +211,30 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
     colours.push_back(140);
 
     num_particles++;
+	if( speed > 0.0f )
+	{
+		this->speed = speed;
+	}
 }
 
 CPartFlow::CPartFlow()
  	: offset(0)
 {
-    num_flows++;
+	num_flows++;
 
-    // Reserve some space for 20 packets worth
-    vertices.reserve(20*6);
-    tex_coords.reserve(20*6);
-    colours.reserve(20*6*4);
+	// Reserve some space for 20 packets worth
+	vertices.reserve(20*6);
+	tex_coords.reserve(20*6);
+	colours.reserve(20*6*4);
 
 	sam_count = 0;
+
+	speed = 1.0f;
 }
 
 CPartFlow::~CPartFlow()
 {
-    num_particles -= vertices.size() / 6 - offset;
+    num_particles -= (const int)vertices.size() / 6 - offset;
     num_flows--;
 }
 
@@ -232,9 +250,82 @@ void CPartVis::Draw()
     d->SetDepthTest(false);
     
     // Draw the flows
-    for(; i != flows.end(); ++i) {
-	i->second->Draw();
-    }
+	for( ; i != flows.end(); ++i )
+	{
+		switch( filter_state ) 
+		{
+		case 0: // Display all packets:
+			i->second->Draw();
+			break;
+		case 1: // Display only packets with RTT data:
+			if( i->second->speed != 1.0f )
+				i->second->Draw();
+			break;
+		case 2: // TCP
+			if( i->second->colours[0] == 100 && i->second->colours[1] == 0 && i->second->colours[2] == 100 )
+				i->second->Draw();
+			break;
+		case 3: // HTTP
+			if( i->second->colours[0] == 0 && i->second->colours[1] == 0 && i->second->colours[2] == 200 )
+				i->second->Draw();
+			break;
+		case 4: // HTTPS
+			if( i->second->colours[0] == 150 && i->second->colours[1] == 150 && i->second->colours[2] == 240 )
+				i->second->Draw();
+			break;
+		case 5: // MAIL
+			if( i->second->colours[0] == 200 && i->second->colours[1] == 0 && i->second->colours[2] == 0 )
+				i->second->Draw();
+			break;
+		case 6: // FTP
+			if( i->second->colours[0] == 0 && i->second->colours[1] == 150 && i->second->colours[2] == 0 )
+				i->second->Draw();
+			break;
+		case 7: // VPN
+			if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 0 )
+				i->second->Draw();
+			break;
+		case 8: // DNS
+			if( i->second->colours[0] == 200 && i->second->colours[1] == 200 && i->second->colours[2] == 0 )
+				i->second->Draw();
+			break;
+		case 9: // NTP
+			if( i->second->colours[0] == 30 && i->second->colours[1] == 85 && i->second->colours[2] == 30 )
+				i->second->Draw();
+			break;
+		case 10: // SSH
+			if( i->second->colours[0] == 110 && i->second->colours[1] == 110 && i->second->colours[2] == 110 )
+				i->second->Draw();
+			break;
+		case 11: // UDP
+			if( i->second->colours[0] == 150 && i->second->colours[1] == 100 && i->second->colours[2] == 50 )
+				i->second->Draw();
+			break;
+		case 12: // ICMP
+			if( i->second->colours[0] == 0 && i->second->colours[1] == 250 && i->second->colours[2] == 200 )
+				i->second->Draw();
+			break;
+		case 13: // IRC
+			if( i->second->colours[0] == 240 && i->second->colours[1] == 230 && i->second->colours[2] == 140 )
+				i->second->Draw();
+			break;
+		case 14: // Windows
+			if( i->second->colours[0] == 200 && i->second->colours[1] == 100 && i->second->colours[2] == 0 )
+				i->second->Draw();
+			break;
+		case 15: // Other
+			if( i->second->colours[0] == 255 && i->second->colours[1] == 192 && i->second->colours[2] == 203 )
+				i->second->Draw();
+			break;
+		default: // All packets are shown:
+			i->second->Draw();
+		}
+	}
+    /*for(; i != flows.end(); ++i) 
+	{
+
+		i->second->Draw();
+    }*/
 
     d->SetDepthTest(true);
 
@@ -246,6 +337,85 @@ void CPartVis::Draw()
     right->Draw();
     d->SetColour(1.0f, 1.0f, 1.0f);
     d->SetBlend(false);
+
+	// Display current toggle state:
+	char outstr[256];
+	switch( filter_state ) 
+	{
+	case 0: // Display all packets:
+		strcpy( outstr, "All packets." );
+		break;
+	case 1: // Display only packets with RTT data:
+		strcpy( outstr, "Flows with RTT data." );	
+		break;
+	case 2: // TCP
+		strcpy( outstr, "TCP." );
+		break;
+	case 3: // HTTP
+		strcpy( outstr, "HTTP." );
+		break;
+	case 4: // HTTPS
+		strcpy( outstr, "HTTPS." );
+		break;
+	case 5: // MAIL
+		strcpy( outstr, "Mail." );
+		break;
+	case 6: // FTP
+		strcpy( outstr, "FTP." );
+		break;
+	case 7: // VPN
+		strcpy( outstr, "VPN." );
+		break;
+	case 8: // DNS
+		strcpy( outstr, "DNS." );
+		break;
+	case 9: // NTP
+		strcpy( outstr, "NTP." );
+		break;
+	case 10: // SSH
+		strcpy( outstr, "SSH." );
+		break;
+	case 11: // UDP
+		strcpy( outstr, "UDP." );
+		break;
+	case 12: // ICMP
+		strcpy( outstr, "ICMP." );
+		break;
+	case 13: // IRC
+		strcpy( outstr, "IRC." );
+		break;
+	case 14: // Windows
+		strcpy( outstr, "Windows." );
+		break;
+	case 15: // Other
+		strcpy( outstr, "Other." );
+		break;
+	default: // All packets are shown:
+		strcpy( outstr, "All packets." );
+	}
+
+	float w = 270, h = 40;
+	float x = 0, y = d->GetHeight() - h;
+	string str;
+
+	str = outstr;
+
+	d->Begin2D();
+	d->SetColour(0.4f, 0.8f, 0.9f, 0.75f);
+	d->BindTexture(NULL);
+	d->SetBlend(true);
+	d->SetBlendMode(CDisplayManager::Transparent);
+	d->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h));
+	d->BindTexture(wandlogo);
+	d->SetColour(1.0f, 1.0f, 1.0f, 0.8f);
+	d->Draw2DQuad( d->GetWidth() - 160, d->GetHeight() - 65, d->GetWidth(), d->GetHeight() );
+	d->BindTexture(NULL);
+	d->SetBlendMode(CDisplayManager::Multiply);
+	d->SetBlend(false);
+	d->SetColour(1.0f, 1.0f, 1.0f);
+	d->DrawString2((int)(x+3), (int)(y+1), str);
+	
+	d->End2D();
 
     flows_drawn = packets_drawn = 0;
 }
@@ -267,6 +437,8 @@ CPartVis::CPartVis()
 {
     // Need to create a couple of quads, one with the uni logo, another
     // without the logo.
+	filter_state = 0;
+
     left = new CTriangleFan();
     left->vertices.push_back(Vector3f(-10, 10, -10));	
     left->vertices.push_back(Vector3f(-10, 10, 10));	
@@ -278,7 +450,7 @@ CPartVis::CPartVis()
     left->texCoords.push_back(Vector2f(0, 1));
     left->texCoords.push_back(Vector2f(1, 1));
     
-    left->tex = CTextureManager::tm.LoadTexture("data/uni-logo.png");
+    left->tex = CTextureManager::tm.LoadTexture("data/left.png");
 
     right = new CTriangleFan();
     right->vertices.push_back(Vector3f(10, 10, -10));	
@@ -289,7 +461,9 @@ CPartVis::CPartVis()
     right->texCoords.push_back(Vector2f(1, 1));
     right->vertices.push_back(Vector3f(10, -10, -10));	
     right->texCoords.push_back(Vector2f(0, 1));
-    right->tex = CTextureManager::tm.LoadTexture("data/earth.png");
+    right->tex = CTextureManager::tm.LoadTexture("data/right.png");
+
+	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
 }
 
 void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
@@ -311,7 +485,7 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 }
 
 void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size)
+	byte g, byte b, unsigned short size, float speed)
 {
     FlowMap::const_iterator i = flows.find(flow_id);
 
@@ -328,7 +502,11 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 		// time more accurate than second accuracy, though.
 
 		//flow->MoveParticles();
-		flow->AddParticle(r, g, b, size);
+		
+		// Log( "Flow speedz: %f", speed );
+		// Log( "R = %c G = %c B = %c", r, g, b );
+
+		flow->AddParticle(r, g, b, size, speed);
 	}
 
     last_timestamp = timestamp;
@@ -360,4 +538,18 @@ void CPartVis::EndUpdate()
 void CPartVis::TogglePaused()
 {
     paused = !paused;
+}
+
+void CPartVis::ToggleFilter()
+{
+	filter_state++;
+	if( filter_state > MAX_FILTER_STATE )
+		filter_state = 0;
+}
+
+void CPartVis::ToggleBackFilter()
+{
+	filter_state--;
+	if( filter_state < 0 )
+		filter_state = MAX_FILTER_STATE;
 }

@@ -111,6 +111,8 @@ public:
 	void Pause();
 	void Screenshot();
     void ToggleDebugDisplay();
+	void ToggleFilter();
+	void ToggleBackFilter();
 
 	void TurnUp();
 	void TurnDown();

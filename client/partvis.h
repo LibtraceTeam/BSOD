@@ -61,6 +61,8 @@ private:
 
     unsigned short offset;
     unsigned short sam_count;
+
+    float speed;
     
 public:
     CPartFlow();
@@ -70,7 +72,7 @@ public:
 //void Update_ServerTime(timestamp);
 	
     void MoveParticles();
-    void AddParticle(byte r, byte g, byte b, unsigned short size);
+    void AddParticle(byte r, byte g, byte b, unsigned short size, float speed);
     void ResetCounter() { sam_count = 0; }
     void CreateEndPoints();
 
@@ -88,6 +90,8 @@ private:
     CTriangleFan *left, *right;
     uint32 last_timestamp;
     bool paused;
+	int filter_state;
+	CTexture *wandlogo;
     
 public:
     CPartVis();
@@ -98,12 +102,14 @@ public:
 
     void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2);
     void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size);
+	byte g, byte b, unsigned short size, float speed);
     void RemoveFlow(unsigned int id);
     uint32 GetLastTimestamp() { return last_timestamp; }
     void BeginUpdate();
     void EndUpdate();
     void TogglePaused();
+	void ToggleFilter();
+	void ToggleBackFilter();
 
     CPartFlow * make_flow(int);
 };

@@ -110,10 +110,21 @@ void CWorld::Draw()
 	static float last = world.sys->TimerGetTime();
 	static float fps = 0;
 	float now = world.sys->TimerGetTime();
-	time_t timestamp = partVis->GetLastTimestamp();
 	char tbuf[256];
 
-	strftime(tbuf, 256, "%c", localtime(&timestamp));
+	// time_t does not seem to be unsigned in Windows and this appears to cause
+	// problems when the client connects to the server after perviously disconnecting
+	// malformed timestamp info? Using 64bit timestamps fixes this.
+#ifdef _WIN32
+	uint32 timestamp = partVis->GetLastTimestamp();
+	__time64_t ts = (const __time64_t)timestamp;
+	tm *timeptr = _localtime64( &ts );
+	strftime(tbuf, 255, "%c", timeptr );
+#else
+	time_t timestamp = partVis->GetLastTimestamp();
+	strftime( tbuf, 255, "%c", localtime(timestamp) );
+#endif
+	
 	// %a %b %d %R %Z %G
 
 	display->BeginFrame2();
@@ -180,11 +191,11 @@ void CWorld::Draw()
 		display->BindTexture(NULL);
 		display->SetBlend(true);
 		display->SetBlendMode(CDisplayManager::Transparent);
-		display->Draw2DQuad(x, y, x + w, y + h);
+		display->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h));
 		display->SetBlendMode(CDisplayManager::Multiply);
 		display->SetBlend(false);
 		display->SetColour(1.0f, 1.0f, 1.0f);
-		display->DrawString2(x+3, y+1, str);
+		display->DrawString2((int)x+3, (int)y+1, str);
 		display->End2D();
     }
 

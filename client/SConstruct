@@ -68,7 +68,7 @@ env.Command('external/lua/lib/liblua.a', '',
 # Configure stuff:
 # This is cached in options.cache. Delete options.cache for the configure
 # stuff to be rerun.
-do_conf = 1
+do_conf = 0
 try: 
     f = open('options.cache', 'r')
     do_conf = 0

@@ -60,44 +60,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __PARTVIS_H__
 #define __PARTVIS_H__
 
-class CPartFlow
-{
-private:
-    vector<Vector3f> vertices;
-    vector<Vector2f> tex_coords;
-    vector<byte> colours;
-    CTexture *tex;
+#ifdef _WIN32
+#pragma warning( disable : 4996 )
+#endif
 
-    vector<Vector3f> endpoint_vertices;
-    vector<Vector2f> endpoint_tex_coords;
-    
-    Vector3f translation;
-    Vector3f start;
-    Vector3f destination;
-
-    unsigned short offset;
-    unsigned short sam_count;
-
-    float speed;
-    
-public:
-    CPartFlow();
-    virtual ~CPartFlow();
-    void Draw();
-    void Update(float diff);
-//void Update_ServerTime(timestamp);
-	
-    void MoveParticles();
-    void AddParticle(byte r, byte g, byte b, unsigned short size, float speed);
-    void ResetCounter() { sam_count = 0; }
-    void CreateEndPoints();
-
-    static float time_to_live;
-
-    friend class CPartVis;
-};
-
-typedef map<unsigned int, CPartFlow *> FlowMap;
+typedef hash_map<unsigned int, CPartFlow *> FlowMap;
 
 class CPartVis : public CEntity
 {
@@ -107,7 +74,11 @@ private:
     uint32 last_timestamp;
     bool paused;
 	int filter_state;
+	short int show_dark;
 	CTexture *wandlogo;
+	CTexture *helptex;
+	float colour_table[256]; // Lookup for colour/255.0f to get 0.0f-1.0f
+	bool show_help;
     
 public:
     CPartVis();
@@ -118,16 +89,25 @@ public:
 
     void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2);
     void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
-	byte g, byte b, unsigned short size, float speed);
+	byte g, byte b, unsigned short size, float speed, bool dark);
     void RemoveFlow(unsigned int id);
     uint32 GetLastTimestamp() { return last_timestamp; }
     void BeginUpdate();
     void EndUpdate();
     void TogglePaused();
 	void ToggleFilter();
+	void ToggleShowDark();
 	void ToggleBackFilter();
+	void ToggleHelp();
+	int NumFLows();
+
+	int packetsFrame;
+	float diff;
+	float fps;
 
     CPartFlow * make_flow(int);
+
+	friend class CPartFlow;
 };
 
 #endif // __PARTVIS_H__

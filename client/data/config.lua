@@ -10,6 +10,7 @@ height			= 768
 bpp				= 32
 
 -- Hawk net driver can use "host:port" notation
-network_host	= "voodoo:32500"
+--network_host	= "voodoo:32500"
+network_host    = "chasm:32500"
 -- Do not specify port for enet (for now)
 --network_host    = "localhost" 

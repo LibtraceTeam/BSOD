@@ -71,7 +71,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "matrix.h"
 #include "quaternion.h"
 
-#include "md3.h"					// Temporary
+//#include "md3.h"					// Temporary
 
 // DevIL Image Library used to open textures
 #include "IL/il.h"
@@ -160,8 +160,8 @@ void CGLDisplayManager::Initialise()
 	Log("OpenGL display driver. Extensions found: %s\n",
 			glGetString(GL_EXTENSIONS));
 	int tex_units;
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &tex_units);
-	Log("\tTexture units: %d\n", tex_units);
+//	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &tex_units);
+//	Log("\tTexture units: %d\n", tex_units);
 }
 
 void CGLDisplayManager::DrawSphere(Vector3f offset, float width)
@@ -238,7 +238,7 @@ void CGLDisplayManager::DrawActor(CActor *act)
 	glRotatef(act->GetBearing().y, 0.0f,  1.0f, 0.0f);
 	glRotatef(act->GetBearing().x, 1.0f, 0.0f,  0.0f);
 	glRotatef(act->GetBearing().z, 0.0f,  0.0f,  1.0f);
-	act->m_model->Draw();
+//	act->m_model->Draw();
 	glPopMatrix(); 
 	//*/
 
@@ -798,5 +798,5 @@ void CGLDisplayManager::Screenshot(vector<byte> &buf, uint32 &w, uint32 &h)
     
     buf.resize(w * h * 3);
 
-    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, buf.begin());
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, &buf[0]);
 }

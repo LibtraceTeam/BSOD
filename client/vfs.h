@@ -164,22 +164,6 @@ public:
 	virtual uint32 GetLength();
 };
 
-// A reader to read (gzip) compressed data
-class CGZReader : public CReader
-{
-private:
-	byte *uncompressedBuf;
-	int uncompressedLength;
-	int internalOffset;
-public:
-	CGZReader(CReader *f, int uncLength);
-	virtual ~CGZReader();
-	virtual int Read(void *buf, uint32 length);
-	virtual int Seek(uint32 offset);
-	virtual uint32 GetLength();
-	virtual void Uncompress();
-};
-
 class CTextReader : public CReader
 {
 public:

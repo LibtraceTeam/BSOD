@@ -60,7 +60,7 @@ private:
     Vector3f destination;
 
     unsigned short offset;
-    unsigned short count;
+    unsigned short sam_count;
     
 public:
     CPartFlow();
@@ -71,7 +71,7 @@ public:
 	
     void MoveParticles();
     void AddParticle(byte r, byte g, byte b, unsigned short size);
-    void ResetCounter() { count = 0; }
+    void ResetCounter() { sam_count = 0; }
     void CreateEndPoints();
 
     static float time_to_live;

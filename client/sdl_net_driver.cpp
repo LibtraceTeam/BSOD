@@ -112,6 +112,14 @@ void CSDLNetDriver::SendData(CPlayer *p)
 	    " implemented!");
 }
 
+#ifdef _WIN32
+#pragma pack(push)
+#pragma pack(1)
+#define PACKED
+#else
+#define PACKED __attribute__((packed))
+#endif
+
 struct flow_update_t {
     unsigned char type; // 0
     float x1;
@@ -121,20 +129,20 @@ struct flow_update_t {
     float y2;
     float z2;
     unsigned int id;
-} __attribute__((packed));
+} PACKED;
 
 struct pack_update_t {
     unsigned char type; // 1
     uint32 ignored, ts;
     unsigned int id;
-    char colour[3];
+    unsigned char colour[3];
     unsigned short size;
-} __attribute__((packed));
+} PACKED;
 
 struct flow_remove_t {
     unsigned char type; // 2
     unsigned int id;
-} __attribute__((packed));
+} PACKED;
 
 union fp_union {
     struct flow_update_t flow;
@@ -142,105 +150,117 @@ union fp_union {
     struct flow_remove_t rem;
 };
 
+#ifdef _WIN32
+#pragma pack(pop)
+#endif
+
 void CSDLNetDriver::ReceiveData()
 {
-    byte buffer[1024];
-    int  readlen;
-    union fp_union *fp;
+	byte buffer[1024];
+	int  readlen;
+	union fp_union *fp;
 
-    while(SDLNet_CheckSockets(set, 0) > 0)
-    {
-	if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
+	while(SDLNet_CheckSockets(set, 0) > 0)
 	{
-	    int sam = databuf.size();
-	    databuf.resize( sam + readlen );
-	    memcpy(&databuf[sam], buffer, readlen);
+		if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
+		{
+			int sam = databuf.size();
+			databuf.resize( sam + readlen );
+			memcpy(&databuf[sam], buffer, readlen);
+
+#ifdef NET_DEBUG
+			Log("Read %d bytes\n", readlen);
+#endif
+		}
+		if(readlen == 0)
+			break;
 	}
-	if(readlen == 0)
-	    break;
-    }
 
-   // Log("Databuf.size()=%d\n", databuf.size());
-    world.partVis->BeginUpdate();
-	    
-    unsigned char *buf = &databuf[0];
-    while(true) {
-	const unsigned int s = &databuf[databuf.size()] - &buf[0];
-	fp = (fp_union *)buf;
-	if(s == 0) {
-	    databuf.erase(databuf.begin(), databuf.end());
-	    break;
+	// Log("Databuf.size()=%d\n", databuf.size());
+	world.partVis->BeginUpdate();
+
+	unsigned char *buf = &databuf[0];
+	while(true) {
+		const unsigned int s = &databuf[databuf.size()] - &buf[0];
+		fp = (fp_union *)buf;
+		if(s == 0) {
+			databuf.erase(databuf.begin(), databuf.end());
+			break;
+		}
+		if(fp->flow.type == 0x00) {
+			// Flow
+			if(sizeof(flow_update_t) <= s) {
+#ifdef NET_DEBUG
+				Log("Flow: (%f,%f,%f)->(%f,%f,%f):%u\n", 
+				fp->flow.x1,
+				fp->flow.y1,
+				fp->flow.z1,
+				fp->flow.x2,
+				fp->flow.y2,
+				fp->flow.z2,
+				fp->flow.id);
+#endif
+
+				world.partVis->UpdateFlow(
+					fp->flow.id,
+					Vector3f(fp->flow.x1, fp->flow.y1, fp->flow.z1),
+					Vector3f(fp->flow.x2, fp->flow.y2, fp->flow.z2));
+
+				buf += sizeof(flow_update_t);
+			} else {
+				if(buf != &databuf[0])
+					databuf.erase(databuf.begin(), databuf.begin() 
+					+ (buf - &databuf[0]));
+				break;
+			}
+		} else if(fp->flow.type == 0x01) {
+			// Packet
+			if(sizeof(pack_update_t) <= s) {
+#ifdef NET_DEBUG
+				Log("Packet: ts:%u id:%u (%d,%d,%d) size:%u\n",
+				fp->packet.ts,
+				fp->packet.id,
+				(int)fp->packet.colour[0],
+				(int)fp->packet.colour[1],
+				(int)fp->packet.colour[2],
+				fp->packet.size);
+#endif
+
+				world.partVis->UpdatePacket(
+					fp->packet.id, fp->packet.ts,
+					fp->packet.colour[0],
+					fp->packet.colour[1],
+					fp->packet.colour[2],
+					fp->packet.size);
+
+				buf += sizeof(pack_update_t);
+			} else {
+				if(buf != &databuf[0])
+					databuf.erase(databuf.begin(), databuf.begin() 
+					+ (buf - &databuf[0]));
+				break;
+			}
+		} else if(fp->flow.type == 0x02) {
+			if(sizeof(flow_remove_t) <= s) {
+				world.partVis->RemoveFlow(fp->rem.id);
+
+				buf += sizeof(flow_remove_t);
+			} else {
+				if(buf != &databuf[0])
+					databuf.erase(databuf.begin(), databuf.begin() 
+					+ (buf - &databuf[0]));
+				break;
+			}
+		} else {
+			Log("Unknown packet type...s:%u r:%u d:%u \n",
+				databuf.size(), 
+				(int)(buf-&databuf[0]), 
+				(int)(&databuf[databuf.size()]-buf)
+				);
+			databuf.erase(databuf.begin(), databuf.end());
+			break;
+		}
 	}
-	if(fp->flow.type == 0x00) {
-	    // Flow
-	    if(sizeof(flow_update_t) <= s) {
-		/*Log("Flow: (%f,%f,%f)->(%f,%f,%f):%u\n", 
-			fp->flow.x1,
-			fp->flow.y1,
-			fp->flow.z1,
-			fp->flow.x2,
-			fp->flow.y2,
-			fp->flow.z2,
-			fp->flow.id);*/
-		
-		world.partVis->UpdateFlow(
-			fp->flow.id,
-			Vector3f(fp->flow.x1, fp->flow.y1, fp->flow.z1),
-			Vector3f(fp->flow.x2, fp->flow.y2, fp->flow.z2));
 
-		buf += sizeof(flow_update_t);
-	    } else {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() 
-			+ (buf - &databuf[0]));
-		break;
-	    }
-	} else if(fp->flow.type == 0x01) {
-	    // Packet
-	    if(sizeof(pack_update_t) <= s) {
-		/*Log("Packet: ts:%u id:%u (%hhu,%hhu,%hhu) size:%u\n",
-			fp->packet.ts,
-			fp->packet.id,
-			fp->packet.colour[0],
-			fp->packet.colour[1],
-			fp->packet.colour[2],
-			fp->packet.size);*/
-
-		world.partVis->UpdatePacket(
-			fp->packet.id, fp->packet.ts,
-			fp->packet.colour[0],
-			fp->packet.colour[1],
-			fp->packet.colour[2],
-			fp->packet.size);
-
-		buf += sizeof(pack_update_t);
-	    } else {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() 
-			+ (buf - &databuf[0]));
-		break;
-	    }
-	} else if(fp->flow.type == 0x02) {
-	    if(sizeof(flow_remove_t) <= s) {
-		world.partVis->RemoveFlow(fp->rem.id);
-
-		buf += sizeof(flow_remove_t);
-	    } else {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() 
-			+ (buf - &databuf[0]));
-		break;
-	    }
-	} else {
-	    Log("Unknown packet type...s:%u r:%u d:%u \n",
-		    databuf.size(), 
-		    (int)(buf-&databuf[0]), 
-		    (int)(&databuf[databuf.size()]-buf)
-		);
-	    databuf.erase(databuf.begin(), databuf.end());
-	    break;
-	}
-    }
-
-    world.partVis->EndUpdate();
+	world.partVis->EndUpdate();
 }

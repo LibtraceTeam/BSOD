@@ -150,9 +150,10 @@ void CPartFlow::MoveParticles()
 
 void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
 {
-    count++;
-    if(count > 5)
-	return;
+	//Log("flow %p count %x\n", this, sam_count);
+    sam_count++;
+    if(sam_count > 5)
+		return;
 
     float size;
     // size = 1; // Old operation
@@ -179,6 +180,8 @@ void CPartFlow::AddParticle(byte r, byte g, byte b, unsigned short _size)
     tex_coords.push_back(Vector2f(1, 0));
     tex_coords.push_back(Vector2f(0, 1));
     tex_coords.push_back(Vector2f(1, 1));
+
+	//r = g = b = 255;
 
     // alpha was 80
     colours.push_back(r); colours.push_back(g); colours.push_back(b); 
@@ -207,6 +210,8 @@ CPartFlow::CPartFlow()
     vertices.reserve(20*6);
     tex_coords.reserve(20*6);
     colours.reserve(20*6*4);
+
+	sam_count = 0;
 }
 
 CPartFlow::~CPartFlow()
@@ -293,15 +298,15 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 
     if(i == flows.end()) {
 	// If the flow does not already exist (it shouldn't at this point)
-	CPartFlow *flow = new CPartFlow();
-	flow->start = v1;
-	flow->destination = v2;
-	flow->tex = CTextureManager::tm.LoadTexture("data/particle.png");
-	flows.insert(FlowMap::value_type(flow_id, flow));
-    } else {
-	// Found
-	Log("UpdateFlow called on flow that already exits (flow=%d)\n",
-		flow_id);
+		CPartFlow *flow = new CPartFlow();
+		flow->start = v1;
+		flow->destination = v2;
+		flow->tex = CTextureManager::tm.LoadTexture("data/particle.png");
+		flows.insert(FlowMap::value_type(flow_id, flow));
+	} else {
+		// Found
+		Log("UpdateFlow called on flow that already exits (flow=%d)\n",
+			flow_id);
     }
 }
 
@@ -310,21 +315,21 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte r,
 {
     FlowMap::const_iterator i = flows.find(flow_id);
 
-    if(i == flows.end()) {
-	Log("Adding packet to non-existant flow %d\n", flow_id);
-    } else {
-	CPartFlow *flow = i->second;
+	if(i == flows.end()) {
+		Log("Adding packet to non-existant flow %d\n", flow_id);
+	} else {
+		CPartFlow *flow = i->second;
 
-	//flow->Update_ServerTime(timestamp);
-	// XXX: at this point we could use the time to make sure the 
-	// particle is in the correct position; if we have lost some amount
-	// of time it might not make sense to have this particle start at
-	// the start position. To make this useful we would really need
-	// time more accurate than second accuracy, though.
-	
-	//flow->MoveParticles();
-	flow->AddParticle(r, g, b, size);
-    }
+		//flow->Update_ServerTime(timestamp);
+		// XXX: at this point we could use the time to make sure the 
+		// particle is in the correct position; if we have lost some amount
+		// of time it might not make sense to have this particle start at
+		// the start position. To make this useful we would really need
+		// time more accurate than second accuracy, though.
+
+		//flow->MoveParticles();
+		flow->AddParticle(r, g, b, size);
+	}
 
     last_timestamp = timestamp;
 }

@@ -113,7 +113,7 @@ void CWorld::Draw()
 	time_t timestamp = partVis->GetLastTimestamp();
 	char tbuf[256];
 
-	strftime(tbuf, 256, "%a %b %d %T %Z %G", localtime(&timestamp));
+	strftime(tbuf, 256, "%c", localtime(&timestamp));
 	// %a %b %d %R %Z %G
 
 	display->BeginFrame2();
@@ -133,53 +133,59 @@ void CWorld::Draw()
 	}
 	
     if(debug_display) {
-	display->Begin2D();
-	display->SetColour(0.2f, 0.1f, 0.3f, 0.8f);
-	display->BindTexture(NULL);
-	display->SetBlend(true);
-	display->SetBlendMode(CDisplayManager::Transparent);
-	display->Draw2DQuad(0, 8, 800, 57);
-	display->SetBlendMode(CDisplayManager::Multiply);
-	display->SetBlend(false);
-	display->SetColour(1.0f, 1.0f, 1.0f);
+		display->Begin2D();
+		display->SetColour(0.2f, 0.1f, 0.3f, 0.8f);
+		display->BindTexture(NULL);
+		display->SetBlend(true);
+		display->SetBlendMode(CDisplayManager::Transparent);
+		display->Draw2DQuad(0, 8, 800, 57);
+		display->SetBlendMode(CDisplayManager::Multiply);
+		display->SetBlend(false);
+		display->SetColour(1.0f, 1.0f, 1.0f);
 
-	display->DrawString2(10, 10, 
-		bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s", fps, 
-			COctree::nodes_drawn, display->GetNumMeshesDrawn(),
-			display->GetNumTrianglesDrawn(), tbuf)
-		);
+		display->DrawString2(10, 10, 
+			bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s", fps, 
+				COctree::nodes_drawn, display->GetNumMeshesDrawn(),
+				display->GetNumTrianglesDrawn(), tbuf)
+			);
 
-	display->DrawString2(10, 35, 
-		bsprintf("(%f,%f,%f) (pitch:%f,heading:%f)", 
-			world.entities->GetPlayer()->GetPosition().x, 
-			world.entities->GetPlayer()->GetPosition().y, 
-			world.entities->GetPlayer()->GetPosition().z,
-			world.entities->GetPlayer()->GetBearing().x, 
-			world.entities->GetPlayer()->GetBearing().y)
-		);
+		display->DrawString2(10, 35, 
+			bsprintf("(%f,%f,%f) (pitch:%f,heading:%f)", 
+				world.entities->GetPlayer()->GetPosition().x, 
+				world.entities->GetPlayer()->GetPosition().y, 
+				world.entities->GetPlayer()->GetPosition().z,
+				world.entities->GetPlayer()->GetBearing().x, 
+				world.entities->GetPlayer()->GetBearing().y)
+			);
 
-	// Debugging:
-	display->DrawString2(10, 60, CReporter::GetLog().front());
+		// Debugging:
+		list<string>::const_iterator i = CReporter::GetLog().begin();
+		int count = 0;
+		for(; i != CReporter::GetLog().end(); ++i, count++) {
+			if(count < 10)
+				display->DrawString2(10, 60 + count * 20, *i);
+		}
+		
 
-	display->End2D();
+		display->End2D();
     } else {
-	float w = 270, h = 20;
-	float x = 0, y = display->GetHeight() - 20;
-	string str;
+		float w = 270, h = 20;
+		float x = 0, y = display->GetHeight() - h;
+		string str;
 
-	str = tbuf;
-	
-	display->Begin2D();
-	display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
-	display->BindTexture(NULL);
-	display->SetBlend(true);
-	display->SetBlendMode(CDisplayManager::Transparent);
-	display->Draw2DQuad(x, y, x + w, y + h);
-	display->SetBlendMode(CDisplayManager::Multiply);
-	display->SetBlend(false);
-	display->SetColour(1.0f, 1.0f, 1.0f);
-	display->DrawString2(x+3, y+1, str);
-	display->End2D();
+		str = tbuf;
+		
+		display->Begin2D();
+		display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
+		display->BindTexture(NULL);
+		display->SetBlend(true);
+		display->SetBlendMode(CDisplayManager::Transparent);
+		display->Draw2DQuad(x, y, x + w, y + h);
+		display->SetBlendMode(CDisplayManager::Multiply);
+		display->SetBlend(false);
+		display->SetColour(1.0f, 1.0f, 1.0f);
+		display->DrawString2(x+3, y+1, str);
+		display->End2D();
     }
 
 

@@ -124,8 +124,8 @@ void CReporter::SimpleReport(ReportLevel dbgLevel, const string &msg)
 		cr.reportLog.pop_back();
 
 #ifdef _WIN32
-	OutputDebugString(reportLevelName[dbgLevel]);
-	OutputDebugString(": ");
+//	OutputDebugString(reportLevelName[dbgLevel]);
+//	OutputDebugString(": ");
 	OutputDebugString(msg.c_str());
 #endif
 }

@@ -132,11 +132,11 @@ CTexture *CTextureManager::LoadTexture(string texName)
     {
         if(!IsPowerOfTwo(height))
         {
-            height = (int)pow(2, ceil(log(height) / log(2.0)));
+            height = (int)pow(2.0f, ceil(log((float)height) / log(2.0f)));
         }
         if(!IsPowerOfTwo(width))
         {
-            width = (int)pow(2, ceil(log(width) / log(2.0)));
+            width = (int)pow(2.0f, ceil(log((float)width) / log(2.0f)));
         }
 
         iluScale(width, height, ilGetInteger(IL_IMAGE_DEPTH));

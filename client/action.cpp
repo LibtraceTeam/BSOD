@@ -93,6 +93,16 @@ CActionHandler::CActionHandler()
 	keyDownMap[ BKC_D ] = &CActionHandler::BeginStrafingRight;	
 	keyUpMap[ BKC_D ] = &CActionHandler::EndStrafingRight;
 
+	keyUpMap[ BKC_UP ] = &CActionHandler::TurnUp;
+	keyUpMap[ BKC_DOWN ] = &CActionHandler::TurnDown;
+	keyUpMap[ BKC_LEFT ] = &CActionHandler::TurnLeft;
+	keyUpMap[ BKC_RIGHT ] = &CActionHandler::TurnRight;
+
+	keyUpMap[ BKC_K ] = &CActionHandler::TurnUp;
+	keyUpMap[ BKC_I ] = &CActionHandler::TurnDown;
+	keyUpMap[ BKC_J ] = &CActionHandler::TurnLeft;
+	keyUpMap[ BKC_L ] = &CActionHandler::TurnRight;
+
 	keyDownMap[ BKC_ESCAPE ] = &CActionHandler::Quit;
 	keyDownMap[ BKC_Q ] = &CActionHandler::Quit;
 
@@ -212,7 +222,12 @@ void CActionHandler::Screenshot()
 {
     char buffer[1024];
     static unsigned int ss_num = 0;
-    snprintf(buffer,sizeof(buffer),"screenshot-%u-%u.png",
+#ifdef _WIN32
+	_snprintf
+#else
+	snprintf
+#endif
+		(buffer,sizeof(buffer),"screenshot-%u-%u.png",
             (unsigned int)time(NULL), ++ss_num);
     CTextureManager::tm.SaveScreenshot(buffer);
 }
@@ -220,4 +235,35 @@ void CActionHandler::Screenshot()
 void CActionHandler::ToggleDebugDisplay()
 {
     world.debug_display = !world.debug_display;
+}
+
+void CActionHandler::TurnDown()
+{
+		/*SetBearing(Vector3f(GetBearing().x + (mpos.x / 10.0f) * invert_mouse,
+					    GetBearing().y + (mpos.y / 10.0f),
+						GetBearing().z));*/
+	Vector3f b(world.entities->GetPlayer()->GetBearing());
+	world.entities->GetPlayer()->SetBearing(
+		Vector3f(b.x-3, b.y, b.z));
+}
+
+void CActionHandler::TurnUp()
+{
+	Vector3f b(world.entities->GetPlayer()->GetBearing());
+	world.entities->GetPlayer()->SetBearing(
+		Vector3f(b.x+3, b.y, b.z));
+}
+
+void CActionHandler::TurnLeft()
+{
+	Vector3f b(world.entities->GetPlayer()->GetBearing());
+	world.entities->GetPlayer()->SetBearing(
+		Vector3f(b.x, b.y+3, b.z));
+}
+
+void CActionHandler::TurnRight()
+{
+	Vector3f b(world.entities->GetPlayer()->GetBearing());
+	world.entities->GetPlayer()->SetBearing(
+		Vector3f(b.x, b.y-3, b.z));
 }

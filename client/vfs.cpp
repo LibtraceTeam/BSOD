@@ -46,7 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "exception.h"
 #include "reporter.h"
 #include "misc.h"
-#include <zlib.h>
+//#include <zlib.h>
 
 static CVFS vfs;
 
@@ -135,9 +135,9 @@ CReader *CArchive::LoadFile(string name) {
 		fileIter->second.com_length == 0 ? fileIter->second.unc_length : 
 		fileIter->second.com_length);
 
-	if(fileIter->second.com_length != 0) {
+	/*if(fileIter->second.com_length != 0) {
 		reader = new CGZReader(reader, fileIter->second.unc_length);
-	}
+	}*/
 
 	return reader;
 }
@@ -226,70 +226,6 @@ int CArchiveReader::Seek(uint32 offset)  {
 
 uint32 CArchiveReader::GetLength()  {
 	return fileLength;
-}
-////////////////////////////////////////////////////////////////////////////
-// GZip reader functions:
-CGZReader::CGZReader(CReader *f, int uncLength) { 
-	parent = f; 
-	internalOffset = 0; 
-	uncompressedBuf = NULL;
-	uncompressedLength = uncLength;
-}
-
-CGZReader::~CGZReader()  { 
-	if(uncompressedBuf) delete [] uncompressedBuf; 
-	delete parent;
-}
-
-int CGZReader::Read(void *buf, uint32 length) {
-	if(internalOffset + length > (uint32)uncompressedLength) {
-		throw CEOFException("CGZReader went past EOF in Read().");
-	}
-
-	if(uncompressedBuf == NULL) {
-		Uncompress();
-	}
-
-	memcpy(buf, (void *)(uncompressedBuf + internalOffset), length);
-	internalOffset += length;
-
-	return length;
-}
-
-int CGZReader::Seek(uint32 offset) {
-	if(offset > GetLength()) {
-		throw CEOFException("CGZReader went past EOF in Seek().");
-	}
-	internalOffset = offset;
-	return offset;
-}
-
-uint32 CGZReader::GetLength() {
-	return uncompressedLength;
-}
-
-void CGZReader::Uncompress() {
-	uint32 uncLen = uncompressedLength, compressedLength = parent->GetLength();
-	int ret;
-	byte *compressedBuf;
-
-	compressedBuf = new byte[compressedLength];
-	uncompressedBuf = new byte[uncompressedLength];
-
-	parent->Seek(0);
-	parent->Read(compressedBuf, compressedLength);
-
-	ret = uncompress(uncompressedBuf, (unsigned long *)&uncLen, compressedBuf, 
-			compressedLength);
-
-	if(ret != Z_OK)
-	{
-		CReporter::Report(CReporter::R_ERROR, "Zlib: uncompress return=%d, should have been %d.", 
-			ret, Z_OK);
-		throw CException("Error uncompressing in CGZReader");
-	}
-
-	delete [] compressedBuf;
 }
 ////////////////////////////////////////////////////////////////////////////
 // Text reader functions:

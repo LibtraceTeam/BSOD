@@ -99,11 +99,11 @@ int CWin32SystemDriver::RunMessageLoop()
 			// Draw The Scene.  Watch For ESC Key And Quit Messages From DrawGLScene()
 			if (active)								// Program Active?
 			{
-				POINT temp_mouse;
-				GetCursorPos(&temp_mouse);
-				SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
-				world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
-				world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
+				//POINT temp_mouse;
+				/*GetCursorPos(&temp_mouse);
+				SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);*/
+				//world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
+				//world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
 				
 				carry_time = TimerGetTime ();			// Get The Tick Count
 				world.Update ((carry_time - start_time)/1000);	// Update The Counter
@@ -157,14 +157,14 @@ CDisplayManager *CWin32SystemDriver::InitDisplay(int width, int height, int bpp,
 	}
 	else if(type == DISPLAY_DIRECT3D)
 	{
-		openGL = false;
+/*		openGL = false;
 
 		CreateWindowD3D("BuNg", width, height, bpp);
 
 		CD3DDisplayManager *disp = new CD3DDisplayManager();
 		disp->CreateD3D(width, height, full_screen, hWnd);
 
-		return disp;
+		return disp;*/
 	}
 
 	throw CException("Unsupported display type in InitDisplay()");
@@ -425,6 +425,11 @@ void CWin32SystemDriver::DI_KeymapInit()
 	keyMap[ DIK_PERIOD ] = CActionHandler::BKC_PERIOD;
 	keyMap[ DIK_COMMA ] = CActionHandler::BKC_COMMA;
 	//keyMap[  ] = BKC_QUESTION_MARK;
+
+	keyMap[ DIK_LEFT ] = CActionHandler::BKC_LEFT;
+	keyMap[ DIK_RIGHT ] = CActionHandler::BKC_RIGHT;
+	keyMap[ DIK_UP ] = CActionHandler::BKC_UP;
+	keyMap[ DIK_DOWN ] = CActionHandler::BKC_DOWN;
 }
 
 void CWin32SystemDriver::DI_Initialise()

@@ -58,6 +58,9 @@ public:
 		BKC_ESCAPE = 256, BKC_BACKSPACE, BKC_RETURN, BKC_TAB,
 		// Mouse clicks arent exactly keys but they might as well be handled as such
 		BKC_LEFTMOUSEBUT,
+		
+		// Arrow keys
+		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
 
 		// Normal ASCII codes:
 		// Alphabet
@@ -108,6 +111,11 @@ public:
 	void Pause();
 	void Screenshot();
     void ToggleDebugDisplay();
+
+	void TurnUp();
+	void TurnDown();
+	void TurnLeft();
+	void TurnRight();
 };
 
 #endif // _ACTION_H_

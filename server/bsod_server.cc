@@ -369,7 +369,7 @@ void fix_defaults() {
 	if (!pidfile)
 		pidfile=strdup("/var/run/bsod_server.pid");
 	if (!macaddrfile)
-		macaddrfile=strdup("/usr/local/bsod/etc/mac_addrs");
+		macaddrfile=strdup("etc/mac_addrs");
 	if (!blacklistdir)
 		blacklistdir=strdup("blist/");
 

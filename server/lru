@@ -13,7 +13,7 @@ template <class key_t, class value_t>
 class lru_iterator {
 	private: 
 		typedef std::list<key_t> lru_t;
-		typedef std::map<key_t,std::pair<lru_t::iterator,value_t> > data_t;
+		typedef std::map<typename key_t,std::pair<lru_t::iterator,value_t> > data_t;
 		data_t::const_iterator where;
 	public:
 		lru_iterator() { };

@@ -24,19 +24,11 @@
 #include "dagformat.h"
 
 
-//#include "colours.h"
-//#include "position.h"
-
-
-
-extern "C" {
-//#include "utils.h"
 #include "packets.h"
-#include "socket.h" // please explain why this works having it in twice
-#include "bsod_server.h"
-}
 
-//#include "socket.h" // but breaks in a different place if i leave one out
+#include "socket.h" 
+#include "bsod_server.h"
+
 
 
 typedef struct ip ip_t;
@@ -59,19 +51,19 @@ struct flow_info_t {
 	float end[3];
 };
 
-	bool operator < (const flow_id_t &a, const flow_id_t &b) {
-		if (a.sourceport != b.sourceport)
-			return a.sourceport < b.sourceport;
-		if (a.destport != b.destport)
-			return a.destport < b.destport;
-		if (a.sourceip.s_addr != b.sourceip.s_addr)
-			return a.sourceip.s_addr < b.sourceip.s_addr;
-		if (a.destip.s_addr != b.destip.s_addr)
-			return a.destip.s_addr < b.destip.s_addr;
+bool operator < (const flow_id_t &a, const flow_id_t &b) {
+	if (a.sourceport != b.sourceport)
+		return a.sourceport < b.sourceport;
+	if (a.destport != b.destport)
+		return a.destport < b.destport;
+	if (a.sourceip.s_addr != b.sourceip.s_addr)
+		return a.sourceip.s_addr < b.sourceip.s_addr;
+	if (a.destip.s_addr != b.destip.s_addr)
+		return a.destip.s_addr < b.destip.s_addr;
 
-		// if all items are the same, it is not less than
-		return false;
-	}
+	// if all items are the same, it is not less than
+	return false;
+}
 
 bool operator == (const flow_id_t &a, const flow_id_t &b) {
 	/* Ports are the most unique thing, so check them first */

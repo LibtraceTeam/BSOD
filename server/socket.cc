@@ -8,9 +8,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 
-extern "C" {
 #include "socket.h"
-}
 
 /* list of file descriptors for all connected clients */
 struct client {

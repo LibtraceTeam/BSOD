@@ -30,13 +30,8 @@
 
 #include "dagformat.h"
 
-extern "C" {
-//#include "utils.h"
-//#include "outputs.h"
-//#include "inputs.h"
 #include "socket.h"
 #include "packets.h"
-}
 
 #define SCANSIZE 4096
 

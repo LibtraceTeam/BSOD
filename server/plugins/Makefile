@@ -1,8 +1,8 @@
-CXX=g++-3.0
-CC=g++-3.0
+CXX=g++
+CC=g++
 INCLUDE = -I/usr/local/wand/include
 #CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g -fPIC
-CXXFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -Wpedantic
+CXXFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -pedantic
 CXXFLAGS += $(INCLUDE)
 
 DIRS := colour position direction

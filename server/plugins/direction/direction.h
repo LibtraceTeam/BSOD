@@ -32,7 +32,6 @@
 #ifndef _DIRECTION_H
 #define _DIRECTION_H
 
-#include <endian.h>
 #include <stdint.h>
 #include "libtrace.h"
 

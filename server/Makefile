@@ -1,5 +1,5 @@
-CXX=g++-3.0
-CC=g++-3.0
+CXX=g++
+CC=g++
 CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g
 INCLUDE =  -I/usr/local/include  -I. -I./lib
 
@@ -25,7 +25,7 @@ libconfig:
 
 clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)
-	cd lib && make clean || exit 1
+	cd lib && $(MAKE) clean || exit 1
 
 distclean: clean
 	
@@ -35,10 +35,10 @@ bsod_server: $(OBJS) bsod_server.o
 
 
 plugins:
-	cd plugins; make; cd ..
+	cd plugins; $(MAKE); cd ..
 
 plugins-clean:
-	cd plugins; make clean; cd ..
+	cd plugins; $(MAKE) clean; cd ..
 
 install:
 	mkdir -p $(BINDIR)
@@ -50,7 +50,7 @@ install:
 	install -m 644 ./mac_addrs $(CONFDIR)/mac_addrs
 	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
 
-	cd plugins; make install; cd ..
+	cd plugins; $(MAKE) install; cd ..
 
 install-init:
 	install -m 755 ./bsod_server.init /etc/init.d/bsod_server

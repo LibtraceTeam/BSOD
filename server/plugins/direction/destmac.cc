@@ -32,7 +32,6 @@
 
 #include "direction.h"
 #include <stdint.h>
-#include <endian.h>
 #include "libtrace.h"
 
 #include <stdio.h>
@@ -48,10 +47,10 @@ int macsloaded = 0;
 uint64_t *macs = 0;
 
 
-inline uint64_t mac_to_uint64(const uint8_t mac[ETH_ALEN]) {
+inline uint64_t mac_to_uint64(const uint8_t mac[ETHER_ADDR_LEN]) {
     uint64_t address = 0;
     int i = 0;
-    for (i = 0; i < ETH_ALEN; i++) {
+    for (i = 0; i < ETHER_ADDR_LEN; i++) {
 	address = address << 8;
 	address = address | mac[i];
     }
@@ -59,7 +58,7 @@ inline uint64_t mac_to_uint64(const uint8_t mac[ETH_ALEN]) {
 }
 
 
-inline int is_local(const uint8_t mac[ETH_ALEN]) {
+inline int is_local(const uint8_t mac[ETHER_ADDR_LEN]) {
     int i = 0;
     uint64_t address = mac_to_uint64(mac);
     for (i = 0; i < macsloaded; i++) {
@@ -79,7 +78,7 @@ void mod_init_dir(char* filename)
     FILE *fin = 0;
     char *buffer;
     int lines = 0;
-    uint8_t octets[ETH_ALEN];
+    uint8_t octets[ETHER_ADDR_LEN];
     //int i = 0;
     int num = 0;
 

@@ -29,18 +29,18 @@
  *
  */
 
-
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <netinet/in_systm.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
@@ -51,7 +51,6 @@
 #include <iostream>
 #include <syslog.h>
 #include <map>
-
 
 #include "lru"
 
@@ -227,8 +226,8 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 {
 
 	int hlen = 0;
-	struct tcphdr *tcpptr = 0;
-	struct udphdr *udpptr = 0;
+	struct libtrace_tcp *tcpptr = 0;
+	struct libtrace_udp *udpptr = 0;
 	uint32_t ts32;
 	float start[3];
 	float end[3];
@@ -272,7 +271,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	{
 		isTCP = true;
 		hlen = p->ip_hl * 4;
-		tcpptr = (struct tcphdr *) ((uint8_t *)p  + hlen);
+		tcpptr = trace_get_tcp(&packet);
 		assert(tcpptr);
 
 		datasize = (ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen);
@@ -286,7 +285,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	else if(p->ip_p == 17)
 	{
 		hlen = p->ip_hl * 4;
-		udpptr = (struct udphdr *) ((uint8_t *)p  + hlen);
+		udpptr = trace_get_udp(&packet);
 		assert(udpptr);
 
 		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);

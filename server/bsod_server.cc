@@ -42,6 +42,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
+#include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/ip.h>
@@ -438,7 +439,7 @@ static void load_modules() {
 	}
 
 	modptrs.colour = (colfptr) dlsym(colourhandle, "mod_get_colour");
-	if ((error = dlerror()) != NULL) {
+	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.colour);
 	}
@@ -453,7 +454,7 @@ static void load_modules() {
 	}
 
 	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
-	if ((error = dlerror()) != NULL) {
+	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.left);
 	}
@@ -468,7 +469,7 @@ static void load_modules() {
 	}
 	
 	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
-	if ((error = dlerror()) != NULL) {
+	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.right);
 	}
@@ -483,7 +484,7 @@ static void load_modules() {
 	}
 
 	modptrs.init_dir = (initdirfptr) dlsym(dirhandle,"mod_init_dir");
-	if ((error = dlerror()) != NULL) {
+	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.init_dir);
 	}
@@ -496,7 +497,7 @@ static void load_modules() {
 	modptrs.init_dir(macaddrfile);
 
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
-	if ((error = dlerror()) != NULL) {
+	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.direction);
 	}

@@ -11,7 +11,8 @@ research group. For further information please see http://www.wand.net.nz/.
 
 This directory contains source code for bsod-server, one half of the bsod 
 tool for the visualisation of network traffic captured from live interfaces 
-or from offline traces.
+or from offline traces. Get the other half, the bsod client from 
+http://www.wand.net.nz/.
 
 bsod was written to make use of the libtrace traffic processing library
 also developed by the WAND research group. This means that it can 
@@ -22,9 +23,6 @@ The bsod server has been tested on and is known to run in Debian GNU/Linux.
 
 It is licensed under the GNU General Public License (GPL) version 2. Please
 see the included file GPL for details of this license.
-
-The files CHANGES and TODO contain more information regarding the current
-release.
 
 Please read the included INSTALL file for information regarding the
 installation of bsod, including required dependencies.
@@ -48,6 +46,9 @@ form:
 
 A value can be one of two types - string or integer. All strings are 
 enclosed in double quotes, while integers are simply a number.
+
+The configuration file can be reloaded on the fly by sending the bsod server
+process a SIGUSR1.
 
 
 KEY		VALUE TYPE
@@ -188,3 +189,40 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 
 Alternatively, you can (as root) add /usr/local/lib to your /etc/ld.so.conf 
 and run ldconfig to update this system wide.
+
+
+Problem: 
+error: parse error
+
+Solution:
+This means there is an error in your config file. Check that all strings
+are appropriately quoted at start and finish and that all options have 
+arguments of the right types. Also note that the last line of the file
+cannont be a comment - it must either be a configuration option or a blank
+line.
+
+
+Problem:
+Couldn't load module /usr/local/bsod/plugins/colour/colours.so
+bsod_server: bsod_server.cc:391: void load_modules(): Assertion `colourhandle' failed.
+
+Solution:
+This library is part of the bsod server and should be present. It is the first
+one loaded by bsod and so is usually indicative of all the libraries being
+in the wrong place. Check the path that the error message gives for where it 
+is looking for the module, and make sure that it is correct. If bsod server 
+has been installed somewhere else (or if 'make install' has not been run at 
+all), then you will need to specify where to find the bsod server directory. 
+In the configuration file you should set the 'basedir' option to point to the 
+bsod server directory containing the plugins directory.
+
+
+Problem:
+Oi! You called trace_read_packet() with a NULL libtrace parameter!
+bsod_server: trace.c:639: trace_read_packet: Assertion `libtrace' failed.
+Aborted
+
+Solution:
+This means that the server failed to open the data source correctly. Check
+that the 'source' option in the configuration file is set to the right path,
+and that the URI is of the correct type.

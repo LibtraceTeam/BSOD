@@ -11,9 +11,10 @@
 
 #ifdef _WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif
 
-#include <unistd.h>
 
 void CLoadingScreen::Redraw()
 {
@@ -23,7 +24,7 @@ void CLoadingScreen::Redraw()
     world.display->BindTexture(background);
 
     float nw, nh;
-    if(background->orig_width > width || background->orig_height > height)
+    if(background->orig_width > width)
     {
         // Find out optimal scaling for the image so it is as large as possible but
         // the aspect is still the same.
@@ -33,35 +34,20 @@ void CLoadingScreen::Redraw()
         // 1.333 is the normal aspect ratio of a monitor
 
         // Maximise to screen size
-        if(aspect > 1.3333f) // width is the prevailing dimension
-        {
-            nw = (float)width;
-            nh = nw / aspect;
-        } else {
-            nh = (float)height;
-            nw = aspect * nh;
-        }
-
+        nw = (float)width;
+        nh = nw / aspect;
     } else {
         nw = background->orig_width;
         nh = background->orig_height;
     }
 
-    world.display->Draw2DQuad( 
-            (int)((width - nw) / 2), 
-            (int)((height - nh) / 2), 
-            (int)(width - ((width - nw) / 2)), 
-            (int)(height - ((height - nh) / 2)) 
-            );
-
+    world.display->Draw2DQuad(
+	0, 0,
+	nw, nh);
 
     world.display->SetBlend(true);	
     world.display->BindTexture(NULL);
 
-
-    /*	world.display->SetColour(0.2f, 0.1f, 0.3f, 0.7f);
-
-        world.display->Draw2DQuad(8, 43, maxlen * 8 + 12, messages.size() * 20 + 47);*/
 
     world.display->SetColour(1.0f, 1.0f, 1.0f);
 

@@ -8,8 +8,6 @@ executable = 'bsod-client'
 libs = [ 
     # Image libraries that should be in external/
     'IL', 'ILU', 
-    # stl lib. Sometimes stlport and sometimes stlport_gcc ?
-    'stlport_gcc', 
     # opengl and opengl utility lib.
     'GL', 'GLU', 
     # lua programming language, should be in external/
@@ -79,13 +77,16 @@ except:
     pass
 
 opt = Options('options.cache', ARGUMENTS)
+opt.Add('CPPDEFINES', 'Preprocessor definitions')
+#opt['SAM'] = 1
 
 if do_conf:
     conf = env.Configure()
     if not conf.CheckLibWithHeader('stlport_gcc', 'hash_map', 'C++', 
             'std::hash_map< int, int > hmap;', 1):
-        # This needs testing.
-        opt.Add('DEFINES', '', 'NO_STLPORT')
+        conf.env['CPPDEFINES'] = [ 'NO_STLPORT' ]
+    else:
+	conf.env['LIBS'] += [ 'stlport_gcc' ]
 
     check_libs = { 
         'lua_open':'lua', 
@@ -106,7 +107,6 @@ if do_conf:
     for key in check_libs.keys():
         if not conf.CheckLib(None, key):
             print "Critical library '%s' not found!" % (check_libs[key])
-            Exit(1)
 
     env = conf.Finish()
 

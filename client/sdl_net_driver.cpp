@@ -118,7 +118,7 @@ void CSDLNetDriver::ReceiveData()
 	    
     unsigned char *buf = &databuf[0];
     while(true) {
-	const unsigned int s = databuf.end() - buf;
+	const unsigned int s = &databuf[databuf.size()] - &buf[0];
 	fp = (fp_union *)buf;
 	if(s == 0) {
 	    databuf.erase(databuf.begin(), databuf.end());
@@ -144,7 +144,8 @@ void CSDLNetDriver::ReceiveData()
 		buf += sizeof(flow_update_t);
 	    } else {
 		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), buf);
+		    databuf.erase(databuf.begin(), databuf.begin() 
+			+ (buf - &databuf[0]));
 		break;
 	    }
 	} else if(fp->flow.type == 0x01) {
@@ -168,7 +169,8 @@ void CSDLNetDriver::ReceiveData()
 		buf += sizeof(pack_update_t);
 	    } else {
 		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), buf);
+		    databuf.erase(databuf.begin(), databuf.begin() 
+			+ (buf - &databuf[0]));
 		break;
 	    }
 	} else if(fp->flow.type == 0x02) {
@@ -178,12 +180,16 @@ void CSDLNetDriver::ReceiveData()
 		buf += sizeof(flow_remove_t);
 	    } else {
 		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), buf);
+		    databuf.erase(databuf.begin(), databuf.begin() 
+			+ (buf - &databuf[0]));
 		break;
 	    }
 	} else {
 	    Log("Unknown packet type...s:%u r:%u d:%u \n",
-		    databuf.size(), buf-&databuf[0], databuf.end()-buf);
+		    databuf.size(), 
+		    (int)(buf-&databuf[0]), 
+		    (int)(&databuf[databuf.size()]-buf)
+		);
 	    databuf.erase(databuf.begin(), databuf.end());
 	    break;
 	}

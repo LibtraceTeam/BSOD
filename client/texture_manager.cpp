@@ -101,6 +101,8 @@ CTexture *CTextureManager::LoadTexture(string texName)
 	iluScale(width, height, ilGetInteger(IL_IMAGE_DEPTH));
     }
 
+    Log("LoadTexture: orig: %dx%d now: %dx%d\n",
+	orig_width, orig_height, width, height);
     glId = world.display->LoadTexture(ilGetData(), type, width, height);
 
     ilDeleteImages(1, &ilId);
@@ -176,7 +178,7 @@ void CTextureManager::SaveScreenshot(string fileName)
 
     world.display->Screenshot(buf, w, h);
 
-    if(!ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, buf.begin())) {
+    if(!ilTexImage(w, h, 1, 3, IL_RGB, IL_UNSIGNED_BYTE, &buf[0])) {
 	throw CException("ilTexImage error\n");
     }
 

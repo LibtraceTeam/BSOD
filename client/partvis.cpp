@@ -110,8 +110,7 @@ void CPartFlow::Update(float diff)
     translation += d;
 
     while(vertices.size() >= (unsigned)6*(offset+1)) {
-	vector<Vector3f>::iterator i = &vertices[offset*6];
-	Vector3f e = (*i) + translation;
+	Vector3f e = (vertices[offset*6]) + translation;
 	Vector3f m = destination - start;
 	if( (e - start).Length() > m.Length() ) {
 	    offset++;
@@ -131,9 +130,9 @@ void CPartFlow::Update(float diff)
     // will be taking place.
     // - Sam, 13/2/2004
     if(vertices.size() > 6*100 && offset) {
-	 vertices.erase( vertices.begin(), &vertices[6*offset] );
-	 tex_coords.erase( tex_coords.begin(), &tex_coords[6*offset] );
-	 colours.erase( colours.begin(), &colours[6*4*offset] );
+	 vertices.erase( vertices.begin(), vertices.begin()+(6*offset) );
+	 tex_coords.erase( tex_coords.begin(), tex_coords.begin()+(6*offset) );
+	 colours.erase( colours.begin(), colours.begin()+(6*4*offset) );
 	 offset = 0;
     }
 }
@@ -142,7 +141,7 @@ void CPartFlow::Update(float diff)
 void CPartFlow::MoveParticles()
 {
     throw CException("MoveParticles is deprecated.");
-    vector<Vector3f>::iterator i = &vertices[offset*6];
+    vector<Vector3f>::iterator i = vertices.begin()+(offset*6);
     for(; i != vertices.end(); ++i) {
 	(*i) += translation;
     }

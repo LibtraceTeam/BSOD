@@ -1,10 +1,11 @@
 CXX=g++-3.0
 CC=g++-3.0
+INCLUDE = -I/usr/local/wand/include
 #CPPFLAGS = -Wall -Wimplicit -Wformat -pipe -g -fPIC
-CPPFLAGS = -g -fPIC -shared
+CPPFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -Wpedantic
 CPPFLAGS += $(INCLUDE)
 
-DIRS := colour position
+DIRS := colour position direction
 SOURCES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))
 
 OBJS := $(patsubst %.cc, %.so, $(SOURCES))

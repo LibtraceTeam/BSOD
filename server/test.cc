@@ -54,6 +54,14 @@ uint32_t ts32 = 0;
 uint32_t startts32 = 0;
 
 
+
+void do_usage(char* name)
+{
+    printf("Usage: %s [-s <source>] [-p <listenport>]\n", name);
+    exit(0);
+}
+
+
 //---------------------------------------------------
 int main(int argc, char *argv[])
 {
@@ -66,6 +74,9 @@ int main(int argc, char *argv[])
     struct timeval tv;
     int new_client;
 
+    bool live = true;
+    char *tmp;
+
 
     // rt stuff
     static struct rt_client_t *rtclient;
@@ -74,8 +85,6 @@ int main(int argc, char *argv[])
     int status = 0;
     uint64_t ts;
     dag_record_t *erfptr = 0;
-
-    //int new_fd;
 
     gettimeofday(&starttime, 0); // XXX
     
@@ -120,7 +129,7 @@ int main(int argc, char *argv[])
     //-------------------------------------------------------
     // do some command line stuff for ports and things
 
-    while( (opt = getopt(argc, argv, "s:p:")) != -1)
+    while( (opt = getopt(argc, argv, "s:p:l:r:")) != -1)
     {
 	switch(opt)
 	{
@@ -132,11 +141,12 @@ int main(int argc, char *argv[])
 		// should I be doing some checking on this arg?
 		port = atoi(optarg);
 		break;
-
-	    default: /* do nothing */ break;
+	    default: do_usage(argv[0]);
 	};
     }
     //--------------------------------------------------------
+
+    init_packets();
 
     //-------Setup listen socket-----------
     listen_socket = setup_listen_socket(); // set up socket
@@ -154,7 +164,19 @@ int main(int argc, char *argv[])
     rtclient = create_rtclient(hostname,0);
     printf("Connected to data source: %s\n", hostname);
 
-    while(1)// someone explain why i have 2 loops here...
+    // hax to make it only slow down saved trace files...looks for a '/'
+    for(tmp=hostname; *tmp != '\0'; tmp++)
+	if(*tmp == '/')
+	{
+	    printf("Attempting to replay trace in real time\n");
+	    live = false;
+	    break;
+	}
+
+    // someone explain why i have 2 loops here...think its cause I did
+    // have some clean up code which left/moved, and how it fitted in
+    // with signal handlers
+    while(1)
     {
 	// loop till something breaks
 	
@@ -175,20 +197,42 @@ int main(int argc, char *argv[])
 	    ts = erfptr->ts;
 
 	    /* this time checking only matters when reading from a prerecorded
-	     * trace file. It limits it to a seconds worth of data a second */
-	    if(startts32 == 0)
-		startts32 = ts >> 32;
-
-	    ts32 = ts >> 32;
-	    gettimeofday(&nowtime, 0);
-
-	    while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
+	     * trace file. It limits it to a seconds worth of data a second,
+	     * which is still a large chunk*/
+	    if(!live)
 	    {
-		usleep(10);	
+		if(startts32 == 0)
+		    startts32 = ts >> 32;
+
+		ts32 = ts >> 32;
 		gettimeofday(&nowtime, 0);
 
+		// check that we are in the right second, and arent 
+		// getting ahead of ourselves
+		while( ((uint32_t)(nowtime.tv_sec - starttime.tv_sec) < (ts32 - startts32)))
+		{
+		    usleep(10);	
+		    gettimeofday(&nowtime, 0);
+
+		}
+
+		//check that we are in the right part of the second and arent
+		//getting ahead of ourselves. could go into more detail
+		//here, but is not super important
+		uint32_t dagparts_hax = 0;
+		if(ts & 0x0000000080000000)
+		    dagparts_hax += 500000;
+		if(ts & 0x0000000040000000)
+		    dagparts_hax += 250000;
+		if(ts & 0x0000000020000000)
+		    dagparts_hax += 125000;
+
+		while((uint32_t)(nowtime.tv_usec) < dagparts_hax)
+		{
+		    usleep(1);
+		    gettimeofday(&nowtime, 0);
+		}
 	    }
-	    
 	    // if sending fails, assume we just lost a client
 	    if(per_packet(erfptr, psize, ts) != 0)
 		break;

@@ -1,3 +1,8 @@
+/*
+ * Picking a location on each plane still doesn't feel very good. It's
+ * like a super hack that won't go away.
+ */ 
+
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
@@ -30,6 +35,9 @@ extern "C" {
 }
 
 #include "socket.h" // but breaks in a different place if i leave one out
+
+#define SIDE_LENGTH 8
+#define MAX_SIZE 10000
 
 typedef struct ip ip_t;
 uint32_t lastts = 0;
@@ -123,7 +131,6 @@ flow_lru_t flows;
 void init_packets()
 {
     id = 0;
-
     while(!flows.empty())
 	flows.erase(flows.front().first);
 }
@@ -222,61 +229,63 @@ float compact2(struct in_addr ip, int offset)
 //-------------------------------------------------------------
 int get_start_pos(float start[3], struct in_addr source, int iface)
 {
-   if(iface == 0)// only uses last half(starts locally)
-   {
-       start[1] = compact2( source, 1);
-       start[0] = -10;
-       start[2] = compact2( source, 0 );
-   }
-   else if(iface == 1)
-   {
-       source.s_addr = ntohl(source.s_addr);
-       /*
-       start[1] = compact( source, 1);
-       start[0] = 10;
-       start[2] = compact( source, 0 );
-       */
-       start[0] = 10;
-       start[1] = (((float)((source.s_addr & 0xffff) % 20000)) / 1000) - 10;
-       start[2] = (((float)(((source.s_addr & 0xffff0000)>>16) % 20000)) 
-			/ 1000) - 10;
-   }
-   else
-       return 1;
+    float length;
+    float angle;
 
     
-   return 0;
-
-}
-//------------------------------------------------------------
-int get_end_pos(float end[3], struct in_addr dest, int iface)
-{
     if(iface == 0)
     {
-	/*
-	end[1] = compact( dest , 1 );
-	end[0] = 10;
-	end[2] = compact( dest , 0 );
-	*/
-       end[0] = 10;
-       end[1] = (((float)((dest.s_addr & 0xffff) % 20000)) / 1000) - 10;
-       end[2] = (((float)(((dest.s_addr & 0xffff0000)>>16) % 20000)) 
-			/ 1000) - 10;
+	    start[1] = compact2( source, 1);
+	    start[0] = -10;
+	    start[2] = compact2( source, 0 );
     }
-    else if(iface == 1) // only uses last half(ends locally)
+    else if(iface == 1)
     {
-	end[1] = compact2( dest, 1 );
-	end[0] = -10;
-	end[2] = compact2( dest , 0 );
+	source.s_addr = ntohl(source.s_addr);
+	angle = ((source.s_addr & 0xffff0000) >> 16) % MAX_SIZE;
+	length = (source.s_addr & 0xffff) % MAX_SIZE;
+
+	start[0] = 10;
+	start[1] = angle/MAX_SIZE * sin( (2* M_PI * length) / MAX_SIZE) 
+	    * SIDE_LENGTH;
+	start[2] = angle/MAX_SIZE * cos( (2* M_PI * length) / MAX_SIZE) 
+	    * SIDE_LENGTH;
+
+
     }
     else
 	return 1;
 
+    return 0;
+}
+//------------------------------------------------------------
+int get_end_pos(float end[3], struct in_addr dest, int iface)
+{
+    float length;
+    float angle;
+    
+    if(iface == 0)
+    {
+	dest.s_addr = ntohl(dest.s_addr);
+	angle = ((dest.s_addr & 0xffff0000) >> 16) % MAX_SIZE;
+	length = (dest.s_addr & 0xffff) % MAX_SIZE;
+
+	end[0] = 10;
+	end[1] = angle/MAX_SIZE * sin( (2* M_PI * length) / MAX_SIZE) * SIDE_LENGTH;
+	end[2] = angle/MAX_SIZE * cos( (2* M_PI * length) / MAX_SIZE) * SIDE_LENGTH;
+    }
+    else if(iface == 1)
+    {
+	    end[1] = compact2( dest, 1);
+	    end[0] = -10;
+	    end[2] = compact2( dest, 0 );
+    }
+    else
+	return 1;
 
     return 0;
 
 }
-
 //-----------------------------------------------------------
 
 static int  is_server_port(int port) {
@@ -340,10 +349,12 @@ void get_colour(uint8_t color[3], int port, int protocol)
 		     color[i] = countercolours[MAIL][i];
 		 break;
 
+		 /* white is just too confusing when other things blend */
+/*
 	case 119: for(i=0;i<3;i++)
 		      color[i] = countercolours[NNTP][i];
 		  break;
-
+*/
 	case 53: for(i=0;i<3;i++)
 		     color[i] = countercolours[DNS][i];
 		 break;
@@ -352,7 +363,7 @@ void get_colour(uint8_t color[3], int port, int protocol)
 	case 23: for(i=0;i<3;i++)
 		     color[i] = countercolours[SSH][i];
 		 break;
-
+		 
 	case 443: for(i=0;i<3;i++)
 		      color[i] = countercolours[HTTPS][i];
 		  break;

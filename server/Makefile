@@ -44,7 +44,8 @@ install:
 	mkdir -p $(CONFDIR)
 	mkdir -p $(LIBDIR)
 
-	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.dist
+	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.conf
+	install -m 644 ./mac_addrs $(CONFDIR)/mac_addrs
 	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
 
 	cd plugins; make install; cd ..

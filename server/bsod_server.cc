@@ -66,7 +66,7 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *macaddrfile = 0;
-char *configfile = "/usr/local/bsod/etc/bsod_server";
+char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
 
 int port = 32500;

@@ -265,7 +265,7 @@ void CPartVis::Update(float diff)
     }*/
 	if( do_gcc )
 	{
-		if( (world.sys->TimerGetTime() - last_gc) > 36000.0f ) // 360000.0f
+		if( (world.sys->TimerGetTime() - last_gc) > 180000.0f ) // 5 minutes
 		{
 			last_gc = world.sys->TimerGetTime();
 			GCPartFlows(); 
@@ -509,7 +509,7 @@ void CPartVis::GCPartFlows()
 	// Garbage collect:
 	if( partflow_pool.size() > 10 )
 	{
-		Log( "Begin garbage collection. %d flows in free list", partflow_pool.size() );
+		//Log( "Begin garbage collection. %d flows in free list", partflow_pool.size() );
 		FlowList::iterator i = partflow_pool.begin();
 		FlowList::iterator last;
 		CPartFlow *tmp;
@@ -531,7 +531,7 @@ void CPartVis::GCPartFlows()
 			}
 			//i++;
 		}
-		Log( "End garbage collection. %d flows in free list", partflow_pool.size() );
+		//Log( "End garbage collection. %d flows in free list", partflow_pool.size() );
 	}
 }
 

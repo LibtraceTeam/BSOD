@@ -659,7 +659,8 @@ bool CWin32SystemDriver::CreateGLWindow(char *title, int width, int height, int 
 								dwStyle |							// Defined Window Style
 								WS_CLIPSIBLINGS |					// Required Window Style
 								WS_CLIPCHILDREN,					// Required Window Style
-								0, 0,								// Window Position
+								0,						// Window Position
+								0,					// Window Position
 								WindowRect.right-WindowRect.left,	// Calculate Window Width
 								WindowRect.bottom-WindowRect.top,	// Calculate Window Height
 								NULL,								// No Parent Window

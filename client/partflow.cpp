@@ -21,7 +21,9 @@
 #include "partflow.h"
 #include "partvis.h"
 
+
 float CPartFlow::time_to_live = 4.5f;
+#define PREALLOC 10 // Number of packets each flow preallocates memory for.
 
 // The following globals are for debugging only
 /*int flows_drawn = 0;
@@ -37,9 +39,9 @@ CPartFlow::CPartFlow()
 	active_flow_ptr = NULL;
 
 	// Reserve some space for 20 packets worth
-	vertices.reserve(20*6);
-	tex_coords.reserve(20*6);
-	colours.reserve(20*6*4);
+	vertices.reserve(PREALLOC*6);
+	tex_coords.reserve(PREALLOC*6);
+	colours.reserve(PREALLOC*6*4);
 
 	sam_count = 0;
 	packets = 0;
@@ -442,9 +444,10 @@ void CPartFlow::ReInitialize()
 	vertices.clear();
 	tex_coords.clear();
 	colours.clear();
-	//vertices.reserve(20*6);
-	//tex_coords.reserve(20*6);
-	//colours.reserve(20*6*4);
+	
+	vertices.reserve(PREALLOC*6);
+	tex_coords.reserve(PREALLOC*6);
+	colours.reserve(PREALLOC*6*4);
 
 	translation.x = translation.y = translation.z = 0.0f;
 	start.x = start.y = start.z = 0.0f;
@@ -456,6 +459,7 @@ void CPartFlow::ReInitialize()
 
 	speed = 1.0f;
 
+	jitter.clear();
 	endpoint_vertices.clear();
 	endpoint_tex_coords.clear();
 }

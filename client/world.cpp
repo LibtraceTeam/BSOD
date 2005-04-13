@@ -174,7 +174,8 @@ void CWorld::Draw()
 		// Debugging:
 		list<string>::const_iterator i = CReporter::GetLog().begin();
 		int count = 0;
-		for(; i != CReporter::GetLog().end(); ++i, count++) {
+		for(; i != CReporter::GetLog().end(); ++i, count++) 
+		{
 			if(count < 10)
 				display->DrawString2(10, 60 + count * 20, *i);
 		}

@@ -265,7 +265,7 @@ void CPartVis::Update(float diff)
     }*/
 	if( do_gcc )
 	{
-		if( (world.sys->TimerGetTime() - last_gc) > 360000.0f )
+		if( (world.sys->TimerGetTime() - last_gc) > 36000.0f ) // 360000.0f
 		{
 			last_gc = world.sys->TimerGetTime();
 			GCPartFlows(); 
@@ -492,13 +492,14 @@ CPartFlow *CPartVis::AllocPartFlow()
 	CPartFlow *ret = *(partflow_pool.begin());
 	partflow_pool.pop_front();
 
-	ret->ReInitialize();
+	//ret->ReInitialize();
 	return( ret );
 }
 
 void CPartVis::FreePartFlow( CPartFlow *flow )
 {
 	flow->gc_count = 0;
+	flow->ReInitialize();
 	partflow_pool.push_front( flow );
 }
 
@@ -508,39 +509,30 @@ void CPartVis::GCPartFlows()
 	// Garbage collect:
 	if( partflow_pool.size() > 10 )
 	{
+		Log( "Begin garbage collection. %d flows in free list", partflow_pool.size() );
 		FlowList::iterator i = partflow_pool.begin();
 		FlowList::iterator last;
 		CPartFlow *tmp;
 		for( ; i != partflow_pool.end(); )
 		{
-			if( (*i)->gc_count == 2 )
+			if( (*i)->gc_count == 1 )
 			{
 				tmp = (*i);
 				last = i;
 				i++;
 				partflow_pool.erase( last );
 				delete tmp;
-				continue;
+				//continue;
 			}
 			else
 			{
 				(*i)->gc_count++;
+				i++;
 			}
-			i++;
+			//i++;
 		}
+		Log( "End garbage collection. %d flows in free list", partflow_pool.size() );
 	}
-
-	// If there are oer than 10 items in the pool clean some out:
-	/*if( partflow_pool.size() > 10 )
-	{
-		CPartFlow *ptr;
-		for( int i=0; i<10; i++ )
-		{
-			ptr = partflow_pool.begin();
-			partflow_pool.pop_front();
-			delete ptr;
-		}
-	}*/
 }
 
 void CPartVis::BillboardBegin()

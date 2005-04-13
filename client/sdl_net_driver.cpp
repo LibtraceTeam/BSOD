@@ -341,7 +341,7 @@ void CSDLNetDriver::ReceiveData()
 			fd->colour[1] = fp->fdesc.colour[1];
 			fd->colour[2] = fp->fdesc.colour[2];
 			strcpy( fd->name, fp->fdesc.name );
-			Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
+			//Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
 			world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
 		}
 		buf += sizeof(flow_descriptor);

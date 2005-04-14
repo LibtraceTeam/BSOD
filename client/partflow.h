@@ -5,6 +5,8 @@
 #pragma warning( disable : 4996 )
 #endif
 
+#define PREALLOC 10 // Number of packets each flow preallocates memory for.
+
 class CPartFlow;
 
 typedef hash_map<unsigned int, CPartFlow *> FlowMap;

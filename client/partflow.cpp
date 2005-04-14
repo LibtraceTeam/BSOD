@@ -23,7 +23,6 @@
 
 
 float CPartFlow::time_to_live = 4.5f;
-#define PREALLOC 10 // Number of packets each flow preallocates memory for.
 
 // The following globals are for debugging only
 /*int flows_drawn = 0;

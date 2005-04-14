@@ -498,6 +498,14 @@ CPartFlow *CPartVis::AllocPartFlow()
 
 void CPartVis::FreePartFlow( CPartFlow *flow )
 {
+	if( flow->vertices.capacity() > (PREALLOC*6) )
+	{
+		// The flow has grown so discard it to prevent infinitely growing vectors
+		delete flow;
+		flow = NULL;
+		return;
+	}
+
 	flow->gc_count = 0;
 	flow->ReInitialize();
 	partflow_pool.push_front( flow );

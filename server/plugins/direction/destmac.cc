@@ -73,6 +73,7 @@ inline int is_local(const uint8_t mac[ETHER_ADDR_LEN]) {
 /**
  * Read in all the macs from the file specified in the config.
  */ 
+extern "C"
 void mod_init_dir(char* filename)
 {
     FILE *fin = 0;
@@ -133,11 +134,12 @@ void mod_init_dir(char* filename)
 /**
  * destmac looks at the destination MAC of the packet
  */
-int mod_get_direction(struct libtrace_packet_t packet)
+extern "C"
+int mod_get_direction(struct libtrace_packet_t *packet)
 {
     struct ether_header *ethptr;
 
-    ethptr = (struct ether_header *)trace_get_link(&packet);
+    ethptr = (struct ether_header *)trace_get_link(packet);
 
 
     /* Set direction bit based on upstream routers' MAC */

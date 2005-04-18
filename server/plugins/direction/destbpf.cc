@@ -29,16 +29,55 @@
  *
  */
 
-#ifndef _DIRECTION_H
-#define _DIRECTION_H
 
+#include "direction.h"
 #include <stdint.h>
 #include "libtrace.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <net/ethernet.h>
+#include <err.h>
 
-extern "C" {
-    void mod_init_dir(const char* filename);
-    int mod_get_direction(struct libtrace_packet_t *packet);   
+#include "../../debug.h"
+#include <syslog.h>
+#include <string.h>
+
+static char *bpf_exp = NULL;
+static struct libtrace_filter_t *filter = NULL;
+
+
+/**
+ * Read in all the macs from the file specified in the config.
+ */ 
+extern "C"
+void mod_init_dir(const char* bpf)
+{
+	bpf_exp = strdup(bpf);
+	filter = trace_bpf_setfilter(bpf);
 }
 
-#endif // _DIRECTION_H
+
+/**
+ * Free any resources allocated during the init_dir
+ */
+extern "C"
+void mod_fini_dir()
+{
+	free(bpf_exp);
+}
+
+
+/**
+ * destmac looks at the destination MAC of the packet
+ */
+extern "C"
+int mod_get_direction(struct libtrace_packet_t *packet)
+{
+
+    if (trace_bpf_filter(filter,packet)==1)
+	    return 1;
+    else
+	    return 0;
+}
+

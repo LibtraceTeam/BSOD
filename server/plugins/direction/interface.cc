@@ -45,7 +45,7 @@ int mod_get_direction(struct libtrace_packet_t *packet)
 }
 
 extern "C"
-void mod_init_dir(char* filename)
+void mod_init_dir(const char* filename)
 {
     /* empty */
 }

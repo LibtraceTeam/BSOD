@@ -36,11 +36,31 @@
 #include <stdint.h>
 #include "libtrace.h"
 
+typedef enum {
+	DIR_UNKNOWN = -1,
+	DIR_OUTBOUND = 0,
+	DIR_INBOUND = 1,
+	DIR_OTHER = 2
+} direction_t;
+
+typedef enum {
+	SIDE_LEFT = 0,
+	SIDE_RIGHT = 1
+} side_t;
+
+
 typedef void (* colfptr)(unsigned char*,struct libtrace_packet_t *);
 typedef void (* inffptr)(uint8_t*,char[256],int);
-typedef int (* posfptr)(float[3], int iface, struct libtrace_packet_t *);
+typedef int (* posfptr)(float[3], 
+		side_t side,
+		direction_t dir,
+		struct libtrace_packet_t *);
 typedef int (* dirfptr)(struct libtrace_packet_t *);
 typedef void (* initdirfptr)(char* );
+typedef int (* initfuncfptr)(const char *);
+typedef int (* initsidefptr)(side_t side, const char *);
+typedef int (* endfptr)();
+typedef int (* endsidefptr)(side_t side);
 struct modptrs_t {
 	colfptr colour;
 	inffptr info;

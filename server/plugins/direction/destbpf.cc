@@ -51,7 +51,7 @@ static struct libtrace_filter_t *filter = NULL;
  * Read in all the macs from the file specified in the config.
  */ 
 extern "C"
-void mod_init_dir(const char* bpf)
+void module_init(const char* bpf)
 {
 	bpf_exp = strdup(bpf);
 	filter = trace_bpf_setfilter(bpf);
@@ -62,7 +62,7 @@ void mod_init_dir(const char* bpf)
  * Free any resources allocated during the init_dir
  */
 extern "C"
-void mod_fini_dir()
+void end_module()
 {
 	free(bpf_exp);
 }
@@ -80,4 +80,5 @@ int mod_get_direction(struct libtrace_packet_t *packet)
     else
 	    return 0;
 }
+
 

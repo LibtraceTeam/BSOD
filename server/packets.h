@@ -40,8 +40,6 @@
 #define SIDE_LENGTH 8
 #define MAX_SIZE 10000
 
-
-
 int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList);
 float convert_speed( float speed );
 

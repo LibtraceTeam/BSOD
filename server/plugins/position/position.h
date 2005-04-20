@@ -34,8 +34,38 @@
 #define _POSITION_H
 
 #include <netinet/in.h>
+
+typedef enum {
+	DIR_UNKNOWN = -1,
+	DIR_OUTBOUND = 0,
+	DIR_INBOUND = 1,
+	DIR_OTHER = 2
+} direction_t;
+
+typedef enum {
+	SIDE_LEFT = 0,
+	SIDE_RIGHT = 1
+} side_t;
+
+#define CHK_SOURCE(side,dir) ((SIDE_LEFT == (side)) ^ ((dir) == DIR_OUTBOUND))
+
+/** initialise the module
+ * @param[in] side	Which side to initialise
+ * @param[in] param	The parameters from the config file
+ *
+ * @note this function may be called twice (once for each side) or only
+ * once (if it's only used on one side).
+ *
+ * @note The param may be an empty string ("") if there is no parameter.
+ */
+extern "C"
+int init_module(side_t side, const char *msg);
+
 /** mod_get_position
- * @param[out] coord[3] The 3d coordinate of the position (x,y,z), z is ignored.
+ * @param[in,out] coord[3] The 3d coordinate of the position (x,y,z), 
+ * 			z is ignored.
+ * @param[in] side	Which side this layout module is being used for
+ * @param[in] dir	Which direction this packet is travelling
  * @param[in] ip 	The IP address.
  *
  * @returns 1 on failure, 0 on success
@@ -45,7 +75,7 @@
  * coord[0] and coord[1] must be in the range -10..10.
  */
 extern "C" int mod_get_position(float coord[3], 
-		int iface,
+		side_t side, direction_t dir,
 		struct libtrace_packet_t *packet);
 
 #endif // _POSITION_H

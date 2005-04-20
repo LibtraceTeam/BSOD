@@ -82,7 +82,8 @@ static int check_subnet(uint32_t net) {
 }
 
 extern "C"
-int mod_get_position(float coord[3], int iface, 
+int mod_get_position(float coord[3], 
+		side_t side, direction_t dir,
 		struct libtrace_packet_t *packet) {
 
 	int index = -1;
@@ -93,7 +94,7 @@ int mod_get_position(float coord[3], int iface,
 	if (!ipptr)
 		return 1;
 
-	if (0 == iface) {
+	if (CHK_SOURCE(side,dir)) {
 		ip = ipptr->ip_src;
 	}
 	else {

@@ -63,7 +63,6 @@
 #include "debug.h"
 #include "socket.h" 
 #include "bsod_server.h"
-#include "plugins/direction/direction.h"
 
 #include "RTTMap.h"
 
@@ -190,10 +189,10 @@ int get_start_pos(float start[3], struct libtrace_packet_t *packet,
 {
 	if(iface == DIR_OUTBOUND) {
 		start[0] = -10;
-		modptrs->left(start, 0, packet);
+		modptrs->left(start, SIDE_LEFT, DIR_OUTBOUND, packet);
 	} else if(iface == DIR_INBOUND) {
 		start[0] = 10;
-		modptrs->right(start, 0, packet);
+		modptrs->right(start, SIDE_RIGHT, DIR_INBOUND, packet);
 	} else
 		return 1;
 
@@ -205,10 +204,10 @@ int get_end_pos(float end[3], struct libtrace_packet_t *packet,
 {
 	if(iface == DIR_OUTBOUND) {
 		end[0] = 10;
-		modptrs->right(end, 1,packet);
+		modptrs->right(end, SIDE_RIGHT, DIR_OUTBOUND, packet);
 	} else if(iface == DIR_INBOUND) {
 		end[0] = -10;
-		modptrs->left(end, 1,packet);
+		modptrs->left(end, SIDE_LEFT, DIR_INBOUND, packet);
 	} else
 		return 1;
 

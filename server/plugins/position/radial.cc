@@ -62,7 +62,7 @@
  * length
  */
 extern "C"
-int mod_get_position(float coord[3], int iface, 
+int mod_get_position(float coord[3], side_t side, direction_t dir,
 		struct libtrace_packet_t *packet) { 
 	
 	struct libtrace_ip *ipptr = trace_get_ip(packet);
@@ -70,7 +70,7 @@ int mod_get_position(float coord[3], int iface,
 		return 1;
 
 	struct in_addr ip;
-	if (0 == iface)
+	if (CHK_SOURCE(side,dir))
 		ip = ipptr->ip_src;
 	else
 		ip = ipptr->ip_dst;

@@ -35,8 +35,8 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -74,10 +74,12 @@
 #include "RTTMap.h"
 #include "Blacklist.h"
 
+extern "C"
+char *strndup(const char *, size_t);
+
 typedef struct ip ip_t;
 
 struct sigaction sigact;
-static void sig_hnd(int signo);
 static jmp_buf  jmpbuf;
 
 int  _fcs_bits = 32;
@@ -338,11 +340,6 @@ goodbye:
 }
 
 
-void sig_hnd( int signo )
-{
-    longjmp(jmpbuf, 1);
-}
-
 static void sigusr_hnd(int signo) {
 	restart_config = 1;
 }
@@ -441,6 +438,95 @@ void do_configuration(int argc, char **argv) {
 	fix_defaults();
 }
 
+/** Parse out the arguments and the driver name 
+ * @note driver/args are allocated on the heap and should be free()'d
+ * later
+ */
+static void parse_args(const char *line, char **driver, char **args)
+{
+	char *tok;
+	tok = strchr(line,' ');
+	if (!tok) {
+		*driver = strdup(line);
+		*args = strdup("");
+		return;
+	}
+
+	*driver = strndup(line,tok-line);
+	*args = strdup(tok+1);
+}
+
+/**
+ * Load the module, calling it's initialisation function if appropriate
+ */
+static void *get_module(const char *name)
+{
+	char tmp[4096];
+	char *driver;
+	char *args;
+
+	parse_args(name,&driver,&args);
+	
+	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
+
+	void *handle = dlopen(tmp,RTLD_LAZY);
+	if (!handle) {
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
+		assert(0);
+	}
+
+	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
+
+	if (init_func) {
+		if (!init_func(args)) {
+			Log(LOG_DAEMON|LOG_ALERT,
+			     "Initialisation function failed for %s\n",driver);
+			dlclose(handle);
+			handle = NULL;
+		}
+	}
+
+	free(driver);
+	free(args);
+
+	return handle;
+}
+
+/**
+ * Load a position module, calling it's initialisation function if appropriate
+ */
+static void *get_position_module(side_t side, const char *name)
+{
+	char tmp[4096];
+	char *driver;
+	char *args;
+
+	parse_args(name,&driver,&args);
+	
+	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
+
+	void *handle = dlopen(tmp,RTLD_LAZY);
+	if (!handle) {
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
+		assert(0);
+	}
+
+	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
+
+	if (init_func) {
+		if (!init_func(side,args)) {
+			Log(LOG_DAEMON|LOG_ALERT,
+			     "Initialisation function failed for %s\n",driver);
+			dlclose(handle);
+			handle = NULL;
+		}
+	}
+
+	free(driver);
+	free(args);
+
+	return handle;
+}
 
 static void load_modules() {
 	char *error = 0;
@@ -448,12 +534,7 @@ static void load_modules() {
 
 	//------- Load up modules -----------
 	
-	snprintf(tmp,4096,"%s%s",basedir,colourmod);
-	colourhandle = dlopen(tmp,RTLD_LAZY);
-	if (!colourhandle) {
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
-		assert(colourhandle);
-	}
+	colourhandle = get_module(colourmod);
 
 	modptrs.colour = (colfptr) dlsym(colourhandle, "mod_get_colour");
 	if ((error = (char*)dlerror()) != NULL) {
@@ -466,29 +547,15 @@ static void load_modules() {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.info);
 	}
-	
-	snprintf(tmp,4096,"%s%s",basedir,leftpos);
-	lefthandle = dlopen(tmp,RTLD_LAZY);
-	if (!lefthandle) {
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
-		assert(lefthandle);
-	}
 
+	lefthandle = get_position_module(SIDE_LEFT, leftpos);
 	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		assert(modptrs.left);
 	}
 
-
-	
-	snprintf(tmp,4096,"%s%s",basedir,rightpos);
-	righthandle = dlopen(tmp,RTLD_LAZY);
-	if (!righthandle) {
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
-		assert(righthandle);
-	}
-	
+	righthandle = get_position_module(SIDE_RIGHT,rightpos);
 	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
@@ -496,27 +563,11 @@ static void load_modules() {
 	}
 
 
-	
-	snprintf(tmp,4096,"%s%s",basedir,dirmod);
-	dirhandle = dlopen(tmp,RTLD_LAZY);
+	dirhandle = get_module(dirmod);
 	if (!dirhandle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		assert(dirhandle);
 	}
-
-	modptrs.init_dir = (initdirfptr) dlsym(dirhandle,"mod_init_dir");
-	if ((error = (char*)dlerror()) != NULL) {
-		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.init_dir);
-	}
-
-	/* 
-	 * initialise the mac addresses we are looking for.
-	 * would be nice to use _init here, but there's no easy way
-	 * to pass it the information it needs 
-	 */
-	snprintf(tmp,4096,"%s%s",basedir,macaddrfile);
-	modptrs.init_dir(tmp);
 
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = (char*)dlerror()) != NULL) {
@@ -530,18 +581,34 @@ static void load_modules() {
 
 static void close_modules() {
 	if(colourhandle) {
+		endfptr end_module = (endfptr)dlsym(colourhandle,"end_module");
+		if (end_module) {
+			end_module();
+		}
 		dlclose(colourhandle);
 	}
 	modptrs.colour = 0;
 	if(lefthandle) {
+		endsidefptr end_position_module =
+			(endsidefptr)dlsym(lefthandle,"end_module");
+		if (end_position_module)
+			end_position_module(SIDE_LEFT);
 		dlclose(lefthandle);
 	}
 	modptrs.left = 0;
 	if(righthandle) {
+		endsidefptr end_position_module =
+			(endsidefptr)dlsym(righthandle,"end_module");
+		if (end_position_module)
+			end_position_module(SIDE_RIGHT);
 		dlclose(righthandle);
 	}
 	modptrs.right = 0;
 	if(dirhandle) {
+		endfptr end_module = (endfptr)dlsym(colourhandle,"end_module");
+		if (end_module) {
+			end_module();
+		}
 		dlclose(dirhandle);
 	}
 	modptrs.init_dir = 0;

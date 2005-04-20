@@ -39,13 +39,13 @@ typedef enum {
 	DIR_UNKNOWN = -1,
 	DIR_OUTBOUND = 0,
 	DIR_INBOUND = 1,
-	DIR_OTHER = 2,
+	DIR_OTHER = 2
 } direction_t;
 
-
 extern "C" {
-    void mod_init_dir(const char* filename);
+    void init_module(const char* filename);
     int mod_get_direction(struct libtrace_packet_t *packet);   
+    void end_module(void);
 }
 
 #endif // _DIRECTION_H

@@ -59,14 +59,15 @@
  * the other is based on the last octet.
  */
 extern "C"
-int mod_get_position(float coord[3], int iface, 
+int mod_get_position(float coord[3], 
+		side_t side, direction_t dir,
 		struct libtrace_packet_t *packet) {
 	struct libtrace_ip *ipptr = trace_get_ip(packet);
 	struct in_addr ip;
 	if (!ipptr)
 		return 1;
 
-	if (0 == iface) {
+	if (CHK_SOURCE(side,dir)) {
 		ip = ipptr->ip_src;
 	}
 	else {

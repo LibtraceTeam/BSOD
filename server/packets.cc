@@ -63,6 +63,7 @@
 #include "debug.h"
 #include "socket.h" 
 #include "bsod_server.h"
+#include "plugins/direction/direction.h"
 
 #include "RTTMap.h"
 
@@ -183,23 +184,14 @@ int send_flows(int fd)
 	return 0;
 }
 
-//------------------------------------------------------------
-short get_port(uint8_t protocol, uint16_t source, uint16_t dest)
-{
-    if(trace_get_server_port(protocol, source, dest) == USE_DEST)
-	return dest;
-
-    return source;
-}
-	
 //-------------------------------------------------------------
 int get_start_pos(float start[3], struct libtrace_packet_t *packet, 
 		int iface, struct modptrs_t *modptrs)
 {
-	if(iface == 0) {
+	if(iface == DIR_OUTBOUND) {
 		start[0] = -10;
-		modptrs->left(start, 1, packet);
-	} else if(iface == 1) {
+		modptrs->left(start, 0, packet);
+	} else if(iface == DIR_INBOUND) {
 		start[0] = 10;
 		modptrs->right(start, 0, packet);
 	} else
@@ -211,12 +203,12 @@ int get_start_pos(float start[3], struct libtrace_packet_t *packet,
 int get_end_pos(float end[3], struct libtrace_packet_t *packet, 
 		int iface, struct modptrs_t *modptrs)
 {
-	if(iface == 0) {
+	if(iface == DIR_OUTBOUND) {
 		end[0] = 10;
-		modptrs->right(end,0,packet);
-	} else if(iface == 1) {
+		modptrs->right(end, 1,packet);
+	} else if(iface == DIR_INBOUND) {
 		end[0] = -10;
-		modptrs->left(end,1,packet);
+		modptrs->left(end, 1,packet);
 	} else
 		return 1;
 

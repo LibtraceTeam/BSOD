@@ -189,10 +189,10 @@ int get_start_pos(float start[3], struct libtrace_packet_t *packet,
 {
 	if(iface == DIR_OUTBOUND) {
 		start[0] = -10;
-		modptrs->left(start, SIDE_LEFT, DIR_OUTBOUND, packet);
+		modptrs->left(start, SIDE_RIGHT, DIR_OUTBOUND, packet);
 	} else if(iface == DIR_INBOUND) {
 		start[0] = 10;
-		modptrs->right(start, SIDE_RIGHT, DIR_INBOUND, packet);
+		modptrs->right(start, SIDE_LEFT, DIR_INBOUND, packet);
 	} else
 		return 1;
 
@@ -204,10 +204,10 @@ int get_end_pos(float end[3], struct libtrace_packet_t *packet,
 {
 	if(iface == DIR_OUTBOUND) {
 		end[0] = 10;
-		modptrs->right(end, SIDE_RIGHT, DIR_OUTBOUND, packet);
+		modptrs->right(end, SIDE_LEFT, DIR_OUTBOUND, packet);
 	} else if(iface == DIR_INBOUND) {
 		end[0] = -10;
-		modptrs->left(end, SIDE_LEFT, DIR_INBOUND, packet);
+		modptrs->left(end, SIDE_RIGHT, DIR_INBOUND, packet);
 	} else
 		return 1;
 

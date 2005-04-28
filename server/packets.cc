@@ -66,6 +66,15 @@
 
 #include "RTTMap.h"
 
+#ifndef LIBTRACE_API_VERSION
+# error "Your version of libtrace is too old, you need 2.0.16 or higher"
+#else
+# if LIBTRACE_API_VERSION < 0x010010
+#  error "Your version of libtrace is too old, you need 2.0.16 or higher"
+# endif
+#endif
+
+
 
 #define EXPIRE_SECS 20
 
@@ -79,10 +88,9 @@ extern int showcontrol;
 
 
 struct flow_id_t {
-	struct in_addr sourceip;
-	uint32_t sourceport;
-	struct in_addr destip;
-	uint32_t destport;
+	float start[3];
+	float end[3];
+	unsigned char id_num; // Type of flow. ("colour")
 };
 
 struct flow_info_t {
@@ -93,34 +101,15 @@ struct flow_info_t {
 	float end[3];
 };
 
-bool operator < (const flow_id_t &a, const flow_id_t &b) {
-	if (a.sourceport != b.sourceport)
-		return a.sourceport < b.sourceport;
-	if (a.destport != b.destport)
-		return a.destport < b.destport;
-	if (a.sourceip.s_addr != b.sourceip.s_addr)
-		return a.sourceip.s_addr < b.sourceip.s_addr;
-	if (a.destip.s_addr != b.destip.s_addr)
-		return a.destip.s_addr < b.destip.s_addr;
-
-	// if all items are the same, it is not less than
-	return false;
+bool operator <(const flow_id_t &a, const flow_id_t &b) {
+	for(int i=0;i<3;i++) {
+		if (a.start[i]!=b.start[i]) 
+			return a.start[i] < b.start[i];
+		if (a.end[i]!=b.end[i]) 
+			return a.end[i] < b.end[i];
+	}
+	return a.id_num < b.id_num;
 }
-
-bool operator == (const flow_id_t &a, const flow_id_t &b) {
-	/* Ports are the most unique thing, so check them first */
-	if (a.sourceport != b.sourceport)
-		return false;
-	if (a.destport != b.destport)
-		return false;
-	if (a.sourceip.s_addr != b.sourceip.s_addr)
-		return false;
-	if (a.destip.s_addr != b.destip.s_addr)
-		return false;
-
-	return true;
-}
-
 
 typedef lru<flow_id_t,flow_info_t> flow_lru_t;
 flow_lru_t flows;
@@ -250,10 +239,10 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	if(ts32-lastts > 0)
 	{
 		expire_flows(ts32);
+		lastts = ts32;
 	}
 
-	lastts = ts32;
-
+	
 
 	/*
 	 * Find the port numbers in the packet
@@ -267,9 +256,6 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 
 		datasize = (ntohs(p->ip_len)) - (tcpptr->doff*4 + hlen);
 
-		tmpid.sourceport = ntohs(tcpptr->source);
-		tmpid.destport = ntohs(tcpptr->dest);
-		
 		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
 			force_display = 1;
 	}
@@ -278,19 +264,6 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		hlen = p->ip_hl * 4;
 
 		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);
-		tmpid.sourceport = ntohs(udpptr->source);
-		tmpid.destport = ntohs(udpptr->dest);
-	}
-	else if(p->ip_p == 1)
-	{
-		isICMP = true;
-		tmpid.sourceport = 0;
-		tmpid.destport = 0;
-	}
-	else //for now, set the ports to zero and let the protocol count instead
-	{
-		tmpid.sourceport = 0;
-		tmpid.destport = 0;
 	}
 
 	if (datasize > -1 && !force_display) {
@@ -303,29 +276,29 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	
 	}
 
-	tmpid.sourceip = p->ip_src;
-	tmpid.destip = p->ip_dst;
+	direction = modptrs->direction(&packet);
 
+	// populate start and end arrays
+	// also checks that we want traffic from this iface
+	if(get_start_pos(tmpid.start, 
+			&packet,
+			direction,
+			modptrs) != 0)
+		return 0;
 
+	if(get_end_pos(tmpid.end, 
+			&packet,
+			direction,
+			modptrs) != 0)
+		return 0;
+
+	modptrs->colour(&(tmpid.id_num), 
+			&packet);
 
 	if ( flows.find(tmpid) == flows.end() ) // this is a new flow
 	{
 		flow_info_t flow_info;
 
-		direction = modptrs->direction(&packet);
-
-		// populate start and end arrays
-		// also checks that we want traffic from this iface
-		if(get_start_pos(start, 
-				&packet,
-				direction,
-				modptrs) != 0)
-			return 0;
-		if(get_end_pos(end, 
-				&packet,
-				direction,
-				modptrs) != 0)
-			return 0;
 
 		flow_info.id = id;
 		flow_info.time = ts32; 
@@ -336,9 +309,6 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		flow_info.end[1] = end[1];
 		flow_info.end[2] = end[2];
 
-		modptrs->colour(&(flow_info.id_num), 
-				&packet);
-		
 		id++;
 
 		flows[tmpid] = flow_info;
@@ -361,10 +331,12 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	double now = trace_get_seconds( &packet );
 	static double last = now;
 	PacketTS pts = map->GetTimeStamp( &packet );
-	Flow *rtt_flow = new Flow( tmpid.sourceip.s_addr, tmpid.destip.s_addr, 
-		tmpid.sourceport, tmpid.destport );
-	Flow *rtt_flow_inverse = new Flow( tmpid.destip.s_addr, 
-		tmpid.sourceip.s_addr, tmpid.destport, tmpid.sourceport );
+	uint16_t dport = get_destination_port( &packet );
+	uint16_t sport = get_source_port( &packet );
+	Flow *rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
+		sport, dport );
+	Flow *rtt_flow_inverse = new Flow( p->ip_src.s_addr, 
+		p->ip_dst.s_addr, dport, sport );
 	double the_time = 0.0;
 	float speed = -2.0f; // Default. (1.0f)
 
@@ -470,30 +442,14 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 
 float convert_speed( float speed )
 {
-	if( speed <= 0.0005f )
-		return( 4.0f );
-
-	if( speed <= 0.005f )
-		return( 3.0f );
-
-	if( speed <= 0.05f )
-		return( 2.0f );
-
-	if( speed <= 0.25f )
-		return( 1.75f );
-
-	if( speed <= 0.5f )
-		return( 1.5f );
-
-	if( speed <= 1.0f )
-		return( 1.25f );
-
-	if( speed <= 2.5f )
-		return( 1.01f );
-
-	if( speed <= 5.0f )
-		return( 0.75f );
-
+	if( speed <= 0.0005f ) 	return( 4.0f ); 
+	if( speed <= 0.005f ) 	return( 3.0f );
+	if( speed <= 0.05f )	return( 2.0f ); 
+	if( speed <= 0.25f )	return( 1.75f ); 
+	if( speed <= 0.5f )	return( 1.5f ); 
+	if( speed <= 1.0f )	return( 1.25f ); 
+	if( speed <= 2.5f )	return( 1.01f ); 
+	if( speed <= 5.0f )	return( 0.75f );
 	return( 0.5f );
 }
 

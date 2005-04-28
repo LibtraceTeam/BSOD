@@ -90,25 +90,22 @@ extern int showcontrol;
 struct flow_id_t {
 	float start[3];
 	float end[3];
-	unsigned char id_num; // Type of flow. ("colour")
+	unsigned char type; // Type of flow. ("colour")
 };
 
 struct flow_info_t {
-	uint32_t id;
+	uint32_t flow_id;
 	uint32_t time; 
-	unsigned char id_num; // Type of flow.
-	float start[3];
-	float end[3];
 };
 
-bool operator <(const flow_id_t &a, const flow_id_t &b) {
+static bool operator <(const flow_id_t &a, const flow_id_t &b) {
 	for(int i=0;i<3;i++) {
 		if (a.start[i]!=b.start[i]) 
 			return a.start[i] < b.start[i];
 		if (a.end[i]!=b.end[i]) 
 			return a.end[i] < b.end[i];
 	}
-	return a.id_num < b.id_num;
+	return a.type < b.type;
 }
 
 typedef lru<flow_id_t,flow_info_t> flow_lru_t;
@@ -142,7 +139,7 @@ void expire_flows(uint32_t time)
 	while( !flows.empty() && 
 		(time - flows.front().second.time > EXPIRE_SECS)) 
 	{
-		tmpid = flows.front().second.id;
+		tmpid = flows.front().second.flow_id;
 		flows.erase(flows.front().first);	
 
 		if(send_kill_flow(tmpid) != 0)
@@ -164,9 +161,9 @@ int send_flows(int fd)
 			flow_iterator!=flows.end();
 			++flow_iterator)
 	{
-		if(send_update_flow(fd, (*flow_iterator).second.start, 
-					(*flow_iterator).second.end, 
-					(*flow_iterator).second.id) != 0)
+		if(send_update_flow(fd, (*flow_iterator).first.start, 
+					(*flow_iterator).first.end, 
+					(*flow_iterator).second.flow_id) != 0)
 			return 1;
 	}
 	return 0;
@@ -211,15 +208,13 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	struct libtrace_tcp *tcpptr = 0;
 	struct libtrace_udp *udpptr = 0;
 	uint32_t ts32;
-	float start[3];
-	float end[3];
 	int direction = -1;
 	int datasize = -1;
 	int force_display = 0;
 
 
 	flow_id_t tmpid;
-	flow_info_t current;
+	flow_lru_t::iterator current;
 
 	assert(packet.buffer != NULL);
 	assert(packet.size > 0);
@@ -235,14 +230,6 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 
 	assert(modptrs);
 	assert(modptrs->colour);
-	// expire old flows - once a second is often enough for now
-	if(ts32-lastts > 0)
-	{
-		expire_flows(ts32);
-		lastts = ts32;
-	}
-
-	
 
 	/*
 	 * Find the port numbers in the packet
@@ -292,38 +279,39 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 			modptrs) != 0)
 		return 0;
 
-	modptrs->colour(&(tmpid.id_num), 
+	modptrs->colour(&(tmpid.type), 
 			&packet);
 
-	if ( flows.find(tmpid) == flows.end() ) // this is a new flow
+	current = flows.find(tmpid);
+
+	if ( current == flows.end() ) // this is a new flow
 	{
-		flow_info_t flow_info;
+		std::pair<flow_id_t,flow_info_t> flowdata;
 
-
-		flow_info.id = id;
-		flow_info.time = ts32; 
-		flow_info.start[0] = start[0];
-		flow_info.start[1] = start[1];
-		flow_info.start[2] = start[2];
-		flow_info.end[0] = end[0];
-		flow_info.end[1] = end[1];
-		flow_info.end[2] = end[2];
+		flowdata.second.flow_id = id;
+		flowdata.second.time = ts32; 
 
 		id++;
 
-		flows[tmpid] = flow_info;
-		current = flow_info;
+		flowdata.first = tmpid;
 
-		if(send_new_flow(start, end, flow_info.id) != 0)
+		current = flows.insert(flowdata);
+
+		if(send_new_flow(tmpid.start, tmpid.end, current->second.flow_id)!=0)
 			return 1;
 
 	}
 	else // this is a flow we've already seen
 	{
-		flows[tmpid].time = ts32; // update time last seen
-		current = flows[tmpid];
+		current->second.time = ts32; // update time last seen
 	}
 
+
+	// Expire flows is efficient, and will only expire flows that have uh
+	// expired, there is no need to only run it once a second
+	expire_flows(ts32);
+
+	
 	// RTT calculation stuff:
 	static long int pcount = 0;
 	//static long int pcount_nortt = 0;
@@ -331,8 +319,8 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	double now = trace_get_seconds( &packet );
 	static double last = now;
 	PacketTS pts = map->GetTimeStamp( &packet );
-	uint16_t dport = get_destination_port( &packet );
-	uint16_t sport = get_source_port( &packet );
+	uint16_t dport = trace_get_destination_port( &packet );
+	uint16_t sport = trace_get_source_port( &packet );
 	Flow *rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
 		sport, dport );
 	Flow *rtt_flow_inverse = new Flow( p->ip_src.s_addr, 
@@ -423,14 +411,14 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	if( theList->poke( &packet ) == 1 )
 	{
 	    /* darknet traffic - going to address with no machine */
-	    if(send_new_packet(ts, current.id, current.id_num, 
+	    if(send_new_packet(ts, current->second.flow_id, tmpid.type, 
 			ntohs(p->ip_len), speed, true) !=0)
 		return 1;
 	}
 	else
 	{
 	    /* normal traffic - going to address with a machine */
-	    if(send_new_packet(ts, current.id, current.id_num, 
+	    if(send_new_packet(ts, current->second.flow_id, tmpid.type, 
 			ntohs(p->ip_len), speed, false) !=0)
 		return 1;
 	}

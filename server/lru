@@ -41,15 +41,33 @@
  */
 
 template <class key_t, class value_t>
+class lru_const_iterator;
+
+template <class key_t, class value_t>
+class lru_iterator;
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_const_iterator<key1_t,value1_t> &a, const lru_iterator<key1_t,value1_t> &b);
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_iterator<key1_t,value1_t> &a, const lru_const_iterator<key1_t,value1_t> &b);
+
+template <class key_t, class value_t>
 class lru_iterator {
 	private: 
 		typedef std::list<key_t> lru_t;
 		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
-		typename data_t::const_iterator where;
+		typename data_t::iterator where;
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_iterator<key1_t,value1_t> &a, 
+		                         const lru_const_iterator<key1_t,value1_t> &b);
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_const_iterator<key1_t,value1_t> &a, 
+		                         const lru_iterator<key1_t,value1_t> &b);
 	public:
 		lru_iterator() { };
 		lru_iterator(const lru_iterator &x) : where(x.where) {};
-		lru_iterator(typename data_t::const_iterator &_where) : where(_where) {};
+		lru_iterator(typename data_t::iterator &_where) : where(_where) {};
 		lru_iterator<key_t,value_t> &operator ++() {
 			++where;
 			return *this;
@@ -86,17 +104,82 @@ class lru_iterator {
 		}
 };
 
+template <class key_t, class value_t>
+class lru_const_iterator {
+	private: 
+		typedef std::list<key_t> lru_t;
+		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
+		typename data_t::const_iterator where;
+
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_const_iterator<key1_t,value1_t> &a, 
+		                         const lru_iterator<key1_t,value1_t> &b);
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_iterator<key1_t,value1_t> &a, 
+		                         const lru_const_iterator<key1_t,value1_t> &b);
+	public:
+		lru_const_iterator() { };
+		lru_const_iterator(const lru_const_iterator &x) : where(x.where) {};
+		lru_const_iterator(typename data_t::const_iterator &_where) : where(_where) {};
+		lru_const_iterator<key_t,value_t> &operator ++() {
+			++where;
+			return *this;
+		}
+		lru_const_iterator<key_t,value_t> operator ++(int) {
+			lru_const_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			++where;
+			return tmp;
+		}
+		lru_const_iterator<key_t,value_t> &operator --() {
+			--where;
+			return *this;
+		}
+		lru_const_iterator<key_t,value_t> operator --(int) {
+			lru_const_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			--where;
+			return tmp;
+		}
+		std::pair<key_t,value_t> operator *() const {
+			return std::pair<key_t,value_t>(where->first,where->second.second);
+		}
+		// We hope that the -> operator will dereference this immediately
+		// and the & will get optimised away.
+		std::pair<key_t,value_t> *operator ->() const {
+			return &(operator *());
+		}
+		bool operator ==( const lru_const_iterator<key_t,value_t> &b) {
+			return where==b.where;
+		}
+		bool operator !=( const lru_const_iterator<key_t,value_t> &b) {
+			return where!=b.where;
+		}
+};
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_const_iterator<key1_t,value1_t> &a, const lru_iterator<key1_t,value1_t> &b) {
+	return a.where == b.where;
+}
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_iterator<key1_t,value1_t> &a, const lru_const_iterator<key1_t,value1_t> &b) {
+	return a.where == b.where;
+}
 
 template <class key_t,class value_t>
 class lru {
 	private: 
 		typedef  std::list<key_t> lru_t;
 		lru_t lru_list;
-		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
+		typedef std::pair<typename lru_t::iterator,value_t> map_data_t;
+		typedef std::map<key_t,map_data_t> data_t;
 		data_t data;
 
 	public:
-		typedef lru_iterator<key_t,value_t> const_iterator;
+		typedef lru_const_iterator<key_t,value_t> const_iterator;
+		typedef lru_iterator<key_t,value_t> iterator;
+
 		std::pair<key_t,value_t > front() {
 			key_t & key = lru_list.front();
 			return std::pair<key_t,value_t>(key,data[key].second);
@@ -124,32 +207,60 @@ class lru {
 			return ci;
 		}
 
-		const_iterator find(key_t &key) const {
-			typename data_t::const_iterator i =  data.find(key);
-			const_iterator ci(i);
-			return ci;
+		iterator find(key_t &key) {
+			typename data_t::iterator i = data.find(key);
+			if (i != data.end()) {
+				lru_list.erase(i->second.first);
+				i->second.first = lru_list.insert(lru_list.end(),key);
+			}
+			iterator ii(i); 
+			return ii;
 		}
 
 		void erase(key_t k) {
 			// Remove from the LRU
-			lru_list.erase(data[k].first);
+			typename data_t::iterator i = data.find(k);
+			assert(i!=data.end());
+			lru_list.erase(i->second.first);
 			// Remove from the map
-			data.erase(k);
+			data.erase(i);
+		}
+
+		iterator insert(std::pair<key_t,value_t> &p) {
+			typename data_t::iterator i;
+			i = data.find(p.first);
+			if (i != data.end()) {
+				lru_list.erase(i->second.first);
+			}
+			/* good god */
+			i = data.insert(data_t::value_type(
+					p.first,
+					map_data_t(
+						lru_list.insert(lru_list.end(),p.first),
+						p.second
+						)
+					)).first;
+
+			return iterator(i);
 		}
 		
 		/* Add/update an item, updating the LRU at the same time */
 		value_t &operator[](const key_t &k) {
+			typename data_t::iterator i;
+			i = data.find(p.first);
 			/* Does this already exist? */
-			if (data.find(k) != data.end()) {
+			if (i != data.end()) {
 				/* Remove from the LRU */
-				lru_list.erase(data[k].first);
+				lru_list.erase(i->second.first);
 			}
-			/* Put it on the end */
-			lru_list.push_back(k);
-			/* Update the pointer */
-			data[k].first=lru_list.end();
-			data[k].first--;
-			/* Return the data */
+			else {
+				data[p.first];
+			}
+			/* Add it to the LRU and keep a reference
+			 * to the iterator in the map so we can 
+			 * easily move it around later 
+			 */
+			i->second.first = lru_list.insert(lru_list.end(),p.first);
 			return data[k].second;
 		}
 };

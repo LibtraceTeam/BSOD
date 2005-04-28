@@ -39,6 +39,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "socket.h"
 #include "debug.h"
@@ -241,16 +242,26 @@ int check_clients(struct modptrs_t *modptrs, bool wait)
 
 	if(wait) // wait on the first time through so the rtclient isnt running
 	{
-		if (select(fd_max+1, &read_fds, NULL, NULL, NULL) == -1) {
-			perror("select");
-			exit(1);
+		while (select(fd_max+1, &read_fds, NULL, NULL, NULL) == -1) {
+			switch (errno) {
+				case EAGAIN: continue;
+				case EINTR: return -1;
+				default:
+					    perror("select");
+					    exit(1);
+			}
 		}
 	}
 	else // timeout instantly if there are no new clients
 	{
-		if (select(fd_max+1, &read_fds, NULL, NULL, &tv) == -1) {
-			perror("select");
-			exit(1);
+		while (select(fd_max+1, &read_fds, NULL, NULL, &tv) == -1) {
+			switch (errno) {
+				case EAGAIN: continue;
+				case EINTR: return -1;
+				default:
+					    perror("select");
+					    exit(1);
+			}
 		}
 	}
 

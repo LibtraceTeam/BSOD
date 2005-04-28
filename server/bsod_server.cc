@@ -49,7 +49,6 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <signal.h>
-#include <setjmp.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <dlfcn.h>
@@ -80,10 +79,10 @@ char *strndup(const char *, size_t);
 typedef struct ip ip_t;
 
 struct sigaction sigact;
-static jmp_buf  jmpbuf;
 
 int  _fcs_bits = 32;
 int restart_config = 1;
+int terminate_bsod = 0;
 int fd_max;
 
 struct libtrace_t *trace = 0;
@@ -116,6 +115,7 @@ int showdata = 1;
 int showcontrol = 1;
 
 static void sigusr_hnd(int sig);
+static void sigterm_hnd(int sig);
 void do_configuration(int argc, char **argv);
 
 void *colourhandle = 0;
@@ -184,8 +184,18 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	if (setjmp(jmpbuf))
-		goto goodbye;
+	sigact.sa_handler = sigterm_hnd;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+
+	if (sigaction(SIGTERM, &sigact, NULL) < 0) {
+		perror("sigaction(SIGTERM)");
+		exit(1);
+	}
+	if (sigaction(SIGINT, &sigact, NULL) < 0) {
+		perror("sigaction(SIGINT)");
+		exit(1);
+	}
 
 	//-------------------------------------------------------
 	// do some command line stuff for ports and things
@@ -278,6 +288,9 @@ int main(int argc, char *argv[])
 			if (restart_config == 1) {
 				break;
 			}
+
+			if (terminate_bsod)
+				break;
 			
 			/* check for new clients */
 			new_client = check_clients(&modptrs, false);
@@ -328,7 +341,6 @@ int main(int argc, char *argv[])
 
 	// if we actually get out of the outer loop, it's because we want to 
 	// shut down entirely
-goodbye:
 	close(listen_socket);
 
 	close_modules();
@@ -342,6 +354,10 @@ goodbye:
 
 static void sigusr_hnd(int signo) {
 	restart_config = 1;
+}
+
+static void sigterm_hnd(int signo) {
+	terminate_bsod = 1;
 }
 
 void set_defaults() {
@@ -605,7 +621,7 @@ static void close_modules() {
 	}
 	modptrs.right = 0;
 	if(dirhandle) {
-		endfptr end_module = (endfptr)dlsym(colourhandle,"end_module");
+		endfptr end_module = (endfptr)dlsym(dirhandle,"end_module");
 		if (end_module) {
 			end_module();
 		}

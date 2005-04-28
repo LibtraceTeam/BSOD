@@ -169,12 +169,11 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 		if( type != 8 )
 			continue;
 
-		UINT32 *ts = (UINT32*)&data[0];
-		UINT32 *tsecho = (UINT32*)&data[4];
+		PacketTS ret;
 
-		//spew( "--ts: " << *ts << " --ts_echo: " << *tsecho );
+		ret.ts = *(UINT32*)&data[0];
+		ret.ts_echo = *(UINT32*)&data[4];
 
-		PacketTS ret( *ts, *tsecho );
 		return( ret );
 	}
 

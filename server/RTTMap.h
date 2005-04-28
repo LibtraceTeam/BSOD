@@ -48,23 +48,6 @@ using namespace std;
 #define UINT32 unsigned long int
 #define BYTE unsigned char
 
-inline void* operator new( size_t size )
-{
-	void *p = malloc( size );
-	if( p==0 )
-		throw std::bad_alloc(); // For ANSI/ISO compliance.
-	return( p );
-}
-
-inline void operator delete ( void *ptr )
-{
-	if( ptr != NULL )
-	{
-		free( ptr );
-		ptr = NULL;
-	}
-}
-
 struct Flow
 {
 	UINT32 ip1;
@@ -94,63 +77,25 @@ struct PacketTS
 	UINT32 ts;
 	UINT32 ts_echo;
 
-	PacketTS(void)
-	{
-		ts = 0;
-		ts_echo = 0;
-	}
-
-	PacketTS( UINT32 ts, UINT32 ts_echo )
-	{
-		this->ts = ts;
-		this->ts_echo = ts_echo;
-	}
-
-	void operator = (PacketTS other)
-	{
-		this->ts = other.ts;
-		this->ts_echo = other.ts_echo;
-	}
 };
 
 inline int cmp( const Flow &a, const Flow &b )
 {
-	if( a.ip1 < b.ip1 )
-		return( -1 );
-	if( a.ip1 > b.ip1 )
-		return( 1 );
+	if (a.ip1 != b.ip1)
+		return a.ip1 - b.ip1;
+
+	if (a.ip2 != b.ip2)
+		return a.ip2 - b.ip2;
 	
-	if( a.ip2 < b.ip2 )
-		return( -1 );
-	if( a.ip2 > b.ip2 )
-		return( 1 );
+	if (a.port1 != b.port1)
+		return a.port1 - b.port1;
 
-	if( a.port1 < b.port1 )
-		return( -1 );
-	if( a.port1 > b.port1 )
-		return( 1 );
-
-	if( a.port2 < b.port2 )
-		return( -1 );
-	if( a.port2 > b.port2 )
-		return( 1 );
-
-	return( 0 );
+	return a.port2 - b.port2;
 }
 
 inline bool operator < (const Flow &a, const Flow &b )
 {
 	return( cmp(a,b) < 0 );
-}
-
-inline bool operator > (const Flow &a, const Flow &b )
-{
-	return( cmp(a,b) > 0 );
-}
-
-inline bool operator == (const Flow &a, const Flow &b )
-{
-	return( cmp(a,b) == 0 );
 }
 
 typedef std::map< UINT32, double > TraceMap; 

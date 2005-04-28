@@ -1,10 +1,11 @@
 CXX=g++
 CC=g++
-CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g
+CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g -pg -p
 INCLUDE =  -I/usr/local/include  -I. -I./lib
 
 CXXFLAGS += $(INCLUDE)
-LDLIBS =  -lm -ltrace -lz -lpcap -L./lib -L/usr/local/lib -ldl -rdynamic -lconfig -lfl
+LDLIBS =  -lm -ltrace -lz -lpcap -ldl -lconfig -lfl
+LDFLAGS=-pg -p -L./lib -L/usr/local/lib -rdynamic 
 
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o

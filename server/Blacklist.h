@@ -36,36 +36,26 @@
 #include "libtrace.h"
 #include "time.h"
 #include <arpa/inet.h>
+#include <set>
 
 class blacklist
 {
 public:
-	blacklist(const char *path, int bl_cnt, int save_int);
+	blacklist(const char *path);
+
+	bool is_dark(uint32_t ip);
+	void set_light(uint32_t ip);
+
+	void save(void);
+
 	~blacklist();
 
-	bool poke(libtrace_packet_t *packet);
 private:
-	struct BL
-	{
-		std::string FName;
-		bool InUse;
-		bool List[256][256];
-		BL *next;
-	}*head,*cur;
-	
+	typedef std::set<in_addr_t> lightlist_t;
+	lightlist_t lightlist;
+
 	std::string BLpath;
-	int BL_cnt;
-
-	double  ptime,
-		ctime,
-		Save_int;
-
-	bool read(uint8_t *ip);
-	bool write(uint8_t *ip);
-	bool load();
-	bool save(double);
-	void delBL(BL*die);
-	char* itoa(int input);
+	void load(void);
 };
 
 #endif

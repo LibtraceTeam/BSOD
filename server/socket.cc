@@ -286,10 +286,10 @@ int check_clients(struct modptrs_t *modptrs, bool wait)
 			}
 			printf("server: new connection from %s\n", 
 					inet_ntoa(remoteaddr.sin_addr));
-			send_colour_table(modptrs);	// Update all clients with the colour table
-									// so that the new client gets it.
-									// This could be done better by targeting only the
-									// new client.
+			// Update all clients with the colour table
+			// This could be done better by targeting only the new
+			// client.
+			send_colour_table(modptrs);	
 		}
 		return newfd;
 	}
@@ -307,10 +307,10 @@ int send_all(pack_union *data)
 	struct client *tmp = clients;
 	int size = 0;
 
-	if(data->flow.type == 0x00)
-		size = sizeof(flow_update_t);
-	else if(data->flow.type == 0x01)
+	if(data->flow.type == 0x01)
 		size = sizeof(pack_update_t);
+	else if(data->flow.type == 0x00)
+		size = sizeof(flow_update_t);
 	else if(data->flow.type == 0x02)
 		size = sizeof(flow_remove_t);
 	else if(data->flow.type == 0x03)
@@ -397,8 +397,8 @@ int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(uint64_t ts, uint32_t id, unsigned char id_num, uint16_t size,
-	float speed, bool dark)
+int send_new_packet(uint64_t ts, uint32_t id, unsigned char id_num,
+		uint16_t size, float speed, bool dark)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
@@ -433,17 +433,13 @@ int send_kill_all()
 // Sends a table of colours, their associated protocol names and id number
 int send_colour_table(struct modptrs_t *modptrs)
 {
-	uint8_t colour[3];
 	char name[256];
 	int i = 0;
+	struct flow_descriptor_t fd;
 	do 
 	{
-		modptrs->info( colour, name, i );
-		struct flow_descriptor_t fd;
+		modptrs->info( fd.colour, name, i );
 		fd.type = 0x04;
-		fd.colour[0] = colour[0];
-		fd.colour[1] = colour[1];
-		fd.colour[2] = colour[2];
 		strcpy( fd.name, name );
 		fd.id = i;
 		union pack_union *punion;
@@ -452,7 +448,7 @@ int send_colour_table(struct modptrs_t *modptrs)
 		i++;
 		if( i > 256 ) // Sanity check.
 			exit( -99 );
-	} while( !(colour[0]==0 && colour[1]==0 && colour[2]==0) );
+	} while( !(fd.colour[0]==0 && fd.colour[1]==0 && fd.colour[2]==0) );
 
 	return( 0 );
 }

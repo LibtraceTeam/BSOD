@@ -1,14 +1,14 @@
 CXX=g++
 CC=g++
-CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g -pg -p
+CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g 
 INCLUDE =  -I/usr/local/include  -I. -I./lib
 
 CXXFLAGS += $(INCLUDE)
-LDLIBS =  -lm -ltrace -lz -lpcap -ldl -lconfig -lfl
-LDFLAGS=-pg -p -L./lib -L/usr/local/lib -rdynamic 
+LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace
+LDFLAGS= -L./lib -L/usr/local/lib -rdynamic 
 
 BINS = bsod_server
-OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o
+OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o 
 
 PREFIX=/usr/local/bsod
 

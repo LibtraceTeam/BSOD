@@ -79,12 +79,15 @@
 #define EXPIRE_SECS 20
 
 typedef struct ip ip_t;
-uint32_t lastts = 0;
-uint32_t id = 0;
+static uint32_t lastts = 0;
+static uint32_t id = 0;
 
 extern int shownondata;
 extern int showdata;
 extern int showcontrol;
+
+bool enable_rttest = true;
+bool enable_darknet = true;
 
 
 struct flow_id_t {
@@ -98,13 +101,19 @@ struct flow_info_t {
 	uint32_t time; 
 };
 
-static bool operator <(const flow_id_t &a, const flow_id_t &b) {
-	for(int i=0;i<3;i++) {
-		if (a.start[i]!=b.start[i]) 
-			return a.start[i] < b.start[i];
-		if (a.end[i]!=b.end[i]) 
-			return a.end[i] < b.end[i];
-	}
+static inline bool operator <(const flow_id_t &a, const flow_id_t &b) {
+	if (a.start[2]!=b.start[2]) 
+		return a.start[2] < b.start[2];
+	if (a.end[2]!=b.end[2]) 
+		return a.end[2] < b.end[2];
+	if (a.start[1]!=b.start[1]) 
+		return a.start[1] < b.start[1];
+	if (a.end[1]!=b.end[1]) 
+		return a.end[1] < b.end[1];
+	if (a.start[0]!=b.start[0]) 
+		return a.start[0] < b.start[0];
+	if (a.end[0]!=b.end[0]) 
+		return a.end[0] < b.end[0];
 	return a.type < b.type;
 }
 
@@ -201,13 +210,13 @@ int get_end_pos(float end[3], struct libtrace_packet_t *packet,
 }
 
 //------------------------------------------------------------
-int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList )
+int per_packet(struct libtrace_packet_t *packet, time_t secs, 
+		struct modptrs_t *modptrs, RTTMap *map, blacklist *theList )
 {
 
 	int hlen = 0;
 	struct libtrace_tcp *tcpptr = 0;
 	struct libtrace_udp *udpptr = 0;
-	uint32_t ts32;
 	int direction = -1;
 	int datasize = -1;
 	int force_display = 0;
@@ -216,17 +225,15 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	flow_id_t tmpid;
 	flow_lru_t::iterator current;
 
-	assert(packet.buffer != NULL);
-	assert(packet.size > 0);
+	assert(packet->buffer != NULL);
+	assert(packet->size > 0);
 
-	struct libtrace_ip *p = trace_get_ip(&packet);
+	struct libtrace_ip *p = trace_get_ip(packet);
 
 	if (!p) {
 		return 0;
 	}
-	//ip_t *p = (ip_t *) erfptr->rec.eth.pload;
-	ts32 = ts >> 32;
-	assert(ts32-lastts >= 0);
+	assert(secs-lastts >= 0);
 
 	assert(modptrs);
 	assert(modptrs->colour);
@@ -235,8 +242,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	 * Find the port numbers in the packet
 	 */ 
 	bool isTCP = false;
-	bool isICMP = false;
-	if((tcpptr = trace_get_tcp(&packet)))
+	if((tcpptr = trace_get_tcp(packet)))
 	{
 		isTCP = true;
 		hlen = p->ip_hl * 4;
@@ -246,7 +252,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
 			force_display = 1;
 	}
-	else if((udpptr = trace_get_udp(&packet)))
+	else if((udpptr = trace_get_udp(packet)))
 	{
 		hlen = p->ip_hl * 4;
 
@@ -263,24 +269,24 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	
 	}
 
-	direction = modptrs->direction(&packet);
+	direction = modptrs->direction(packet);
 
 	// populate start and end arrays
 	// also checks that we want traffic from this iface
 	if(get_start_pos(tmpid.start, 
-			&packet,
+			packet,
 			direction,
 			modptrs) != 0)
 		return 0;
 
 	if(get_end_pos(tmpid.end, 
-			&packet,
+			packet,
 			direction,
 			modptrs) != 0)
 		return 0;
 
 	modptrs->colour(&(tmpid.type), 
-			&packet);
+			packet);
 
 	current = flows.find(tmpid);
 
@@ -289,7 +295,7 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 		std::pair<flow_id_t,flow_info_t> flowdata;
 
 		flowdata.second.flow_id = id;
-		flowdata.second.time = ts32; 
+		flowdata.second.time = secs;
 
 		id++;
 
@@ -303,125 +309,129 @@ int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *m
 	}
 	else // this is a flow we've already seen
 	{
-		current->second.time = ts32; // update time last seen
+		current->second.time = secs; // update time last seen
 	}
 
 
 	// Expire flows is efficient, and will only expire flows that have uh
 	// expired, there is no need to only run it once a second
-	expire_flows(ts32);
+	expire_flows(secs);
 
-	
 	// RTT calculation stuff:
-	static long int pcount = 0;
-	//static long int pcount_nortt = 0;
-	pcount++;
-	double now = trace_get_seconds( &packet );
-	static double last = now;
-	PacketTS pts = map->GetTimeStamp( &packet );
-	uint16_t dport = trace_get_destination_port( &packet );
-	uint16_t sport = trace_get_source_port( &packet );
-	Flow *rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
-		sport, dport );
-	Flow *rtt_flow_inverse = new Flow( p->ip_src.s_addr, 
-		p->ip_dst.s_addr, dport, sport );
-	double the_time = 0.0;
 	float speed = -2.0f; // Default. (1.0f)
 
-	if( pts.ts > 0 )
-	{
-	    // Add packet:
-	    map->Add( rtt_flow, pts.ts, now );
-	}
-	else if( isTCP )
-	{
-	    libtrace_tcp *tcpInfo = trace_get_tcp( &packet );
-	    if( tcpInfo != NULL )
-	    {
-		if( tcpInfo->syn == 1 && tcpInfo->ack == 0 )
+	if (enable_rttest) {
+		double now = trace_get_seconds( packet );
+		static double last = now;
+		uint16_t dport;
+		uint16_t sport;
+		PacketTS pts;
+		Flow *rtt_flow;
+		Flow *rtt_flow_inverse;
+		double the_time = 0.0;
+
+		pts = map->GetTimeStamp( packet );
+		dport = trace_get_destination_port( packet );
+		sport = trace_get_source_port( packet );
+
+		rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, sport, dport );
+		rtt_flow_inverse = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
+				dport, sport );
+
+		if( pts.ts > 0 )
 		{
-		    // SYN:
-		    map->Add( rtt_flow, htonl(tcpInfo->seq), now );
+			// Add packet:
+			map->Add( rtt_flow, pts.ts, now );
 		}
-		else if( tcpInfo->syn == 1 && tcpInfo->ack == 1 )
+		else if( isTCP && 0)
 		{
-		    // SYN/ACK:
-		    map->Update( rtt_flow_inverse, htonl(tcpInfo->ack_seq) - 1,
-			    htonl(tcpInfo->seq) );
+			if( tcpptr != NULL )
+			{
+				if( tcpptr->syn == 1 && tcpptr->ack == 0 )
+				{
+					// SYN:
+					map->Add( rtt_flow, htonl(tcpptr->seq), now );
+				}
+				else if( tcpptr->syn == 1 && tcpptr->ack == 1 )
+				{
+					// SYN/ACK:
+					map->Update( rtt_flow_inverse, htonl(tcpptr->ack_seq) - 1,
+							htonl(tcpptr->seq) );
 
+				}
+				else if( tcpptr->syn == 0 && tcpptr->ack == 1 )
+				{
+					// ACK:
+					if( (the_time = map->Retrieve( rtt_flow, 
+									htonl(tcpptr->ack_seq) - 1 )) >= 0.0f )
+					{
+						speed = convert_speed( now-the_time );
+					}
+				}
+			}
 		}
-		else if( tcpInfo->syn == 0 && tcpInfo->ack == 1 )
+		else if( p->ip_p == 1 ) // isICMP
 		{
-		    // ACK:
-		    if( (the_time = map->Retrieve( rtt_flow, 
-				    htonl(tcpInfo->ack_seq) - 1 )) >= 0.0f )
-		    {
-			speed = convert_speed( now-the_time );
-		    }
+			// Process packet as ICMP:
+			libtrace_icmp *icmpInfo = trace_get_icmp( packet );
+			if( icmpInfo != NULL )
+			{
+				if( icmpInfo->type == 0 )
+				{
+					// Echo reply:
+					if( (the_time = map->Retrieve( rtt_flow_inverse, 
+									icmpInfo->un.echo.id ) ) >= 0.0f )
+						speed = convert_speed(now-the_time);
+				}
+				else if( icmpInfo->type == 8 )
+				{
+					// Echo:
+					map->Add( rtt_flow, icmpInfo->un.echo.id, now );
+				}
+			}
 		}
-	    }
-	}
-	else if( isICMP )
-	{
-	    // Process packet as ICMP:
-	    libtrace_icmp *icmpInfo = trace_get_icmp( &packet );
-	    if( icmpInfo != NULL )
-	    {
-		if( icmpInfo->type == 0 )
+
+
+		if( pts.ts_echo > 0 )
 		{
-		    // Echo reply:
-		    if( (the_time = map->Retrieve( rtt_flow_inverse, 
-				    icmpInfo->un.echo.id ) ) >= 0.0f )
-			speed = convert_speed(now-the_time);
+			if((the_time = map->Retrieve(rtt_flow_inverse, pts.ts_echo)) >= 0.0)
+			{	
+				// Calculate a sensible speed value 
+				// (2.0 = fastest, 1.0 = default, 0.0 = stopped)
+				speed = convert_speed( now-the_time );
+			}
+			else if( speed == -2.0f )
+			{
+				speed = -1.0f; // -1 tells the client to keep old values
+			}
 		}
-		else if( icmpInfo->type == 8 )
+
+		delete rtt_flow;
+		delete rtt_flow_inverse;
+
+		if( now - last > 60 )
 		{
-		    // Echo:
-		    map->Add( rtt_flow, icmpInfo->un.echo.id, now );
+			map->Flush( now );
+			last = now;
 		}
-	    }
 	}
 
+	bool is_dark = false;
 
-	if( pts.ts_echo > 0 )
-	{
-	    if((the_time = map->Retrieve(rtt_flow_inverse, pts.ts_echo)) >= 0.0)
-	    {	
-		// Calculate a sensible speed value 
-		// (2.0 = fastest, 1.0 = default, 0.0 = stopped)
-		speed = convert_speed( now-the_time );
-	    }
-	    else if( speed == -2.0f )
-	    {
-		speed = -1.0f; // -1 tells the client to keep old values
-	    }
+	if (enable_darknet) {
+		switch(direction) {
+			case DIR_INBOUND:
+				is_dark=theList->is_dark(p->ip_dst.s_addr);
+				break;
+			case DIR_OUTBOUND:
+				theList->set_light(p->ip_src.s_addr);
+				break;
+		}
 	}
 
-	delete rtt_flow;
-	delete rtt_flow_inverse;
-
-	if( now - last > 60 )
-	{
-	    int dropped = map->Flush( now );
-	    pcount -= dropped;
-	    last = now;
-	}
-
-	/* check the packet against the addresses in the blacklist */
-	if( theList->poke( &packet ) == 1 )
-	{
-	    /* darknet traffic - going to address with no machine */
-	    if(send_new_packet(ts, current->second.flow_id, tmpid.type, 
-			ntohs(p->ip_len), speed, true) !=0)
+	if(send_new_packet(secs, current->second.flow_id, tmpid.type, 
+				ntohs(p->ip_len), speed, is_dark) !=0)
 		return 1;
-	}
-	else
-	{
-	    /* normal traffic - going to address with a machine */
-	    if(send_new_packet(ts, current->second.flow_id, tmpid.type, 
-			ntohs(p->ip_len), speed, false) !=0)
-		return 1;
-	}
 
 	return 0;
 }

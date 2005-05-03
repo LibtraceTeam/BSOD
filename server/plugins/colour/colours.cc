@@ -22,26 +22,28 @@ typedef enum counters {
 	IRC = 11,
 	WINDOWS = 12,
 	P2P = 13,
-	OTHER = 14,
-	LAST = 15 // This must always be the last value in the enum to mark how many items there are!
+	GAMES = 14,
+	OTHER = 15,
+	LAST = 16 // This must always be the last value in the enum to mark how many items there are!
 } counters_t;
 
 // Define colours to use for the various protocols
 static uint8_t countercolours[][3] = {
-	{100,  0,100}, /* TCP     purple		*/
-	{  0,  0,200}, /* HTTP    blue		*/
+	{100,  5,100}, /* TCP     purple		*/
+	{  5, 10,200}, /* HTTP    blue		*/
 	{150,150,240}, /* HTTPS   light blue/purple	*/
-	{200,  0,  0}, /* MAIL    red		*/
-	{  0,150,  0}, /* FTP     green		*/
-	{  0,250,  0}, /* VPN     white		*/
-	{200,200,  0}, /* DNS     yellow		*/
+	{200,  5,  5}, /* MAIL    red		*/
+	{  5,150,  5}, /* FTP     green		*/
+	{  5,250,  5}, /* VPN     white		*/
+	{200,200,  5}, /* DNS     yellow		*/
 	{ 30, 85, 30}, /* NTP     matte green	*/
 	{110,110,110}, /* SSH     grey		*/
 	{150,100, 50}, /* UDP     light brown	*/
-	{  0,250,200}, /* ICMP    teal		*/
+	{  5,250,200}, /* ICMP    teal		*/
 	{240,230,140}, /* IRC     khaki brown	*/
-	{200,100,  0}, /* WINDOWS orange		*/
+	{200,100,  5}, /* WINDOWS orange		*/
 	{ 50,150, 50}, /* P2P     Icky green        */
+	{ 85, 30, 30}, /* GAMES   Icky green        */
 	{255,192,203}  /* OTHER   pink		*/
 };
 
@@ -97,6 +99,7 @@ char counternames [][256] = {
 	"IRC",
 	"Windows",
 	"P2P",
+	"GAMES",
 	"Other"
 };
 
@@ -171,6 +174,7 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 	case 138:
 	case 139:
 	case 445:
+	case 1053:
 		*id_num = WINDOWS;
 		break;
 
@@ -183,6 +187,7 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 	case 4661:
 	case 4662:
 	case 4665:
+	case 4672:
 		// iMesh
 	case 4329:
 		// Bittorrent (common ports - goes up to 6999)
@@ -211,6 +216,15 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 		break;
 
 		// if not a port that I'm counting give a colour based on protocol
+	case 14567:
+	case 20100:
+	case 27015:
+	case 27016:
+	case 27960:
+	case 28070:
+	case 28960:
+		*id_num = GAMES;
+		break;
 	default:  
 		switch(protocol)
 		{

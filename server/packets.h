@@ -40,11 +40,14 @@
 #define SIDE_LENGTH 8
 #define MAX_SIZE 10000
 
-int per_packet(struct libtrace_packet_t packet, uint64_t ts, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList);
+int per_packet(struct libtrace_packet_t *packet, time_t secs, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList);
 float convert_speed( float speed );
 
 void kill_all();
 void expire_flows(uint32_t time);
 void init_packets();
 int send_flows(int fd);
+
+extern bool enable_rttest;
+extern bool enable_darknet;
 #endif // _PACKETS_H

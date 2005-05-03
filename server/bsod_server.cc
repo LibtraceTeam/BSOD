@@ -113,6 +113,7 @@ int loop = 0;
 int shownondata = 0;
 int showdata = 1;
 int showcontrol = 1;
+int sampling = 0;
 
 static void sigusr_hnd(int sig);
 static void sigterm_hnd(int sig);
@@ -155,11 +156,13 @@ int main(int argc, char *argv[])
 	struct timeval packettime;
 
 	int psize = 0;
+	int packet_count = 0;
 
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
 	struct libtrace_packet_t packet;
-	uint64_t ts;
+	time_t next_save = 0;
+	time_t lastts = 0;
 
 
 
@@ -238,7 +241,7 @@ int main(int argc, char *argv[])
 		char tmp[4096];
 		snprintf(tmp,4096,"%s%s",basedir,blacklistdir);
 		Log(LOG_DAEMON|LOG_INFO,"Saving blacklist info to '%s'\n", tmp);
-		theList = new blacklist( tmp, 5, 600 );
+		theList = new blacklist( tmp );
 
 		//------- ---------------------------
 		// keep rtclient from starting till someone connects
@@ -305,35 +308,55 @@ int main(int argc, char *argv[])
 			    break;
 			}
 
+			++packet_count;
+
+			// If we're sampling packets, skip packets that
+			// don't meet our sampling criteria
+			if (sampling && packet_count % sampling != 0)
+				continue;
+
 			// if we have a filter, and if the filter doesn't match, 
 			// continue the inner while() loop
 			if (filter)  
 				if (!trace_bpf_filter(filter,&packet)) 
 					continue;
 
-			ts = trace_get_erf_timestamp(&packet);
 			packettime = trace_get_timeval(&packet);
 		
-			
-			/* this time checking only matters when reading from a prerecorded
-			 * trace file. It limits it to a seconds worth of data a second,
-			 * which is still a large chunk*/
+			/* this time checking only matters when reading from a
+			 * prerecorded trace file. It limits it to a seconds
+			 * worth of data a second, which is still a large
+			 * chunk
+			 */ 
 				
 			if(!live)
 			{
 				offline_delay(packettime);
 			}
+
 			
 			// if sending fails, assume we just lost a client
-			if(per_packet(packet,ts, &modptrs, rttmap, theList) !=0)
+			if(per_packet(&packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0)
 				continue;
+
+			if (packettime.tv_sec > next_save) {
+				/* Save the blacklist every 5 min */
+				next_save = packettime.tv_sec + 300;
+				theList->save();
+			}
+
+			/* Every second update the current time */
+			if (packettime.tv_sec - lastts >= 1) {
+				printf("%s\r",asctime(gmtime((time_t*)&packettime.tv_sec)));
+				lastts=packettime.tv_sec;
+			}
 		}
 		// We've finished with this trace
 		trace_destroy(trace);
 		trace = 0;
 
 		// expire any outstanding flows
-		expire_flows(ts32+10);
+		expire_flows(packettime.tv_sec+3600);
 		
 		// the loop criteria is to loop if we want to loop always, or if
 		// we get a USR1 we restart - the code path is the same.
@@ -372,6 +395,7 @@ void set_defaults() {
 	shownondata = 0;
 	showdata = 1;
 	showcontrol = 1;
+	sampling = 0;
 }
 
 void fix_defaults() {
@@ -419,6 +443,9 @@ void do_configuration(int argc, char **argv) {
 		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
 		{"macaddrfile", TYPE_STR|TYPE_NULL, &macaddrfile},
 		{"blacklistdir", TYPE_STR|TYPE_NULL, &blacklistdir},
+		{"darknet", TYPE_BOOL|TYPE_NULL, &enable_darknet},
+		{"rttest", TYPE_BOOL|TYPE_NULL, &enable_rttest},
+		{"sampling", TYPE_INT|TYPE_NULL, &sampling},
 		{0,0,0}
 	};
 
@@ -452,6 +479,8 @@ void do_configuration(int argc, char **argv) {
 	// if any options were omitted from the config file,
 	// set them here
 	fix_defaults();
+	printf("Darknet: %s\n",enable_darknet ? "Yes" : "No");
+	printf("RTTEst: %s\n",enable_rttest ? "Yes" : "No");
 }
 
 /** Parse out the arguments and the driver name 
@@ -485,6 +514,8 @@ static void *get_module(const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
+	printf("Loading module %s...\n",tmp);
+
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
@@ -494,12 +525,16 @@ static void *get_module(const char *name)
 	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
 
 	if (init_func) {
+		printf(" Initialising module %s...\n",tmp);
 		if (!init_func(args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
 			handle = NULL;
 		}
+	}
+	else {
+		printf(" Not Initialising module %s\n",tmp);
 	}
 
 	free(driver);

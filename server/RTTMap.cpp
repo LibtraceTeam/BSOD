@@ -58,13 +58,8 @@ void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 	{
 		TraceMap::iterator j = NULL;
 		TraceMap *tmpTMap = &i->second;
-		//if( (j = i->first->find( time_stamp )) != i->end() )
 		if( ( j = tmpTMap->find( time_stamp ) ) != tmpTMap->end() )
 		{
-			// Found time_stamp.
-			//spew( "Insertion exists. Deleting and returning value." );
-			//tmpTMap->erase( j );
-			//return( now - time_stamp );
 			return; // Already exists. Done.
 		}
 		else
@@ -89,10 +84,8 @@ int RTTMap::Flush( double now )
 	FlowMap::iterator i = m_flows->begin();
 	int count = 0;
 
-	//spew( "Flushing..." );
 	for( ; i != m_flows->end(); i++ )
 	{
-		//spew( "Loopy1" );
 		TraceMap &tmap = i->second;
 		TraceMap::iterator j = tmap.begin();
 
@@ -100,25 +93,16 @@ int RTTMap::Flush( double now )
 		{
 			if( (now - j->second) > 180 )
 			{
-				//spew( "Erasing old entry..." );
-				//TraceMap::iterator tmp = j;
-				//tmp++;
 				tmap.erase( j );
-				//j = tmp;
-				//spew( "Done" );
 				count++;
 			}
-			//else
-			//	j++;
 		}
 
 		if( tmap.size() < 1 )
 			m_flows->erase( i );
 	}
 
-	spew( "Flows: " << this->m_flows->size() );
 	return( count );
-	//spew( "Done." );
 }
 
 int RTTMap::GetNextOption( BYTE **ptr, BYTE *type, int *len, BYTE *optlen, BYTE **data )
@@ -177,7 +161,6 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 		return( ret );
 	}
 
-	//spew( "No timestamp!" );
 	PacketTS ret;
 	return( ret );
 }
@@ -209,7 +192,6 @@ void RTTMap::Update( Flow *flow, UINT32 time_stamp, UINT32 new_time_stamp )
 	FlowMap::iterator i = NULL;
 	if( (i = m_flows->find(*flow) ) != m_flows->end() )
 	{
-		//spew( "Found matching flow" );
 		TraceMap &tmap = i->second;
 		TraceMap::iterator j = tmap.begin();
 		if( (j = tmap.find( time_stamp )) != tmap.end() )
@@ -217,9 +199,6 @@ void RTTMap::Update( Flow *flow, UINT32 time_stamp, UINT32 new_time_stamp )
 			double time = j->second;
 			tmap.erase( j );
 			tmap.insert( pair<UINT32,double>(new_time_stamp,time) );
-			//spew( "Updated packet" );
-
-			//j->first = new_time_stamp;
 			return;
 		}
 	}

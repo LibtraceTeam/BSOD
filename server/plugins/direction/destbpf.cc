@@ -51,7 +51,7 @@ static struct libtrace_filter_t *filter = NULL;
  * Read in all the macs from the file specified in the config.
  */ 
 extern "C"
-void module_init(const char* bpf)
+void init_module(const char* bpf)
 {
 	bpf_exp = strdup(bpf);
 	filter = trace_bpf_setfilter(bpf);
@@ -75,10 +75,10 @@ extern "C"
 int mod_get_direction(struct libtrace_packet_t *packet)
 {
 
-    if (trace_bpf_filter(filter,packet)==1)
-	    return 1;
+    if (trace_bpf_filter(filter,packet))
+	    return DIR_OUTBOUND;
     else
-	    return 0;
+	    return DIR_INBOUND;
 }
 
 

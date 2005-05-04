@@ -39,8 +39,11 @@ CPartFlow::CPartFlow()
 
 	// Reserve some space for 20 packets worth
 	vertices.reserve(PREALLOC*6);
-	tex_coords.reserve(PREALLOC*6);
-	colours.reserve(PREALLOC*6*4);
+	//tex_coords.reserve(PREALLOC*6);
+	//colours.reserve(PREALLOC*6*4);
+	colour[0] = 0;
+	colour[1] = 0;
+	colour[2] = 0;
 
 	sam_count = 0;
 	packets = 0;
@@ -134,17 +137,28 @@ void CPartFlow::Draw()
 	else
 	{
 		// Draw start and end points
-		d->SetColour( world.partVis->colour_table[colours[0]], world.partVis->colour_table[colours[1]], world.partVis->colour_table[colours[2]], 0.15f );
+		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], 0.15f );
 		d->DrawTriangles2( (float *)&endpoint_vertices[0], (float *)&endpoint_tex_coords[0], 4);
-		d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// Check that we have enough texture coordinates in our list:
+		while( (num_triangles * 3) > world.partVis->tex_coords.size() )
+		{
+			// Grow x2:
+			world.partVis->tex_coords.resize( world.partVis->tex_coords.size() * 2 );
+			memcpy( &(world.partVis->tex_coords[(world.partVis->tex_coords.size()/2)]), 
+				&(world.partVis->tex_coords[0]), 
+				world.partVis->tex_coords.size()*sizeof(Vector2f)/2 );
+		}
 
 		// Draw the actual flow
 		d->PushMatrix();
 		d->Translate(translation);
+		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], 0.5f );
 		d->DrawTriangles2(
 			(float *)&vertices[vertex_offset],
-			(float *)&tex_coords[vertex_offset],
-			(byte *)&colours[vertex_offset*4],
+			(float *)&(world.partVis->tex_coords[0]), //(float *)&(tex_coords[vertex_offset],
+			//(byte *)&colours[vertex_offset*4],
 			num_triangles);
 		d->PopMatrix();
 	}
@@ -298,11 +312,12 @@ void CPartFlow::Update(float diff)
 	// changing the value here, if it is too low a lot of memory copies
 	// will be taking place.
 	// - Sam, 13/2/2004
-	if(vSize > 6*100 && offset)
+	//if( (vSize > 6*100) && offset)
+	if(offset > vSize/6/3)
 	{
 		vertices.erase( vertices.begin(), vertices.begin()+(6*offset) );
-		tex_coords.erase( tex_coords.begin(), tex_coords.begin()+(6*offset) );
-		colours.erase( colours.begin(), colours.begin()+(6*4*offset) );
+		//tex_coords.erase( tex_coords.begin(), tex_coords.begin()+(6*offset) );
+		//colours.erase( colours.begin(), colours.begin()+(6*4*offset) );
 		jitter.erase( jitter.begin(), jitter.begin()+offset );
 		offset = 0;
 	}
@@ -385,7 +400,7 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
 		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation);
 	}
-
+/*
 	if( (destination.x < start.x) || (world.partVis->matrix_mode) )
 	{
 		tex_coords.push_back(Vector2f(1, 1));
@@ -405,11 +420,11 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		tex_coords.push_back(Vector2f(1, 0));
 		tex_coords.push_back(Vector2f(0, 1));
 		tex_coords.push_back(Vector2f(1, 1));
-	}
+	} */
 
 	// alpha was 80
 
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
+	/*colours.push_back(r); colours.push_back(g); colours.push_back(b); 
 	colours.push_back(140);
 	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
 	colours.push_back(140);
@@ -421,7 +436,10 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
 	colours.push_back(140);
 	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
+	colours.push_back(140);*/
+	colour[0] = r;
+	colour[1] = g;
+	colour[2] = b;
 
 //	num_particles++;
 	packets++;
@@ -441,12 +459,12 @@ void CPartFlow::ReInitialize()
 
 	// Reserve some space for 20 packets worth
 	vertices.clear();
-	tex_coords.clear();
-	colours.clear();
+	//tex_coords.clear();
+	//colours.clear();
 	
 	vertices.reserve(PREALLOC*6);
-	tex_coords.reserve(PREALLOC*6);
-	colours.reserve(PREALLOC*6*4);
+	//tex_coords.reserve(PREALLOC*6);
+	//colours.reserve(PREALLOC*6*4);
 
 	translation.x = translation.y = translation.z = 0.0f;
 	start.x = start.y = start.z = 0.0f;

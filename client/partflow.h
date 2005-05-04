@@ -16,8 +16,9 @@ class CPartFlow
 {
 private:
 	vector<Vector3f> vertices;
-	vector<Vector2f> tex_coords;
-	vector<byte> colours;
+	//vector<Vector2f> tex_coords;
+	//vector<byte> colours;
+	byte colour[3];
 	vector<Vector3f> jitter;
 	//byte colours[3];
 	CTexture *tex;

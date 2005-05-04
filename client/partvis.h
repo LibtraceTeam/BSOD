@@ -89,6 +89,7 @@ private:
 	bool show_help;
 	IterList active_nodes;
 	FlowList partflow_pool;
+	vector<Vector2f> tex_coords;
     
 public:
     CPartVis( bool mm );

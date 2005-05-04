@@ -137,6 +137,15 @@ CPartVis::CPartVis( bool mm )
 
 	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
 	helptex = CTextureManager::tm.LoadTexture( "data/help.png" );
+
+	tex_coords.reserve( 6 );
+	tex_coords.push_back(Vector2f(1, 1));
+	tex_coords.push_back(Vector2f(0, 1));
+	tex_coords.push_back(Vector2f(1, 0));
+
+	tex_coords.push_back(Vector2f(0, 1));
+	tex_coords.push_back(Vector2f(1, 0));
+	tex_coords.push_back(Vector2f(0, 0));
 }
 
 // The "container" class implementation

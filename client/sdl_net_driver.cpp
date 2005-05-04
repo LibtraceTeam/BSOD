@@ -54,7 +54,29 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <SDL.h>
 #include <SDL_net.h>
 
+#ifdef WIN32
+#include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#endif
+
+
 #include "sdl_net_driver.h"
+
+//#define htonf(x) x//(*(uint32*)&(x))
+union
+{
+	float f;
+	uint32 i;
+} _u;
+float htonf( float x )
+{
+	_u.f = (x);
+	_u.i = htonl(_u.i);
+	return( _u.f );
+	//return( (float)(htonl( *((uint32*)&x) )) );
+}
+#define ntohf(x) htonf(x)
 
 CNetDriver *CNetDriver::Create()
 {
@@ -162,7 +184,7 @@ struct flow_update_t {
 
 struct pack_update_t {
     unsigned char type; // 1
-    uint32 ignored, ts;
+    uint32 ts;
     unsigned int id;
     unsigned char id_num;
     unsigned short size;
@@ -243,19 +265,19 @@ void CSDLNetDriver::ReceiveData()
 	    {
 #ifdef NET_DEBUG
 		Log("Flow: (%f,%f,%f)->(%f,%f,%f):%u\n", 
-			fp->flow.x1,
-			fp->flow.y1,
-			fp->flow.z1,
-			fp->flow.x2,
-			fp->flow.y2,
-			fp->flow.z2,
-			fp->flow.id);
+			ntohf(fp->flow.x1),
+			ntohf(fp->flow.y1),
+			ntohf(fp->flow.z1),
+			ntohf(fp->flow.x2),
+			ntohf(fp->flow.y2),
+			ntohf(fp->flow.z2),
+			ntohl(fp->flow.id) );
 #endif
 
 		world.partVis->UpdateFlow(
-			fp->flow.id,
-			Vector3f(fp->flow.x1, fp->flow.y1, fp->flow.z1),
-			Vector3f(fp->flow.x2, fp->flow.y2, fp->flow.z2));
+			ntohl(fp->flow.id),
+			Vector3f(ntohf(fp->flow.x1), ntohf(fp->flow.y1), ntohf(fp->flow.z1)),
+			Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)));
 
 		buf += sizeof(flow_update_t);
 	    } 
@@ -269,28 +291,29 @@ void CSDLNetDriver::ReceiveData()
 	else if(fp->flow.type == 0x01) 
 	{
 	    // Packet
+		//Log( "PACKET!" );
 	    if(sizeof(pack_update_t) <= s) {
 #ifdef NET_DEBUG
-		Log("Packet: ts:%u id:%u (%d,%d,%d) size:%u\n",
-			fp->packet.ts,
-			fp->packet.id,
-			(int)fp->packet.colour[0],
-			(int)fp->packet.colour[1],
-			(int)fp->packet.colour[2],
-			fp->packet.size);
+			Log("Packet: ts:%u id:%u size:%u speed:%f dark:%d\n",
+			ntohl(fp->packet.ts),
+			ntohl(fp->packet.id),
+			fp->packet.id_num,
+			fp->packet.size,
+			ntohf(fp->packet.speed),
+			fp->packet.dark);
 #endif
 		//if( world.partVis->fps > 30.0f )//world.partVis->packetsFrame < 25 )
 		//{
 		world.partVis->packetsFrame++;
 		//static uint32 tsfudge = fp->packet.ts;
 		//tsfudge++;
-		//Log( "%d\n", fp->packet.id_num );
+		//Log( "%d\n", fp->packet.ts );
 		world.partVis->UpdatePacket(
-			fp->packet.id, 
-			fp->packet.ts,
+			ntohl(fp->packet.id), 
+			ntohl(fp->packet.ts),
 			fp->packet.id_num,
 			fp->packet.size,
-			fp->packet.speed,
+			ntohf(fp->packet.speed),
 			fp->packet.dark);
 		//}
 
@@ -308,7 +331,7 @@ void CSDLNetDriver::ReceiveData()
 	{
 	    if(sizeof(flow_remove_t) <= s) 
 	    {
-		world.partVis->RemoveFlow(fp->rem.id);
+		world.partVis->RemoveFlow(ntohl(fp->rem.id));
 
 		buf += sizeof(flow_remove_t);
 	    } 
@@ -331,8 +354,8 @@ void CSDLNetDriver::ReceiveData()
 		// Flow descriptor.
 		// Check if we have it already, if we don't add it, if we do
 		// update it if its different, else do nothing.
-		int tempK = fp->fdesc.id;
-		int ppK = tempK;
+		//int tempK = fp->fdesc.id;
+		//int ppK = tempK;
 		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
 		{
 			// Not in the map yet so lets add it:

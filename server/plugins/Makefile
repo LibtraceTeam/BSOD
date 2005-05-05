@@ -27,7 +27,7 @@ distclean: clean
 clean:
 	$(RM) *~ $(OBJS)
 	for i in $(SUBDIRS); do \
-		$(MAKE) $(MAKEFLAGS) -C $$i all; \
+		$(MAKE) -C $$i clean; \
 	done
 
 %.o: %.c

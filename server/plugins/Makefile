@@ -1,12 +1,14 @@
 CXX=g++
 CC=g++
-INCLUDE = -I/usr/local/include
+INCLUDE = -I/usr/local/include -I/home/perry/lib/include
 #CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g -fPIC
 CXXFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -pedantic
 CXXFLAGS += $(INCLUDE)
+LDFLAGS=-L/home/perry/lib/lib
 
-DIRS := colour position direction
+DIRS := position direction
 SOURCES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))
+SUBDIRS := colour
 
 OBJS := $(patsubst %.cc, %.so, $(SOURCES))
 
@@ -16,11 +18,17 @@ LIBDIR=$(PREFIX)/plugins
 .PHONY: all clean distclean install depend
 
 all: $(OBJS)
+	for i in $(SUBDIRS); do \
+		$(MAKE) -C $$i all; \
+	done
 
 distclean: clean
 
 clean:
 	$(RM) *~ $(OBJS)
+	for i in $(SUBDIRS); do \
+		$(MAKE) $(MAKEFLAGS) -C $$i all; \
+	done
 
 %.o: %.c
 	$(CXX) -c $(CXXFLAGS) \

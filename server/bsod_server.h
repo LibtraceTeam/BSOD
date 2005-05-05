@@ -49,7 +49,7 @@ typedef enum {
 } side_t;
 
 
-typedef void (* colfptr)(unsigned char*,struct libtrace_packet_t *);
+typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *);
 typedef void (* inffptr)(uint8_t*,char[256],int);
 typedef int (* posfptr)(float[3], 
 		side_t side,

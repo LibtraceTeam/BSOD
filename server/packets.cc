@@ -163,19 +163,17 @@ void expire_flows(uint32_t time)
  * When a new client connects, send them information about every flow that is
  * in progress.
  */ 
-int send_flows(int fd)
+void send_flows(struct client *client)
 {
 	Log(LOG_DAEMON|LOG_INFO,"Updating new client with all flows in progress...\n");
 	for(flow_lru_t::const_iterator flow_iterator=flows.begin();
 			flow_iterator!=flows.end();
 			++flow_iterator)
 	{
-		if(send_update_flow(fd, (*flow_iterator).first.start, 
+		send_update_flow(client, (*flow_iterator).first.start, 
 					(*flow_iterator).first.end, 
-					(*flow_iterator).second.flow_id) != 0)
-			return 1;
+					(*flow_iterator).second.flow_id);
 	}
-	return 0;
 }
 
 //-------------------------------------------------------------
@@ -259,15 +257,12 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);
 	}
 
-	if (datasize > -1 && !force_display) {
-		// if we don't show non-data, and datasize is 0, return early
-		if ((shownondata == 0) && (datasize == 0))
-			return 0;
-		// if we don't show data, and datasize is > 0, return early
-		if ((showdata == 0) && (datasize > 0))
-			return 0;
-	
-	}
+	/* Find out the packet colour early on, then we can skip looking up
+	 * positions if we're lucky
+	 */
+	if (modptrs->colour(&(tmpid.type), 
+			packet) != 0)
+		return 0;
 
 	direction = modptrs->direction(packet);
 
@@ -285,8 +280,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			modptrs) != 0)
 		return 0;
 
-	modptrs->colour(&(tmpid.type), 
-			packet);
 
 	current = flows.find(tmpid);
 
@@ -303,7 +296,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		current = flows.insert(flowdata);
 
-		if(send_new_flow(tmpid.start, tmpid.end, current->second.flow_id)!=0)
+		if(send_new_flow(tmpid.start, tmpid.end,
+					current->second.flow_id)!=0)
 			return 1;
 
 	}
@@ -315,6 +309,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 	// Expire flows is efficient, and will only expire flows that have uh
 	// expired, there is no need to only run it once a second
+	// We want to run this after we've touched the current flow so we
+	// don't expire it only to recreate it again
 	expire_flows(secs);
 
 	// RTT calculation stuff:
@@ -334,8 +330,9 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		dport = trace_get_destination_port( packet );
 		sport = trace_get_source_port( packet );
 
-		rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, sport, dport );
-		rtt_flow_inverse = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
+		rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
+				sport, dport );
+		rtt_flow_inverse = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr,
 				dport, sport );
 
 		if( pts.ts > 0 )
@@ -427,6 +424,20 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 				theList->set_light(p->ip_src.s_addr);
 				break;
 		}
+	}
+
+	/* The RTT estimator and darknet blacklist both need access to syns
+	 * and non data packets, so don't skip them until now
+	 */
+
+	if (datasize > -1 && !force_display) {
+		// if we don't show non-data, and datasize is 0, return early
+		if ((shownondata == 0) && (datasize == 0))
+			return 0;
+		// if we don't show data, and datasize is > 0, return early
+		if ((showdata == 0) && (datasize > 0))
+			return 0;
+	
 	}
 
 	if(send_new_packet(secs, current->second.flow_id, tmpid.type, 

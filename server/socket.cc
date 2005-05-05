@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -45,14 +46,33 @@
 #include "debug.h"
 #include <syslog.h>
 #include "bsod_server.h"
+#include <list>
 
+float htonf(float x) { 
+	union {
+		float f;
+		uint32_t i;
+	} _u;
+	_u.f = (x);
+	_u.i=htonl(_u.i); 
+	return _u.f;
+}
 
 extern int fd_max;
+
+struct client_buffer
+{
+	char *data;
+	size_t datalen;
+	size_t offset;
+};
+
 /* list of file descriptors for all connected clients */
 struct client {
 	int fd;
 	struct client *next;
 	struct client *prev;
+	std::list< client_buffer > buffer;
 } *clients = NULL;
 
 /* structure for flow update packets */
@@ -70,7 +90,7 @@ struct flow_update_t {
 /* structure for new packet packets */
 struct pack_update_t {
 	unsigned char type;
-	uint64_t ts;
+	uint32_t ts;
 	uint32_t id; // Flow id
 	unsigned char id_num; // packet type id
 	uint16_t size;
@@ -108,6 +128,7 @@ union pack_union {
 
 int listen_socket;
 fd_set read_fds;
+fd_set write_fds;
 
 
 /* Creates a new structure containing a file descriptor */
@@ -122,7 +143,7 @@ struct client* create_fd(int fd)
 }
 
 /* Adds a structure containing a file descriptor to the front of the list */
-void add_fd(int fd)
+struct client *add_fd(int fd)
 {
 	struct client *tmp = create_fd(fd);
 
@@ -135,6 +156,8 @@ void add_fd(int fd)
 		clients = tmp;
 	}
 
+	assert(tmp->fd>=0);
+	return tmp;
 }
 
 /* Removes a given structure from the list of file descriptors */
@@ -143,6 +166,7 @@ void remove_fd(struct client *tmp)
 	Log(LOG_DAEMON|LOG_INFO,"Removing client on fd %i\n", tmp->fd);
 
 	FD_CLR(tmp->fd, &read_fds);
+	FD_CLR(tmp->fd, &write_fds);
 	close(tmp->fd);
 
 	if(tmp->next == NULL && tmp->prev == NULL) // only item
@@ -187,6 +211,7 @@ int setup_listen_socket()
 
 	// reset the set and add the listening socket to it
 	FD_ZERO(&read_fds);
+	FD_ZERO(&write_fds);
 	FD_SET(listen_socket, &read_fds);
 
 	return listen_socket;
@@ -217,10 +242,52 @@ int bind_tcp_socket(int listener, int port)
 	return 0;
 }
 
+/*
+ * Writes all waiting data out to the client immediately
+ *
+ * returns 1 if the client is fine
+ *         0 if the client is "dead"
+ */
+int flush_data(struct client *client)
+{
+	while (!client->buffer.empty()) {
+		int ret=send(client->fd,
+				client->buffer.front().data+client->buffer.front().offset,
+				client->buffer.front().datalen-client->buffer.front().offset,
+				0);
+
+		if (ret == -1) {
+			switch (errno) {
+				case EINTR: continue;
+				case ENOBUFS:
+				case ENOMEM:
+				case EAGAIN: return 1;
+				default:
+					perror("send");
+					return 0;
+			}
+		}
+
+		// If we successfully wrote this data, remove it from the queue
+		if (ret == (int)client->buffer.front().datalen - (int)client->buffer.front().offset) {
+			free(client->buffer.front().data);
+			client->buffer.pop_front();
+		}
+		else {
+			client->buffer.front().offset+=ret;
+			return 1;
+		}
+	}
+
+	/* Nothing more to write */
+	FD_CLR(client->fd, &write_fds);
+
+	return 1;
+}
 
 //-----------------------------------------------------------------
 /* Pickup any new clients. */
-int check_clients(struct modptrs_t *modptrs, bool wait)
+struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 {
 	/* Protocol version is a single byte, the upper nibble is the 
 	 * major version, and the lower nibble is the minor
@@ -235,38 +302,47 @@ int check_clients(struct modptrs_t *modptrs, bool wait)
 	socklen_t sock_size;
 	int newfd;
 	struct timeval tv;
+	struct timeval *tvp;
+	struct client *tmp = clients;
+	struct client *ret = NULL;
+	fd_set xread_fds, xwrite_fds;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
 
-	FD_SET(listen_socket, &read_fds);
+	if (wait) {
+		tvp = NULL;
+	}
+	else {
+		tvp = &tv;
+	}
 
-	if(wait) // wait on the first time through so the rtclient isnt running
-	{
-		while (select(fd_max+1, &read_fds, NULL, NULL, NULL) == -1) {
-			switch (errno) {
-				case EAGAIN: continue;
-				case EINTR: return -1;
-				default:
-					    perror("select");
-					    exit(1);
-			}
+	xread_fds = read_fds;
+	xwrite_fds = write_fds;
+
+	while (select(fd_max+1, &xread_fds, &xwrite_fds, NULL, tvp) == -1) {
+		switch (errno) {
+			case EAGAIN: continue;
+			case EINTR: return NULL;
+			default:
+				    perror("select");
+				    exit(1);
 		}
 	}
-	else // timeout instantly if there are no new clients
-	{
-		while (select(fd_max+1, &read_fds, NULL, NULL, &tv) == -1) {
-			switch (errno) {
-				case EAGAIN: continue;
-				case EINTR: return -1;
-				default:
-					    perror("select");
-					    exit(1);
-			}
+
+	/* For every client that can accept data, send it anything that it
+	 * has queued 
+	 */
+	struct client *next;
+	while(tmp) {
+		next = tmp->next;
+		if (!flush_data(tmp)) {
+			remove_fd(tmp);
 		}
+		tmp = next;
 	}
 
 	/* if listen_socket is in the set, we have a new client */
-	if (FD_ISSET(listen_socket, &read_fds)) 
+	if (FD_ISSET(listen_socket, &xread_fds))
 	{
 		// handle new connections
 		sock_size = sizeof(struct sockaddr_in);
@@ -276,9 +352,10 @@ int check_clients(struct modptrs_t *modptrs, bool wait)
 		} 
 		else 
 		{
-			FD_SET(newfd, &read_fds);
+			fcntl(newfd, F_SETFL, O_NONBLOCK);
+			FD_SET(newfd, &xread_fds);
 			write(newfd,&protocol_version,1);
-			add_fd(newfd);
+			ret=add_fd(newfd);
 			if (newfd > fd_max) 
 			{    
 				// keep track of the maximum
@@ -291,12 +368,23 @@ int check_clients(struct modptrs_t *modptrs, bool wait)
 			// client.
 			send_colour_table(modptrs);	
 		}
-		return newfd;
 	}
 
-	return -1;
+	return ret;
 }
 
+/* Enqueue data onto a clients sendq
+ */
+void enqueue_data(struct client *client,char *buffer, size_t size)
+{
+	struct client_buffer sendq;
+	sendq.datalen = size;
+	sendq.data = (char*) malloc(sendq.datalen);
+	memcpy(sendq.data,buffer,sendq.datalen);
+	sendq.offset = 0;
+	client->buffer.push_back(sendq);
+	FD_SET(client->fd,&write_fds);
+}
 
 /*
  * Takes a packet as part of a union, works out which one it is and
@@ -325,12 +413,7 @@ int send_all(pack_union *data)
 	// send to all clients 
 	while(tmp != NULL)
 	{
-		if(send(tmp->fd, data, size, 0) != size){
-			perror("send_all");
-			Log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
-			remove_fd(tmp);
-			return 1;
-		}
+		enqueue_data(tmp, (char*)data, size);
 		tmp = tmp->next;
 	}
 
@@ -342,7 +425,7 @@ int send_kill_flow(uint32_t id)
 {
 	struct flow_remove_t update;
 	update.type = 0x02;
-	update.id = id;
+	update.id = htonl(id);
 
 	union pack_union *punion;
 	punion = (pack_union *)&update;
@@ -356,13 +439,13 @@ int send_new_flow(float start[3], float end[3], uint32_t id)
 {
 	struct flow_update_t update;
 	update.type = 0x00;
-	update.x1 = start[0];
-	update.y1 = start[1];
-	update.z1 = start[2];
-	update.x2 = end[0];
-	update.y2 = end[1];
-	update.z2 = end[2];
-	update.count = id;
+	update.x1 = htonf(start[0]);
+	update.y1 = htonf(start[1]);
+	update.z1 = htonf(start[2]);
+	update.x2 = htonf(end[0]);
+	update.y2 = htonf(end[1]);
+	update.z2 = htonf(end[2]);
+	update.count = htonl(id);
 
 	union pack_union *punion;
 	punion = (pack_union *)&update;
@@ -372,41 +455,40 @@ int send_new_flow(float start[3], float end[3], uint32_t id)
 }
 //-------------------------------------------------------------------
 
-int send_update_flow(int fd, float start[3], float end[3], uint32_t id)
+/* Send flow information to a single client.  This differs from
+ * send_new_flow in that it doesn't send to all clients 
+ */
+int send_update_flow(struct client *client, 
+		float start[3], float end[3], uint32_t id)
 {
 
 	struct flow_update_t update;
 	update.type = 0x00;
-	update.x1 = start[0];
-	update.y1 = start[1];
-	update.z1 = start[2];
-	update.x2 = end[0];
-	update.y2 = end[1];
-	update.z2 = end[2];
-	update.count = id;
+	update.x1 = htonf(start[0]);
+	update.y1 = htonf(start[1]);
+	update.z1 = htonf(start[2]);
+	update.x2 = htonf(end[0]);
+	update.y2 = htonf(end[1]);
+	update.z2 = htonf(end[2]);
+	update.count = htonl(id);
 
 	// send to single client 
-	if(send(fd, &update, sizeof(struct flow_update_t), 0) 
-			!= sizeof(struct flow_update_t )){
-		perror("send_new_flow");
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't send all data - broken pipe?\n");
-		return 1;
-	}
+	enqueue_data(client, (char*)&update, sizeof(struct flow_update_t));
 
 	return 0;
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(uint64_t ts, uint32_t id, unsigned char id_num,
+int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,
 		uint16_t size, float speed, bool dark)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
-	update.ts = ts;
-	update.id = id;
+	update.ts = htonl(ts);
+	update.id = htonl(id);
 	update.id_num = id_num;
-	update.size = size;
-	update.speed = speed;
+	update.size = htons(size);
+	update.speed = htonf(speed);
 	update.dark = dark;
 
 	union pack_union *punion;

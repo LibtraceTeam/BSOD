@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	// socket stuff
 	int listen_socket;
 	fd_set listen_set, event_set;
-	int new_client = 0;
+	struct client *new_client = NULL;
 
 	bool live = true;
 
@@ -225,9 +225,6 @@ int main(int argc, char *argv[])
 	fd_max = listen_socket; // biggest file descriptor
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
 
-
-
-
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
 			Log(LOG_DAEMON|LOG_INFO,"Rereading configuration file upon user request\n");
@@ -246,7 +243,7 @@ int main(int argc, char *argv[])
 		//------- ---------------------------
 		// keep rtclient from starting till someone connects
 		// but if we already have clients, don't bother
-		if (new_client == 0) {
+		if (!new_client) {
 			new_client = check_clients(&modptrs, true);
 		}
 
@@ -297,7 +294,7 @@ int main(int argc, char *argv[])
 			
 			/* check for new clients */
 			new_client = check_clients(&modptrs, false);
-			if(new_client > 0)// is zero valid?
+			if(new_client)
 				send_flows(new_client);
 
 			/* get a packet, and process it */
@@ -556,6 +553,7 @@ static void *get_position_module(side_t side, const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
+	printf("Loading module %s...\n",tmp);
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
@@ -565,12 +563,16 @@ static void *get_position_module(side_t side, const char *name)
 	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
 
 	if (init_func) {
+		printf(" Initialising module %s...\n",tmp);
 		if (!init_func(side,args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
 			handle = NULL;
 		}
+	}
+	else {
+		printf(" Not Initialising module %s\n",tmp);
 	}
 
 	free(driver);

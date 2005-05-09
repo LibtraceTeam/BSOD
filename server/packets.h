@@ -46,7 +46,7 @@ float convert_speed( float speed );
 void kill_all();
 void expire_flows(uint32_t time);
 void init_packets();
-int send_flows(int fd);
+void send_flows(struct client *client);
 
 extern bool enable_rttest;
 extern bool enable_darknet;

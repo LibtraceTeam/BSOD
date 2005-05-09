@@ -139,6 +139,8 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 	if( !tcpptr )
 	{
 		PacketTS ret;
+		ret.ts = 0;
+		ret.ts_echo = 0;
 		return( ret ); // Fail.
 	}
 	
@@ -162,6 +164,8 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 	}
 
 	PacketTS ret;
+	ret.ts = 0;
+	ret.ts_echo = 0;
 	return( ret );
 }
 

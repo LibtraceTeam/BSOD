@@ -247,20 +247,20 @@ class lru {
 		/* Add/update an item, updating the LRU at the same time */
 		value_t &operator[](const key_t &k) {
 			typename data_t::iterator i;
-			i = data.find(p.first);
+			i = data.find(k);
 			/* Does this already exist? */
 			if (i != data.end()) {
 				/* Remove from the LRU */
 				lru_list.erase(i->second.first);
 			}
 			else {
-				data[p.first];
+				data[k];
 			}
 			/* Add it to the LRU and keep a reference
 			 * to the iterator in the map so we can 
 			 * easily move it around later 
 			 */
-			i->second.first = lru_list.insert(lru_list.end(),p.first);
+			i->second.first = lru_list.insert(lru_list.end(),k);
 			return data[k].second;
 		}
 };

@@ -233,7 +233,7 @@ class lru {
 				lru_list.erase(i->second.first);
 			}
 			/* good god */
-			i = data.insert(data_t::value_type(
+			i = data.insert(typename data_t::value_type(
 					p.first,
 					map_data_t(
 						lru_list.insert(lru_list.end(),p.first),

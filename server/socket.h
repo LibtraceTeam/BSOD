@@ -31,6 +31,7 @@
 
 #ifndef _SOCKET_H
 #define _SOCKET_H
+#include <inttypes.h>
 int setup_listen_socket();
 int bind_tcp_socket(int listener, int port);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);

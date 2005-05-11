@@ -4,8 +4,13 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 INCLUDE =  -I/usr/local/include  -I. -I./lib
 
 CXXFLAGS += $(INCLUDE)
+# GeoIP is required in the server for the GeoIP module
+#LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
 LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace
-LDFLAGS= -L./lib -L/usr/local/lib -rdynamic 
+LDFLAGS= -L/home/perry/lib/lib -L./lib -L/usr/local/lib -rdynamic 
+# For Mac OS X
+# Mac OS X doesn't do -rdynamic
+#LDFLAGS= -L./lib -L/usr/local/lib
 
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o 

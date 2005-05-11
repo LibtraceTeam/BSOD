@@ -35,7 +35,7 @@ clean:
 	$<
 	
 %.so: %.o
-	$(CXX) $(CXXFLAGS) \
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
 	-o $@ $^
 
 install:

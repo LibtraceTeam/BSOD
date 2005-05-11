@@ -70,9 +70,9 @@ struct FlowDescriptor
 	char name[256];
 };
 
-typedef hash_map<unsigned int, CPartFlow *> FlowMap;
+typedef map<unsigned int, CPartFlow *> FlowMap;
 typedef list<CPartFlow*> FlowList;
-typedef hash_map<unsigned char, FlowDescriptor *>FlowDescMap;
+typedef map<unsigned char, FlowDescriptor *>FlowDescMap;
 
 class CPartVis : public CEntity
 {

@@ -60,8 +60,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * less template stuff to figure out. - STJ 27/2/02
  */
 struct string_less : binary_function<string, string, bool> {
-	bool operator()(const string& _X, const string& _Y) const
-	{ return ((_X.compare(_Y) < 0) ? true : false); }
+	bool operator()(const string& bsod_X, const string& bsod_Y) const
+	{ return ((bsod_X.compare(bsod_Y) < 0) ? true : false); }
 };
 
 class CReader;

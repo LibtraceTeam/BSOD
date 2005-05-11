@@ -9,7 +9,7 @@
 
 class CPartFlow;
 
-typedef hash_map<unsigned int, CPartFlow *> FlowMap;
+typedef map<unsigned int, CPartFlow *> FlowMap;
 typedef list<FlowMap::const_iterator> IterList;
 
 class CPartFlow

@@ -54,18 +54,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <string>
 #include <map>
-#include <hash_map>
 
 #define NO_STLPORT
 
 #ifdef _WIN32
 #pragma warning(disable:4786)
-#endif
-
-#if defined(DEBUG) || defined(_DEBUG)
-#define _D(x)	x
-#else
-#define _D(x)
 #endif
 
 #ifndef ASSERT

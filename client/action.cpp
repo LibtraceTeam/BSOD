@@ -57,8 +57,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef NO_STLPORT
 #include <map>
-#else
-#include <hash_map>
 #endif
 
 #ifdef _WIN32
@@ -74,11 +72,7 @@ typedef void (CActionHandler::*ActionFunc)();
 // are constants or something?  I don't know.  But because of g++, we need to use ints in
 // our hash_map.
 //typedef hash_map<CActionHandler::Keycode, ActionFunc> ActionMap;
-#ifdef NO_STLPORT
 typedef map<int, ActionFunc> ActionMap;
-#else
-typedef hash_map<int, ActionFunc> ActionMap;
-#endif
 
 ActionMap keyDownMap;
 ActionMap keyUpMap;

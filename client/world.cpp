@@ -116,15 +116,16 @@ void CWorld::Draw()
 	// time_t does not seem to be unsigned in Windows and this appears to cause
 	// problems when the client connects to the server after perviously disconnecting
 	// malformed timestamp info? Using 64bit timestamps fixes this.
-/*#ifdef _WIN32
+#ifdef _WIN32
 	uint32 timestamp = partVis->GetLastTimestamp();
 	__time64_t ts = (const __time64_t)timestamp;
 	tm *timeptr = _localtime64( &ts );
 	strftime(tbuf, 255, "%c", timeptr );
-#else*/
+#else
 	time_t timestamp = partVis->GetLastTimestamp();
 	strftime( tbuf, 255, "%c", localtime(&timestamp) );
-//#endif
+	//strcpy( tbuf, "Null" );
+#endif
 	
 	// %a %b %d %R %Z %G
 

@@ -142,7 +142,7 @@ void CPartFlow::Draw()
 		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// Check that we have enough texture coordinates in our list:
-		while( (num_triangles * 3) > world.partVis->tex_coords.size() )
+		while( ((unsigned int)num_triangles * 3) > world.partVis->tex_coords.size() )
 		{
 			// Grow x2:
 			world.partVis->tex_coords.resize( world.partVis->tex_coords.size() * 2 );

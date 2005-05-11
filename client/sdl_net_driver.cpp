@@ -54,6 +54,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <SDL.h>
 #include <SDL_net.h>
 
+
 #ifdef WIN32
 #include <WinSock2.h>
 #else
@@ -62,6 +63,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "sdl_net_driver.h"
+
+// DEBUG ONLY
+//#define htonl(x) x
+//#define ntohl(x) x
+// END DEBUG ONLY
 
 //#define htonf(x) x//(*(uint32*)&(x))
 union
@@ -356,8 +362,8 @@ void CSDLNetDriver::ReceiveData()
 		// update it if its different, else do nothing.
 		//int tempK = fp->fdesc.id;
 		//int ppK = tempK;
-		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
-		{
+		//if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
+		//{
 			// Not in the map yet so lets add it:
 			FlowDescriptor *fd = new FlowDescriptor();
 			fd->colour[0] = fp->fdesc.colour[0];
@@ -366,7 +372,7 @@ void CSDLNetDriver::ReceiveData()
 			strcpy( fd->name, fp->fdesc.name );
 			//Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
 			world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
-		}
+		//}
 		buf += sizeof(flow_descriptor);
 	}
 	else 

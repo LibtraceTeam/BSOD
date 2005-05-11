@@ -16,7 +16,7 @@ bpfcolour: bpfcolour_lexer.o bpfcolour_parser.o bpfcolour.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 %.so: %.o
-	$(CXX) $(CXXFLAGS) \
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
 	-o $@ $^
 
 clean:

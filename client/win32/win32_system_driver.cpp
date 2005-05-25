@@ -78,7 +78,7 @@ int CWin32SystemDriver::RunMessageLoop()
 	start_time = TimerGetTime();
 	active = true;
 	minimised = false;
-	SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
+	//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
 
 	while(!done)									// Loop That Runs While done=FALSE
 	{
@@ -99,11 +99,29 @@ int CWin32SystemDriver::RunMessageLoop()
 			// Draw The Scene.  Watch For ESC Key And Quit Messages From DrawGLScene()
 			if (active)								// Program Active?
 			{
-				POINT temp_mouse;
-				GetCursorPos(&temp_mouse);
-				SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
-				world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
-				world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
+				if( GetAsyncKeyState( VK_LBUTTON ) ) // Dirty Hax
+				{
+					if( interact )
+					{
+						POINT temp_mouse;
+						GetCursorPos(&temp_mouse);
+						//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
+						//world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
+						//world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
+						SetCursorPos( lastPoint.x, lastPoint.y );
+						world.entities->GetPlayer()->mpos.y = (float)(lastPoint.x - temp_mouse.x);
+						world.entities->GetPlayer()->mpos.x = (float)(lastPoint.y - temp_mouse.y);
+						//lastPoint = temp_mouse;
+					}
+					else
+					{
+						GetCursorPos(&lastPoint);
+						interact = true;
+					}
+				}
+				else
+					interact = false;
+				
 				
 				carry_time = TimerGetTime ();			// Get The Tick Count
 				world.Update ((carry_time - start_time)/1000);	// Update The Counter
@@ -135,7 +153,8 @@ int CWin32SystemDriver::RunMessageLoop()
 CDisplayManager *CWin32SystemDriver::InitDisplay(int width, int height, int bpp, 
 												 bool full_screen, CSystemDriver::DisplayType type, char *title)
 {
-	
+	GetCursorPos(&lastPoint);
+	interact = false;
 	fullScreen = full_screen;
 
 	TimerInit();
@@ -543,7 +562,7 @@ void CWin32SystemDriver::KillGLWindow()
 	if (fullScreen)										// Are We In Fullscreen Mode?
 	{
 		ChangeDisplaySettings(NULL,0);					// If So Switch Back To The Desktop
-		ShowCursor(TRUE);								// Show Mouse Pointer
+		//ShowCursor(TRUE);								// Show Mouse Pointer
 	}
 
 	if (hRC)											// Do We Have A Rendering Context?
@@ -642,7 +661,7 @@ bool CWin32SystemDriver::CreateGLWindow(char *title, int width, int height, int 
 	{
 		dwExStyle = WS_EX_APPWINDOW;							// Window Extended Style
 		dwStyle = WS_POPUP;										// Windows Style
-		ShowCursor(false);										// Hide Mouse Pointer
+		//ShowCursor(false);										// Hide Mouse Pointer
 	}
 	else
 	{
@@ -733,7 +752,7 @@ bool CWin32SystemDriver::CreateGLWindow(char *title, int width, int height, int 
 	ShowWindow(hWnd,SW_SHOW);						// Show The Window
 	SetForegroundWindow(hWnd);						// Slightly Higher Priority
 	SetFocus(hWnd);									// Sets Keyboard Focus To The Window
-	ShowCursor(FALSE);								// We don't want no stinking cursor! (Sam)
+	//ShowCursor(FALSE);								// We don't want no stinking cursor! (Sam)
 
 	return true;									// Success
 }
@@ -775,7 +794,7 @@ void CWin32SystemDriver::CreateWindowD3D(const char *title, int width, int heigh
 	{
 		dwExStyle = WS_EX_APPWINDOW;							// Window Extended Style
 		dwStyle = WS_POPUP;										// Windows Style
-		ShowCursor(false);										// Hide Mouse Pointer
+		//ShowCursor(false);										// Hide Mouse Pointer
 	}
 	else
 	{
@@ -807,5 +826,5 @@ void CWin32SystemDriver::CreateWindowD3D(const char *title, int width, int heigh
 	ShowWindow(hWnd,SW_SHOW);						// Show The Window
 	SetForegroundWindow(hWnd);						// Slightly Higher Priority
 	SetFocus(hWnd);									// Sets Keyboard Focus To The Window
-	ShowCursor(FALSE);								// We don't want no stinking cursor! (Sam)
+	//ShowCursor(FALSE);								// We don't want no stinking cursor! (Sam)
 }

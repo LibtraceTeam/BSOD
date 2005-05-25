@@ -57,6 +57,8 @@ private:
 	bool		active;
 	bool		minimised;
 	bool		openGL;
+	bool		interact; // Unused ATM, should use for mouse instead of hax.
+	POINT		lastPoint;
 
 	// D3D Specifc...
 	void CreateWindowD3D(const char *name, int width, int height, int bpp);

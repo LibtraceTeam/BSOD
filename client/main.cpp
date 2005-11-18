@@ -100,6 +100,7 @@ int BungMain(int argc, char *argv[])
 		bool billboard = false;
 		bool do_gcc = true;
 		bool matrix_mode = false;
+		float alpha = 0.5f;
 		string particle = "data/particle.png";
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
@@ -108,23 +109,24 @@ int BungMain(int argc, char *argv[])
 		//world.config = new CConfig;
 		//world.config->ParseFile("config.xml");
 		config->Begin();
-		config->ExecuteFile("data/config.lua");
+		config->ExecuteFile( "data/config.lua" );
 
-		config->GetGlobal("width", &width);
-		config->GetGlobal("height", &height);
-		config->GetGlobal("bpp", &bpp);
-		config->GetGlobal("network_host", &netHost);
-		config->GetGlobal("fullscreen", &fullScreen);
-		config->GetGlobal("start_location", &startLoc);
-		config->GetGlobal("pitch", &pitch);
-		config->GetGlobal("heading", &heading);
-		config->GetGlobal("speed", &speed );
-		config->GetGlobal("size", &size );
-		config->GetGlobal("jitter", &jitter );
-		config->GetGlobal("billboard", &billboard );
-		config->GetGlobal("particle", &particle );
-		config->GetGlobal("do_gcc", &do_gcc );
-		config->GetGlobal("matrix_mode", &matrix_mode );
+		config->GetGlobal( "width", &width );
+		config->GetGlobal( "height", &height );
+		config->GetGlobal( "bpp", &bpp );
+		config->GetGlobal( "network_host", &netHost );
+		config->GetGlobal( "fullscreen", &fullScreen );
+		config->GetGlobal( "start_location", &startLoc );
+		config->GetGlobal( "pitch", &pitch );
+		config->GetGlobal( "heading", &heading );
+		config->GetGlobal( "speed", &speed );
+		config->GetGlobal( "size", &size );
+		config->GetGlobal( "jitter", &jitter );
+		config->GetGlobal( "billboard", &billboard );
+		config->GetGlobal( "particle", &particle );
+		config->GetGlobal( "do_gcc", &do_gcc );
+		config->GetGlobal( "matrix_mode", &matrix_mode );
+		config->GetGlobal( "particle_opacity", &alpha );
 
 		{	string disp("opengl");
 			config->GetGlobal("display", &disp);
@@ -170,6 +172,7 @@ int BungMain(int argc, char *argv[])
 		world.partVis->billboard = billboard;
 		world.partVis->particle_img = particle;
 		world.partVis->do_gcc = do_gcc;
+		world.partVis->global_alpha = alpha;
 	}
 	catch(string error)
 	{

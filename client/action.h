@@ -125,6 +125,11 @@ public:
 	void TurnDown();
 	void TurnLeft();
 	void TurnRight();
+
+	void Navigate();
+	void EndNavigate();
+
+	bool lmb_down; // Can query to find out if the LMB is down; needed for the navigation stuff.
 };
 
 #endif // _ACTION_H_

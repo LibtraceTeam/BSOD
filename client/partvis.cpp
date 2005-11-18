@@ -98,6 +98,7 @@ CPartVis::CPartVis( bool mm )
 	fps = 0.0f;
 	show_help = false;
 	global_speed = 1.0f;
+	global_alpha = 0.5f; // Default.
 	do_gcc = true;
 	matrix_mode = mm;
 

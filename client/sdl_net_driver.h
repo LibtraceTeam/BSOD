@@ -53,6 +53,7 @@ private:
 	SDLNet_SocketSet set;
 	
 	vector<byte>	databuf;
+	string          address;
 	
 public:
 	CSDLNetDriver();
@@ -61,7 +62,13 @@ public:
 	virtual void Connect(string address);
 	virtual void SendData(CPlayer *p);
 	virtual void ReceiveData();
+	virtual void Reconnect();
+	virtual bool Reconnecting();
+	virtual float WaitTime();
 
+	bool reconnect; // true if we need to reconnect.
+	bool first_connect;
+	float reconnect_wait;
 };
 
 #endif

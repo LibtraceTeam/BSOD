@@ -94,6 +94,9 @@ CSDLNetDriver::CSDLNetDriver()
     // Assumes SDL_Init() has been called
     if(SDLNet_Init() == -1)
 	throw CException(SDLNet_GetError());
+	reconnect = false;
+	first_connect = true;
+	reconnect_wait = 500.0f;
 }
 
 CSDLNetDriver::~CSDLNetDriver()
@@ -104,6 +107,7 @@ CSDLNetDriver::~CSDLNetDriver()
 
 void CSDLNetDriver::Connect(string address)
 {
+	this->address = address;
     string::size_type c = address.find(':', 0);
     string host = address.substr(0, c);
     string port = address.substr(c+1, string::npos);
@@ -121,8 +125,19 @@ void CSDLNetDriver::Connect(string address)
     clientsock = SDLNet_TCP_Open(&ip);
 
     if(!clientsock)
-	throw CException(bsprintf("Unable to connect to server '%s': '%s'",
-                    host.c_str(), SDLNet_GetError()));
+	{
+		if( first_connect )
+		{
+			throw CException(bsprintf("Unable to connect to server '%s': '%s'",
+							host.c_str(), SDLNet_GetError()));
+		}
+		else
+		{
+			reconnect = true;
+			return;
+		}
+	}
+	first_connect = false;
 
     set = SDLNet_AllocSocketSet(16);
     if(!set)
@@ -160,6 +175,8 @@ void CSDLNetDriver::Connect(string address)
 			    version>>4,version&0x0F,
 			    max_version>>4,max_version&0x0f));
     }
+
+	reconnect = false;
     
 }
 
@@ -235,21 +252,30 @@ void CSDLNetDriver::ReceiveData()
     int  readlen;
     union fp_union *fp;
 
+
     while(SDLNet_CheckSockets(set, 0) > 0)
     {
-	if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
-	{
-	    int sam = (int)databuf.size();
-	    databuf.resize( sam + readlen );
-	    memcpy(&databuf[sam], buffer, readlen);
+		if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
+		{
+			int sam = (int)databuf.size();
+			databuf.resize( sam + readlen );
+			memcpy(&databuf[sam], buffer, readlen);
 
 #ifdef NET_DEBUG
-	    Log("Read %d bytes\n", readlen);
+			Log("Read %d bytes\n", readlen);
 #endif
+		}
+		else
+		{
+			// Disconnected or some unknown error try to reconnect:
+			//Connect( address );
+			reconnect = true;
+			break;
+		}
 	}
-	if(readlen == 0)
+	/*if(readlen == 0)
 	    break;
-    }
+    }*/
 
     // Log("Databuf.size()=%d\n", databuf.size());
     world.partVis->BeginUpdate();
@@ -390,3 +416,22 @@ void CSDLNetDriver::ReceiveData()
     world.partVis->EndUpdate();
 }
 
+void CSDLNetDriver::Reconnect()
+{
+	Connect( address );
+	if( reconnect ) // Still not connected. Wait longer next time.
+		if( reconnect_wait < 120000.0f ) // Don't wait longer than 2 minutes between connection attempts.
+			reconnect_wait *= 2.0f;
+	else // Connected so reset the wait time.
+		reconnect_wait = 500.0f;
+}
+
+bool CSDLNetDriver::Reconnecting()
+{
+	return( reconnect );
+}
+
+float CSDLNetDriver::WaitTime()
+{
+	return( reconnect_wait );
+}

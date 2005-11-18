@@ -114,7 +114,7 @@ void CWorld::Draw()
 	char tbuf[256];
 
 	// time_t does not seem to be unsigned in Windows and this appears to cause
-	// problems when the client connects to the server after perviously disconnecting
+	// problems when the client connects to the server after previously disconnecting
 	// malformed timestamp info? Using 64bit timestamps fixes this.
 #ifdef _WIN32
 	uint32 timestamp = partVis->GetLastTimestamp();
@@ -211,9 +211,7 @@ void CWorld::Draw()
 }
 
 /**
- * This method updates all world entities. :P
- * rawk - I am god - Jesse
- * Jesse is a god - Sam
+ * This method updates all world entities. 
  */
 void CWorld::Update(float diff)
 {
@@ -223,7 +221,19 @@ void CWorld::Update(float diff)
 		netDriver->SendData(world.entities->GetPlayer());
 		netDriver->ReceiveData();
 	}*/
-	netDriver->ReceiveData();
+	if( !netDriver->Reconnecting() )
+		netDriver->ReceiveData();
+	else
+	{
+		// Wait a bit and try to reconnect:
+		static float cur_time = world.sys->TimerGetTime();
+		if( world.sys->TimerGetTime() - cur_time > netDriver->WaitTime() )
+		{
+			Log( "Trying to reconnect..." );
+			cur_time = world.sys->TimerGetTime();
+			netDriver->Reconnect();
+		}
+	}
 	
 	entities->Update(diff);
 }

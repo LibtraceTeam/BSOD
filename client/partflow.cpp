@@ -154,7 +154,7 @@ void CPartFlow::Draw()
 		// Draw the actual flow
 		d->PushMatrix();
 		d->Translate(translation);
-		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], 0.5f );
+		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], world.partVis->global_alpha );
 		d->DrawTriangles2(
 			(float *)&vertices[vertex_offset],
 			(float *)&(world.partVis->tex_coords[0]), //(float *)&(tex_coords[vertex_offset],

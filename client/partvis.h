@@ -131,6 +131,7 @@ public:
 	
 	float global_size;
 	float global_speed;
+	float global_alpha;
 	bool jitter;
 	bool billboard;
 	string particle_img;

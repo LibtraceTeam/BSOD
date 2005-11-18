@@ -111,7 +111,8 @@ CActionHandler::CActionHandler()
 
 	keyDownMap[ BKC_G ] = &CActionHandler::ToggleGhostMode;
 
-	keyDownMap[ BKC_LEFTMOUSEBUT ] = &CActionHandler::Fire;
+	keyDownMap[ BKC_LEFTMOUSEBUT ] = &CActionHandler::Navigate;
+	keyUpMap[ BKC_LEFTMOUSEBUT ]   = &CActionHandler::EndNavigate;
 
 	keyUpMap[ BKC_M ] = &CActionHandler::Screenshot;
 	keyUpMap[ BKC_H ] = &CActionHandler::ToggleDebugDisplay;
@@ -122,6 +123,8 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_F1 ] = &CActionHandler::ToggleHelp;
 	keyUpMap[ BKC_EQUALS ] = &CActionHandler::Faster;
 	keyUpMap[ BKC_MINUS ] = &CActionHandler::Slower;
+
+	lmb_down = false; // Left mouse button not down yet.
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -301,4 +304,14 @@ void CActionHandler::Faster()
 void CActionHandler::Slower()
 {
 	world.partVis->ChangeSpeed( false );
+}
+
+void CActionHandler::Navigate()
+{
+	lmb_down = true;
+}
+
+void CActionHandler::EndNavigate()
+{
+	lmb_down = false;
 }

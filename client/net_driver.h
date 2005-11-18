@@ -51,6 +51,9 @@ private:
 public:
 	virtual void Connect(string address) = 0;
 	virtual void ReceiveData() = 0;
+	virtual void Reconnect() = 0;
+	virtual bool Reconnecting() = 0;
+	virtual float WaitTime() = 0;
 	virtual ~CNetDriver() {}
 
 	static CNetDriver *Create();

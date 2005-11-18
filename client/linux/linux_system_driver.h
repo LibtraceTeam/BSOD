@@ -48,6 +48,7 @@ class CLinuxSystemDriver : public CSystemDriver
 {
 private:
 	bool done;
+	Vector2f lastPoint;
 
 public:
 	CLinuxSystemDriver() : done(false) {  }

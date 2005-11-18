@@ -145,9 +145,9 @@ int CLinuxSystemDriver::RunMessageLoop()
 
     start_time = TimerGetTime();
 
-    SDL_ShowCursor(0);
-    SDL_WarpMouse(world.display->GetWidth() / 2, 
-            world.display->GetHeight() / 2);
+    // SDL_ShowCursor(0);
+    //SDL_WarpMouse(world.display->GetWidth() / 2, 
+    //       world.display->GetHeight() / 2);
 
     world.entities->GetPlayer()->mpos.x = 0;
     world.entities->GetPlayer()->mpos.y = 0;
@@ -178,19 +178,21 @@ int CLinuxSystemDriver::RunMessageLoop()
                 }
                 else if ( event.type == SDL_MOUSEMOTION )
                 {
-                    int w = world.display->GetWidth() / 2,
-                        h = world.display->GetHeight() / 2;
+                    /*int w = world.display->GetWidth() / 2;
+                    int h = world.display->GetHeight() / 2;
 
                     if((event.motion.x == w) && (event.motion.y == h))
                         continue;
 
                     int xrel, yrel;
 
-                    if(first_time) {
+                    if(first_time) 
+					{
                         xrel = 0;
                         yrel = 0;
                         first_time = false;
-                    } else {
+                    } else 
+					{
                         xrel = -(event.motion.x - w);
                         yrel = -(event.motion.y - h);
                     }
@@ -199,7 +201,25 @@ int CLinuxSystemDriver::RunMessageLoop()
                     world.entities->GetPlayer()->mpos.y = xrel; //event.motion.yrel;
 
                     SDL_WarpMouse(world.display->GetWidth() / 2, 
-                            world.display->GetHeight() / 2);
+                            world.display->GetHeight() / 2);*/
+					if( first_time )
+					{
+						lastPoint.x = event.motion.x;
+						lastPoint.y = event.motion.y;
+						first_time = false;
+					}
+					else if( world.actionHandler->lmb_down )
+					{
+						// Do the movement:
+						world.entities->GetPlayer()->mpos.x = ( lastPoint.x - event.motion.x);
+						world.entities->GetPlayer()->mpos.y = ( lastPoint.y - event.motion.y);
+						SDL_WarpMouse( (int)(lastPoint.x), (int)(lastPoint.y) );
+					}
+					else
+					{
+						lastPoint.x = event.motion.x;
+						lastPoint.y = event.motion.y;
+					}
                 }
                 else if ( event.type == SDL_MOUSEBUTTONDOWN )
                 {

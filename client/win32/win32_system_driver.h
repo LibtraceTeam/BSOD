@@ -57,7 +57,7 @@ private:
 	bool		active;
 	bool		minimised;
 	bool		openGL;
-	bool		interact; // Unused ATM, should use for mouse instead of hax.
+	//bool		interact; // Unused ATM, should use for mouse instead of hax.
 	POINT		lastPoint;
 
 	// D3D Specifc...

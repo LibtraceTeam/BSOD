@@ -99,10 +99,11 @@ int CWin32SystemDriver::RunMessageLoop()
 			// Draw The Scene.  Watch For ESC Key And Quit Messages From DrawGLScene()
 			if (active)								// Program Active?
 			{
-				if( GetAsyncKeyState( VK_LBUTTON ) ) // Dirty Hax
-				{
-					if( interact )
+				//if( GetAsyncKeyState( VK_LBUTTON ) ) // Dirty Hax
+				//{
+					if( world.actionHandler->lmb_down )
 					{
+						//ShowCursor( FALSE );
 						POINT temp_mouse;
 						GetCursorPos(&temp_mouse);
 						//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
@@ -115,12 +116,13 @@ int CWin32SystemDriver::RunMessageLoop()
 					}
 					else
 					{
+						//ShowCursor( TRUE );
 						GetCursorPos(&lastPoint);
-						interact = true;
+						//interact = true;
 					}
-				}
-				else
-					interact = false;
+				//}
+				//else
+				//	interact = false;
 				
 				
 				carry_time = TimerGetTime ();			// Get The Tick Count
@@ -154,7 +156,7 @@ CDisplayManager *CWin32SystemDriver::InitDisplay(int width, int height, int bpp,
 												 bool full_screen, CSystemDriver::DisplayType type, char *title)
 {
 	GetCursorPos(&lastPoint);
-	interact = false;
+	//interact = false;
 	fullScreen = full_screen;
 
 	TimerInit();

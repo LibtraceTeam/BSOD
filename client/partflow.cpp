@@ -8,6 +8,12 @@
 #include <windows.h>
 #endif
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glaux.h>
+//#include <GL/glext.h>
+#include "external/gl/glext.h"
+
 #include "vector.h"
 #include "polygon.h"
 #include "world.h"
@@ -59,7 +65,7 @@ CPartFlow::~CPartFlow()
 	//	num_flows--;
 }
 
-void CPartFlow::Draw()
+void CPartFlow::Draw( bool picking )
 {
 	if( packets == 0 )
 		return;
@@ -81,64 +87,85 @@ void CPartFlow::Draw()
 
 	if( world.partVis->billboard )
 	{
-		// This is how will our point sprite's size will be modified by distance from the viewer.
-		/*float quadratic[] =  { 1.0f, 0.0f, 0.01f };
-		glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
-		// The alpha of a point is calculated to allow the fading of points 
-		//glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
-
-		//float fAdjustedSize = m_fSize / 4.0f;
-
-		//glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f );
-		//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, fAdjustedSize );
-
-		// Specify point sprite texture coordinate replacement mode for each texture unit
-		glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
-		
-		// Render point sprites:
-		glEnable( GL_POINT_SPRITE_ARB );
-		//glPointSize( m_fSize );
-
 		// Draw as point sprites:
 		// Endpoints:
-		d->SetColour( world.partVis->colour_table[colours[0]], world.partVis->colour_table[colours[1]], world.partVis->colour_table[colours[2]], 0.15f );
-		glBegin( GL_POINTS );
+		glPointSize( 20.0f );
+		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], 0.15f );
+		/*d->SetColour( 1.0f, 0.0f, 0.0f, 0.5f ); // DEBUG */
+		if( picking )
 		{
-			// Render each particle...
-			/*while( pParticle )
+			// Note: Two separate glBegin()/end calls are needed when picking because you can't name objects inside
+			// a glBegin()/end block and the points both have different IPs.
+			glPushName( ip1 );
+			glBegin( GL_POINTS );
 			{
-				glVertex3f( pParticle->m_vCurPos.x,
-					pParticle->m_vCurPos.y,
-					pParticle->m_vCurPos.z );
-
-				pParticle = pParticle->m_pNext;
+				glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
 			}
+			glEnd();
+			glPopName(); // ???
+
+			glPushName( ip2 );
+			glBegin( GL_POINTS );
+			{
+				glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+			}
+			glEnd();
+			glPopName(); // ???
+
+			return;
 		}
-		glEnd();
+		else
+		{
+			glBegin( GL_POINTS );
+			{
+				glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
+				glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+			}
+			glEnd();
+		}
 
 		// Flow:
-		d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], world.partVis->global_alpha );
+		// Draw the actual flow
+		glPointSize( world.partVis->maxPointSize );
+		d->PushMatrix();
+		d->Translate(translation);
 		glBegin( GL_POINTS );
 		{
 			// Render each particle...
-			/*while( pParticle )
+			 /*
+			while( pParticle )
 			{
 				glVertex3f( pParticle->m_vCurPos.x,
 					pParticle->m_vCurPos.y,
 					pParticle->m_vCurPos.z );
 
 				pParticle = pParticle->m_pNext;
-			}
+			} // */
+			for( int i=vertex_offset; i < (int)(vertices.size()); i+= 6 )
+				glVertex3f( (vertices[i]).x, (vertices[i]).y, (vertices[i]).z );
 		}
 		glEnd();
-
-		glDisable( GL_POINT_SPRITE_ARB );*/
+		d->PopMatrix();
 	}
 	else
 	{
 		// Draw start and end points
+
 		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], 0.15f );
-		d->DrawTriangles2( (float *)&endpoint_vertices[0], (float *)&endpoint_tex_coords[0], 4);
+		// Start point:
+		glPushName( ip1 );
+		d->DrawTriangles2( (float *)&endpoint_vertices[0], (float *)&endpoint_tex_coords[0], 2);
+		glPopName();
+		// End point:
+		glPushName( ip2 );
+		d->DrawTriangles2( (float *)&endpoint_vertices[6], (float *)&endpoint_tex_coords[6], 2);
+		glPopName();
+
+
+		if( picking )
+			return;
 		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// Check that we have enough texture coordinates in our list:
@@ -274,7 +301,7 @@ void CPartFlow::CreateEndPoints()
 	    tex = CTextureManager::tm.LoadTexture("data/matrix_15.png"); // OTHER
     }
     else
-	tex = CTextureManager::tm.LoadTexture(world.partVis->particle_img);
+		tex = CTextureManager::tm.LoadTexture(world.partVis->particle_img);
 }
 
 void CPartFlow::Update(float diff)

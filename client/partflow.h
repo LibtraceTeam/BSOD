@@ -35,6 +35,9 @@ private:
 	unsigned short gc_count;
 	uint32 last_ts;
 
+	uint32 ip1;
+	uint32 ip2;
+
 	float speed;
 	float length;
 	bool dark;
@@ -46,7 +49,7 @@ private:
 public:
 	CPartFlow();
 	virtual ~CPartFlow();
-	void Draw();
+	void Draw( bool picking );
 	void Update(float diff);
 	//void Update_ServerTime(timestamp);
 

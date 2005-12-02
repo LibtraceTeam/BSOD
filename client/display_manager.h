@@ -179,6 +179,9 @@ public:
 
 
     virtual void Screenshot(vector<byte> &buf, uint32 &w, uint32 &h) = 0;
+
+	virtual void SetGLPointParameterfARB( uint32 param, float value ) = 0;
+	virtual void SetGLPointParameterfvARB( uint32 param, float *value ) = 0;
 };
 
 typedef CDisplayManager::DisplayBlendMode BlendMode;

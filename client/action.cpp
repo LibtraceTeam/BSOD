@@ -114,6 +114,9 @@ CActionHandler::CActionHandler()
 	keyDownMap[ BKC_LEFTMOUSEBUT ] = &CActionHandler::Navigate;
 	keyUpMap[ BKC_LEFTMOUSEBUT ]   = &CActionHandler::EndNavigate;
 
+	keyDownMap[ BKC_RIGHTMOUSEBUT ] = &CActionHandler::Pick;
+	keyUpMap[ BKC_RIGHTMOUSEBUT ]	= &CActionHandler::EndPick;
+
 	keyUpMap[ BKC_M ] = &CActionHandler::Screenshot;
 	keyUpMap[ BKC_H ] = &CActionHandler::ToggleDebugDisplay;
 
@@ -125,6 +128,7 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_MINUS ] = &CActionHandler::Slower;
 
 	lmb_down = false; // Left mouse button not down yet.
+	rmb_down = false;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -314,4 +318,14 @@ void CActionHandler::Navigate()
 void CActionHandler::EndNavigate()
 {
 	lmb_down = false;
+}
+
+void CActionHandler::Pick()
+{
+	rmb_down = true;
+}
+
+void CActionHandler::EndPick()
+{
+	rmb_down = false;
 }

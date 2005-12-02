@@ -52,6 +52,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "player.h"
 #include "entity_manager.h"
 #include "sound.h"
+#include "action.h"
 
 #include "partflow.h"
 #include "partvis.h"
@@ -97,20 +98,26 @@ CPlayer* CEntityManager::GetPlayer()
 	return player;
 }
 
-//CCamera* CEntityManager::GetCamera() {
+//CCamera* CEntityManager::GetCamera() 
+//{
 //	return player->GetCamera();
 //}
 
-void CEntityManager::DrawEntities() {
+void CEntityManager::DrawEntities() 
+{
 	list<CEntity *>::iterator i;
 	for(i = entities.begin(); i != entities.end(); ++i)
 	{
-		(*i)->Draw();
+		(*i)->Draw( false );
+		if( world.actionHandler->rmb_down )
+			(*i)->Draw( true );
 	}
 
 	for(i = temp_entities.begin(); i != temp_entities.end(); ++i)
 	{
-		(*i)->Draw();
+		(*i)->Draw( false );
+		if( world.actionHandler->rmb_down )
+			(*i)->Draw( true );
 	}
 }
 

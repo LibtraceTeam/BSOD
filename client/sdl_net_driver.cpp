@@ -160,8 +160,8 @@ void CSDLNetDriver::Connect(string address)
 	    throw CException("Server version is ancient\n");
     }
 
-    const int min_version = 0x13; // Minimum version known
-    const int max_version = 0x13; // Maximum version known
+    const int min_version = 0x14; // Minimum version known
+    const int max_version = 0x14; // Maximum version known
 
     if (version < min_version) {
 	    throw CException(bsprintf("Server version is %i.%i, need at least %i.%i\n",
@@ -203,6 +203,8 @@ struct flow_update_t {
     float y2;
     float z2;
     unsigned int id;
+	uint32 ip1;
+	uint32 ip2;
 } PACKED;
 
 struct pack_update_t {
@@ -306,10 +308,13 @@ void CSDLNetDriver::ReceiveData()
 			ntohl(fp->flow.id) );
 #endif
 
+		//Log( "Flow with ip1 = %d, and ip2 = %d", ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ) );
+
 		world.partVis->UpdateFlow(
 			ntohl(fp->flow.id),
 			Vector3f(ntohf(fp->flow.x1), ntohf(fp->flow.y1), ntohf(fp->flow.z1)),
-			Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)));
+			Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)),
+			ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ));
 
 		buf += sizeof(flow_update_t);
 	    } 

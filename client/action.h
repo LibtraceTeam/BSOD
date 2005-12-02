@@ -57,7 +57,7 @@ public:
 		//
 		BKC_ESCAPE = 256, BKC_BACKSPACE, BKC_RETURN, BKC_TAB,
 		// Mouse clicks aren't exactly keys but they might as well be handled as such
-		BKC_LEFTMOUSEBUT,
+		BKC_LEFTMOUSEBUT, BKC_MIDDLEMOUSEBUT, BKC_RIGHTMOUSEBUT,
 		
 		// Arrow keys
 		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
@@ -129,7 +129,11 @@ public:
 	void Navigate();
 	void EndNavigate();
 
+	void Pick();
+	void EndPick();
+
 	bool lmb_down; // Can query to find out if the LMB is down; needed for the navigation stuff.
+	bool rmb_down; // Right mouse button down?
 };
 
 #endif // _ACTION_H_

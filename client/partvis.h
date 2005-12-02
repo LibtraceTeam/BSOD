@@ -64,11 +64,30 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma warning( disable : 4996 )
 #endif
 
+#define SELECT_BUFFER_SIZE 1024
+
 struct FlowDescriptor 
 {
 	byte colour[3];
 	char name[256];
 };
+
+union IPUnion
+{
+	byte quartet[4];
+	uint32 integer;
+};
+
+inline void IPInt2Byte( uint32 ip, byte *q1, byte *q2, byte *q3, byte *q4 )
+{
+	IPUnion ipu;
+	ipu.integer = ip;
+
+	*q1 = ipu.quartet[0];
+	*q2 = ipu.quartet[1];
+	*q3 = ipu.quartet[2];
+	*q4 = ipu.quartet[3];
+}
 
 typedef map<unsigned int, CPartFlow *> FlowMap;
 typedef list<CPartFlow*> FlowList;
@@ -95,10 +114,10 @@ public:
     CPartVis( bool mm );
     virtual ~CPartVis() {}
 
-    virtual void Draw();
+    virtual void Draw( bool picking );
     virtual void Update(float diff);
 
-    void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2);
+    void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32 ip1, uint32 ip2 );
     void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
 		unsigned short size, float speed, bool dark);
     void RemoveFlow(unsigned int id);
@@ -118,9 +137,6 @@ public:
 	CPartFlow *AllocPartFlow();
 	void FreePartFlow( CPartFlow *flow );
 	void GCPartFlows();
-	void BillboardBegin();
-	void BillboardEnd();
-
 
 	int packetsFrame;
 	float diff;
@@ -135,6 +151,11 @@ public:
 	bool jitter;
 	bool billboard;
 	string particle_img;
+	float maxPointSize;
+	byte ip[4];
+	bool isHit;
+
+	uint32 pSelBuff[SELECT_BUFFER_SIZE];
 
     CPartFlow * make_flow(int);
 	FlowDescMap fdmap;

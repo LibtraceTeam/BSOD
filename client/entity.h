@@ -94,7 +94,7 @@ public:
 
 	virtual float GetSpeed() const;
 
-	virtual void Draw();
+	virtual void Draw( bool picking );
 	virtual void LookAt(const Vector3f &pos); // calculates a bearing given an absolute position to look at
 	virtual void AddChild(CEntity *e) { children.push_back(e); }
 

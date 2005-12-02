@@ -66,6 +66,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glaux.h>
+//#include <GL/glext.h>
+#include "external/gl/glext.h"
 
 #include "vector.h"
 #include "polygon.h"
@@ -77,6 +80,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "texture_manager.h"
 #include "exception.h"
 #include "system_driver.h"
+#include "entity_manager.h"
+#include "player.h"
+#include "action.h"
 
 #include "partflow.h"
 #include "partvis.h"
@@ -101,6 +107,12 @@ CPartVis::CPartVis( bool mm )
 	global_alpha = 0.5f; // Default.
 	do_gcc = true;
 	matrix_mode = mm;
+	isHit = false;
+
+	ip[0] = 0;
+	ip[1] = 0;
+	ip[2] = 0;
+	ip[3] = 0;
 
 	// Build colour lookup table:
 	for( int i=0; i<256; i++ )
@@ -150,8 +162,9 @@ CPartVis::CPartVis( bool mm )
 }
 
 // The "container" class implementation
-void CPartVis::Draw()
+void CPartVis::Draw( bool picking )
 {
+	//tehMax = 0;
     //FlowMap::const_iterator i = flows.begin();
 	IterList::iterator i = active_nodes.begin();
     CDisplayManager *d = world.display;
@@ -161,11 +174,73 @@ void CPartVis::Draw()
     d->SetBlendMode(CDisplayManager::Transparent2);
     d->SetDepthTest(false);
 
-	//BillboardBegin();
+	int mx = 0, my = 0;
+	world.sys->GetMousePos( &mx, &my );
+
+	if( billboard )
+	{
+		// This is how our point sprite's size will be modified by distance from the viewer.
+		// /*
+		float quadratic[] =  { 1.0f, 0.0f, 0.01f };
+		d->SetGLPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
+
+		//------------------------------------------------------------------------+
+		glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxPointSize );
+
+		// Clamp size to 100.0f or the sprites could get a little too big on some  
+		// of the newer graphic cards.
+		//Log( "MaxSize = %f", maxSize );
+		if( maxPointSize > 128.0f )
+			maxPointSize = 128.0f;
+
+		glPointSize( maxPointSize );
+
+		// The alpha of a point is calculated to allow the fading of points 
+		// instead of shrinking them past a defined threshold size. The threshold 
+		// is defined by GL_POINT_FADE_THRESHOLD_SIZE_ARB and is not clamped to 
+		// the minimum and maximum point sizes.
+		d->SetGLPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
+
+		d->SetGLPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f );
+		d->SetGLPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxPointSize );
+		//------------------------------------------------------------------------+
+
+		// Specify point sprite texture coordinate replacement mode for each texture unit
+		glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
+
+		// Render point sprites:
+		glEnable( GL_POINT_SPRITE_ARB );
+	}
+
+	if( picking )
+	{
+		GLint viewport[4];
+
+		// Save old projection matrix and reset (identity):
+		glMatrixMode( GL_PROJECTION );
+		glPushMatrix();
+		glLoadIdentity();
+
+		// Set selection buffer:
+		glSelectBuffer( SELECT_BUFFER_SIZE, pSelBuff );
+		glRenderMode( GL_SELECT );
+
+		// Initialize the OpenGL name stack:
+		glInitNames();
+
+		// Set pick matrix:
+		glGetIntegerv( GL_VIEWPORT, viewport );
+		gluPickMatrix( mx, viewport[3] - my, 15.0, 15.0, viewport );
+		gluPerspective(60.0f, (GLfloat)(d->GetWidth())/(GLfloat)(d->GetHeight()), 0.1f, 100.0f);
+		glMatrixMode( GL_MODELVIEW );
+		glLoadIdentity();
+		d->SetCameraTransform( *world.entities->GetPlayer()->GetCamera() );
+	}
+
 	for( ; i != active_nodes.end(); ++i )
 	{
 		(*i)->second->ResetCounter();
-		if( !paused )
+		if( !paused && !picking )
 		{
 			(*i)->second->Update(diff);
 			if( (*i)->second->packets == 0 )
@@ -180,15 +255,57 @@ void CPartVis::Draw()
 			}
 		}
 
+		
 		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
 		{
 			if( filter_state == -1 )
-				(*i)->second->Draw();
+				(*i)->second->Draw( picking );
 			else if( filter_state == (*i)->second->type )
-				(*i)->second->Draw();
+				(*i)->second->Draw( picking );
 		}
 	}
+	if( billboard )
+		glDisable( GL_POINT_SPRITE_ARB );
 	//BillboardEnd();
+
+	if( picking ) // Done picking.
+	{
+		int hits;
+
+		// Restore original projection matrix:
+		glMatrixMode( GL_PROJECTION );
+		glPopMatrix();
+		glMatrixMode( GL_MODELVIEW );
+		glFlush();
+		
+		hits = glRenderMode( GL_RENDER );
+		//Log( "Hits for click = %d\n", hits );
+		if( hits < 1 )
+			isHit = false;
+		else
+			isHit = true;
+
+		if( hits > 0 )
+		{
+			int choose = pSelBuff[3];
+			int depth = pSelBuff[1];
+
+			for( int i=0; i<hits; i++ )
+			{
+				if( pSelBuff[(i*4)+1] < (GLuint)depth )
+				{
+					choose = pSelBuff[(i*4)+3];
+					depth = pSelBuff[(i*4)+1];
+				}
+			}
+
+			IPInt2Byte( choose, &ip[0], &ip[1], &ip[2], &ip[3] );
+
+			//Log( "IP chosen: %d.%d.%d.%d\n", ip[0], ip[1], ip[2], ip[3] );
+		}
+
+		return;
+	}
 
     d->SetDepthTest(true);
 
@@ -256,6 +373,22 @@ void CPartVis::Draw()
 	d->SetBlend(false);
 	d->SetColour(1.0f, 1.0f, 1.0f);
 	d->DrawString2((int)(x+3), (int)(y+1), str);
+
+	if( world.actionHandler->rmb_down && isHit )
+	{
+		outstr[0] = '\0';
+		sprintf( outstr, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3] );
+
+		d->BindTexture(NULL);
+		d->SetBlendMode(CDisplayManager::Multiply);
+		d->SetBlend(true);
+		d->SetColour( 0.0f, 0.0f, 0.3f, 0.5f );
+		d->Draw2DQuad( mx, my-25, mx + (strlen(outstr)*10), my-5 );
+
+		d->SetBlend(false);
+		d->SetColour(1.0f, 1.0f, 1.0f);
+		d->DrawString2(mx+3, my-23, outstr);
+	}
 	
 	d->End2D();
 
@@ -283,7 +416,7 @@ void CPartVis::Update(float diff)
 	}
 }
 
-void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
+void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32 ip1, uint32 ip2 )
 {
     //FlowMap::const_iterator i = flows.find(flow_id);
 
@@ -297,6 +430,17 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2)
 		flow->start = v1;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
 		flow->destination = v2;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
 		flow->length = (v2 - v1).Length();
+
+		if( flow->start.x < flow->destination.x )
+		{
+			flow->ip1 = ip1;
+			flow->ip2 = ip2;
+		}
+		else
+		{
+			flow->ip1 = ip2;
+			flow->ip2 = ip1;
+		}
 
 		flows.insert(FlowMap::value_type(flow_id, flow));
 	/*} else {
@@ -551,33 +695,4 @@ void CPartVis::GCPartFlows()
 		}
 		//Log( "End garbage collection. %d flows in free list", partflow_pool.size() );
 	}
-}
-
-void CPartVis::BillboardBegin()
-{
-	/*float modelview[16];
-
-	// Save current view:
-	glPushMatrix();
-
-	// Get current view:
-	glGetFloatv( GL_MODELVIEW_MATRIX, modelview );
-
-	// Undo all rotations:
-	for( int i=0; i<3; i++ )
-	{
-		for( int j=0; j<3; j++ )
-		{
-			if( i==j )
-				modelview[i*4+j] = 1.0;
-			else
-				modelview[i*4*j] = 0.0;
-		}
-	}
-	glLoadMatrixf( modelview );*/
-}
-
-void CPartVis::BillboardEnd()
-{
-	//glPopMatrix();
 }

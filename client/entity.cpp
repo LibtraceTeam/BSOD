@@ -77,7 +77,7 @@ CEntity::~CEntity()
 		delete *iter;
 }
 
-void CEntity::Draw() {}
+void CEntity::Draw( bool picking ) {}
 
 #define DO_CHILDREN(func) { list<CEntity *>::iterator iter = children.begin(); \
 							for(; iter != children.end(); ++iter) (*iter)->func; }

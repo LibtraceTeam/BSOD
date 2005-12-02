@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 			}
 
 			if (terminate_bsod)
-				break;
+				exit(0);
 			
 			/* check for new clients */
 			new_client = check_clients(&modptrs, false);

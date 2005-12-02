@@ -35,9 +35,9 @@
 int setup_listen_socket();
 int bind_tcp_socket(int listener, int port);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
-int send_new_flow(float start[3], float end[3], uint32_t count);
+int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
 int send_update_flow(struct client *client, 
-		float start[3], float end[3], uint32_t count);
+		float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
 int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num, 
 	uint16_t size, float speed, bool dark);
 int send_kill_flow(uint32_t id);

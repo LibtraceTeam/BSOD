@@ -75,6 +75,8 @@
 #endif
 
 
+// Direction fix while the RT client direction stuff is screwed:
+//#define INVERSE_DIRECTION
 
 #define EXPIRE_SECS 20
 
@@ -94,6 +96,8 @@ struct flow_id_t {
 	float start[3];
 	float end[3];
 	unsigned char type; // Type of flow. ("colour")
+	uint32_t ip1;
+	uint32_t ip2;
 };
 
 struct flow_info_t {
@@ -172,7 +176,8 @@ void send_flows(struct client *client)
 	{
 		send_update_flow(client, (*flow_iterator).first.start, 
 					(*flow_iterator).first.end, 
-					(*flow_iterator).second.flow_id);
+					(*flow_iterator).second.flow_id, 
+					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2 );
 	}
 }
 
@@ -266,6 +271,10 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 	direction = modptrs->direction(packet);
 
+#ifdef INVERSE_DIRECTION
+	direction = !direction;
+#endif
+
 	// populate start and end arrays
 	// also checks that we want traffic from this iface
 	if(get_start_pos(tmpid.start, 
@@ -280,6 +289,19 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			modptrs) != 0)
 		return 0;
 
+	// Get the right IP addresses for each end of the flow:
+	libtrace_ip *tmpip = trace_get_ip( packet );
+	if( direction == DIR_OUTBOUND )
+	//if( tmpid.start[0] < tmpid.end[0] )
+	{
+		tmpid.ip1 = tmpip->ip_src.s_addr;
+		tmpid.ip2 = tmpip->ip_dst.s_addr;
+	}
+	else
+	{
+		tmpid.ip1 = tmpip->ip_dst.s_addr;
+		tmpid.ip2 = tmpip->ip_src.s_addr;
+	}
 
 	current = flows.find(tmpid);
 
@@ -297,7 +319,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		current = flows.insert(flowdata);
 
 		if(send_new_flow(tmpid.start, tmpid.end,
-					current->second.flow_id)!=0)
+					current->second.flow_id, tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 
 	}
@@ -415,8 +437,10 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 	bool is_dark = false;
 
-	if (enable_darknet) {
-		switch(direction) {
+	if (enable_darknet) 
+	{
+		switch(direction) 
+		{
 			case DIR_INBOUND:
 				is_dark=theList->is_dark(p->ip_dst.s_addr);
 				break;
@@ -448,7 +472,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 }
 
 
-
+// Convert the speed into something that looks good (vaguely logarithmic)
+// This function could probably be replaced with something a little more clever.
 float convert_speed( float speed )
 {
 	if( speed <= 0.0005f ) 	return( 4.0f ); 

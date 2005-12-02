@@ -85,6 +85,8 @@ struct flow_update_t {
 	float y2;
 	float z2; 
 	uint32_t count;
+	uint32_t ip1;
+	uint32_t ip2;
 } __attribute__((packed));
 
 /* structure for new packet packets */
@@ -297,7 +299,7 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 	 *  1.2 == 0x12
 	 *  10.13 = 0xad
 	 */
-	char protocol_version = 0x13;
+	char protocol_version = 0x14;
 	struct sockaddr_in remoteaddr;
 	socklen_t sock_size;
 	int newfd;
@@ -435,7 +437,7 @@ int send_kill_flow(uint32_t id)
 }
 
 //------------------------------------------------------------------
-int send_new_flow(float start[3], float end[3], uint32_t id)
+int send_new_flow(float start[3], float end[3], uint32_t id, uint32_t ip1, uint32_t ip2 )
 {
 	struct flow_update_t update;
 	update.type = 0x00;
@@ -446,6 +448,8 @@ int send_new_flow(float start[3], float end[3], uint32_t id)
 	update.y2 = htonf(end[1]);
 	update.z2 = htonf(end[2]);
 	update.count = htonl(id);
+	update.ip1 = htonl(ip1);
+	update.ip2 = htonl(ip2);
 
 	union pack_union *punion;
 	punion = (pack_union *)&update;
@@ -459,7 +463,7 @@ int send_new_flow(float start[3], float end[3], uint32_t id)
  * send_new_flow in that it doesn't send to all clients 
  */
 int send_update_flow(struct client *client, 
-		float start[3], float end[3], uint32_t id)
+		float start[3], float end[3], uint32_t id, uint32_t ip1, uint32_t ip2 )
 {
 
 	struct flow_update_t update;
@@ -471,6 +475,8 @@ int send_update_flow(struct client *client,
 	update.y2 = htonf(end[1]);
 	update.z2 = htonf(end[2]);
 	update.count = htonl(id);
+	update.ip1 = htonl(ip1);
+	update.ip2 = htonl(ip2);
 
 	// send to single client 
 	enqueue_data(client, (char*)&update, sizeof(struct flow_update_t));

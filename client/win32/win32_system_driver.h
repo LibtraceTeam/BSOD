@@ -109,6 +109,7 @@ public:
 	virtual float TimerGetTime();
 	virtual void ForceWindowDraw();
 	virtual void ErrorMessageBox(string title, string message);
+	virtual void GetMousePos(int *x, int *y );
 };
 
 int BungMain(int argc, char *argv[]);

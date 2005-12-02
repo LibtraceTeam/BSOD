@@ -169,6 +169,9 @@ public:
 	virtual void SetDepthTest(bool on);
 
     virtual void Screenshot(vector<byte> &buf, uint32 &w, uint32 &h);
+
+	void SetGLPointParameterfARB( uint32 param, float value );
+	void SetGLPointParameterfvARB( uint32 param, float *value );
 };
 
 #endif

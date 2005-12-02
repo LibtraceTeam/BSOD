@@ -367,6 +367,18 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 			world.actionHandler->KeyUp(CActionHandler::BKC_LEFTMOUSEBUT);
 			return 0;
 		}
+
+		case WM_RBUTTONDOWN:
+			{
+				world.actionHandler->KeyDown(CActionHandler::BKC_RIGHTMOUSEBUT);
+				return 0;
+			}
+
+		case WM_RBUTTONUP:
+			{
+				world.actionHandler->KeyUp(CActionHandler::BKC_RIGHTMOUSEBUT);
+				return 0;
+			}
 	}
 
 	// Pass All Unhandled Messages To DefWindowProc
@@ -819,7 +831,7 @@ void CWin32SystemDriver::CreateWindowD3D(const char *title, int width, int heigh
 								NULL,								// No Parent Window
 								NULL,								// No Menu
 								hInstance,							// Instance
-								NULL)))								// Dont Pass Anything To WM_CREATE
+								NULL)))								// Don't Pass Anything To WM_CREATE
 	{
 		MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
 		return;								// Return false
@@ -828,5 +840,14 @@ void CWin32SystemDriver::CreateWindowD3D(const char *title, int width, int heigh
 	ShowWindow(hWnd,SW_SHOW);						// Show The Window
 	SetForegroundWindow(hWnd);						// Slightly Higher Priority
 	SetFocus(hWnd);									// Sets Keyboard Focus To The Window
-	//ShowCursor(FALSE);								// We don't want no stinking cursor! (Sam)
+	//ShowCursor(FALSE);							// We don't want no stinking cursor! (Sam)
+}
+
+void CWin32SystemDriver::GetMousePos(int *x, int *y )
+{
+	POINT p;
+	GetCursorPos( &p );
+	ScreenToClient( hWnd, &p );
+	*x = p.x;
+	*y = p.y;
 }

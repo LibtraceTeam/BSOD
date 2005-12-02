@@ -92,6 +92,10 @@ int main(int argc, char *argv[])
 	return BungMain(argc, argv);
 }
 
+void CLinuxSystemDriver::GetMousePos( int *x, int *y )
+{
+	SDL_GetMouseState( x, y );
+}
 
 CDisplayManager *CLinuxSystemDriver::InitDisplay(
 		int width, 

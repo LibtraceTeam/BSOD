@@ -54,6 +54,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glaux.h>
+//#include <GL/glext.h>
+#include "external/gl/glext.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -94,6 +97,10 @@ char *buf = NULL;
 
 int CGLDisplayManager::triangles_drawn = 0;
 int CGLDisplayManager::meshs_drawn = 0;
+
+// GL_ARB_point_parameters
+PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB  = NULL;
+PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB = NULL;
 
 CFont			default_font;
 
@@ -161,9 +168,28 @@ void CGLDisplayManager::Initialise()
 
 	Log("OpenGL display driver. Extensions found: %s\n",
 			glGetString(GL_EXTENSIONS));
-	int tex_units;
+//	int tex_units;
 //	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &tex_units);
 //	Log("\tTexture units: %d\n", tex_units);
+
+	char *ext = (char*)glGetString( GL_EXTENSIONS );
+
+	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL )
+	{
+		Log( "GL_ARB_point_parameters extension was not found.\n" );
+		return;
+	}
+	else
+	{
+		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)wglGetProcAddress("glPointParameterfARB");
+		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)wglGetProcAddress("glPointParameterfvARB");
+
+		if( !glPointParameterfARB || !glPointParameterfvARB )
+		{
+			Log( "One or more GL_ARB_point_parameters functions were not found.\n" );
+			return;
+		}
+	}
 }
 
 void CGLDisplayManager::DrawSphere(Vector3f offset, float width)
@@ -759,7 +785,7 @@ void CGLDisplayManager::WindowResized(int new_width, int new_height)
 	// Reset The Projection Matrix
 	glLoadIdentity();													
 	// Calculate The Aspect Ratio Of The Window
-	gluPerspective(60.0f, (GLfloat)(width)/(GLfloat)(height), 0.1f, 100.0f);		
+	gluPerspective(60.0f, (GLfloat)(new_width)/(GLfloat)(new_height), 0.1f, 100.0f);		
 	// Select The Modelview Matrix
 	glMatrixMode(GL_MODELVIEW);
 	// Reset The Modelview Matrix
@@ -801,4 +827,14 @@ void CGLDisplayManager::Screenshot(vector<byte> &buf, uint32 &w, uint32 &h)
     buf.resize(w * h * 3);
 
     glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, &buf[0]);
+}
+
+void CGLDisplayManager::SetGLPointParameterfARB( uint32 param, float value )
+{
+	glPointParameterfARB( param, value );
+}
+
+void CGLDisplayManager::SetGLPointParameterfvARB( uint32 param, float *value )
+{
+	glPointParameterfvARB( param, value );
 }

@@ -53,6 +53,7 @@ private:
 public:
 	CLinuxSystemDriver() : done(false) {  }
 
+	virtual void GetMousePos( int *x, int *y );
 	virtual CDisplayManager *InitDisplay(int width, int height, int bpp, bool fullScreen, 
 		DisplayType type, char *title);
 	virtual int RunMessageLoop();

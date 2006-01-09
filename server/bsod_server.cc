@@ -255,6 +255,11 @@ int main(int argc, char *argv[])
 		init_times();
 		init_packets();
 
+		if (terminate_bsod) {
+			loop=0;
+			break;
+		}
+
 		//------- Connect trace ----------
 		if( (trace = trace_create(uri)) == NULL)
 		{
@@ -284,7 +289,7 @@ int main(int argc, char *argv[])
 			filter = trace_bpf_setfilter(filterstring);
 		}
 
-		while(1) // loop on packets
+		while(loop) // loop on packets
 		{
 			// If we get a USR1, we want to restart. Break out of this while()
 			// and go into cleanup
@@ -292,8 +297,10 @@ int main(int argc, char *argv[])
 				break;
 			}
 
-			if (terminate_bsod)
-				exit(0);
+			if (terminate_bsod) {
+				loop=0;
+				break;
+			}
 			
 			/* check for new clients */
 			new_client = check_clients(&modptrs, false);
@@ -370,8 +377,8 @@ int main(int argc, char *argv[])
 	delete rttmap;
 	delete theList;
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
-	exit(0);
 
+	return 0;
 }
 
 

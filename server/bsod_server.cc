@@ -518,7 +518,8 @@ static void *get_module(const char *name)
 
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s: %s\n",
+				driver,dlerror());
 		return NULL;
 	}
 
@@ -559,7 +560,8 @@ static void *get_position_module(side_t side, const char *name)
 	printf("Loading module %s...\n",tmp);
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
-		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s: %s\n",
+				driver,dlerror());
 		return NULL;
 	}
 

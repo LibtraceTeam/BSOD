@@ -132,7 +132,7 @@ void do_usage(char* name)
     exit(0);
 }
 
-static void load_modules();
+static int load_modules();
 static void close_modules();
 static void init_times();
 static void offline_delay(struct timeval tv);
@@ -231,7 +231,10 @@ int main(int argc, char *argv[])
 			restart_config = 0;
 			close_modules();
 			do_configuration(0,0);
-			load_modules();
+			if (!load_modules()) {
+				Log(LOG_DAEMON|LOG_INFO,"Failed to load modules, abourting\n");
+				return 1;
+			}
 		} 
 		
 		/* set up directory where we should store our blacklist stuff */
@@ -516,7 +519,7 @@ static void *get_module(const char *name)
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
-		assert(0);
+		return NULL;
 	}
 
 	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
@@ -557,7 +560,7 @@ static void *get_position_module(side_t side, const char *name)
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",driver);
-		assert(0);
+		return NULL;
 	}
 
 	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
@@ -581,53 +584,64 @@ static void *get_position_module(side_t side, const char *name)
 	return handle;
 }
 
-static void load_modules() {
+static int load_modules() {
 	char *error = 0;
 	char tmp[4096];
 
 	//------- Load up modules -----------
 	
 	colourhandle = get_module(colourmod);
+	if (!colourhandle) {
+		return 0;
+	}
 
 	modptrs.colour = (colfptr) dlsym(colourhandle, "mod_get_colour");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.colour);
+		return 0;
 	}
 
 	modptrs.info = (inffptr) dlsym(colourhandle, "mod_get_info");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.info);
+		Log(LOG_DAEMON|LOG_ALERT,"Are you using an old colour module?\n");
+		return 0;
 	}
 
 	lefthandle = get_position_module(SIDE_LEFT, leftpos);
+	if (!lefthandle) {
+		return 0;
+	}
 	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.left);
+		return 0;
 	}
 
 	righthandle = get_position_module(SIDE_RIGHT,rightpos);
+	if (!righthandle) {
+		return 0;
+	}
 	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.right);
+		return 0;
 	}
 
 
 	dirhandle = get_module(dirmod);
 	if (!dirhandle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
-		assert(dirhandle);
+		return 0;
 	}
 
 	modptrs.direction = (dirfptr) dlsym(dirhandle,"mod_get_direction");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
-		assert(modptrs.direction);
+		return 0;
 	}
 
+	return 1;
 }
 
 

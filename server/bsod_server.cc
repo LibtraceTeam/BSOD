@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 			close_modules();
 			do_configuration(0,0);
 			if (!load_modules()) {
-				Log(LOG_DAEMON|LOG_INFO,"Failed to load modules, abourting\n");
+				Log(LOG_DAEMON|LOG_INFO,"Failed to load modules, aborting\n");
 				return 1;
 			}
 		} 

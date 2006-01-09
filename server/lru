@@ -64,37 +64,49 @@ class lru_iterator {
 		template <class key1_t, class value1_t>
 		friend bool operator ==( const lru_const_iterator<key1_t,value1_t> &a, 
 		                         const lru_iterator<key1_t,value1_t> &b);
+		bool intpairdirty; /* is the "internal pair" not up to date?*/
+		std::pair<key_t,value_t> intpair;
 	public:
-		lru_iterator() { };
-		lru_iterator(const lru_iterator &x) : where(x.where) {};
-		lru_iterator(typename data_t::iterator &_where) : where(_where) {};
+		lru_iterator() : intpairdirty(true) { };
+		lru_iterator(const lru_iterator &x) : where(x.where), intpairdirty(true) {};
+		lru_iterator(typename data_t::iterator &_where) : where(_where), intpairdirty(true) {};
 		lru_iterator<key_t,value_t> &operator ++() {
 			++where;
+			intpairdirty=true;
 			return *this;
 		}
 		lru_iterator<key_t,value_t> operator ++(int) {
 			lru_iterator <key_t,value_t> tmp;
 			tmp=*this;
 			++where;
+			intpairdirty=true;
 			return tmp;
 		}
 		lru_iterator<key_t,value_t> &operator --() {
 			--where;
+			intpairdirty=true;
 			return *this;
 		}
 		lru_iterator<key_t,value_t> operator --(int) {
 			lru_iterator <key_t,value_t> tmp;
 			tmp=*this;
 			--where;
+			intpairdirty=true;
 			return tmp;
 		}
-		std::pair<key_t,value_t> operator *() const {
-			return std::pair<key_t,value_t>(where->first,where->second.second);
+		std::pair<key_t,value_t> operator *() {
+			if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return intpair;
 		}
-		// We hope that the -> operator will dereference this immediately
-		// and the & will get optimised away.
 		std::pair<key_t,value_t> *operator ->() const {
-			return &(operator *());
+		 	if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return &intpair;
 		}
 		bool operator ==( const lru_iterator<key_t,value_t> &b) {
 			return where==b.where;
@@ -117,37 +129,49 @@ class lru_const_iterator {
 		template <class key1_t, class value1_t>
 		friend bool operator ==( const lru_iterator<key1_t,value1_t> &a, 
 		                         const lru_const_iterator<key1_t,value1_t> &b);
+		bool intpairdirty;
+		std::pair<key_t,value_t> intpair;
 	public:
-		lru_const_iterator() { };
-		lru_const_iterator(const lru_const_iterator &x) : where(x.where) {};
-		lru_const_iterator(typename data_t::const_iterator &_where) : where(_where) {};
+		lru_const_iterator() : intpairdirty(true) { };
+		lru_const_iterator(const lru_const_iterator &x) : where(x.where), intpairdirty(true) {};
+		lru_const_iterator(typename data_t::const_iterator &_where) : where(_where), intpairdirty(true) {};
 		lru_const_iterator<key_t,value_t> &operator ++() {
 			++where;
+			intpairdirty=true;
 			return *this;
 		}
 		lru_const_iterator<key_t,value_t> operator ++(int) {
 			lru_const_iterator <key_t,value_t> tmp;
 			tmp=*this;
 			++where;
+			intpairdirty=true;
 			return tmp;
 		}
 		lru_const_iterator<key_t,value_t> &operator --() {
 			--where;
+			intpairdirty=true;
 			return *this;
 		}
 		lru_const_iterator<key_t,value_t> operator --(int) {
 			lru_const_iterator <key_t,value_t> tmp;
 			tmp=*this;
 			--where;
+			intpairdirty=true;
 			return tmp;
 		}
-		std::pair<key_t,value_t> operator *() const {
-			return std::pair<key_t,value_t>(where->first,where->second.second);
+		std::pair<key_t,value_t> operator *() {
+			if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return intpair;
 		}
-		// We hope that the -> operator will dereference this immediately
-		// and the & will get optimised away.
 		std::pair<key_t,value_t> *operator ->() const {
-			return &(operator *());
+		 	if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return &intpair;
 		}
 		bool operator ==( const lru_const_iterator<key_t,value_t> &b) {
 			return where==b.where;

@@ -578,7 +578,8 @@ static void *get_position_module(side_t side, const char *name)
 		}
 	}
 	else {
-		printf(" Not Initialising module %s\n",tmp);
+		printf(" Initialisation not required for %s\n",tmp);
+		dlerror();
 	}
 
 	free(driver);

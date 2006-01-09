@@ -535,7 +535,8 @@ static void *get_module(const char *name)
 		}
 	}
 	else {
-		printf(" Not Initialising module %s\n",tmp);
+		printf(" No initialisation required for %s\n",tmp);
+		dlerror(); /* This is needed to clear the error flag */
 	}
 
 	free(driver);

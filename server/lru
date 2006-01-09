@@ -101,7 +101,7 @@ class lru_iterator {
 			}
 			return intpair;
 		}
-		std::pair<key_t,value_t> *operator ->() const {
+		std::pair<key_t,value_t> *operator ->() {
 		 	if (intpairdirty) {
 				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
 				intpairdirty=false;
@@ -166,7 +166,7 @@ class lru_const_iterator {
 			}
 			return intpair;
 		}
-		std::pair<key_t,value_t> *operator ->() const {
+		std::pair<key_t,value_t> *operator ->() {
 		 	if (intpairdirty) {
 				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
 				intpairdirty=false;

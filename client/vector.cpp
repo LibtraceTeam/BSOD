@@ -54,8 +54,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // http://www.flipcode.com/cgi-bin/msg.cgi?showThread=00001144&forum=general&id=-1
 // for why this needs to be done.
 // TODO: check this works for G++
-template Vector3<float>;
-template Vector3<double>;
+template class Vector3<float>;
+template class Vector3<double>;
+
+template string Vector3<float>::toString() const;
+template Vector3<float> &Vector3<float>::operator*=(float);
+template Vector3<float> &Vector3<float>::operator+=(Vector3<float> const&);
+template Vector3<float> Vector3<float>::operator/(float) const;
+template Vector3<float> Vector3<float>::operator*(float) const;
 
 // Global operators:
 template<class T>

@@ -10,9 +10,9 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glaux.h>
+//#include <GL/glaux.h>
 //#include <GL/glext.h>
-#include "external/gl/glext.h"
+#include "external/GL/glext.h"
 
 #include "vector.h"
 #include "polygon.h"

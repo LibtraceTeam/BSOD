@@ -54,9 +54,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glaux.h>
 //#include <GL/glext.h>
-#include "external/gl/glext.h"
+#include "external/GL/glext.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -85,7 +84,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _WIN32
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glu32.lib" )	
-#pragma comment( lib, "glaux.lib" )
 #endif
 
 // TEMPORARY
@@ -181,8 +179,14 @@ void CGLDisplayManager::Initialise()
 	}
 	else
 	{
+#if 0
 		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)wglGetProcAddress("glPointParameterfARB");
 		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)wglGetProcAddress("glPointParameterfvARB");
+#else
+                glPointParameterfARB = NULL;
+                glPointParameterfvARB = NULL;
+                // Fix up your bloody windows-specific code, you dolt.
+#endif
 
 		if( !glPointParameterfARB || !glPointParameterfvARB )
 		{

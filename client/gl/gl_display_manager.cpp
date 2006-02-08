@@ -179,7 +179,7 @@ void CGLDisplayManager::Initialise()
 	}
 	else
 	{
-#if 0
+#ifdef WIN32
 		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)wglGetProcAddress("glPointParameterfARB");
 		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)wglGetProcAddress("glPointParameterfvARB");
 #else

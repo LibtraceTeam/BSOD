@@ -134,17 +134,10 @@ void CPartFlow::Draw( bool picking )
 		glBegin( GL_POINTS );
 		{
 			// Render each particle...
-			 /*
-			while( pParticle )
-			{
-				glVertex3f( pParticle->m_vCurPos.x,
-					pParticle->m_vCurPos.y,
-					pParticle->m_vCurPos.z );
-
-				pParticle = pParticle->m_pNext;
-			} // */
 			for( int i=vertex_offset; i < (int)(vertices.size()); i+= 6 )
+			{
 				glVertex3f( (vertices[i]).x, (vertices[i]).y, (vertices[i]).z );
+			}
 		}
 		glEnd();
 		d->PopMatrix();
@@ -200,107 +193,125 @@ void CPartFlow::CreateEndPoints()
     //	size = -size;
 
     // Create start and end points
-    if( world.partVis->billboard )
-    {
-	endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,size)+start+offset);
+	if( world.partVis->billboard )
+	{
+		endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,0,size)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,size)+start+offset);
 
-	endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,size)+destination+offset);
-    }
-    else
-    {
-	endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
-	endpoint_vertices.push_back(Vector3f(size,size,0)+start+offset);
-
-	endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
-	endpoint_vertices.push_back(Vector3f(size,size,0)+destination+offset);
-    }
-
-    if( (destination.x < start.x) || (world.partVis->matrix_mode) )
-    {
-	endpoint_tex_coords.push_back(Vector2f(1, 1));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 0));
-
-	endpoint_tex_coords.push_back(Vector2f(1, 1));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 0));
-    }
-    else
-    {
-	endpoint_tex_coords.push_back(Vector2f(0, 0));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 1));
-
-	endpoint_tex_coords.push_back(Vector2f(0, 0));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 0));
-	endpoint_tex_coords.push_back(Vector2f(0, 1));
-	endpoint_tex_coords.push_back(Vector2f(1, 1));
-    }
-
-    // Load texture:
-    if( world.partVis->matrix_mode )
-    {
-	if( flow_colour[0] == 100 && flow_colour[1] == 0 && flow_colour[2] == 100 ) // TCP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_01.png");
-	else if( flow_colour[0] == 0 && flow_colour[1] == 0 && flow_colour[2] == 200 ) // HTTP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_02.png");
-	else if( flow_colour[0] == 150 && flow_colour[1] == 150 && flow_colour[2] == 240 ) // HTTPS
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_03.png");
-	else if( flow_colour[0] == 200 && flow_colour[1] == 0 && flow_colour[2] == 0 ) // MAIL
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_04.png");
-	else if( flow_colour[0] == 0 && flow_colour[1] == 150 && flow_colour[2] == 0 ) // FTP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_05.png");
-	else if( flow_colour[0] == 0 && flow_colour[1] == 250 && flow_colour[2] == 0 ) // VPN
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_06.png");
-	else if( flow_colour[0] == 200 && flow_colour[1] == 200 && flow_colour[2] == 0 ) // DNS
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_07.png");
-	else if( flow_colour[0] == 30 && flow_colour[1] == 85 && flow_colour[2] == 30 ) // NTP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_08.png");
-	else if( flow_colour[0] == 110 && flow_colour[1] == 110 && flow_colour[2] == 110 ) // SSH
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_09.png");
-	else if( flow_colour[0] == 150 && flow_colour[1] == 100 && flow_colour[2] == 50 ) // UDP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_10.png");
-	else if( flow_colour[0] == 0 && flow_colour[1] == 250 && flow_colour[2] == 200 ) // ICMP
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_11.png");
-	else if( flow_colour[0] == 240 && flow_colour[1] == 230 && flow_colour[2] == 140 ) // IRC
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_12.png");
-	else if( flow_colour[0] == 200 && flow_colour[1] == 100 && flow_colour[2] == 0 ) // WINDOWS
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_13.png");
-	else if( flow_colour[0] == 50 && flow_colour[1] == 150 && flow_colour[2] == 50 ) // P2P
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_14.png");
+		endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,0,size)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,size)+destination+offset);
+	}
 	else
-	    tex = CTextureManager::tm.LoadTexture("data/matrix_15.png"); // OTHER
-    }
-    else
+	{
+		endpoint_vertices.push_back(Vector3f(0,0,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(size,0,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+start+offset);
+		endpoint_vertices.push_back(Vector3f(size,size,0)+start+offset);
+
+		endpoint_vertices.push_back(Vector3f(0,0,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(size,0,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(0,size,0)+destination+offset);
+		endpoint_vertices.push_back(Vector3f(size,size,0)+destination+offset);
+	}
+
+	if( (destination.x < start.x) || (world.partVis->matrix_mode) )
+	{
+		endpoint_tex_coords.push_back(Vector2f(1, 1));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 0));
+
+		endpoint_tex_coords.push_back(Vector2f(1, 1));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 0));
+	}
+	else
+	{
+		endpoint_tex_coords.push_back(Vector2f(0, 0));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 1));
+
+		endpoint_tex_coords.push_back(Vector2f(0, 0));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 0));
+		endpoint_tex_coords.push_back(Vector2f(0, 1));
+		endpoint_tex_coords.push_back(Vector2f(1, 1));
+	}
+
+	// Load texture:
+	if( world.partVis->matrix_mode )
+	{
+		switch( type )
+		{
+		case 0:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_01.png" );
+			break;
+		case 1:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_02.png" );
+			break;
+		case 2:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_03.png" );
+			break;
+		case 3:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_04.png" );
+			break;
+		case 4:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_05.png" );
+			break;
+		case 5:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_06.png" );
+			break;
+		case 6:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_07.png" );
+			break;
+		case 7:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_08.png" );
+			break;
+		case 8:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_09.png" );
+			break;
+		case 9:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_10.png" );
+			break;
+		case 10:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_11.png" );
+			break;
+		case 11:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_12.png" );
+			break;
+		case 12:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_13.png" );
+			break;
+		case 13:
+			tex = CTextureManager::tm.LoadTexture( "data/matrix_14.png" );
+			break;
+		default:
+			tex = CTextureManager::tm.LoadTexture("data/matrix_15.png");
+			break;
+		}
+	}
+	else
 		tex = CTextureManager::tm.LoadTexture(world.partVis->particle_img);
 }
 
@@ -310,20 +321,22 @@ void CPartFlow::Update(float diff)
 	Vector3f d = destination - start;
 	d *= (percent * (speed * world.partVis->global_speed));
 
-	translation += d;
+	proxy_delta += d;
+	if( !world.partVis->paused )
+	{
+		translation += proxy_delta;
+		proxy_delta.x = proxy_delta.y = proxy_delta.z = 0.0f;
+	}
 
 	unsigned int vSize = (unsigned int)vertices.size();
 	unsigned int lengthV = (unsigned)6*(offset+1);
 	while( vSize >= lengthV ) 
 	{
 		Vector3f e = (vertices[offset*6]) + translation - jitter[offset];
-		//Vector3f m = destination - start;
-		if( (e - start).Length() > length )//m.Length() ) 
-		//if( vertices[offset*6].x < destination.x )
+		if( (e - start).Length() > length )
 		{
 			offset++;
 			lengthV = (unsigned)6*(offset+1);
-//			num_particles--;
 			packets--;
 		} 
 		else 
@@ -405,27 +418,27 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 	if( world.partVis->billboard )
 	{
 		// Triangle 1:
-		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
 
 		// Triangle 2:
-		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,size,size)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,size)+start+offset-d-translation-proxy_delta);
 		// -------------------------------------------------------------
 	}
 	else
 	{
 		// Triangle 1:
-		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
 
 		// Triangle 2:
-		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation);
-		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation);
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation-proxy_delta);
 	}
 /*
 	if( (destination.x < start.x) || (world.partVis->matrix_mode) )

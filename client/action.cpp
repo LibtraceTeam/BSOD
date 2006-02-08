@@ -123,17 +123,18 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_PERIOD ] = &CActionHandler::ToggleFilter;
 	keyUpMap[ BKC_COMMA ] = &CActionHandler::ToggleBackFilter;
 	keyUpMap[ BKC_SLASH ] = &CActionHandler::ToggleShowDark;
-	keyUpMap[ BKC_F1 ] = &CActionHandler::ToggleHelp;
 	keyUpMap[ BKC_EQUALS ] = &CActionHandler::Faster;
 	keyUpMap[ BKC_MINUS ] = &CActionHandler::Slower;
 
 	lmb_down = false; // Left mouse button not down yet.
 	rmb_down = false;
+	gui_open = false;
 }
 
 void CActionHandler::KeyDown(Keycode key)
 {
 	ActionMap::const_iterator i = keyDownMap.find(key);
+	world.partVis->pGui->OnKeyDown( (unsigned short)key ); // Notify GUI of event. (Slightly hax, should really be some sort of flexible event structure in BSOD).
 	
 	if(i == keyDownMap.end()) {
 		// Not found!
@@ -251,6 +252,9 @@ void CActionHandler::ToggleDebugDisplay()
 
 void CActionHandler::TurnDown()
 {
+	if( gui_open )
+		return;
+
 		/*SetBearing(Vector3f(GetBearing().x + (mpos.x / 10.0f) * invert_mouse,
 					    GetBearing().y + (mpos.y / 10.0f),
 						GetBearing().z));*/
@@ -261,6 +265,9 @@ void CActionHandler::TurnDown()
 
 void CActionHandler::TurnUp()
 {
+	if( gui_open )
+		return;
+
 	Vector3f b(world.entities->GetPlayer()->GetBearing());
 	world.entities->GetPlayer()->SetBearing(
 		Vector3f(b.x+3, b.y, b.z));
@@ -268,6 +275,9 @@ void CActionHandler::TurnUp()
 
 void CActionHandler::TurnLeft()
 {
+	if( gui_open )
+		return;
+
 	Vector3f b(world.entities->GetPlayer()->GetBearing());
 	world.entities->GetPlayer()->SetBearing(
 		Vector3f(b.x, b.y+3, b.z));
@@ -275,6 +285,9 @@ void CActionHandler::TurnLeft()
 
 void CActionHandler::TurnRight()
 {
+	if( gui_open )
+		return;
+
 	Vector3f b(world.entities->GetPlayer()->GetBearing());
 	world.entities->GetPlayer()->SetBearing(
 		Vector3f(b.x, b.y-3, b.z));
@@ -295,11 +308,6 @@ void CActionHandler::ToggleShowDark()
 	world.partVis->ToggleShowDark();
 }
 
-void CActionHandler::ToggleHelp()
-{
-	world.partVis->ToggleHelp();
-}
-
 void CActionHandler::Faster()
 {
 	world.partVis->ChangeSpeed( true );
@@ -318,6 +326,7 @@ void CActionHandler::Navigate()
 void CActionHandler::EndNavigate()
 {
 	lmb_down = false;
+	world.partVis->click = true;
 }
 
 void CActionHandler::Pick()

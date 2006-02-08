@@ -46,6 +46,8 @@ private:
 	byte flow_colour[3];
 	unsigned char type;
 
+	Vector3f proxy_delta;
+
 public:
 	CPartFlow();
 	virtual ~CPartFlow();
@@ -53,7 +55,7 @@ public:
 	void Update(float diff);
 	//void Update_ServerTime(timestamp);
 
-	bool AddParticle(unsigned char id, byte r, byte g, byte b, unsigned short size, float speed, bool dark);
+	bool AddParticle(unsigned char id, byte r, byte g, byte b, unsigned short _size, float speed, bool dark);
 	inline void ResetCounter() { sam_count = 0; }
 	void CreateEndPoints();
 	void ReInitialize();

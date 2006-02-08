@@ -66,10 +66,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SELECT_BUFFER_SIZE 1024
 
+#include "gui.h"
+
 struct FlowDescriptor 
 {
 	byte colour[3];
 	char name[256];
+	bool show;
 };
 
 union IPUnion
@@ -89,9 +92,24 @@ inline void IPInt2Byte( uint32 ip, byte *q1, byte *q2, byte *q3, byte *q4 )
 	*q4 = ipu.quartet[3];
 }
 
+inline bool PointInRect( int px, int py, int rx, int ry, int rwidth, int rheight )
+{
+	if( px < rx )
+		return( false );
+	if( py < ry )
+		return( false );
+	if( px > (rx+rwidth) )
+		return( false );
+	if( py > (ry+rheight) )
+		return( false );
+
+	return( true );
+}
+
 typedef map<unsigned int, CPartFlow *> FlowMap;
 typedef list<CPartFlow*> FlowList;
-typedef map<unsigned char, FlowDescriptor *>FlowDescMap;
+typedef map<unsigned char, FlowDescriptor *> FlowDescMap;
+typedef list<unsigned int> FlowIDList;
 
 class CPartVis : public CEntity
 {
@@ -100,15 +118,11 @@ private:
     CTriangleFan *left, *right;
     uint32 last_timestamp;
     bool paused;
-	int filter_state;
-	short int show_dark;
 	CTexture *wandlogo;
-	CTexture *helptex;
-	float colour_table[256]; // Lookup for colour/255.0f to get 0.0f-1.0f
-	bool show_help;
 	IterList active_nodes;
 	FlowList partflow_pool;
 	vector<Vector2f> tex_coords;
+	FlowIDList flows_to_remove;
     
 public:
     CPartVis( bool mm );
@@ -128,7 +142,6 @@ public:
 	void ToggleFilter();
 	void ToggleShowDark();
 	void ToggleBackFilter();
-	void ToggleHelp();
 	int NumFlows();
 	void ChangeSpeed( bool faster );
 	void KillAll();
@@ -137,6 +150,10 @@ public:
 	CPartFlow *AllocPartFlow();
 	void FreePartFlow( CPartFlow *flow );
 	void GCPartFlows();
+	void BillboardBegin();
+	void BillboardEnd();
+
+	float colour_table[256]; // Lookup for colour/255.0f to get 0.0f-1.0f
 
 	int packetsFrame;
 	float diff;
@@ -144,7 +161,11 @@ public:
 	float last_gc;
 	bool do_gcc;
 	bool matrix_mode;
+	bool no_gui;
 	
+	short int show_dark;
+	//int filter_state;
+
 	float global_size;
 	float global_speed;
 	float global_alpha;
@@ -152,13 +173,16 @@ public:
 	bool billboard;
 	string particle_img;
 	float maxPointSize;
+	uint32 tehMax;
 	byte ip[4];
 	bool isHit;
+	bool click;
 
 	uint32 pSelBuff[SELECT_BUFFER_SIZE];
 
     CPartFlow * make_flow(int);
 	FlowDescMap fdmap;
+	CGui *pGui;
 
 	friend class CPartFlow;
 };

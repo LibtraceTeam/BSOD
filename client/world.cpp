@@ -146,7 +146,8 @@ void CWorld::Draw()
 		frames = 0;
 	}
 	
-    if(debug_display) {
+    if( debug_display ) 
+	{
 		display->Begin2D();
 		display->SetColour(0.2f, 0.1f, 0.3f, 0.8f);
 		display->BindTexture(NULL);
@@ -183,7 +184,9 @@ void CWorld::Draw()
 		
 
 		display->End2D();
-    } else {
+    } 
+	else
+	{
 		float w = 360, h = 20;
 		float x = 0, y = display->GetHeight() - h;
 		string str;

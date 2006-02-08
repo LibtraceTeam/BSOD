@@ -56,11 +56,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifdef WIN32
+#pragma warning(disable:4005)
 #include <WinSock2.h>
 #else
 #include <netinet/in.h>
 #endif
-
 
 #include "sdl_net_driver.h"
 
@@ -328,7 +328,7 @@ void CSDLNetDriver::ReceiveData()
 	else if(fp->flow.type == 0x01) 
 	{
 	    // Packet
-		//Log( "PACKET!" );
+		//Log( "PACKET!\n" );
 	    if(sizeof(pack_update_t) <= s) {
 #ifdef NET_DEBUG
 			Log("Packet: ts:%u id:%u size:%u speed:%f dark:%d\n",
@@ -366,22 +366,24 @@ void CSDLNetDriver::ReceiveData()
 	} 
 	else if(fp->flow.type == 0x02) 
 	{
+		//Log( "Kill flow!\n" );
 	    if(sizeof(flow_remove_t) <= s) 
 	    {
-		world.partVis->RemoveFlow(ntohl(fp->rem.id));
+			world.partVis->RemoveFlow(ntohl(fp->rem.id));
 
-		buf += sizeof(flow_remove_t);
+			buf += sizeof(flow_remove_t);
 	    } 
 	    else 
 	    {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() 
-			    + (buf - &databuf[0]));
-		break;
+			if(buf != &databuf[0])
+				databuf.erase(databuf.begin(), databuf.begin() 
+					+ (buf - &databuf[0]));
+			break;
 	    }
 	}
 	else if( fp->flow.type == 0x03 )
 	{
+		//Log( "Kill all flows!\n" );
 	    // Kill all existing flows!
 	    world.partVis->KillAll();
 	    buf += sizeof(kill_all_t);
@@ -393,17 +395,22 @@ void CSDLNetDriver::ReceiveData()
 		// update it if its different, else do nothing.
 		//int tempK = fp->fdesc.id;
 		//int ppK = tempK;
-		//if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
-		//{
+		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
+		{
+			// Log( "Adding new fd.\n" );
 			// Not in the map yet so lets add it:
 			FlowDescriptor *fd = new FlowDescriptor();
 			fd->colour[0] = fp->fdesc.colour[0];
 			fd->colour[1] = fp->fdesc.colour[1];
 			fd->colour[2] = fp->fdesc.colour[2];
+			fd->show = true; // Initially show this.
 			strcpy( fd->name, fp->fdesc.name );
 			//Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
 			world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
-		//}
+
+			if( (fd->colour[0] == 0 ) && (fd->colour[1] == 0 ) && ( fd->colour[2] == 0 ) )
+				world.partVis->pGui->InitFD();
+		}
 		buf += sizeof(flow_descriptor);
 	}
 	else 
@@ -425,10 +432,18 @@ void CSDLNetDriver::Reconnect()
 {
 	Connect( address );
 	if( reconnect ) // Still not connected. Wait longer next time.
+	{
 		if( reconnect_wait < 120000.0f ) // Don't wait longer than 2 minutes between connection attempts.
 			reconnect_wait *= 2.0f;
+	}
 	else // Connected so reset the wait time.
+	{
 		reconnect_wait = 500.0f;
+
+		// Also, need to clear the flow desriptors since we will get a new list.
+		// (if we keep the old list we get problems if the server was changed and is sending a different fd list).
+		world.partVis->fdmap.clear();
+	}
 }
 
 bool CSDLNetDriver::Reconnecting()

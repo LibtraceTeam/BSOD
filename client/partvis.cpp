@@ -96,23 +96,26 @@ CPartVis::CPartVis( bool mm )
 {
 	// Need to create a couple of quads, one with the uni logo, another
 	// without the logo.
-	filter_state = -1;
+	//filter_state = -1;
 	packetsFrame = 0;
 	diff = 0.0f;
 	last_gc = world.sys->TimerGetTime();
 	show_dark = 0;
 	fps = 0.0f;
-	show_help = false;
 	global_speed = 1.0f;
 	global_alpha = 0.5f; // Default.
 	do_gcc = true;
 	matrix_mode = mm;
+	no_gui = false;
 	isHit = false;
+	click = false;
 
 	ip[0] = 0;
 	ip[1] = 0;
 	ip[2] = 0;
 	ip[3] = 0;
+
+	pGui = new CGui();
 
 	// Build colour lookup table:
 	for( int i=0; i<256; i++ )
@@ -149,7 +152,6 @@ CPartVis::CPartVis( bool mm )
 		right->tex = CTextureManager::tm.LoadTexture("data/right.png");
 
 	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
-	helptex = CTextureManager::tm.LoadTexture( "data/help.png" );
 
 	tex_coords.reserve( 6 );
 	tex_coords.push_back(Vector2f(1, 1));
@@ -240,7 +242,8 @@ void CPartVis::Draw( bool picking )
 	for( ; i != active_nodes.end(); ++i )
 	{
 		(*i)->second->ResetCounter();
-		if( !paused && !picking )
+		//if( !paused && !picking )
+		if( !picking )
 		{
 			(*i)->second->Update(diff);
 			if( (*i)->second->packets == 0 )
@@ -255,13 +258,18 @@ void CPartVis::Draw( bool picking )
 			}
 		}
 
-		
 		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
 		{
-			if( filter_state == -1 )
+			/*if( filter_state == -1 )
 				(*i)->second->Draw( picking );
 			else if( filter_state == (*i)->second->type )
-				(*i)->second->Draw( picking );
+				(*i)->second->Draw( picking );*/
+			FlowDescMap::iterator fdmi = fdmap.find((*i)->second->type);
+			if( fdmi != fdmap.end() )
+			{
+				if( fdmi->second->show )
+					(*i)->second->Draw( picking );
+			}
 		}
 	}
 	if( billboard )
@@ -321,21 +329,21 @@ void CPartVis::Draw( bool picking )
 	// Display current toggle state:
 	char outstr[256];
 
-	if( filter_state == -1 )
+	/*if( filter_state == -1 )
 		strcpy( outstr, "All packets." );
 	else
 	{
 		FlowDescMap::iterator iter;
 		if( (iter = fdmap.find(filter_state) ) != fdmap.end() )
 			strcpy( outstr, iter->second->name );
-	}
+	}*/
 
 	if( show_dark == 0 )
-		strcat( outstr, " - All" );
+		strcpy( outstr, "Darknetmode: All" );
 	else if( show_dark == 1 )
-		strcat( outstr, " - Darknet" );
+		strcpy( outstr, "Darknetmode: Darknet" );
 	else
-		strcat( outstr, " - Sans darknet" );
+		strcpy( outstr, "Darknetmode: Sans darknet" );
 
 	float w = 360, h = 40;
 	float x = 0, y = d->GetHeight() - h;
@@ -352,22 +360,16 @@ void CPartVis::Draw( bool picking )
 	d->BindTexture(wandlogo);
 	d->SetColour(1.0f, 1.0f, 1.0f, 0.8f);
 	d->Draw2DQuad( d->GetWidth() - 160, d->GetHeight() - 65, d->GetWidth(), d->GetHeight() );
-	if( show_help )
-	{
-		d->BindTexture( helptex );
-		d->Draw2DQuad( 0, 0, 516, 480 );
-	}
-	else
-	{
-		d->BindTexture(NULL);
-		d->SetBlendMode(CDisplayManager::Multiply);
-		d->SetBlend(false);
-		d->SetColour(1.0f, 1.0f, 1.0f);
-		if( matrix_mode )
-			d->DrawString2( 5, 5, "MATRIX!");
-		else
-			d->DrawString2( 5, 5, "F1 for help.");
-	}
+
+	d->BindTexture(NULL);
+	d->SetBlendMode(CDisplayManager::Multiply);
+	d->SetBlend(false);
+	d->SetColour(1.0f, 1.0f, 1.0f);
+	if( matrix_mode )
+		d->DrawString2( d->GetWidth() - 75, 5, "MATRIX!");
+	/*else
+	d->DrawString2( 5, 5, "F1 for help.");*/
+
 	d->BindTexture(NULL);
 	d->SetBlendMode(CDisplayManager::Multiply);
 	d->SetBlend(false);
@@ -383,14 +385,20 @@ void CPartVis::Draw( bool picking )
 		d->SetBlendMode(CDisplayManager::Multiply);
 		d->SetBlend(true);
 		d->SetColour( 0.0f, 0.0f, 0.3f, 0.5f );
-		d->Draw2DQuad( mx, my-25, mx + (strlen(outstr)*10), my-5 );
+		d->Draw2DQuad( mx, my-25, mx + ((int)(strlen(outstr))*10), my-5 );
 
 		d->SetBlend(false);
 		d->SetColour(1.0f, 1.0f, 1.0f);
 		d->DrawString2(mx+3, my-23, outstr);
 	}
-	
+
 	d->End2D();
+
+	// Lastly draw the GUI:
+	if( !no_gui )
+		pGui->Draw( 5, 5, mx, my, click );
+
+	click = false;
 
     //flows_drawn = packets_drawn = 0;
 }
@@ -453,11 +461,17 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
 void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
 							unsigned short size, float speed, bool dark)
 {
+	if( paused ) // Don't add packets when paused.
+		return;
+
     FlowMap::iterator i = flows.find(flow_id);
 
-	if(i == flows.end()) {
+	if(i == flows.end()) 
+	{
 		return;//Log("Adding packet to non-existant flow %d\n", flow_id);
-	} else {
+	} 
+	else 
+	{
 		CPartFlow *flow = i->second;
 
 		// XXX: at this point we could use the time to make sure the 
@@ -465,15 +479,6 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 		// of time it might not make sense to have this particle start at
 		// the start position. To make this useful we would really need
 		// time more accurate than second accuracy, though.
-
-		/*flow->flow_colour[0] = r;
-		flow->flow_colour[1] = g;
-		flow->flow_colour[2] = b;
-		if( matrix_mode )
-		{
-			r = b = 36;
-			g = 132;
-		}*/
 
 		FlowDescMap::iterator iter;
 		if( (iter = fdmap.find(id_num)) != fdmap.end() )
@@ -504,6 +509,12 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 
 void CPartVis::RemoveFlow(unsigned int id)
 {
+	if( paused )
+	{
+		flows_to_remove.push_back( id );
+		return;
+	}
+
     FlowMap::iterator i = flows.find(id);
 
     if(i == flows.end()) 
@@ -533,21 +544,30 @@ void CPartVis::EndUpdate()
 void CPartVis::TogglePaused()
 {
     paused = !paused;
+
+	// if not paused, remove all flows stored in list.
+	if( !paused ) // Unpaused, so remove any flows we marked for removal.
+	{
+		for( FlowIDList::iterator i = flows_to_remove.begin(); i != flows_to_remove.end(); i++ )
+			RemoveFlow( *i );
+
+		flows_to_remove.clear();
+	}
 }
 
 void CPartVis::ToggleFilter()
 {
-	filter_state++;
+	/*filter_state++;
 	FlowDescMap::iterator iter = fdmap.find( filter_state );
 	if( iter == fdmap.end() )
 		filter_state = -1;
 	if( (iter->second->colour[0] == 0) && (iter->second->colour[1] == 0) && (iter->second->colour[2] == 0) )
-		filter_state = -1;
+		filter_state = -1;*/
 }
 
 void CPartVis::ToggleBackFilter()
 {
-	filter_state--;
+	/*filter_state--;
 	if( filter_state < -1 )
 	{
 		for( int i=0; i<256; i++ )
@@ -565,7 +585,7 @@ void CPartVis::ToggleBackFilter()
 			}
 		}
 		
-	}
+	}*/
 }
 
 void CPartVis::ToggleShowDark()
@@ -578,11 +598,6 @@ void CPartVis::ToggleShowDark()
 int CPartVis::NumFlows()
 {
 	return( (int)flows.size() );
-}
-
-void CPartVis::ToggleHelp()
-{
-	show_help = !show_help;
 }
 
 void CPartVis::ChangeSpeed( bool faster )

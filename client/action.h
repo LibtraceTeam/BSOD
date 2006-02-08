@@ -60,6 +60,7 @@ public:
 		BKC_LEFTMOUSEBUT, BKC_MIDDLEMOUSEBUT, BKC_RIGHTMOUSEBUT,
 		
 		// Arrow keys
+		// 263,      264,     265,     266
 		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
 
 		// Function keys
@@ -87,8 +88,7 @@ public:
 		// < > [ ] { } ~ `
 		// numpad stuff
 		// insert delete home end pageup pagedown scrolllock numlock pause/break
-		// cursor keys
-		// f1 f2 f3 ... f12
+		// f2 f3 ... f12
 	};
 	
 	CActionHandler();
@@ -117,7 +117,6 @@ public:
 	void ToggleFilter();
 	void ToggleShowDark();
 	void ToggleBackFilter();
-	void ToggleHelp();
 	void Faster();
 	void Slower();
 
@@ -134,6 +133,7 @@ public:
 
 	bool lmb_down; // Can query to find out if the LMB is down; needed for the navigation stuff.
 	bool rmb_down; // Right mouse button down?
+	bool gui_open; // Hack to give easy access in system driver. This should really be in a more appropriate place;
 };
 
 #endif // _ACTION_H_

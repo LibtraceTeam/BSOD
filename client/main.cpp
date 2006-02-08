@@ -102,6 +102,7 @@ int BungMain(int argc, char *argv[])
 		bool matrix_mode = false;
 		float alpha = 0.5f;
 		string particle = "data/particle.png";
+		bool no_gui = false;
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
 		Log("Parsing config file.\n");
@@ -127,6 +128,13 @@ int BungMain(int argc, char *argv[])
 		config->GetGlobal( "do_gcc", &do_gcc );
 		config->GetGlobal( "matrix_mode", &matrix_mode );
 		config->GetGlobal( "particle_opacity", &alpha );
+		config->GetGlobal( "no_gui", &no_gui );
+		
+		/* If GetGlobal doesn't find a value it seems to return 0.
+		 * Therefore, to avoid packets being invisible and the confusion that this causes
+		 * we make sure that the alpha value makes sense:  */
+		if( alpha == 0.0f )
+			alpha = 0.5f;
 
 		{	string disp("opengl");
 			config->GetGlobal("display", &disp);
@@ -173,6 +181,7 @@ int BungMain(int argc, char *argv[])
 		world.partVis->particle_img = particle;
 		world.partVis->do_gcc = do_gcc;
 		world.partVis->global_alpha = alpha;
+		world.partVis->no_gui = no_gui;
 	}
 	catch(string error)
 	{

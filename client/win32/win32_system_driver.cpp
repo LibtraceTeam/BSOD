@@ -59,13 +59,34 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DIRECTINPUT_VERSION	0x800
 #include <dinput.h>			// Direct Input 8 header file
-#include <hash_map>			// STL hash map for DI keys -> BuNg keys
+//#include <hash_map>			// STL hash map for DI keys -> BuNg keys
+#include <map>
+// HAX: hash_map throws lots of warnings in VS2003 (deprecated apparently) so use std::map instead.
+#define hash_map map
 #include "win32_system_driver.h"
 
 #include <d3dx8.h>
 #include "../d3d/d3d_display_manager.h"
 
 const int KEYBOARD_BUFFER_SIZE = 32; // Buffer size.  32 should easily be big enough (I think) - Sam
+
+
+// Duplicated from PartVis.h
+// Simpler than including the header and then figuring out all the dependencies but perhaps there needs to be a util.h or something
+// for global helper functions like this?
+inline bool PointInRect( int px, int py, int rx, int ry, int rwidth, int rheight )
+{
+	if( px < rx )
+		return( false );
+	if( py < ry )
+		return( false );
+	if( px > (rx+rwidth) )
+		return( false );
+	if( py > (ry+rheight) )
+		return( false );
+
+	return( true );
+}
 
 int CWin32SystemDriver::RunMessageLoop()
 {
@@ -101,23 +122,34 @@ int CWin32SystemDriver::RunMessageLoop()
 			{
 				//if( GetAsyncKeyState( VK_LBUTTON ) ) // Dirty Hax
 				//{
-					if( world.actionHandler->lmb_down )
+					if( world.actionHandler->lmb_down && !world.actionHandler->gui_open )
 					{
 						//ShowCursor( FALSE );
 						POINT temp_mouse;
 						GetCursorPos(&temp_mouse);
-						//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
-						//world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
-						//world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
-						SetCursorPos( lastPoint.x, lastPoint.y );
-						world.entities->GetPlayer()->mpos.y = (float)(lastPoint.x - temp_mouse.x);
-						world.entities->GetPlayer()->mpos.x = (float)(lastPoint.y - temp_mouse.y);
-						//lastPoint = temp_mouse;
+						RECT wndrect;
+						GetWindowRect( hWnd, &wndrect );
+						if( PointInRect( temp_mouse.x, temp_mouse.y, wndrect.left, wndrect.top, wndrect.right - wndrect.left, wndrect.bottom - wndrect.top ))
+						{
+							//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
+							//world.entities->GetPlayer()->mpos.y = (float)(world.display->GetWidth() / 2 - temp_mouse.x);
+							//world.entities->GetPlayer()->mpos.x = (float)(world.display->GetHeight() / 2 - temp_mouse.y);
+							SetCursorPos( lastPoint.x, lastPoint.y );
+							world.entities->GetPlayer()->mpos.y = (float)(lastPoint.x - temp_mouse.x);
+							world.entities->GetPlayer()->mpos.x = (float)(lastPoint.y - temp_mouse.y);
+							//lastPoint = temp_mouse;
+						}
 					}
 					else
 					{
 						//ShowCursor( TRUE );
-						GetCursorPos(&lastPoint);
+						POINT temp_mouse;
+						GetCursorPos(&temp_mouse);
+						RECT wndrect;
+						GetWindowRect( hWnd, &wndrect );
+						if( PointInRect( temp_mouse.x, temp_mouse.y, wndrect.left, wndrect.top, wndrect.right - wndrect.left, wndrect.bottom - wndrect.top ))
+							GetCursorPos(&lastPoint);
+						
 						//interact = true;
 					}
 				//}
@@ -847,7 +879,7 @@ void CWin32SystemDriver::GetMousePos(int *x, int *y )
 {
 	POINT p;
 	GetCursorPos( &p );
-	ScreenToClient( hWnd, &p );
+	::ScreenToClient( hWnd, &p );
 	*x = p.x;
 	*y = p.y;
 }

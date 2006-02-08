@@ -63,6 +63,23 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int Xpos = 0;
 int Ypos = 0; //again a lazy hack - Brendon
 
+// Duplicated from PartVis.h
+// Simpler than including the header and then figuring out all the dependencies but perhaps there needs to be a util.h or something
+// for global helper functions like this?
+inline bool PointInRect( int px, int py, int rx, int ry, int rwidth, int rheight )
+{
+	if( px < rx )
+		return( false );
+	if( py < ry )
+		return( false );
+	if( px > (rx+rwidth) )
+		return( false );
+	if( py > (ry+rheight) )
+		return( false );
+
+	return( true );
+}
+
 int main(int argc, char *argv[])
 {
 	/* Initialize the SDL library (starts the event loop) */
@@ -212,7 +229,7 @@ int CLinuxSystemDriver::RunMessageLoop()
 						lastPoint.y = event.motion.y;
 						first_time = false;
 					}
-					else if( world.actionHandler->lmb_down )
+					else if( world.actionHandler->lmb_down && !world.actionHandler->gui_open )
 					{
 						// Do the movement:
 						world.entities->GetPlayer()->mpos.x = ( lastPoint.x - event.motion.x);

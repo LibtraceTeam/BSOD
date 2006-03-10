@@ -74,7 +74,7 @@ inline int is_local(const uint8_t mac[ETHER_ADDR_LEN]) {
  * Read in all the macs from the file specified in the config.
  */ 
 extern "C"
-void mod_init_dir(const char* filename)
+int init_module(const char* filename)
 {
     FILE *fin = 0;
     char *buffer;
@@ -122,9 +122,7 @@ void mod_init_dir(const char* filename)
     }
     */
 
-    return;
-
-
+    return(0);
 }
 
 

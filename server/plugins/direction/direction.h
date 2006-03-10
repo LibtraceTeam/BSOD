@@ -43,7 +43,7 @@ typedef enum {
 } direction_t;
 
 extern "C" {
-    void init_module(const char* filename);
+    int init_module(const char* filename);
     int mod_get_direction(struct libtrace_packet_t *packet);   
     void end_module(void);
 }

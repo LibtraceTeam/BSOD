@@ -214,17 +214,19 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 	case 6901:
 		*id_num = P2P;
 		break;
-
-		// if not a port that I'm counting give a colour based on protocol
-	case 14567:
-	case 20100:
-	case 27015:
-	case 27016:
-	case 27960:
-	case 28070:
-	case 28960:
+		
+	case 3724:		// World of Warcraft
+	case 14567:		// Battlefield 1942
+	case 20100:		// Soldier of Fortune II
+	case 27015:		// Half-Life / Half-Life 2
+	case 27016:		// Counter-Strike
+	case 27960:		// Quake III Arena
+	case 28070:		// Jedi Knight 2: Jedi Outcast
+	case 28960:		// Call of Duty
 		*id_num = GAMES;
 		break;
+	
+	// if not a port that I'm counting give a colour based on protocol
 	default:  
 		switch(protocol)
 		{

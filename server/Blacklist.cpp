@@ -59,7 +59,7 @@ void blacklist::load(void)
 
 bool blacklist::is_dark(uint32_t ip)
 {
-	return lightlist.find(ip) != lightlist.end();
+	return( lightlist.find(ip) == lightlist.end() );
 }
 
 void blacklist::set_light(uint32_t ip)
@@ -70,6 +70,13 @@ void blacklist::set_light(uint32_t ip)
 void blacklist::save(void)
 {
 	FILE *f=fopen(BLpath.c_str(),"w");
+
+	if( f == NULL )
+	{
+		printf( "Warning: Failed to write out lightlist.\n" );
+		return;
+	}
+
 	for(lightlist_t::const_iterator i=lightlist.begin();
 			lightlist.end() != i;
 			++i) {

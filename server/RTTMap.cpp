@@ -53,6 +53,7 @@ RTTMap::~RTTMap(void)
 
 void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 {
+	//cout << "Inserting " << time_stamp << endl;
 	FlowMap::iterator i = NULL;
 	if( (i = m_flows->find( *flow )) != m_flows->end() )
 	{
@@ -65,6 +66,7 @@ void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 		else
 		{
 			// Didn't find a matching timestamp.
+			//printf( "Insert into tracemap, m_flows = %d\n", m_flows->size() );
 			tmpTMap->insert( pair< unsigned long int, double >( time_stamp, now ) );
 			return;
 		}
@@ -74,6 +76,7 @@ void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 		TraceMap tmap;
 		tmap.insert( pair< unsigned long int, double >( time_stamp, now ) );
 		m_flows->insert( pair< Flow, TraceMap >( *flow, tmap ) );
+		//printf( "Insert into tracemap, m_flows = %d\n", m_flows->size() );
 	}
 	return;
 }
@@ -173,21 +176,28 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 // If it does not find it the function simply returns -1.
 double RTTMap::Retrieve( Flow *flow, unsigned long int time_stamp )
 {
+	//cout << "Attempting to retrieve " << time_stamp << endl;
 	FlowMap::iterator i = NULL;
 	if( (i = m_flows->find(*flow) ) != m_flows->end() )
 	{
+		//cout << "Found flow in m_flows" << endl;
 		TraceMap &tmap = i->second;
 		TraceMap::iterator j = tmap.begin();
 		if( (j = tmap.find( time_stamp )) != tmap.end() )
 		{
+			//cout << "Found time stamp in tmap" << endl;
 			double ret = j->second;
+			//cout << "Returning: " << (int)ret << endl;
+			//printf( "Erasing from tracemap\n" );
 			tmap.erase( j );
 			if( tmap.size() < 1 )
 				m_flows->erase( i );
 			return( ret );
 		}
+		//printf( "Flow found but not timestamp =(\n" );
 	}
 
+	//printf( "Retrieve failed\n" );
 	return( -1.0 );
 }
 

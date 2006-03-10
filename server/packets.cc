@@ -335,10 +335,12 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	// don't expire it only to recreate it again
 	expire_flows(secs);
 
+	// BGN RTT code #####################################################################################
 	// RTT calculation stuff:
 	float speed = -2.0f; // Default. (1.0f)
 
-	if (enable_rttest) {
+	if( enable_rttest ) 
+	{
 		double now = trace_get_seconds( packet );
 		static double last = now;
 		uint16_t dport;
@@ -354,7 +356,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		rtt_flow = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr, 
 				sport, dport );
-		rtt_flow_inverse = new Flow( p->ip_src.s_addr, p->ip_dst.s_addr,
+		rtt_flow_inverse = new Flow( p->ip_dst.s_addr, p->ip_src.s_addr,
 				dport, sport );
 
 		if( pts.ts > 0 )
@@ -362,7 +364,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			// Add packet:
 			map->Add( rtt_flow, pts.ts, now );
 		}
-		else if( isTCP && 0)
+		else if( isTCP )
 		{
 			if( tcpptr != NULL )
 			{
@@ -384,6 +386,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 					if( (the_time = map->Retrieve( rtt_flow, 
 									htonl(tcpptr->ack_seq) - 1 )) >= 0.0f )
 					{
+						//printf( "TCP\n" );
 						speed = convert_speed( now-the_time );
 					}
 				}
@@ -398,9 +401,11 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 				if( icmpInfo->type == 0 )
 				{
 					// Echo reply:
-					if( (the_time = map->Retrieve( rtt_flow_inverse, 
-									icmpInfo->un.echo.id ) ) >= 0.0f )
+					if( (the_time = map->Retrieve( rtt_flow_inverse, icmpInfo->un.echo.id ) ) >= 0.0f )
+					{
+						//printf( "ICMP\n" );
 						speed = convert_speed(now-the_time);
+					}
 				}
 				else if( icmpInfo->type == 8 )
 				{
@@ -411,12 +416,13 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		}
 
 
+		// BGN broken -------------------------------------------------------------------------
+		
+		// d^_^b
 		if( pts.ts_echo > 0 )
 		{
 			if((the_time = map->Retrieve(rtt_flow_inverse, pts.ts_echo)) >= 0.0)
-			{	
-				// Calculate a sensible speed value 
-				// (2.0 = fastest, 1.0 = default, 0.0 = stopped)
+			{
 				speed = convert_speed( now-the_time );
 			}
 			else if( speed == -2.0f )
@@ -424,6 +430,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 				speed = -1.0f; // -1 tells the client to keep old values
 			}
 		}
+
+		// END broken -------------------------------------------------------------------------
 
 		delete rtt_flow;
 		delete rtt_flow_inverse;
@@ -434,6 +442,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			last = now;
 		}
 	}
+	// END RTT code. #####################################################################################
 
 	bool is_dark = false;
 
@@ -442,7 +451,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		switch(direction) 
 		{
 			case DIR_INBOUND:
-				is_dark=theList->is_dark(p->ip_dst.s_addr);
+				is_dark = theList->is_dark(p->ip_dst.s_addr);
 				break;
 			case DIR_OUTBOUND:
 				theList->set_light(p->ip_src.s_addr);
@@ -476,6 +485,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 // This function could probably be replaced with something a little more clever.
 float convert_speed( float speed )
 {
+	//printf( "Converting speed...\n" );
 	if( speed <= 0.0005f ) 	return( 4.0f ); 
 	if( speed <= 0.005f ) 	return( 3.0f );
 	if( speed <= 0.05f )	return( 2.0f ); 

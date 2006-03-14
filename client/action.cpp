@@ -126,6 +126,9 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_EQUALS ] = &CActionHandler::Faster;
 	keyUpMap[ BKC_MINUS ] = &CActionHandler::Slower;
 
+	keyUpMap[ BKC_MOUSESCROLLUP ]   = &CActionHandler::ZoomIn;
+	keyUpMap[ BKC_MOUSESCROLLDOWN ] = &CActionHandler::ZoomOut;
+
 	lmb_down = false; // Left mouse button not down yet.
 	rmb_down = false;
 	gui_open = false;
@@ -338,3 +341,12 @@ void CActionHandler::EndPick()
 {
 	rmb_down = false;
 }
+
+void CActionHandler::ZoomIn()
+{
+}
+
+void CActionHandler::ZoomOut()
+{
+}
+

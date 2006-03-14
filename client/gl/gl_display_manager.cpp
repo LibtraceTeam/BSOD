@@ -57,6 +57,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#include <GL/glext.h>
 #include "external/GL/glext.h"
 
+// Under Linux we need glx.h for the glXGetProcAddress() function:
+#ifndef WIN32
+#include <GL/glx.h>
+#endif
+
 #include <math.h>
 #include <stdarg.h>
 
@@ -183,9 +188,11 @@ void CGLDisplayManager::Initialise()
 		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)wglGetProcAddress("glPointParameterfARB");
 		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)wglGetProcAddress("glPointParameterfvARB");
 #else
-                glPointParameterfARB = NULL;
-                glPointParameterfvARB = NULL;
-                // Fix up your bloody windows-specific code, you dolt.
+		// Linux uses glXGetProcAddressARB instead of wglGetPr....:
+		// Note!: Under OSX another, different function is used so to make the client compile
+		// the correct header will have to be included and the correct function used (in another if def)
+                glPointParameterfARB = (PFNGLPOINTPARAMETERFARBPROC) glXGetProcAddressARB((const GLubyte*)"glPointParameterfARB");
+                glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC) glXGetProcAddressARB((const GLubyte*)"glPointParameterfvARB");
 #endif
 
 		if( !glPointParameterfARB || !glPointParameterfvARB )
@@ -840,5 +847,6 @@ void CGLDisplayManager::SetGLPointParameterfARB( uint32 param, float value )
 
 void CGLDisplayManager::SetGLPointParameterfvARB( uint32 param, float *value )
 {
+	//printf("CGLDisplayManager::SetGLPointParameterfvARB(%u -- %f)\n", param, *value); 
 	glPointParameterfvARB( param, value );
 }

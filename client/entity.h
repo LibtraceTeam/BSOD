@@ -62,10 +62,10 @@ protected:
 	bool  movingLeft;
 	bool  movingRight;
 
-	virtual void MoveForward();
-	virtual void MoveBackward();
 	virtual void MoveLeft();
 	virtual void MoveRight();
+	virtual void MoveForward();
+	virtual void MoveBackward();
 
 	Vector3f add;
 
@@ -97,6 +97,7 @@ public:
 	virtual void Draw( bool picking );
 	virtual void LookAt(const Vector3f &pos); // calculates a bearing given an absolute position to look at
 	virtual void AddChild(CEntity *e) { children.push_back(e); }
+
 
 	// TODO: make virtual functions to change/get velocity as well (this is/will be neeed
 	// in some derived classes).

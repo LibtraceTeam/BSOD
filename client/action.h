@@ -63,6 +63,9 @@ public:
 		// 263,      264,     265,     266
 		BKC_LEFT, BKC_RIGHT, BKC_UP, BKC_DOWN,
 
+		// Mouse scroll wheel
+		BKC_MOUSESCROLLUP, BKC_MOUSESCROLLDOWN,
+
 		// Function keys
 		BKC_F1 = 282, // = SDLK_F1
 
@@ -130,6 +133,9 @@ public:
 
 	void Pick();
 	void EndPick();
+
+	void ZoomIn();
+	void ZoomOut();
 
 	bool lmb_down; // Can query to find out if the LMB is down; needed for the navigation stuff.
 	bool rmb_down; // Right mouse button down?

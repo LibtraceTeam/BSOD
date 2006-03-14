@@ -133,7 +133,7 @@ CPartVis::CPartVis( bool mm )
 	left->texCoords.push_back(Vector2f(1, 1));
 
 	if( matrix_mode )
-		left->tex = CTextureManager::tm.LoadTexture("data/matrix_left_.png");
+		left->tex = CTextureManager::tm.LoadTexture("data/matrix_left.png");
 	else
 		left->tex = CTextureManager::tm.LoadTexture("data/left.png");
 
@@ -183,6 +183,7 @@ void CPartVis::Draw( bool picking )
 	{
 		// This is how our point sprite's size will be modified by distance from the viewer.
 		// /*
+		
 		float quadratic[] =  { 1.0f, 0.0f, 0.01f };
 		d->SetGLPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
 

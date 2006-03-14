@@ -162,7 +162,7 @@ CDisplayManager *CLinuxSystemDriver::InitDisplay(
 int CLinuxSystemDriver::RunMessageLoop()
 {
     float start_time, carry_time;
-    bool first_time = true;
+    //bool first_time = true;
 
     start_time = TimerGetTime();
 
@@ -189,13 +189,38 @@ int CLinuxSystemDriver::RunMessageLoop()
                     if ( event.key.keysym.sym == SDLK_ESCAPE ) {
                         done = true;
                     }
-                    world.actionHandler->KeyDown( 
-                            (CActionHandler::Keycode)event.key.keysym.sym );
+			// Do some NASTY translation of keycodes that differ to win32. Is there a nicer way to do this?
+		    if( event.key.keysym.sym == 273 )
+			    world.actionHandler->KeyDown( CActionHandler::BKC_UP );
+		    else if( event.key.keysym.sym == 275 )
+			    world.actionHandler->KeyDown( CActionHandler::BKC_RIGHT );
+		    else if( event.key.keysym.sym == 274 )
+			    world.actionHandler->KeyDown( CActionHandler::BKC_DOWN );
+		    else if( event.key.keysym.sym == 276 )
+			    world.actionHandler->KeyDown( CActionHandler::BKC_LEFT );
+		    else if( event.key.keysym.sym == 13 )
+			    world.actionHandler->KeyDown( CActionHandler::BKC_RETURN );
+
+		    else
+                    	world.actionHandler->KeyDown( 
+                            	(CActionHandler::Keycode)event.key.keysym.sym );
                 }
                 else if ( event.type == SDL_KEYUP )
                 {
-                    world.actionHandler->KeyUp( 
-                            (CActionHandler::Keycode)event.key.keysym.sym );
+                    if( event.key.keysym.sym == 273 )
+			    world.actionHandler->KeyUp( CActionHandler::BKC_UP );
+		    else if( event.key.keysym.sym == 275 )
+			    world.actionHandler->KeyUp( CActionHandler::BKC_RIGHT );
+		    else if( event.key.keysym.sym == 274 )
+			    world.actionHandler->KeyUp( CActionHandler::BKC_DOWN );
+		    else if( event.key.keysym.sym == 276 )
+			    world.actionHandler->KeyUp( CActionHandler::BKC_LEFT );
+		    else if( event.key.keysym.sym == 13 )
+			    world.actionHandler->KeyUp( CActionHandler::BKC_RETURN );
+
+		    else
+                    	world.actionHandler->KeyUp( 
+                            	(CActionHandler::Keycode)event.key.keysym.sym );
                 }
                 else if ( event.type == SDL_MOUSEMOTION )
                 {
@@ -223,7 +248,10 @@ int CLinuxSystemDriver::RunMessageLoop()
 
                     SDL_WarpMouse(world.display->GetWidth() / 2, 
                             world.display->GetHeight() / 2);*/
-					if( first_time )
+					
+					
+					
+					/*if( first_time )
 					{
 						lastPoint.x = event.motion.x;
 						lastPoint.y = event.motion.y;
@@ -240,15 +268,51 @@ int CLinuxSystemDriver::RunMessageLoop()
 					{
 						lastPoint.x = event.motion.x;
 						lastPoint.y = event.motion.y;
+					}*/
+
+
+					if( world.actionHandler->lmb_down && !world.actionHandler->gui_open )
+					{
+						float yd = (float)(lastPoint.x - event.motion.x);
+						float xd = (float)(lastPoint.y - event.motion.y);
+						//if( (xd > 1) && (yd > 1) )
+						//{
+							//SDL_WarpMouse( (Uint16)(lastPoint.x), (Uint16)(lastPoint.y) );
+							world.entities->GetPlayer()->mpos.y = yd * 2.0f;
+							world.entities->GetPlayer()->mpos.x = xd * 2.0f;
+							lastPoint.x = event.motion.x;
+							lastPoint.y = event.motion.y;
+
+						//}
+					}
+					else
+					{
+						// TODO: Check that mouse is in window.
+						lastPoint.x = event.motion.x;
+						lastPoint.y = event.motion.y;
 					}
                 }
                 else if ( event.type == SDL_MOUSEBUTTONDOWN )
                 {
-                    world.actionHandler->KeyDown(CActionHandler::BKC_LEFTMOUSEBUT);
+					if( event.button.button == SDL_BUTTON_LEFT )
+               			world.actionHandler->KeyDown(CActionHandler::BKC_LEFTMOUSEBUT);
+					else if( event.button.button == SDL_BUTTON_RIGHT )
+						world.actionHandler->KeyDown(CActionHandler::BKC_RIGHTMOUSEBUT);
+					else if( event.button.button == 4 )
+						world.actionHandler->KeyDown(CActionHandler::BKC_MOUSESCROLLUP);
+					else if( event.button.button == 5 )
+						world.actionHandler->KeyDown(CActionHandler::BKC_MOUSESCROLLDOWN);
                 }
                 else if ( event.type == SDL_MOUSEBUTTONUP )
                 {
-                    world.actionHandler->KeyUp(CActionHandler::BKC_LEFTMOUSEBUT);
+					if( event.button.button == SDL_BUTTON_LEFT )
+                    	world.actionHandler->KeyUp(CActionHandler::BKC_LEFTMOUSEBUT);
+					else if( event.button.button == SDL_BUTTON_RIGHT )
+						world.actionHandler->KeyUp(CActionHandler::BKC_RIGHTMOUSEBUT);
+					else if( event.button.button == 4 )
+						world.actionHandler->KeyUp(CActionHandler::BKC_MOUSESCROLLUP);
+					else if( event.button.button == 5 )
+						world.actionHandler->KeyUp(CActionHandler::BKC_MOUSESCROLLDOWN);
                 }
             }
         }

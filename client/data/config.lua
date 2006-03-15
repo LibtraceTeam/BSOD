@@ -29,10 +29,11 @@ heading = 12.3
 -- leave this as opengl
 display			=  "opengl"
 
--- if "yes", will run in fullscreen mode, "no" means run in a window
+-- If "yes", will run in fullscreen mode, "no" means run in a window.
 fullscreen		= "no"
 
--- resolution to run the bsod client in
+-- Resolution to run the bsod client in. If fullscreen mode is on make
+-- sure you use values supported by your monitor and videocard.
 width			= 1024
 height			= 768
 bpp			= 32
@@ -41,23 +42,32 @@ bpp			= 32
 
 --------------------------------------------------------
 -- MISC OPTIONS
--- multiplier to the speed particles travel across the display
+-- Multiplier to the speed particles travel across the display.
 speed = 1.0
 
--- size the particles should be drawn
+-- Size the particles should be drawn.
 size = 2.0
 
--- add jitter between particles based on the time since the last frame
+-- Add jitter between particles based on the time since the last frame
 -- was drawn. This helps to smooth out the display and prevent banding
--- when the frame rate is low
+-- when the frame rate is low.
 jitter = "yes"
 
--- billboarding is a work in progress, leave this as "no" for now
-billboard = "no"
+-- Do billboarding using point sprites. This is faster and looks nicer
+-- on hardware that supports this feature. If BSOD crashes on startup
+-- try disabling this to fall back to the textured quads method of
+-- drawing particles.
+billboard = "yes"
 
--- path to the image that should be used for the particles
+-- Path to the image that should be used for the particles.
 particle = "data/particle.png"
 
--- do extra garbage collection on unused flows to remove them from the freelist
+-- Do extra garbage collection on unused flows to remove them from the freelist.
+-- If you have a lot of memory and large volumes of traffic turning this off
+-- may be a good option as there may be a slight pause when the garbage
+-- collection cycle runs.
 do_gcc = "yes"
+
+-- When this is set to "yes" the GUI menu is hidden.
+no_gui = "no"
 

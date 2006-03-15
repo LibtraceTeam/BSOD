@@ -79,10 +79,6 @@ int init_module(const char* filename)
     FILE *fin = 0;
     char *buffer;
     int lines = 0;
-    uint8_t octets[ETHER_ADDR_LEN];
-    //int i = 0;
-    int num = 0;
-
 
     buffer = (char *)malloc(65536);
     if( (fin = fopen(filename,"r")) == NULL)
@@ -90,7 +86,6 @@ int init_module(const char* filename)
 	Log(LOG_DAEMON|LOG_INFO,
 		"Couldn't load mac address file '%s', giving up\n", filename);
 	exit(1);
-	//err(1, "Couldn't load mac address file %s, giving up", filename);
     }
 
     while (fgets(buffer,65536,fin)) {
@@ -105,22 +100,12 @@ int init_module(const char* filename)
     macs = (uint64_t*)malloc(sizeof(uint64_t) * lines);
 
     while(fgets(buffer,65536,fin)) {
-	num = sscanf(buffer,"%x:%x:%x:%x:%x:%x",
-		&octets[0],&octets[1],&octets[2],
-		&octets[3],&octets[4],&octets[5]);
-
-	macs[macsloaded] = mac_to_uint64(octets);
+	macs[macsloaded] = mac_to_uint64(trace_ether_aton(buffer,NULL));
 	macsloaded++;
     }
 
 
     free(buffer);
-
-    /*
-    for (i = 0 ; i < macsloaded; i ++) {
-	printf("%lld\n",macs[i]);
-    }
-    */
 
     return(0);
 }

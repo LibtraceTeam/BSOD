@@ -72,6 +72,7 @@ struct client {
 	int fd;
 	struct client *next;
 	struct client *prev;
+	int data_waiting;
 	std::list< client_buffer > buffer;
 } *clients = NULL;
 
@@ -270,6 +271,8 @@ int flush_data(struct client *client)
 			}
 		}
 
+		client->data_waiting-=ret;
+
 		// If we successfully wrote this data, remove it from the queue
 		if (ret == (int)client->buffer.front().datalen - (int)client->buffer.front().offset) {
 			free(client->buffer.front().data);
@@ -376,10 +379,18 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 }
 
 /* Enqueue data onto a clients sendq
+ *
+ * If this overflows the clients queue, disconnect the client.
  */
 void enqueue_data(struct client *client,char *buffer, size_t size)
 {
 	struct client_buffer sendq;
+	client->data_waiting+=size;
+	if (client->data_waiting>10*1024*1024) { // 10MB
+		Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i for max sendq exceeded\n",client->fd);
+		remove_fd(client);
+		return;
+	}
 	sendq.datalen = size;
 	sendq.data = (char*) malloc(sendq.datalen);
 	memcpy(sendq.data,buffer,sendq.datalen);
@@ -394,7 +405,8 @@ void enqueue_data(struct client *client,char *buffer, size_t size)
  */
 int send_all(pack_union *data)
 {
-	struct client *tmp = clients;
+	struct client *tmp;
+	struct client *next;
 	int size = 0;
 
 	if(data->flow.type == 0x01)
@@ -413,10 +425,10 @@ int send_all(pack_union *data)
 		return 1;
 	}
 	// send to all clients 
-	while(tmp != NULL)
+	for(tmp=clients;tmp != NULL; tmp = next)
 	{
+		next=tmp->next;
 		enqueue_data(tmp, (char*)data, size);
-		tmp = tmp->next;
 	}
 
 	return 0;
@@ -513,7 +525,6 @@ int send_kill_all()
     union pack_union *punion;
     punion = (pack_union *)&kall;
     send_all(punion);
-    printf( "Sent kill all signal!\n" );
 
     return 0;
 }

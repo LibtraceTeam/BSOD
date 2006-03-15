@@ -73,8 +73,10 @@
 #include "RTTMap.h"
 #include "Blacklist.h"
 
+#if 0
 extern "C"
 char *strndup(const char *, size_t);
+#endif
 
 typedef struct ip ip_t;
 
@@ -85,7 +87,7 @@ int restart_config = 1;
 int terminate_bsod = 0;
 int fd_max;
 
-struct libtrace_t *trace = 0;
+libtrace_t *trace = 0;
 
 struct timeval tracetime;
 struct timeval starttime;
@@ -160,7 +162,7 @@ int main(int argc, char *argv[])
 
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
-	struct libtrace_packet_t packet;
+	struct libtrace_packet_t *packet;
 	time_t next_save = 0;
 	time_t lastts = 0;
 
@@ -287,12 +289,17 @@ int main(int argc, char *argv[])
 		if (filterstring) {
 			Log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
 			filter = trace_bpf_setfilter(filterstring);
+			trace_config(trace,TRACE_OPTION_FILTER,filter);
 		}
+
+		trace_start(trace); // Go baby GO!
+
+		packet=trace_create_packet();
 
 		while(loop) // loop on packets
 		{
-			// If we get a USR1, we want to restart. Break out of this while()
-			// and go into cleanup
+			// If we get a USR1, we want to restart. Break out of
+			// this while() and go into cleanup
 			if (restart_config == 1) {
 				break;
 			}
@@ -308,7 +315,7 @@ int main(int argc, char *argv[])
 				send_flows(new_client);
 
 			/* get a packet, and process it */
-			if((psize = trace_read_packet(trace, &packet)) <= 0) {
+			if((psize = trace_read_packet(trace, packet)) <= 0) {
 			    if (psize < 0) {
 				perror("libtrace_read_packet");
 			    }
@@ -322,13 +329,7 @@ int main(int argc, char *argv[])
 			if (sampling && packet_count % sampling != 0)
 				continue;
 
-			// if we have a filter, and if the filter doesn't match, 
-			// continue the inner while() loop
-			if (filter)  
-				if (!trace_bpf_filter(filter,&packet)) 
-					continue;
-
-			packettime = trace_get_timeval(&packet);
+			packettime = trace_get_timeval(packet);
 		
 			/* this time checking only matters when reading from a
 			 * prerecorded trace file. It limits it to a seconds
@@ -343,7 +344,7 @@ int main(int argc, char *argv[])
 
 			
 			// if sending fails, assume we just lost a client
-			if(per_packet(&packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0)
+			if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0)
 				continue;
 
 			if (packettime.tv_sec > next_save) {

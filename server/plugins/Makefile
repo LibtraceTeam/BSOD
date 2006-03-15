@@ -1,10 +1,10 @@
 CXX=g++
 CC=g++
-INCLUDE = -I/usr/local/include -I/home/perry/lib/include
+INCLUDE= -I/usr/local/include -I/home/perry/lib/include
 #CXXFLAGS = -Wall -Wimplicit -Wformat -pipe -g -fPIC
-CXXFLAGS = -g -fPIC -shared -Wall -Wimplicit -Wformat -pipe -pedantic
-CXXFLAGS += $(INCLUDE)
-LDFLAGS=-L/home/perry/lib/lib
+CXXFLAGS+=-g -fPIC -shared -Wall -Wimplicit -Wformat -W -pipe -pedantic
+CXXFLAGS+=$(INCLUDE)
+LDFLAGS+=-L/home/perry/lib/lib -shared -fPIC
 
 DIRS := position direction
 SOURCES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))

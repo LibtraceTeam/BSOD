@@ -7,7 +7,7 @@ CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
 LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace
-LDFLAGS=  -L./lib -L/usr/local/lib -rdynamic 
+LDFLAGS+=  -L./lib -L/usr/local/lib -rdynamic 
 # For Mac OS X
 # Mac OS X doesn't do -rdynamic
 #LDFLAGS= -L./lib -L/usr/local/lib
@@ -15,7 +15,7 @@ LDFLAGS=  -L./lib -L/usr/local/lib -rdynamic
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o 
 
-PREFIX=/usr/local/bsod
+PREFIX=/home/perry/opt/bsod
 
 BINDIR=$(PREFIX)/bin
 CONFDIR=$(PREFIX)/etc
@@ -46,7 +46,7 @@ plugins:
 plugins-clean:
 	cd plugins; $(MAKE) clean; cd ..
 
-install:
+install: all
 	mkdir -p $(BINDIR)
 	mkdir -p $(CONFDIR)
 	mkdir -p $(LIBDIR)

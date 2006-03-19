@@ -263,10 +263,15 @@ int main(int argc, char *argv[])
 		}
 
 		//------- Connect trace ----------
-		if( (trace = trace_create(uri)) == NULL)
+		trace = trace_create(uri);
+
+		if (trace_is_err(trace))
 		{
+		    struct trace_err_t err;
+		    err=trace_get_err(trace);
 		    Log(LOG_DAEMON|LOG_ALERT, 
-			    "Unable to connect to data source: %s\n", uri);
+			    "Unable to connect to data source: %s\n",
+			   	 err.problem);
 		    exit(1);
 		}
 
@@ -292,7 +297,13 @@ int main(int argc, char *argv[])
 			trace_config(trace,TRACE_OPTION_FILTER,filter);
 		}
 
-		trace_start(trace); // Go baby GO!
+		if (trace_start(trace)==-1) {
+			struct trace_err_t err;
+			Log(LOG_DAEMON|LOG_ALERT, 
+					"Unable to connect to data source: %s\n",
+					err.problem);
+			exit(1);
+		}
 
 		packet=trace_create_packet();
 

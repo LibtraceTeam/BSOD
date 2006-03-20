@@ -182,6 +182,8 @@ public:
 
 	virtual void SetGLPointParameterfARB( uint32 param, float value ) = 0;
 	virtual void SetGLPointParameterfvARB( uint32 param, float *value ) = 0;
+
+	virtual ~CDisplayManager() {};
 };
 
 typedef CDisplayManager::DisplayBlendMode BlendMode;

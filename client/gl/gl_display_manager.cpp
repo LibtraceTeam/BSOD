@@ -48,6 +48,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 #endif
 
+#define GLX_GLXEXT_PROTOTYPES
+
 #include "gl_display_manager.h"
 
 

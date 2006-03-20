@@ -415,7 +415,8 @@ void CSDLNetDriver::ReceiveData()
 	}
 	else 
 	{
-	    Log("Unknown packet type...s:%u r:%u d:%u \n",
+	    Log("Unknown packet type... type=%d  || s:%u r:%u d:%u \n",
+			fp->flow.type,
 		    databuf.size(), 
 		    (int)(buf-&databuf[0]), 
 		    (int)(&databuf[databuf.size()]-buf)
@@ -430,6 +431,12 @@ void CSDLNetDriver::ReceiveData()
 
 void CSDLNetDriver::Reconnect()
 {
+	world.partVis->KillAll();
+	
+	world.partVis->fdmap.clear();
+	world.partVis->pGui->InitFD();
+
+
 	Connect( address );
 	if( reconnect ) // Still not connected. Wait longer next time.
 	{
@@ -442,7 +449,7 @@ void CSDLNetDriver::Reconnect()
 
 		// Also, need to clear the flow desriptors since we will get a new list.
 		// (if we keep the old list we get problems if the server was changed and is sending a different fd list).
-		world.partVis->fdmap.clear();
+		databuf.erase(databuf.begin(), databuf.end());
 	}
 }
 

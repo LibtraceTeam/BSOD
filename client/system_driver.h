@@ -64,6 +64,7 @@ public:
 	virtual void ForceWindowDraw() = 0;
 	virtual void ErrorMessageBox(string title, string message) = 0;
 	virtual void GetMousePos( int *x, int *y ) = 0;
+	virtual ~CSystemDriver() {};
 };
 
 int BungMain(int argc, char *argv[]);

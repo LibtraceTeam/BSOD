@@ -502,7 +502,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 			}
 		}
 		else
-			Log( "Received packet that had no descriptor!" );
+			Log( "Received packet that had no descriptor!\n" );
 	}
 
     last_timestamp = timestamp;

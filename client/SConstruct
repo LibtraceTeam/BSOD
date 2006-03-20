@@ -17,7 +17,7 @@ libs = [
     # SDL networking lib for new networking. You'll need to install this
     'SDL_net',
     # a lot of things from the stl are used
-    'stlport_gcc'
+#    'stlport_gcc'
 ]
 include_path = [
     '#.',

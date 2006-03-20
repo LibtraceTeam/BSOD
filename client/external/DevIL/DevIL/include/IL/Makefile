@@ -16,7 +16,7 @@ SHELL = /bin/sh
 srcdir = .
 top_srcdir = ../..
 
-prefix = /home/sjd18/bsod/client/..
+prefix = /home/user/cur_client/bsod/client/external/DevIL/DevIL/..
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
@@ -40,10 +40,10 @@ pkgincludedir = $(includedir)/DevIL
 
 top_builddir = ../..
 
-ACLOCAL = aclocal
-AUTOCONF = autoconf
-AUTOMAKE = automake
-AUTOHEADER = autoheader
+ACLOCAL = /home/user/cur_client/bsod/client/external/DevIL/DevIL/libtools/missing aclocal
+AUTOCONF = /home/user/cur_client/bsod/client/external/DevIL/DevIL/libtools/missing autoconf
+AUTOMAKE = /home/user/cur_client/bsod/client/external/DevIL/DevIL/libtools/missing automake
+AUTOHEADER = /home/user/cur_client/bsod/client/external/DevIL/DevIL/libtools/missing autoheader
 
 INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
@@ -75,16 +75,16 @@ LIBILUT_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer    
 LIBILUT_WIN32LIBPATH = 
 LIBILU_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer                -fexpensive-optimizations
 LIBIL_CFLAGS = -Wall -O3  -funroll-loops -ffast-math  -fomit-frame-pointer               -fexpensive-optimizations
-LIBJPG = -ljpeg
+LIBJPG = 
 LIBLCMS = 
 LIBMNG = 
 LIBPNG = -lpng
 LIBSDL = 
-LIBTIFF = -ltiff
+LIBTIFF = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 MAINT = #
-MAKEINFO = makeinfo
+MAKEINFO = /home/user/cur_client/bsod/client/external/DevIL/DevIL/libtools/missing makeinfo
 OBJDUMP = objdump
 OBJEXT = o
 PACKAGE = DevIL

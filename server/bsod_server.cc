@@ -330,6 +330,8 @@ int main(int argc, char *argv[])
 			    if (psize < 0) {
 				perror("libtrace_read_packet");
 			    }
+			    if (psize == 0)
+				    continue;
 			    break;
 			}
 

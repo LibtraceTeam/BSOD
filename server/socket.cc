@@ -138,6 +138,7 @@ fd_set write_fds;
 struct client* create_fd(int fd)
 {
 	client *tmp = new client;
+	tmp->data_waiting = 0;
 	tmp->fd = fd;
 	tmp->next = NULL;
 	tmp->prev = NULL;

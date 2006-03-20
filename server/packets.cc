@@ -228,12 +228,10 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	flow_id_t tmpid;
 	flow_lru_t::iterator current;
 
-	assert(packet->buffer != NULL);
-	assert(packet->size > 0);
-
 	struct libtrace_ip *p = trace_get_ip(packet);
 
 	if (!p) {
+		printf("not an ip packet\n");
 		return 0;
 	}
 	assert(secs-lastts >= 0);

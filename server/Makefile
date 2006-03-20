@@ -1,13 +1,16 @@
 CXX=g++
 CC=g++
 CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g 
-INCLUDE =  -I. -I/usr/local/include  -I. -I./lib
+##INCLUDE =  -I. -I/usr/local/include  -I. -I./lib -I/home/sjd18/libtrace3/libtrace/lib
+INCLUDE =  -I. -I. -I./lib -I/home/sjd18/libtrace3/libtrace/lib
 
 CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
 LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace
-LDFLAGS+=  -L./lib -L/usr/local/lib -rdynamic 
+##LDFLAGS+=  -L./lib -L/usr/local/lib -L/home/sdj18/libtrace3/libtrace -rdynamic
+LDFLAGS+= -L./lib -L/home/sdj18/libtrace3/libtrace -rdynamic 
+
 # For Mac OS X
 # Mac OS X doesn't do -rdynamic
 #LDFLAGS= -L./lib -L/usr/local/lib

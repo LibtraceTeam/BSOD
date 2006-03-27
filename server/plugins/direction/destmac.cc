@@ -107,7 +107,7 @@ int init_module(const char* filename)
 
     free(buffer);
 
-    return(0);
+    return(1);
 }
 
 

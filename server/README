@@ -136,16 +136,16 @@ option: dir_module	type: string
     you are using a pcap based format instead of erf, you will want to
     use the module "plugins/direction/destmac.so". If you use this
     alternate module, you will need to specify the file containing remote
-    mac addresses with the 'macaddrfile' option. Whether the packet is
-    destined to or coming from one of these listed mac addresses is used
-    to determine which way it is travelling.
-
-option: macaddrfile	type: string
-    If using the "plugins/direction/destmac.so" module for direction, then
-    you need to explicitly specify all remote mac addresses that could
-    possibly appear in the trace/capture. These should be in the standard
-    colon seperated hex notation (eg 00:11:22:33:44:55), one address per 
-    line in the file. Defaults to "/usr/local/bsod/etc/mac_addrs".
+    mac addresses as an argument to the direction module, eg -
+    
+	dir_module "plugins/direction/destmac.so etc/mac_addrs"
+    
+    Whether the packet is destined to or coming from one of the mac 
+    addresses listed in this file is used to determine which way it is 
+    travelling. You need to explicitly specify all local mac addresses 
+    that could possibly appear in the trace/capture. These should be in 
+    the standard colon seperated hex notation (eg 00:11:22:33:44:55), 
+    one address per line in the file.
     
 option: loop		type: integer
     Only makes sense when running with offline traces. If set to 1, then 

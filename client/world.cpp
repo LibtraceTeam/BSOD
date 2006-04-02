@@ -153,18 +153,18 @@ void CWorld::Draw()
 		display->BindTexture(NULL);
 		display->SetBlend(true);
 		display->SetBlendMode(CDisplayManager::Transparent);
-		display->Draw2DQuad(0, 8, 800, 57);
+		display->Draw2DQuad(0, 28, 800, 77);
 		display->SetBlendMode(CDisplayManager::Multiply);
 		display->SetBlend(false);
 		display->SetColour(1.0f, 1.0f, 1.0f);
 
-		display->DrawString2(10, 10, 
-			bsprintf("FPS: %3.3f nodes:%d meshs:%d triangles:%d t:%s Flows: %d", fps, 
-				COctree::nodes_drawn, display->GetNumMeshesDrawn(),
-				display->GetNumTrianglesDrawn(), tbuf, partVis->NumFlows() )
+		display->DrawString2(10, 30, 
+			bsprintf("FPS: %3.3f Triangles: %d Packets: %06d Flows: %d", fps, 
+				display->GetNumTrianglesDrawn(), world.partVis->packetsFrame, 
+				partVis->NumFlows() )
 			);
 
-		display->DrawString2(10, 35, 
+		display->DrawString2(10, 55, 
 			bsprintf("(%f,%f,%f) (pitch:%f,heading:%f)", 
 				world.entities->GetPlayer()->GetPosition().x, 
 				world.entities->GetPlayer()->GetPosition().y, 
@@ -179,14 +179,14 @@ void CWorld::Draw()
 		for(; i != CReporter::GetLog().end(); ++i, count++) 
 		{
 			if(count < 10)
-				display->DrawString2(10, 60 + count * 20, *i);
+				display->DrawString2(10, 80 + count * 20, *i);
 		}
 		
 
 		display->End2D();
     } 
-	else
-	{
+//	else
+//	{
 		float w = 360, h = 20;
 		float x = 0, y = display->GetHeight() - h;
 		string str;
@@ -196,18 +196,31 @@ void CWorld::Draw()
 		str = tbuf;
 		str += buff;
 
-		display->Begin2D();
-		display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
+		/*display->Begin2D();
 		display->BindTexture(NULL);
 		display->SetBlend(true);
 		display->SetBlendMode(CDisplayManager::Transparent);
-		display->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h));
+		display->Draw2DQuad(0, 0, 1, 1);
 		display->SetBlendMode(CDisplayManager::Multiply);
+		display->SetBlend(false);
+		display->SetColour(1.0f, 1.0f, 1.0f);
+		display->End2D();*/
+
+		display->Begin2D();
+		
+				
+		display->BindTexture(NULL);
+		display->SetColour(0.4f, 0.4f, 0.9f, 0.75f);
+		display->BindTexture(NULL);	
+		display->SetBlend(false);
+		display->SetBlendMode(CDisplayManager::Transparent);
+		display->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h));
+		//display->SetBlendMode(CDisplayManager::Multiply);
 		display->SetBlend(false);
 		display->SetColour(1.0f, 1.0f, 1.0f);
 		display->DrawString2((int)x+3, (int)y+1, str);
 		display->End2D();
-    }
+//    }
 
 
 	display->EndFrame2();

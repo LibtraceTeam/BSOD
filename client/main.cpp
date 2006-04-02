@@ -151,7 +151,7 @@ int BungMain(int argc, char *argv[])
 		strcat( title, netHost.c_str() );
 		world.display = world.sys->InitDisplay(width, height, bpp, fullScreen, 
 				dispType, title);
-		world.display->Initialise();
+		world.display->Initialise( billboard );
 		
 		loadingScreen = auto_ptr<CLoadingScreen>(new CLoadingScreen(width, height));
 		

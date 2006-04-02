@@ -339,22 +339,22 @@ void CSDLNetDriver::ReceiveData()
 			ntohf(fp->packet.speed),
 			fp->packet.dark);
 #endif
-		//if( world.partVis->fps > 30.0f )//world.partVis->packetsFrame < 25 )
-		//{
-		world.partVis->packetsFrame++;
-		//static uint32 tsfudge = fp->packet.ts;
-		//tsfudge++;
-		//Log( "%d\n", fp->packet.ts );
-		world.partVis->UpdatePacket(
-			ntohl(fp->packet.id), 
-			ntohl(fp->packet.ts),
-			fp->packet.id_num,
-			fp->packet.size,
-			ntohf(fp->packet.speed),
-			fp->packet.dark);
-		//}
+			//if( world.partVis->fps > 30.0f )//world.partVis->packetsFrame < 25 )
+			//{
+			//world.partVis->packetsFrame++;
+			//static uint32 tsfudge = fp->packet.ts;
+			//tsfudge++;
+			// Log( "Packet for flow: %d\n", fp->packet.id );
+			world.partVis->UpdatePacket(
+							ntohl(fp->packet.id), 
+							ntohl(fp->packet.ts),
+							fp->packet.id_num,
+							fp->packet.size,
+							ntohf(fp->packet.speed),
+							fp->packet.dark);
+			//}
 
-		buf += sizeof(pack_update_t);
+			buf += sizeof(pack_update_t);
 	    } 
 	    else 
 	    {

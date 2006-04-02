@@ -89,7 +89,7 @@ public:
 	// member functions
 
 	// Initialisation
-	virtual void Initialise() = 0;
+	virtual void Initialise( bool pointSprties ) = 0;
 
 	// Texture management
 	virtual CDisplayManager::ImageType RequestSupportedImageType(CDisplayManager::ImageType type) = 0;

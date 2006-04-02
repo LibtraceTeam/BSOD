@@ -98,6 +98,8 @@ CPartVis::CPartVis( bool mm )
 	// without the logo.
 	//filter_state = -1;
 	packetsFrame = 0;
+	//packetsFrameIn = 0;
+
 	diff = 0.0f;
 	last_gc = world.sys->TimerGetTime();
 	show_dark = 0;
@@ -109,6 +111,7 @@ CPartVis::CPartVis( bool mm )
 	no_gui = false;
 	isHit = false;
 	click = false;
+	singularity = false;
 
 	ip[0] = 0;
 	ip[1] = 0;
@@ -269,7 +272,15 @@ void CPartVis::Draw( bool picking )
 			if( fdmi != fdmap.end() )
 			{
 				if( fdmi->second->show )
-					(*i)->second->Draw( picking );
+				{
+					if( singularity )
+					{
+						if( (*i)->second->is_singularity )
+							(*i)->second->Draw( picking );
+					}
+					else
+						(*i)->second->Draw( picking );
+				}
 			}
 		}
 	}
@@ -296,20 +307,32 @@ void CPartVis::Draw( bool picking )
 
 		if( hits > 0 )
 		{
-			int choose = pSelBuff[3];
+			unsigned int choose = pSelBuff[3];
 			int depth = pSelBuff[1];
 
-			for( int i=0; i<hits; i++ )
+			for( int c=0; c<hits; c++ )
 			{
-				if( pSelBuff[(i*4)+1] < (GLuint)depth )
+				if( pSelBuff[(c*4)+1] < (GLuint)depth )
 				{
-					choose = pSelBuff[(i*4)+3];
-					depth = pSelBuff[(i*4)+1];
+					choose = pSelBuff[(c*4)+3];
+					depth = pSelBuff[(c*4)+1];
 				}
 			}
 
 			IPInt2Byte( choose, &ip[0], &ip[1], &ip[2], &ip[3] );
+			if( world.actionHandler->s_pick )
+			{
+				for( i=active_nodes.begin(); i != active_nodes.end(); i++ )
+				{
+					if( ((*i)->second->ip1 == (uint32)choose) || ((*i)->second->ip2 == (uint32)choose) )
+						(*i)->second->is_singularity = true;
+					else
+						(*i)->second->is_singularity = false;
+				}
+				singularity = true;
+			}
 
+			//Log( "IP = %u", choose );
 			//Log( "IP chosen: %d.%d.%d.%d\n", ip[0], ip[1], ip[2], ip[3] );
 		}
 
@@ -357,7 +380,7 @@ void CPartVis::Draw( bool picking )
 	d->BindTexture(NULL);
 	d->SetBlend(true);
 	d->SetBlendMode(CDisplayManager::Transparent);
-	d->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h));
+	d->Draw2DQuad((int)x, (int)y, (int)(x + w), (int)(y + h -20));
 	d->BindTexture(wandlogo);
 	d->SetColour(1.0f, 1.0f, 1.0f, 0.8f);
 	d->Draw2DQuad( d->GetWidth() - 160, d->GetHeight() - 65, d->GetWidth(), d->GetHeight() );
@@ -465,10 +488,11 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 	if( paused ) // Don't add packets when paused.
 		return;
 
-    FlowMap::iterator i = flows.find(flow_id);
+    	FlowMap::iterator i = flows.find(flow_id);
 
 	if(i == flows.end()) 
 	{
+		Log( "Flow NOT found for a packet.\n" );
 		return;//Log("Adding packet to non-existant flow %d\n", flow_id);
 	} 
 	else 
@@ -536,6 +560,7 @@ void CPartVis::RemoveFlow(unsigned int id)
 void CPartVis::BeginUpdate()
 {
 	packetsFrame = 0;
+	//packetsFrameIn = 0;
 }
 
 void CPartVis::EndUpdate()

@@ -57,6 +57,7 @@ CPartFlow::CPartFlow()
 	type = 0;
 
 	speed = 1.0f;
+	is_singularity = false;
 }
 
 CPartFlow::~CPartFlow()
@@ -99,7 +100,8 @@ void CPartFlow::Draw( bool picking )
 			glPushName( ip1 );
 			glBegin( GL_POINTS );
 			{
-				glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
+				//glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
+				glVertex3f( start.x, start.y, start.z );
 			}
 			glEnd();
 			glPopName(); // ???
@@ -107,7 +109,8 @@ void CPartFlow::Draw( bool picking )
 			glPushName( ip2 );
 			glBegin( GL_POINTS );
 			{
-				glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+				//glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+				glVertex3f( destination.x, destination.y, destination.z );
 			}
 			glEnd();
 			glPopName(); // ???
@@ -118,15 +121,26 @@ void CPartFlow::Draw( bool picking )
 		{
 			glBegin( GL_POINTS );
 			{
-				glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
-				glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+				//glVertex3f( endpoint_vertices[0].x, endpoint_vertices[0].y, endpoint_vertices[0].z );
+				//glVertex3f( endpoint_vertices[6].x, endpoint_vertices[6].y, endpoint_vertices[6].z );
+				glVertex3f( start.x, start.y, start.z );
+				glVertex3f( destination.x, destination.y, destination.z );
 			}
 			glEnd();
+			world.partVis->packetsFrame += 2;
 		}
 
 		// Flow:
 		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		
+		
 		d->SetColour( world.partVis->colour_table[colour[0]], world.partVis->colour_table[colour[1]], world.partVis->colour_table[colour[2]], world.partVis->global_alpha );
+		/*if( start.x < destination.x )
+			d->SetColour( 1.0f, 0.4f, 0.4f, world.partVis->global_alpha );
+		else
+			d->SetColour( 0.4f, 0.4f, 1.0f, world.partVis->global_alpha );*/
+		
+		
 		// Draw the actual flow
 		glPointSize( world.partVis->maxPointSize );
 		d->PushMatrix();
@@ -137,6 +151,11 @@ void CPartFlow::Draw( bool picking )
 			for( int i=vertex_offset; i < (int)(vertices.size()); i+= 6 )
 			{
 				glVertex3f( (vertices[i]).x, (vertices[i]).y, (vertices[i]).z );
+				/*if( start.x < destination.x )
+					world.partVis->packetsFrame++;
+				else
+					world.partVis->packetsFrameIn++;*/
+				world.partVis->packetsFrame++;
 			}
 		}
 		glEnd();
@@ -156,10 +175,10 @@ void CPartFlow::Draw( bool picking )
 		d->DrawTriangles2( (float *)&endpoint_vertices[6], (float *)&endpoint_tex_coords[6], 2);
 		glPopName();
 
-
 		if( picking )
 			return;
 		//d->SetColour(1.0f, 1.0f, 1.0f, 1.0f);
+		world.partVis->packetsFrame += 2;
 
 		// Check that we have enough texture coordinates in our list:
 		while( ((unsigned int)num_triangles * 3) > world.partVis->tex_coords.size() )
@@ -181,6 +200,7 @@ void CPartFlow::Draw( bool picking )
 			//(byte *)&colours[vertex_offset*4],
 			num_triangles);
 		d->PopMatrix();
+		world.partVis->packetsFrame += (num_triangles/2);
 	}
 }
 
@@ -366,10 +386,9 @@ void CPartFlow::Update(float diff)
 
 bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned short _size, float speed, bool dark)
 {
-	//Log("flow %p count %x\n", this, sam_count);
 	if(sam_count > 4)
 		return( false );
-	//sam_count++;
+	sam_count++;
 	type = id;
 
 	// -------------------------------------------------------------
@@ -396,8 +415,13 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		size = 1.0f * world.partVis->global_size;
 
 	//const Vector3f offset( -(0.5f * size), (0.5f * size), 0);
-	const Vector3f offset( -(0.5f * size), 0, 0);
-
+	
+	//const Vector3f offset( -(0.5f * size), 0, 0);
+	//const Vector3f offset(0,0.25f,0); // This is pretty random to fix positioning (but doesn't do a good job anyway). FIX-IT!
+	const Vector3f offset(0.0f,0.0f,0.0f); // This is pretty random to fix positioning (but doesn't do a good job anyway). FIX-IT!
+	
+	/*
+	 // WHAT DOES THIS DO?? XXX
 	if( vertices.size() > 0 )
 	{
 		//if( vertices.back().Length() > (Vector3f(size,size,0)+start-d-translation).Length() )
@@ -408,9 +432,10 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		}
 		else if( vertices.back().x > (Vector3f(size,size,0)+start-d-translation).x )
 			return( false );
-	}
+	}*/
 	jitter.push_back(d);
 
+	//Log("flow %p count %x\n", this, sam_count);
 
 
 	// -----------------------------------------------------------

@@ -156,12 +156,14 @@ public:
 	float colour_table[256]; // Lookup for colour/255.0f to get 0.0f-1.0f
 
 	int packetsFrame;
+	//int packetsFrameIn; // Temp var to check packets in/out ratios. Rox.
 	float diff;
 	float fps;
 	float last_gc;
 	bool do_gcc;
 	bool matrix_mode;
 	bool no_gui;
+	bool singularity;
 	
 	short int show_dark;
 	//int filter_state;

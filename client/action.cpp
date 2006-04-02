@@ -106,7 +106,7 @@ CActionHandler::CActionHandler()
 
 	keyUpMap[ BKC_R ] = &CActionHandler::ToggleWireframe;
 	keyUpMap[ BKC_B ] = &CActionHandler::ToggleBackfaceCull;
-	keyUpMap[ BKC_O ] = &CActionHandler::ToggleOctreeBoxes;
+	//keyUpMap[ BKC_O ] = &CActionHandler::ToggleOctreeBoxes;
 	keyDownMap[ BKC_SPACE ] = &CActionHandler::Pause;
 
 	keyDownMap[ BKC_G ] = &CActionHandler::ToggleGhostMode;
@@ -129,9 +129,14 @@ CActionHandler::CActionHandler()
 	keyUpMap[ BKC_MOUSESCROLLUP ]   = &CActionHandler::ZoomIn;
 	keyUpMap[ BKC_MOUSESCROLLDOWN ] = &CActionHandler::ZoomOut;
 
+	keyDownMap[ BKC_P ] = &CActionHandler::SingularityPick;
+	keyUpMap[ BKC_P ] = &CActionHandler::EndSingularityPick;
+	keyUpMap[ BKC_O ] = &CActionHandler::UnlockSingularity;
+
 	lmb_down = false; // Left mouse button not down yet.
 	rmb_down = false;
 	gui_open = false;
+	s_pick = false;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -348,5 +353,20 @@ void CActionHandler::ZoomIn()
 
 void CActionHandler::ZoomOut()
 {
+}
+
+void CActionHandler::SingularityPick()
+{
+	s_pick = true;
+}
+
+void CActionHandler::EndSingularityPick()
+{
+	s_pick = false;
+}
+
+void CActionHandler::UnlockSingularity()
+{
+	world.partVis->singularity = false;
 }
 

@@ -61,6 +61,7 @@ public:
 	void ReInitialize();
 
 	static float time_to_live;
+	bool is_singularity;
 
 	friend class CPartVis;
 };

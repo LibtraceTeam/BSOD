@@ -137,9 +137,14 @@ public:
 	void ZoomIn();
 	void ZoomOut();
 
+	void SingularityPick();
+	void EndSingularityPick();
+	void UnlockSingularity();
+		
 	bool lmb_down; // Can query to find out if the LMB is down; needed for the navigation stuff.
 	bool rmb_down; // Right mouse button down?
 	bool gui_open; // Hack to give easy access in system driver. This should really be in a more appropriate place;
+	bool s_pick; // Should we pick a single flow to look at?
 };
 
 #endif // _ACTION_H_

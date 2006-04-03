@@ -86,7 +86,7 @@ public:
 		height = 600;
 	}
 
-	virtual void Initialise();
+	virtual void Initialise( bool pointSprites );
 
 	// Texture management
 	virtual CDisplayManager::ImageType RequestSupportedImageType(CDisplayManager::ImageType type);

@@ -109,7 +109,7 @@ PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB = NULL;
 
 CFont			default_font;
 
-void CGLDisplayManager::Initialise()		
+void CGLDisplayManager::Initialise( bool pointSprites )		
 {
 	// Start Of User Initialization
 
@@ -170,18 +170,26 @@ void CGLDisplayManager::Initialise()
 			"font/Courier_New_11");
 			//"font/Lucida_Console_11");
 	//default_font.SetBold(true);
+	
+	char *ext = (char*)glGetString( GL_EXTENSIONS );
+
 
 	Log("OpenGL display driver. Extensions found: %s\n",
-			glGetString(GL_EXTENSIONS));
+			ext);
 //	int tex_units;
 //	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &tex_units);
 //	Log("\tTexture units: %d\n", tex_units);
 
-	char *ext = (char*)glGetString( GL_EXTENSIONS );
 
+	
 	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL )
 	{
-		Log( "GL_ARB_point_parameters extension was not found.\n" );
+		Log( "Warning: GL_ARB_point_parameters extension was not found.\n" );
+		if( pointSprites )
+		{
+			throw CException( "Your graphics card does not support point sprites.\nSet billboarding=false in the config.lua file in your\ndata directory to enable BSOD to run." );
+			exit(-1);
+		}
 		return;
 	}
 	else

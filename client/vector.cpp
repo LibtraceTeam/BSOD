@@ -59,6 +59,7 @@ template class Vector3<double>;
 
 template string Vector3<float>::toString() const;
 template Vector3<float> &Vector3<float>::operator*=(float);
+template Vector3<float> &Vector3<float>::operator-=(Vector3<float> const&);
 template Vector3<float> &Vector3<float>::operator+=(Vector3<float> const&);
 template Vector3<float> Vector3<float>::operator/(float) const;
 template Vector3<float> Vector3<float>::operator*(float) const;

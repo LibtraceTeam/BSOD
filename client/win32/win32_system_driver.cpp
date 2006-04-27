@@ -101,6 +101,9 @@ int CWin32SystemDriver::RunMessageLoop()
 	minimised = false;
 	//SetCursorPos(world.display->GetWidth() / 2, world.display->GetHeight() / 2);
 
+	if( world.actionHandler->no_cursor )
+		ShowCursor( FALSE ); // HACK
+
 	while(!done)									// Loop That Runs While done=FALSE
 	{
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
@@ -615,32 +618,46 @@ void CWin32SystemDriver::KillGLWindow()
 	{
 		if (!wglMakeCurrent(NULL,NULL))					// Are We Able To Release The DC And RC Contexts?
 		{
+			Log( "Error in shutdown = %d\n", GetLastError() );
 			MessageBox(NULL,"Release Of DC And RC Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		}
 
 		if (!wglDeleteContext(hRC))						// Are We Able To Delete The RC?
 		{
+			Log( "Error in shutdown = %d\n", GetLastError() );
 			MessageBox(NULL,"Release Rendering Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		}
 		hRC=NULL;										// Set RC To NULL
 	}
 
-	if (hDC && !ReleaseDC(hWnd,hDC))					// Are We Able To Release The DC
+	if( hDC != NULL )									// Are We Able To Release The DC
 	{
-		MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		if( ReleaseDC(hWnd,hDC) == 0 )
+		{
+			Log( "Error in shutdown = %d\n", GetLastError() );
+			MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		}
 		hDC=NULL;										// Set DC To NULL
 	}
 
-	if (hWnd && !DestroyWindow(hWnd))					// Are We Able To Destroy The Window?
+	if( hWnd != NULL )									// Are We Able To Destroy The Window?
 	{
-		MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		if( DestroyWindow(hWnd) == 0 )
+		{
+			Log( "Error in shutdown = %d\n", GetLastError() );
+			MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		}
 		hWnd=NULL;										// Set hWnd To NULL
 	}
 
-	if (!UnregisterClass("OpenGL",hInstance))			// Are We Able To Unregister Class
+	if( hInstance != NULL )
 	{
-		MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
-		hInstance=NULL;									// Set hInstance To NULL
+		if( UnregisterClass("OpenGL",hInstance) == 0 )		// Are We Able To Unregister Class?
+		{
+			Log( "Error in shutdown = %d\n", GetLastError() );
+			MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		}
+		hInstance=NULL;										// Set hInstance To NULL
 	}
 }
 

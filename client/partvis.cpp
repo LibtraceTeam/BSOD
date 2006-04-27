@@ -251,10 +251,11 @@ void CPartVis::Draw( bool picking )
 			if( (*i)->second->packets == 0 )
 			{
 				IterList::iterator tmp = i;
+				if( tmp == active_nodes.begin() )
+					break;
 				tmp--;
 
 				active_nodes.erase( (*i)->second->active_flow_ptr );
-				//(*i)->second->active_flow_ptr = NULL;
 				i = tmp;
 				continue;
 			}

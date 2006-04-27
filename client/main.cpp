@@ -103,6 +103,7 @@ int BungMain(int argc, char *argv[])
 		float alpha = 0.5f;
 		string particle = "data/particle.png";
 		bool no_gui = false;
+		bool no_cursor = false;
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
 		Log("Parsing config file.\n");
@@ -129,6 +130,7 @@ int BungMain(int argc, char *argv[])
 		config->GetGlobal( "matrix_mode", &matrix_mode );
 		config->GetGlobal( "particle_opacity", &alpha );
 		config->GetGlobal( "no_gui", &no_gui );
+		config->GetGlobal( "no_cursor", &no_cursor );
 		
 		/* If GetGlobal doesn't find a value it seems to return 0.
 		 * Therefore, to avoid packets being invisible and the confusion that this causes
@@ -182,6 +184,7 @@ int BungMain(int argc, char *argv[])
 		world.partVis->do_gcc = do_gcc;
 		world.partVis->global_alpha = alpha;
 		world.partVis->no_gui = no_gui;
+		world.actionHandler->no_cursor = no_cursor;
 	}
 	catch(string error)
 	{

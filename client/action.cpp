@@ -137,6 +137,7 @@ CActionHandler::CActionHandler()
 	rmb_down = false;
 	gui_open = false;
 	s_pick = false;
+	no_cursor = false;
 }
 
 void CActionHandler::KeyDown(Keycode key)

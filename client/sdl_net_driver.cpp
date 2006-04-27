@@ -282,10 +282,12 @@ void CSDLNetDriver::ReceiveData()
     // Log("Databuf.size()=%d\n", databuf.size());
     world.partVis->BeginUpdate();
 
+	if( databuf.size() <= 0 )
+		return;
     unsigned char *buf = &databuf[0];
     while( true ) 
     {
-	const unsigned int s = (const unsigned int)(&databuf[databuf.size()] - &buf[0]);
+	const unsigned int s = (const unsigned int)(&databuf[databuf.size()-1] - &buf[0]);
 	fp = (fp_union *)buf;
 	if(s == 0) 
 	{
@@ -419,7 +421,7 @@ void CSDLNetDriver::ReceiveData()
 			fp->flow.type,
 		    databuf.size(), 
 		    (int)(buf-&databuf[0]), 
-		    (int)(&databuf[databuf.size()]-buf)
+		    (int)(&databuf[databuf.size()-1]-buf)
 	       );
 	    databuf.erase(databuf.begin(), databuf.end());
 	    break;

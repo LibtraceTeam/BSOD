@@ -58,7 +58,7 @@ CTextureManager CTextureManager::tm;
 static bool IsPowerOfTwo(int num)
 {
     for(int i = 0; i < 12; i++)
-        if(num == pow(2, i))
+        if(num == pow(2.0f, i))
             return true;
 
     return false;

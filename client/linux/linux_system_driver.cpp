@@ -166,7 +166,8 @@ int CLinuxSystemDriver::RunMessageLoop()
 
     start_time = TimerGetTime();
 
-    // SDL_ShowCursor(0);
+	if( world.actionHandler->no_cursor )
+		SDL_ShowCursor( SDL_DISABLE ); // HACK
     //SDL_WarpMouse(world.display->GetWidth() / 2, 
     //       world.display->GetHeight() / 2);
 

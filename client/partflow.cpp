@@ -41,7 +41,7 @@ CPartFlow::CPartFlow()
 : offset(0)//, vertices(20*6), tex_coords(20*6), colours(20*6*4)
 {
 	//	num_flows++;
-	active_flow_ptr = NULL;
+	//active_flow_ptr = NULL;
 
 	// Reserve some space for 20 packets worth
 	vertices.reserve(PREALLOC*6);
@@ -338,7 +338,8 @@ void CPartFlow::CreateEndPoints()
 void CPartFlow::Update(float diff)
 {
 	float percent = diff / time_to_live;
-	Vector3f d = destination - start;
+	Vector3f d = destination; // - start;
+	d -= start;
 	d *= (percent * (speed * world.partVis->global_speed));
 
 	proxy_delta += d;
@@ -352,7 +353,9 @@ void CPartFlow::Update(float diff)
 	unsigned int lengthV = (unsigned)6*(offset+1);
 	while( vSize >= lengthV ) 
 	{
-		Vector3f e = (vertices[offset*6]) + translation - jitter[offset];
+		Vector3f e = (vertices[offset*6]); // + translation - jitter[offset];
+		e += translation;
+		e -= jitter[offset];
 		if( (e - start).Length() > length )
 		{
 			offset++;
@@ -443,6 +446,69 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 	if( world.partVis->billboard )
 	{
 		// Triangle 1:
+		Vector3f t1c1(0,0,0);
+		t1c1 += start;
+		t1c1 += offset;
+		t1c1 -= d;
+		t1c1 -= translation;
+		t1c1 -= proxy_delta;
+		vertices.push_back(t1c1);
+		Vector3f t1c2(0,0,size);
+		t1c2 += start;
+		t1c2 += offset;
+		t1c2 -= d;
+		t1c2 -= translation;
+		t1c2 -= proxy_delta;
+		vertices.push_back(t1c2);
+		Vector3f t1c3(0,size,0);
+		t1c3 += start;
+		t1c3 += offset;
+		t1c3 -= d;
+		t1c3 -= translation;
+		t1c3 -= proxy_delta;
+		vertices.push_back(t1c3);
+
+		// Triangle 2:
+		Vector3f t2c1(0,0,size);
+		t2c1 += start;
+		t2c1 += offset;
+		t2c1 -= d;
+		t2c1 -= translation;
+		t2c1 -= proxy_delta;
+		vertices.push_back(t2c1);
+		Vector3f t2c2(0,size,0);
+		t2c2 += start;
+		t2c2 += offset;
+		t2c2 -= d;
+		t2c2 -= translation;
+		t2c2 -= proxy_delta;
+		vertices.push_back(t2c2);
+		Vector3f t2c3(0,size,size);
+		t2c3 += start;
+		t2c3 += offset;
+		t2c3 -= d;
+		t2c3 -= translation;
+		t2c3 -= proxy_delta;
+		vertices.push_back(t2c3);
+		// -------------------------------------------------------------
+	}
+	else
+	{
+		// Triangle 1:
+		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
+
+		// Triangle 2:
+		vertices.push_back(Vector3f(size,0,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
+		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation-proxy_delta);
+	}
+
+/*	ORIGINAL CODE (pre-optimisation). Stupid operators creating loads of new objects 'n stuff.******
+	if( world.partVis->billboard )
+	{
+		// Triangle 1:
 		vertices.push_back(Vector3f(0,0,0)+start+offset-d-translation-proxy_delta);
 		vertices.push_back(Vector3f(0,0,size)+start+offset-d-translation-proxy_delta);
 		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
@@ -465,6 +531,9 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		vertices.push_back(Vector3f(0,size,0)+start+offset-d-translation-proxy_delta);
 		vertices.push_back(Vector3f(size,size,0)+start+offset-d-translation-proxy_delta);
 	}
+	[END OF THAT FOO]*****************************************************************************/
+
+
 /*
 	if( (destination.x < start.x) || (world.partVis->matrix_mode) )
 	{
@@ -487,21 +556,6 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 		tex_coords.push_back(Vector2f(1, 1));
 	} */
 
-	// alpha was 80
-
-	/*colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
-
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);
-	colours.push_back(r); colours.push_back(g); colours.push_back(b); 
-	colours.push_back(140);*/
 	colour[0] = r;
 	colour[1] = g;
 	colour[2] = b;
@@ -520,7 +574,7 @@ bool CPartFlow::AddParticle(unsigned char id, byte r, byte g, byte b, unsigned s
 void CPartFlow::ReInitialize()
 {
 	//	num_flows++;
-	active_flow_ptr = NULL;
+	//active_flow_ptr = NULL;
 
 	// Reserve some space for 20 packets worth
 	vertices.clear();

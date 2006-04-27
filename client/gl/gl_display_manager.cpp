@@ -41,7 +41,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // $Id$
-#include "stdafx.h"
+#include "../stdafx.h"
 
 // Windows OpenGL needs windows.h to be included
 #ifdef _WIN32

@@ -55,7 +55,7 @@ int init_module(const char* bpf)
 {
 	bpf_exp = strdup(bpf);
 	filter = trace_bpf_setfilter(bpf);
-	return(0);
+	return(1);
 }
 
 

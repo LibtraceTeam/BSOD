@@ -59,10 +59,10 @@ install: all
 	mkdir -p $(BLISTDIR)
 
 	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.conf.sample
-	install -b -m 644 ./mac_addrs $(CONFDIR)/mac_addrs
+	install -m 644 ./mac_addrs $(CONFDIR)/mac_addrs.sample
 	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
 
-	cd plugins; $(MAKE) install; cd ..
+	cd plugins; $(MAKE) "PREFIX=$(PREFIX)" install; cd ..
 
 install-init:
 	install -m 755 ./bsod_server.init /etc/init.d/bsod_server

@@ -110,6 +110,8 @@ CPartVis::CPartVis( bool mm )
 	isHit = false;
 	click = false;
 	singularity = false;
+	start_x = -10.0f;
+	end_x = 10.0f;
 
 	ip[0] = 0;
 	ip[1] = 0;
@@ -121,36 +123,6 @@ CPartVis::CPartVis( bool mm )
 	// Build colour lookup table:
 	for( int i=0; i<256; i++ )
 		colour_table[i] = (float)i/255.0f;
-
-	left = new CTriangleFan();
-	left->vertices.push_back(Vector3f(-10, 10, -10));	
-	left->vertices.push_back(Vector3f(-10, 10, 10));	
-	left->vertices.push_back(Vector3f(-10, -10, 10));	
-	left->vertices.push_back(Vector3f(-10, -10, -10));	
-
-	left->texCoords.push_back(Vector2f(1, 0));
-	left->texCoords.push_back(Vector2f(0, 0));
-	left->texCoords.push_back(Vector2f(0, 1));
-	left->texCoords.push_back(Vector2f(1, 1));
-
-	if( matrix_mode )
-		left->tex = CTextureManager::tm.LoadTexture("data/matrix_left.png");
-	else
-		left->tex = CTextureManager::tm.LoadTexture("data/left.png");
-
-	right = new CTriangleFan();
-	right->vertices.push_back(Vector3f(10, 10, -10));	
-	right->texCoords.push_back(Vector2f(0, 0));
-	right->vertices.push_back(Vector3f(10, 10, 10));	
-	right->texCoords.push_back(Vector2f(1, 0));
-	right->vertices.push_back(Vector3f(10, -10, 10));	
-	right->texCoords.push_back(Vector2f(1, 1));
-	right->vertices.push_back(Vector3f(10, -10, -10));	
-	right->texCoords.push_back(Vector2f(0, 1));
-	if( matrix_mode )
-		right->tex = CTextureManager::tm.LoadTexture("data/matrix_right.png");
-	else
-		right->tex = CTextureManager::tm.LoadTexture("data/right.png");
 
 	wandlogo = CTextureManager::tm.LoadTexture( "data/wand.png" );
 
@@ -164,12 +136,47 @@ CPartVis::CPartVis( bool mm )
 	tex_coords.push_back(Vector2f(0, 0));
 }
 
+void CPartVis::Initialise()
+{
+	left = new CTriangleFan();
+	left->vertices.push_back(Vector3f(start_x, 10, -10));	
+	left->vertices.push_back(Vector3f(start_x, 10, 10));	
+	left->vertices.push_back(Vector3f(start_x, -10, 10));	
+	left->vertices.push_back(Vector3f(start_x, -10, -10));	
+
+	left->texCoords.push_back(Vector2f(1, 0));
+	left->texCoords.push_back(Vector2f(0, 0));
+	left->texCoords.push_back(Vector2f(0, 1));
+	left->texCoords.push_back(Vector2f(1, 1));
+
+	right = new CTriangleFan();
+	right->vertices.push_back(Vector3f(end_x, 10, -10));	
+	right->texCoords.push_back(Vector2f(0, 0));
+	right->vertices.push_back(Vector3f(end_x, 10, 10));	
+	right->texCoords.push_back(Vector2f(1, 0));
+	right->vertices.push_back(Vector3f(end_x, -10, 10));	
+	right->texCoords.push_back(Vector2f(1, 1));
+	right->vertices.push_back(Vector3f(end_x, -10, -10));	
+	right->texCoords.push_back(Vector2f(0, 1));
+
+	if( matrix_mode )
+		left->tex = CTextureManager::tm.LoadTexture("data/matrix_left.png");
+	else
+		left->tex = CTextureManager::tm.LoadTexture("data/left.png");
+
+	if( matrix_mode )
+		right->tex = CTextureManager::tm.LoadTexture("data/matrix_right.png");
+	else
+		right->tex = CTextureManager::tm.LoadTexture("data/right.png");
+}
+
 // The "container" class implementation
 void CPartVis::Draw( bool picking )
 {
 	//tehMax = 0;
     //FlowMap::const_iterator i = flows.begin();
 	IterList::iterator i = active_nodes.begin();
+	IterList::iterator nexti = i;
     CDisplayManager *d = world.display;
 
     // Common state for all flows:
@@ -241,32 +248,41 @@ void CPartVis::Draw( bool picking )
 		d->SetCameraTransform( *world.entities->GetPlayer()->GetCamera() );
 	}
 
-	for( ; i != active_nodes.end(); ++i )
+	int flows_drawn = 0; // ***
+	for( ; i != active_nodes.end(); i=nexti )
 	{
+		nexti = i;
+		nexti++;
+
 		(*i)->second->ResetCounter();
 		//if( !paused && !picking )
 		if( !picking )
 		{
 			(*i)->second->Update(diff);
-			if( (*i)->second->packets == 0 )
+			if( (*i)->second->packets == 0 ) //
 			{
-				IterList::iterator tmp = i;
-				if( tmp == active_nodes.begin() )
-					break;
-				tmp--;
+				//IterList::iterator tmp = i;
+				//bool start_again = false;
+				//if( tmp == active_nodes.begin() )
+				//{
+					//break;
+				//	start_again = true;
+				//}
+				//else
+				//	tmp--;
 
 				active_nodes.erase( (*i)->second->active_flow_ptr );
-				i = tmp;
+
+				//if( start_again )
+				//	i = active_nodes.begin();
+				//else
+				//	i = tmp;
 				continue;
 			}
 		}
 
 		if( (show_dark == 0) || ( (show_dark == 1) && (*i)->second->dark) || ( (show_dark == 2) && !(*i)->second->dark) ) 
 		{
-			/*if( filter_state == -1 )
-				(*i)->second->Draw( picking );
-			else if( filter_state == (*i)->second->type )
-				(*i)->second->Draw( picking );*/
 			FlowDescMap::iterator fdmi = fdmap.find((*i)->second->type);
 			if( fdmi != fdmap.end() )
 			{
@@ -278,14 +294,24 @@ void CPartVis::Draw( bool picking )
 							(*i)->second->Draw( picking );
 					}
 					else
+					{
+						if( !picking ) // ***
+							flows_drawn++; // ***
 						(*i)->second->Draw( picking );
+					}
 				}
 			}
 		}
 	}
+
+	/*if( NumActiveFlows() > 0 )
+		ASSERT( flows_drawn > 0 );
+
+	if( !picking )// ***
+		Log( "Flows drawn this frame: %d\n", flows_drawn ); */
+	
 	if( billboard )
 		glDisable( GL_POINT_SPRITE_ARB );
-	//BillboardEnd();
 
 	if( picking ) // Done picking.
 	{
@@ -352,15 +378,6 @@ void CPartVis::Draw( bool picking )
 	// Display current toggle state:
 	char outstr[256];
 
-	/*if( filter_state == -1 )
-		strcpy( outstr, "All packets." );
-	else
-	{
-		FlowDescMap::iterator iter;
-		if( (iter = fdmap.find(filter_state) ) != fdmap.end() )
-			strcpy( outstr, iter->second->name );
-	}*/
-
 	if( show_dark == 0 )
 		strcpy( outstr, "Darknetmode: All" );
 	else if( show_dark == 1 )
@@ -423,6 +440,9 @@ void CPartVis::Draw( bool picking )
 
 	click = false;
 
+	//if( packetsFrame == 0 )
+	//	int z = 22;
+
     //flows_drawn = packets_drawn = 0;
 }
 
@@ -449,9 +469,21 @@ void CPartVis::Update(float diff)
 
 void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32 ip1, uint32 ip2 )
 {
-    //FlowMap::const_iterator i = flows.find(flow_id);
+	// Change start and endpoints to the defined value from the config:
+	if( v1.x < 0 )
+	{
+		v1.x = start_x;
+		v2.x = end_x;
+	}
+	else
+	{
+		v2.x = start_x;
+		v1.x = end_x;
+	}
 
-    //if(i == flows.end()) {
+    FlowMap::const_iterator i = flows.find(flow_id);
+
+    if(i == flows.end()) {
 		//if( fps < 30.0f )//flows.size() > 10000 )
 		//	return;
 		//flows.size();
@@ -474,11 +506,11 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
 		}
 
 		flows.insert(FlowMap::value_type(flow_id, flow));
-	/*} else {
+	} else {
 		// Found
 		Log("UpdateFlow called on flow that already exits (flow=%d)\n",
 			flow_id);
-    }*/
+    }
 }
 
 void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
@@ -497,6 +529,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 	else 
 	{
 		CPartFlow *flow = i->second;
+		float bzzz22 = flow->time_to_live;
 
 		// XXX: at this point we could use the time to make sure the 
 		// particle is in the correct position; if we have lost some amount
@@ -522,6 +555,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 			if( flow->AddParticle(id_num, r, g, b, size, speed, dark) && (flow->packets == 1) )
 			{
 				flow->active_flow_ptr = AddActiveFlow( i );
+				float bzzz = ((*(flow->active_flow_ptr))->second)->time_to_live;
 			}
 		}
 		else
@@ -543,7 +577,8 @@ void CPartVis::RemoveFlow(unsigned int id)
 
     if(i == flows.end()) 
 	{
-        return;//Log("Removing non-existant flow %d\n", id);
+		Log( "Removing non-existent flow %d\n", id );
+        return;
     } 
 	else 
 	{
@@ -559,7 +594,6 @@ void CPartVis::RemoveFlow(unsigned int id)
 void CPartVis::BeginUpdate()
 {
 	packetsFrame = 0;
-	//packetsFrameIn = 0;
 }
 
 void CPartVis::EndUpdate()
@@ -625,6 +659,11 @@ int CPartVis::NumFlows()
 	return( (int)flows.size() );
 }
 
+int CPartVis::NumActiveFlows()
+{
+	return( (int)active_nodes.size() );
+}
+
 void CPartVis::ChangeSpeed( bool faster )
 {
 	if( faster )
@@ -662,13 +701,36 @@ void CPartVis::KillAll()
 	}
 
 	flows.clear();
-	//partflow_pool.clear();
 }
 
 IterList::iterator CPartVis::AddActiveFlow( const FlowMap::iterator i )
-{
-	//active_nodes.push_back( i );
-	//return( active_nodes.end()-- );
+{	
+	//Log( "Adding active flow id: %d\n", i->first );
+	// CHECK FOR EXISTENZ:
+	/*IterList::iterator ret = active_nodes.begin();
+	//Log( "Active flows dump:\n" );
+
+	bool exists = false;
+	for( ; (ret != active_nodes.end()); ret++ )
+	{
+		if( (*ret)->first == i->first )
+		{
+			exists = true;
+			break;
+		}
+		//Log( "%d\n", (*ret)->first );
+	}
+	//Log( "END active flows dump.\n" );
+	if( exists )
+	{
+		Log( "Oops, we already exist! Not adding flow.\n" );
+		float bzzz = ((*ret)->second)->time_to_live;
+		return( ret );
+	}*/
+
+	//if( NumFlows() == NumActiveFlows() )
+	//	Log( "ZOMG Ponies!\n" );
+
 	active_nodes.push_front( i );
 	return( active_nodes.begin() );
 }
@@ -686,7 +748,6 @@ CPartFlow *CPartVis::AllocPartFlow()
 	CPartFlow *ret = *(partflow_pool.begin());
 	partflow_pool.pop_front();
 
-	//ret->ReInitialize();
 	return( ret );
 }
 

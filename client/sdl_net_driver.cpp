@@ -299,18 +299,20 @@ void CSDLNetDriver::ReceiveData()
 	    // Flow
 	    if(sizeof(flow_update_t) <= s) 
 	    {
+
 #ifdef NET_DEBUG
-		Log("Flow: (%f,%f,%f)->(%f,%f,%f):%u\n", 
+			Log( "Flow: id=%u, x1=%f, y1=%f, z1=%f, x2=%f, y2=%f, z2=%f, ip1=%d, ip2=%d\n",
+			ntohl(fp->flow.id),
 			ntohf(fp->flow.x1),
 			ntohf(fp->flow.y1),
 			ntohf(fp->flow.z1),
 			ntohf(fp->flow.x2),
 			ntohf(fp->flow.y2),
 			ntohf(fp->flow.z2),
-			ntohl(fp->flow.id) );
+			ntohl(fp->flow.ip1), 
+			ntohl(fp->flow.ip2)
+			);
 #endif
-
-		//Log( "Flow with ip1 = %d, and ip2 = %d", ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ) );
 
 		world.partVis->UpdateFlow(
 			ntohl(fp->flow.id),
@@ -332,21 +334,18 @@ void CSDLNetDriver::ReceiveData()
 	    // Packet
 		//Log( "PACKET!\n" );
 	    if(sizeof(pack_update_t) <= s) {
+
 #ifdef NET_DEBUG
-			Log("Packet: ts:%u id:%u size:%u speed:%f dark:%d\n",
+			Log( "Packet: flow=%u, ts=%u, id_num=%u, size=%u, speed=%f, dark=%d\n",
+			ntohl(fp->packet.id), 
 			ntohl(fp->packet.ts),
-			ntohl(fp->packet.id),
 			fp->packet.id_num,
 			fp->packet.size,
 			ntohf(fp->packet.speed),
-			fp->packet.dark);
+			fp->packet.dark
+			);
 #endif
-			//if( world.partVis->fps > 30.0f )//world.partVis->packetsFrame < 25 )
-			//{
-			//world.partVis->packetsFrame++;
-			//static uint32 tsfudge = fp->packet.ts;
-			//tsfudge++;
-			// Log( "Packet for flow: %d\n", fp->packet.id );
+			
 			world.partVis->UpdatePacket(
 							ntohl(fp->packet.id), 
 							ntohl(fp->packet.ts),
@@ -354,7 +353,6 @@ void CSDLNetDriver::ReceiveData()
 							fp->packet.size,
 							ntohf(fp->packet.speed),
 							fp->packet.dark);
-			//}
 
 			buf += sizeof(pack_update_t);
 	    } 
@@ -368,8 +366,11 @@ void CSDLNetDriver::ReceiveData()
 	} 
 	else if(fp->flow.type == 0x02) 
 	{
-		//Log( "Kill flow!\n" );
-	    if(sizeof(flow_remove_t) <= s) 
+#ifdef NET_DEBUG
+		Log( "Kill: flow=%u\n", ntohl(fp->rem.id) );
+#endif
+
+	   if(sizeof(flow_remove_t) <= s) 
 	    {
 			world.partVis->RemoveFlow(ntohl(fp->rem.id));
 
@@ -385,7 +386,9 @@ void CSDLNetDriver::ReceiveData()
 	}
 	else if( fp->flow.type == 0x03 )
 	{
-		//Log( "Kill all flows!\n" );
+#ifdef NET_DEBUG
+		Log( "Kill all flows!\n" );
+#endif
 	    // Kill all existing flows!
 	    world.partVis->KillAll();
 	    buf += sizeof(kill_all_t);
@@ -397,6 +400,11 @@ void CSDLNetDriver::ReceiveData()
 		// update it if its different, else do nothing.
 		//int tempK = fp->fdesc.id;
 		//int ppK = tempK;
+
+#ifdef NET_DEBUG
+		Log( "Flow descriptor\n" );
+#endif
+
 		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
 		{
 			// Log( "Adding new fd.\n" );

@@ -146,6 +146,7 @@ public:
 	bool gui_open; // Hack to give easy access in system driver. This should really be in a more appropriate place;
 	bool s_pick; // Should we pick a single flow to look at?
 	bool no_cursor;
+	bool screen_saver;
 };
 
 #endif // _ACTION_H_

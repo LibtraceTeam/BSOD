@@ -104,6 +104,9 @@ int BungMain(int argc, char *argv[])
 		string particle = "data/particle.png";
 		bool no_gui = false;
 		bool no_cursor = false;
+		float start_x = -10.0f;
+		float end_x = 10.0f;
+		bool screen_saver = false;
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
 		Log("Parsing config file.\n");
@@ -113,6 +116,8 @@ int BungMain(int argc, char *argv[])
 		config->Begin();
 		config->ExecuteFile( "data/config.lua" );
 
+		assert(start_x != 0.0f);
+		assert(end_x != 0.0f );
 		config->GetGlobal( "width", &width );
 		config->GetGlobal( "height", &height );
 		config->GetGlobal( "bpp", &bpp );
@@ -131,6 +136,16 @@ int BungMain(int argc, char *argv[])
 		config->GetGlobal( "particle_opacity", &alpha );
 		config->GetGlobal( "no_gui", &no_gui );
 		config->GetGlobal( "no_cursor", &no_cursor );
+		config->GetGlobal( "start_x", &start_x );
+		config->GetGlobal( "end_x", &end_x );
+		config->GetGlobal( "screen_saver", &screen_saver );
+
+		// Reset these values to their defaults if they are broken
+		// (this happens when they are not found in the config file):
+		if( start_x == 0.0f )
+			start_x = -10.0f;
+		if(end_x == 0.0f )
+			end_x = 10.0f;
 		
 		/* If GetGlobal doesn't find a value it seems to return 0.
 		 * Therefore, to avoid packets being invisible and the confusion that this causes
@@ -185,6 +200,13 @@ int BungMain(int argc, char *argv[])
 		world.partVis->global_alpha = alpha;
 		world.partVis->no_gui = no_gui;
 		world.actionHandler->no_cursor = no_cursor;
+		world.partVis->start_x = start_x;
+		world.partVis->end_x = end_x;
+		world.actionHandler->screen_saver = screen_saver;
+		if( screen_saver )
+			Log( "Running as a screensaver\n" );
+
+		world.partVis->Initialise();
 	}
 	catch(string error)
 	{

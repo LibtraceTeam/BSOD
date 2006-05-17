@@ -138,6 +138,7 @@ CActionHandler::CActionHandler()
 	gui_open = false;
 	s_pick = false;
 	no_cursor = false;
+	screen_saver = false;
 }
 
 void CActionHandler::KeyDown(Keycode key)
@@ -261,6 +262,9 @@ void CActionHandler::ToggleDebugDisplay()
 
 void CActionHandler::TurnDown()
 {
+	//if( world.actionHandler->screen_saver )
+	//	world.sys->Quit();
+
 	if( gui_open )
 		return;
 
@@ -274,6 +278,9 @@ void CActionHandler::TurnDown()
 
 void CActionHandler::TurnUp()
 {
+	//if( world.actionHandler->screen_saver )
+	//	world.sys->Quit();
+
 	if( gui_open )
 		return;
 
@@ -284,6 +291,9 @@ void CActionHandler::TurnUp()
 
 void CActionHandler::TurnLeft()
 {
+	//if( world.actionHandler->screen_saver )
+	//	world.sys->Quit();
+
 	if( gui_open )
 		return;
 
@@ -294,6 +304,9 @@ void CActionHandler::TurnLeft()
 
 void CActionHandler::TurnRight()
 {
+	//if( world.actionHandler->screen_saver )
+	//	world.sys->Quit();
+
 	if( gui_open )
 		return;
 

@@ -131,6 +131,7 @@ public:
     virtual void Draw( bool picking );
     virtual void Update(float diff);
 
+	void Initialise();
     void UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32 ip1, uint32 ip2 );
     void UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
 		unsigned short size, float speed, bool dark);
@@ -143,6 +144,7 @@ public:
 	void ToggleShowDark();
 	void ToggleBackFilter();
 	int NumFlows();
+	int NumActiveFlows();
 	void ChangeSpeed( bool faster );
 	void KillAll();
 	IterList::iterator AddActiveFlow( const FlowMap::iterator i );
@@ -164,6 +166,8 @@ public:
 	bool matrix_mode;
 	bool no_gui;
 	bool singularity;
+	float start_x;
+	float end_x;
 	
 	short int show_dark;
 	//int filter_state;

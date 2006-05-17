@@ -159,8 +159,8 @@ void CWorld::Draw()
 		display->SetColour(1.0f, 1.0f, 1.0f);
 
 		display->DrawString2(10, 30, 
-			bsprintf("FPS: %3.3f Triangles: %d Packets: %06d Flows: %d", fps, 
-				display->GetNumTrianglesDrawn(), world.partVis->packetsFrame, 
+			bsprintf("FPS: %3.3f Triangles: %d Packets: %06d Flows: (active/total) %d/%d", fps, 
+				display->GetNumTrianglesDrawn(), world.partVis->packetsFrame, partVis->NumActiveFlows(),
 				partVis->NumFlows() )
 			);
 

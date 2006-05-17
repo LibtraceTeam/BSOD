@@ -70,6 +70,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const int KEYBOARD_BUFFER_SIZE = 32; // Buffer size.  32 should easily be big enough (I think) - Sam
 
+int	lastX = -1;
+int	lastY = -1;
 
 // Duplicated from PartVis.h
 // Simpler than including the header and then figuring out all the dependencies but perhaps there needs to be a util.h or something
@@ -339,7 +341,7 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 
 			if(LOWORD(wParam) == WA_INACTIVE)
 			{
-				sys->SetActive(false);
+				//sys->SetActive(false);
 			}
 			else
 			{
@@ -364,7 +366,7 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 
 		case WM_KILLFOCUS:
 		{
-			sys->SetActive(FALSE);
+			//sys->SetActive(FALSE);
 			return 0;
 		}
 
@@ -412,6 +414,32 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 		case WM_RBUTTONUP:
 			{
 				world.actionHandler->KeyUp(CActionHandler::BKC_RIGHTMOUSEBUT);
+				return 0;
+			}
+		case WM_MOUSEMOVE:
+			{
+				if( world.actionHandler->screen_saver )
+				{
+					int xPos = 0;
+					int yPos = 0;
+					world.sys->GetMousePos( &xPos, &yPos );
+					if( lastX == -1 && lastY == -1 )
+					{
+						lastX = xPos;
+						lastY = yPos;
+					}
+					else
+					{
+						if( (xPos != lastX) || (yPos != lastY) )
+							world.sys->Quit();
+					}
+				}
+				return 0;
+			}
+		case WM_KEYDOWN:
+			{
+				if( world.actionHandler->screen_saver )
+					world.sys->Quit();
 				return 0;
 			}
 	}

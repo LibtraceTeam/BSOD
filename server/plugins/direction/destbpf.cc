@@ -54,7 +54,7 @@ extern "C"
 int init_module(const char* bpf)
 {
 	bpf_exp = strdup(bpf);
-	filter = trace_bpf_setfilter(bpf);
+	filter = trace_create_filter(bpf);
 	return(1);
 }
 
@@ -65,6 +65,7 @@ int init_module(const char* bpf)
 extern "C"
 void end_module()
 {
+	trace_destroy_filter(filter);
 	free(bpf_exp);
 }
 
@@ -76,7 +77,7 @@ extern "C"
 int mod_get_direction(struct libtrace_packet_t *packet)
 {
 
-    if (trace_bpf_filter(filter,packet))
+    if (trace_apply_filter(filter,packet))
 	    return DIR_OUTBOUND;
     else
 	    return DIR_INBOUND;

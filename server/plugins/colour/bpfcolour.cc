@@ -46,7 +46,7 @@ void add_expression(const char *name, struct colour_t colour, const char *exp)
 	info.colour = colour;
 	info.name = name;
 	info.exp = exp;
-	info.filter = trace_bpf_setfilter(exp);
+	info.filter = trace_create_filter(exp);
 	if (!info.filter) {
 		fprintf(stderr,"BPF Filter doesn't parse: %s\n",info.exp.c_str());
 		return;
@@ -75,7 +75,7 @@ int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 	for(exps_t::const_iterator i=exps.begin();
 			i!=exps.end();
 			++i) {
-		if (trace_bpf_filter((i)->filter,packet)) {
+		if (trace_apply_filter((i)->filter,packet)) {
 			*id_num=(i)->id;
 			return 0;
 		}

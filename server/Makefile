@@ -4,7 +4,7 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 # change this to your libtrace path. 
 # this is left here as people often have it installed in their home
 # directories for testing things rather than using the system one
-LIBTRACE = /tmp/bcj3/trace
+LIBTRACE = /usr/local
 INCLUDE =  -I. -I./lib -I$(LIBTRACE)/include
 
 CXXFLAGS += $(INCLUDE)

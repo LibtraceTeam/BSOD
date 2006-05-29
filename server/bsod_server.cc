@@ -289,11 +289,11 @@ int main(int argc, char *argv[])
 
 		//------- Create filter -------------
 		if (filter)
-			free(filter);
+			trace_destroy_filter(filter);
 		filter = 0;
 		if (filterstring) {
 			Log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
-			filter = trace_bpf_setfilter(filterstring);
+			filter = trace_create_filter(filterstring);
 			trace_config(trace,TRACE_OPTION_FILTER,filter);
 		}
 

@@ -375,7 +375,10 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 			switch (wParam)							// Check System Calls
 			{
 				case SC_SCREENSAVE:					// Screensaver Trying To Start?
+					return 0;
 				case SC_MONITORPOWER:				// Monitor Trying To Enter Powersave?
+					if( world.actionHandler->screen_saver )
+						return DefWindowProc(hWnd,uMsg,wParam,lParam);
 				return 0;							// Prevent From Happening
 			}
 			break;									// Exit

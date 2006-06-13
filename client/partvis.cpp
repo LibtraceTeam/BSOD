@@ -87,10 +87,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_FILTER_STATE 15
 // Particle visualisation file
+//
+
+// XXX DEBUG XXX
+#include "rangedset.h"
+
+RangedSet<int> flowseen;
+RangedSet<int> flowsactive;
+
 
 
 CPartVis::CPartVis( bool mm )
-: paused(false)
+:  last_timestamp(0), paused(false)
 {
 	// Need to create a couple of quads, one with the uni logo, another
 	// without the logo.
@@ -173,16 +181,14 @@ void CPartVis::Initialise()
 // The "container" class implementation
 void CPartVis::Draw( bool picking )
 {
-	//tehMax = 0;
-    //FlowMap::const_iterator i = flows.begin();
 	IterList::iterator i = active_nodes.begin();
 	IterList::iterator nexti = i;
-    CDisplayManager *d = world.display;
+	CDisplayManager *d = world.display;
 
-    // Common state for all flows:
-    d->SetBlend(true);
-    d->SetBlendMode(CDisplayManager::Transparent2);
-    d->SetDepthTest(false);
+	// Common state for all flows:
+	d->SetBlend(true);
+	d->SetBlendMode(CDisplayManager::Transparent2);
+	d->SetDepthTest(false);
 
 	int mx = 0, my = 0;
 	world.sys->GetMousePos( &mx, &my );
@@ -191,7 +197,7 @@ void CPartVis::Draw( bool picking )
 	{
 		// This is how our point sprite's size will be modified by distance from the viewer.
 		// /*
-		
+
 		float quadratic[] =  { 1.0f, 0.0f, 0.01f };
 		d->SetGLPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
 
@@ -265,7 +271,7 @@ void CPartVis::Draw( bool picking )
 				//bool start_again = false;
 				//if( tmp == active_nodes.begin() )
 				//{
-					//break;
+				//break;
 				//	start_again = true;
 				//}
 				//else
@@ -305,11 +311,11 @@ void CPartVis::Draw( bool picking )
 	}
 
 	/*if( NumActiveFlows() > 0 )
-		ASSERT( flows_drawn > 0 );
+	  ASSERT( flows_drawn > 0 );
 
-	if( !picking )// ***
-		Log( "Flows drawn this frame: %d\n", flows_drawn ); */
-	
+	  if( !picking )// ***
+	  Log( "Flows drawn this frame: %d\n", flows_drawn ); */
+
 	if( billboard )
 		glDisable( GL_POINT_SPRITE_ARB );
 
@@ -322,7 +328,7 @@ void CPartVis::Draw( bool picking )
 		glPopMatrix();
 		glMatrixMode( GL_MODELVIEW );
 		glFlush();
-		
+
 		hits = glRenderMode( GL_RENDER );
 		//Log( "Hits for click = %d\n", hits );
 		if( hits < 1 )
@@ -364,16 +370,16 @@ void CPartVis::Draw( bool picking )
 		return;
 	}
 
-    d->SetDepthTest(true);
+	d->SetDepthTest(true);
 
-    // Draw the left, then the right sides of the display.
-    d->SetBlend(true);
-    d->SetBlendMode(CDisplayManager::Transparent2);
-    d->SetColour(1.0f, 1.0f, 1.0f, 0.35f);
-    left->Draw();
-    right->Draw();
-    d->SetColour(1.0f, 1.0f, 1.0f);
-    d->SetBlend(false);
+	// Draw the left, then the right sides of the display.
+	d->SetBlend(true);
+	d->SetBlendMode(CDisplayManager::Transparent2);
+	d->SetColour(1.0f, 1.0f, 1.0f, 0.35f);
+	left->Draw();
+	right->Draw();
+	d->SetColour(1.0f, 1.0f, 1.0f);
+	d->SetBlend(false);
 
 	// Display current toggle state:
 	char outstr[256];
@@ -408,7 +414,7 @@ void CPartVis::Draw( bool picking )
 	if( matrix_mode )
 		d->DrawString2( d->GetWidth() - 75, 5, "MATRIX!");
 	/*else
-	d->DrawString2( 5, 5, "F1 for help.");*/
+	  d->DrawString2( 5, 5, "F1 for help.");*/
 
 	d->BindTexture(NULL);
 	d->SetBlendMode(CDisplayManager::Multiply);
@@ -443,7 +449,7 @@ void CPartVis::Draw( bool picking )
 	//if( packetsFrame == 0 )
 	//	int z = 22;
 
-    //flows_drawn = packets_drawn = 0;
+	//flows_drawn = packets_drawn = 0;
 }
 
 void CPartVis::Update(float diff)
@@ -453,10 +459,10 @@ void CPartVis::Update(float diff)
 
 	this->diff = diff;
 
-    /*FlowMap::const_iterator i = flows.begin();
-    for(; i != flows.end(); ++i) {
-	i->second->Update(diff);
-    }*/
+	/*FlowMap::const_iterator i = flows.begin();
+	  for(; i != flows.end(); ++i) {
+	  i->second->Update(diff);
+	  }*/
 	if( do_gcc )
 	{
 		if( (world.sys->TimerGetTime() - last_gc) > 180000.0f ) // 5 minutes
@@ -487,7 +493,8 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
 		//if( fps < 30.0f )//flows.size() > 10000 )
 		//	return;
 		//flows.size();
-	// If the flow does not already exist (it shouldn't at this point)
+		// If the flow does not already exist (it shouldn't at this
+		// point)
 		//CPartFlow *flow = new CPartFlow();
 		CPartFlow *flow = AllocPartFlow();
 		flow->start = v1;// - Vector3f((global_size*0.5f), 0.0f, 0.0f);
@@ -506,6 +513,8 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
 		}
 
 		flows.insert(FlowMap::value_type(flow_id, flow));
+		flowseen.insert(flow_id);
+		flowsactive.insert(flow_id);
 	} else {
 		// Found
 		Log("UpdateFlow called on flow that already exits (flow=%d)\n",
@@ -513,8 +522,8 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
     }
 }
 
-void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num, 
-							unsigned short size, float speed, bool dark)
+void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, 
+		byte id_num, unsigned short size, float speed, bool dark)
 {
 	if( paused ) // Don't add packets when paused.
 		return;
@@ -523,19 +532,23 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 
 	if(i == flows.end()) 
 	{
-		Log( "Flow NOT found for a packet.\n" );
-		return;//Log("Adding packet to non-existant flow %d\n", flow_id);
+		if (flowseen.find(flow_id))
+			Log( "Flow never seen for a packet (%d).\n",flow_id);
+		else if (flowsactive.find(flow_id)) 
+			Log( "Flow not active for a packet (%d).\n",flow_id);
+		else
+			Log( "Flow not found for a packet (%d).\n",flow_id);
+		return;
 	} 
 	else 
 	{
 		CPartFlow *flow = i->second;
-		float bzzz22 = flow->time_to_live;
 
-		// XXX: at this point we could use the time to make sure the 
-		// particle is in the correct position; if we have lost some amount
-		// of time it might not make sense to have this particle start at
-		// the start position. To make this useful we would really need
-		// time more accurate than second accuracy, though.
+		// XXX: at this point we could use the time to make sure the
+		// particle is in the correct position; if we have lost some
+		// amount of time it might not make sense to have this particle
+		// start at the start position. To make this useful we would
+		// really need time more accurate than second accuracy, though.
 
 		FlowDescMap::iterator iter;
 		if( (iter = fdmap.find(id_num)) != fdmap.end() )
@@ -555,7 +568,6 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp, byte id_num,
 			if( flow->AddParticle(id_num, r, g, b, size, speed, dark) && (flow->packets == 1) )
 			{
 				flow->active_flow_ptr = AddActiveFlow( i );
-				float bzzz = ((*(flow->active_flow_ptr))->second)->time_to_live;
 			}
 		}
 		else
@@ -573,19 +585,21 @@ void CPartVis::RemoveFlow(unsigned int id)
 		return;
 	}
 
-    FlowMap::iterator i = flows.find(id);
+	FlowMap::iterator i = flows.find(id);
 
-    if(i == flows.end()) 
+	if(i == flows.end()) 
 	{
-		Log( "Removing non-existent flow %d\n", id );
-        return;
-    } 
+		Log( "Removing non-existent flow %d%s%s\n", id,
+			flowsactive.find(id)?" (active)" : " (inactive)",
+			flowseen.find(id)?" (seen)" : " (unseen)"
+		   );
+	} 
 	else 
 	{
 		//RemoveActiveFlow( i );
 		if( i->second->packets != 0 )
 			active_nodes.erase( i->second->active_flow_ptr );
-        //delete i->second;
+		//delete i->second;
 		FreePartFlow( i->second );
 		flows.erase(i);
     }
@@ -602,12 +616,14 @@ void CPartVis::EndUpdate()
 
 void CPartVis::TogglePaused()
 {
-    paused = !paused;
+	paused = !paused;
 
 	// if not paused, remove all flows stored in list.
 	if( !paused ) // Unpaused, so remove any flows we marked for removal.
 	{
-		for( FlowIDList::iterator i = flows_to_remove.begin(); i != flows_to_remove.end(); i++ )
+		for( FlowIDList::iterator i = flows_to_remove.begin();
+			       	i != flows_to_remove.end();
+			       	i++ )
 			RemoveFlow( *i );
 
 		flows_to_remove.clear();
@@ -768,32 +784,35 @@ void CPartVis::FreePartFlow( CPartFlow *flow )
 
 void CPartVis::GCPartFlows()
 {
+	int collected = 0;
 
-	// Garbage collect:
 	if( partflow_pool.size() > 10 )
 	{
-		//Log( "Begin garbage collection. %d flows in free list", partflow_pool.size() );
-		FlowList::iterator i = partflow_pool.begin();
-		FlowList::iterator last;
-		CPartFlow *tmp;
-		for( ; i != partflow_pool.end(); )
+		FlowList::iterator i ;
+		FlowList::iterator next;
+		for( i = partflow_pool.begin();
+			       	i != partflow_pool.end(); 
+				i = next
+				)
 		{
+			next = i;
+			++next;
 			if( (*i)->gc_count == 1 )
 			{
-				tmp = (*i);
-				last = i;
-				i++;
-				partflow_pool.erase( last );
-				delete tmp;
-				//continue;
+				delete (*i);
+				partflow_pool.erase( i );
+				++collected;
 			}
 			else
 			{
-				(*i)->gc_count++;
-				i++;
+				(*i)->gc_count=1;
 			}
-			//i++;
 		}
-		//Log( "End garbage collection. %d flows in free list", partflow_pool.size() );
 	}
+	if (collected)
+		Log ("Garbage Collected %d/%d flows\n",
+				collected,partflow_pool.size()+collected);
+	else
+		Log ("No Garbage collection required (%d pooled flows)\n",
+				partflow_pool.size());
 }

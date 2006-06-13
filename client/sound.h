@@ -61,6 +61,7 @@ public:
 	virtual CSoundListener *CreateSoundListener() = 0;
 	
 	static ISoundProvider *Create();
+	virtual ~ISoundProvider() {};
 };
 
 class CSoundListener : public CEntity
@@ -81,6 +82,7 @@ public:
 	virtual void SetLooping(bool looping) = 0;
 	virtual void SetPitch(float pitch) = 0;
 	virtual void SetGain(float gain) = 0;
+	virtual ~CSoundSource() {};
 };
 
 

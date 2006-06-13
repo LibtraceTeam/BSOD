@@ -73,6 +73,7 @@ struct IParserCallback
 public:
 	virtual void BeginTagFunc(const string &tag, const map<string, string, string_less> &attrs) = 0;
 	virtual void EndTagFunc(const string &contents) = 0;
+	virtual ~IParserCallback() {};
 };
 
 /** A very, VERY simple XML parser.  It is deliberately simple,

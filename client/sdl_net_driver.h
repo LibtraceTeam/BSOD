@@ -52,7 +52,8 @@ private:
 	TCPsocket       clientsock;
 	SDLNet_SocketSet set;
 	
-	vector<byte>	databuf;
+	char		databuf[1024]; /* never recieve messages over 1k */
+	unsigned int	datalen;
 	string          address;
 	
 public:

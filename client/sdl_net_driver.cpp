@@ -70,13 +70,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // END DEBUG ONLY
 
 //#define htonf(x) x//(*(uint32*)&(x))
-union
-{
-	float f;
-	uint32 i;
-} _u;
+
 float htonf( float x )
 {
+	union
+	{
+		float f;
+		uint32 i;
+	} _u;
 	_u.f = (x);
 	_u.i = htonl(_u.i);
 	return( _u.f );
@@ -94,9 +95,10 @@ CSDLNetDriver::CSDLNetDriver()
     // Assumes SDL_Init() has been called
     if(SDLNet_Init() == -1)
 	throw CException(SDLNet_GetError());
-	reconnect = false;
-	first_connect = true;
-	reconnect_wait = 500.0f;
+    reconnect = false;
+    first_connect = true;
+    reconnect_wait = 500.0f;
+    datalen=0;
 }
 
 CSDLNetDriver::~CSDLNetDriver()
@@ -108,74 +110,76 @@ CSDLNetDriver::~CSDLNetDriver()
 void CSDLNetDriver::Connect(string address)
 {
 	this->address = address;
-    string::size_type c = address.find(':', 0);
-    string host = address.substr(0, c);
-    string port = address.substr(c+1, string::npos);
-    IPaddress ip;
+	string::size_type c = address.find(':', 0);
+	string host = address.substr(0, c);
+	string port = address.substr(c+1, string::npos);
+	IPaddress ip;
 
-    Log("Connecting to Host: '%s' Port: '%s'\n", host.c_str(), port.c_str());
-    
-    if(SDLNet_ResolveHost(&ip, (char *)host.c_str(), 
-		(unsigned short)atoi(port.c_str())) == -1) {
-        // Note: SDLNet_GetError() doesn't seem to say anything useful here.
-	throw CException(bsprintf("Error: Unable to resolve host '%s'",
-                    host.c_str()));
-    }
+	Log("Connecting to Host: '%s' Port: '%s'\n", host.c_str(), port.c_str());
 
-    clientsock = SDLNet_TCP_Open(&ip);
+	if(SDLNet_ResolveHost(&ip, (char *)host.c_str(), 
+				(unsigned short)atoi(port.c_str())) == -1) {
+		// Note: SDLNet_GetError() doesn't seem to say anything useful here.
+		throw CException(bsprintf("Error: Unable to resolve host '%s'",
+					host.c_str()));
+	}
 
-    if(!clientsock)
+	clientsock = SDLNet_TCP_Open(&ip);
+
+	if(!clientsock)
 	{
 		if( first_connect )
 		{
 			throw CException(bsprintf("Unable to connect to server '%s': '%s'",
-							host.c_str(), SDLNet_GetError()));
+						host.c_str(), SDLNet_GetError()));
 		}
 		else
 		{
+			Log("Reconnecting...\n");
 			reconnect = true;
 			return;
 		}
 	}
 	first_connect = false;
 
-    set = SDLNet_AllocSocketSet(16);
-    if(!set)
-	throw CException(SDLNet_GetError());
+	set = SDLNet_AllocSocketSet(16);
+	if(!set)
+		throw CException(SDLNet_GetError());
 
-    if(SDLNet_TCP_AddSocket(set, clientsock) == -1)
-	throw CException(SDLNet_GetError());
-    
-    Log("Connected!\n");
+	if(SDLNet_TCP_AddSocket(set, clientsock) == -1)
+		throw CException(SDLNet_GetError());
 
-    char version;
-    if(SDLNet_TCP_Recv(clientsock, &version, 1) != 1) {
-	    Log("Unable to read server version\n");
-	    throw CException("Unable to read server version\n");
-    }
+	Log("Connected!\n");
 
-    /* Versions lower than 0x12 are ancient */
-    if (version < 0x10) {
-	    Log("Server version is ancient\n");
-	    throw CException("Server version is ancient\n");
-    }
+	char version;
+	if(SDLNet_TCP_Recv(clientsock, &version, 1) != 1) {
+		Log("Unable to read server version\n");
+		throw CException("Unable to read server version\n");
+	}
 
-    const int min_version = 0x14; // Minimum version known
-    const int max_version = 0x14; // Maximum version known
+	/* Versions lower than 0x12 are ancient */
+	if (version < 0x10) {
+		Log("Server version is ancient\n");
+		throw CException("Server version is ancient\n");
+	}
 
-    if (version < min_version) {
-	    throw CException(bsprintf("Server version is %i.%i, need at least %i.%i\n",
-			    version>>4,version&0x0F,
-			    min_version>>4,max_version&0x0f));
-    }
+	const int min_version = 0x14; // Minimum version known
+	const int max_version = 0x14; // Maximum version known
 
-    // Maximum protocol version known is uh, 1.2
-    if (version > max_version) {
-	    throw CException(bsprintf("Server version is %i.%i, client version is only %i.%i\n",
-			    version>>4,version&0x0F,
-			    max_version>>4,max_version&0x0f));
-    }
+	if (version < min_version) {
+		throw CException(bsprintf("Server version is %i.%i, need at least %i.%i\n",
+					version>>4,version&0x0F,
+					min_version>>4,max_version&0x0f));
+	}
 
+	// Maximum protocol version known is uh, 1.2
+	if (version > max_version) {
+		throw CException(bsprintf("Server version is %i.%i, client version is only %i.%i\n",
+					version>>4,version&0x0F,
+					max_version>>4,max_version&0x0f));
+	}
+
+	datalen=0;
 	reconnect = false;
     
 }
@@ -239,7 +243,7 @@ union fp_union {
     struct pack_update_t packet;
     struct flow_remove_t rem;
     struct kill_all_t kall;
-	struct flow_descriptor fdesc;
+    struct flow_descriptor fdesc;
 };
 
 #ifdef _WIN32
@@ -250,189 +254,115 @@ union fp_union {
 
 void CSDLNetDriver::ReceiveData()
 {
-    byte buffer[1024];
-    int  readlen;
     union fp_union *fp;
 
-
-    while(SDLNet_CheckSockets(set, 0) > 0)
+    while(SDLNet_CheckSockets(set, 0) > 0 && datalen<sizeof(databuf))
     {
-		if((readlen = SDLNet_TCP_Recv(clientsock, buffer, 1024)) > 0)
-		{
-			int sam = (int)databuf.size();
-			databuf.resize( sam + readlen );
-			memcpy(&databuf[sam], buffer, readlen);
+	    int readlen;
+	    if((readlen=SDLNet_TCP_Recv(clientsock, &databuf[datalen],
+					    sizeof(databuf)-datalen)) <= 0)
+	    {
+		    // Disconnected or some unknown error try to reconnect:
+		    Log("Error from server: %d %s\n",readlen,SDLNet_GetError());
+		    reconnect = true;
+		    break;
+	    }
+	    datalen+=readlen;
+    }
 
-#ifdef NET_DEBUG
-			Log("Read %d bytes\n", readlen);
-#endif
-		}
-		else
-		{
-			// Disconnected or some unknown error try to reconnect:
-			//Connect( address );
-			reconnect = true;
-			break;
-		}
-	}
-	/*if(readlen == 0)
-	    break;
-    }*/
-
-    // Log("Databuf.size()=%d\n", databuf.size());
     world.partVis->BeginUpdate();
 
-	if( databuf.size() <= 0 )
-		return;
-    unsigned char *buf = &databuf[0];
-    while( true ) 
-    {
-	const unsigned int s = (const unsigned int)(&databuf[databuf.size()-1] - &buf[0]);
-	fp = (fp_union *)buf;
-	if(s == 0) 
-	{
-	    databuf.erase(databuf.begin(), databuf.end());
-	    break;
-	}
-	if(fp->flow.type == 0x00) 
-	{
-	    // Flow
-	    if(sizeof(flow_update_t) <= s) 
-	    {
-
-#ifdef NET_DEBUG
-			Log( "Flow: id=%u, x1=%f, y1=%f, z1=%f, x2=%f, y2=%f, z2=%f, ip1=%d, ip2=%d\n",
-			ntohl(fp->flow.id),
-			ntohf(fp->flow.x1),
-			ntohf(fp->flow.y1),
-			ntohf(fp->flow.z1),
-			ntohf(fp->flow.x2),
-			ntohf(fp->flow.y2),
-			ntohf(fp->flow.z2),
-			ntohl(fp->flow.ip1), 
-			ntohl(fp->flow.ip2)
-			);
-#endif
-
-		world.partVis->UpdateFlow(
-			ntohl(fp->flow.id),
-			Vector3f(ntohf(fp->flow.x1), ntohf(fp->flow.y1), ntohf(fp->flow.z1)),
-			Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)),
-			ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ));
-
-		buf += sizeof(flow_update_t);
-	    } 
-	    else 
-	    {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() + (buf - &databuf[0]));
-		break;
-	    }
-	} 
-	else if(fp->flow.type == 0x01) 
-	{
-	    // Packet
-		//Log( "PACKET!\n" );
-	    if(sizeof(pack_update_t) <= s) {
-
-#ifdef NET_DEBUG
-			Log( "Packet: flow=%u, ts=%u, id_num=%u, size=%u, speed=%f, dark=%d\n",
-			ntohl(fp->packet.id), 
-			ntohl(fp->packet.ts),
-			fp->packet.id_num,
-			fp->packet.size,
-			ntohf(fp->packet.speed),
-			fp->packet.dark
-			);
-#endif
-			
-			world.partVis->UpdatePacket(
-							ntohl(fp->packet.id), 
+    while (datalen > 1) {
+	fp = (fp_union*)databuf;
+	switch(fp->flow.type) {
+		case 0: /* Update flow */
+			/* do we have a complete packet? */
+			if (datalen<sizeof(flow_update_t)) {
+    				world.partVis->EndUpdate();
+				return;
+			}
+			world.partVis->UpdateFlow(
+					ntohl(fp->flow.id),
+					Vector3f(ntohf(fp->flow.x1), ntohf(fp->flow.y1), ntohf(fp->flow.z1)),
+					Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)),
+					ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ));
+			/* use memmove, not memcpy */
+			datalen-=sizeof(flow_update_t);
+			memmove(&databuf[0],&databuf[sizeof(flow_update_t)],datalen);
+			break;
+		case 1: /* Packet */
+			if(datalen <= sizeof(pack_update_t)) {
+    				world.partVis->EndUpdate();
+				return;
+			}
+			world.partVis->UpdatePacket( ntohl(fp->packet.id), 
 							ntohl(fp->packet.ts),
 							fp->packet.id_num,
 							fp->packet.size,
 							ntohf(fp->packet.speed),
 							fp->packet.dark);
-
-			buf += sizeof(pack_update_t);
-	    } 
-	    else 
-	    {
-		if(buf != &databuf[0])
-		    databuf.erase(databuf.begin(), databuf.begin() 
-			    + (buf - &databuf[0]));
-		break;
-	    }
-	} 
-	else if(fp->flow.type == 0x02) 
-	{
-#ifdef NET_DEBUG
-		Log( "Kill: flow=%u\n", ntohl(fp->rem.id) );
-#endif
-
-	   if(sizeof(flow_remove_t) <= s) 
-	    {
+			/* use memmove, not memcpy */
+			datalen-=sizeof(pack_update_t);
+			memmove(&databuf[0],&databuf[sizeof(pack_update_t)],datalen);
+			break;
+		case 2: /* Kill a flow */
+			if(datalen <= sizeof(flow_remove_t)) {
+    				world.partVis->EndUpdate();
+				return;
+			}
 			world.partVis->RemoveFlow(ntohl(fp->rem.id));
 
-			buf += sizeof(flow_remove_t);
-	    } 
-	    else 
-	    {
-			if(buf != &databuf[0])
-				databuf.erase(databuf.begin(), databuf.begin() 
-					+ (buf - &databuf[0]));
+			datalen-=sizeof(flow_remove_t);
+			memmove(&databuf[0],&databuf[sizeof(flow_remove_t)],datalen);
 			break;
-	    }
-	}
-	else if( fp->flow.type == 0x03 )
-	{
-#ifdef NET_DEBUG
-		Log( "Kill all flows!\n" );
-#endif
-	    // Kill all existing flows!
-	    world.partVis->KillAll();
-	    buf += sizeof(kill_all_t);
-	}
-	else if( fp->flow.type == 0x04 )
-	{
-		// Flow descriptor.
-		// Check if we have it already, if we don't add it, if we do
-		// update it if its different, else do nothing.
-		//int tempK = fp->fdesc.id;
-		//int ppK = tempK;
+		case 3: /* Kill all flows */
+			if(datalen < sizeof(flow_remove_t)) {
+    				world.partVis->EndUpdate();
+				return;
+			}
 
-#ifdef NET_DEBUG
-		Log( "Flow descriptor\n" );
-#endif
+			world.partVis->KillAll();
 
-		if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
-		{
-			// Log( "Adding new fd.\n" );
-			// Not in the map yet so lets add it:
-			FlowDescriptor *fd = new FlowDescriptor();
-			fd->colour[0] = fp->fdesc.colour[0];
-			fd->colour[1] = fp->fdesc.colour[1];
-			fd->colour[2] = fp->fdesc.colour[2];
-			fd->show = true; // Initially show this.
-			strcpy( fd->name, fp->fdesc.name );
-			//Log( "New flow desc: %s %d %d %d ID: %d", fd->name, fd->colour[0], fd->colour[1], fd->colour[2], fp->fdesc.id );
-			world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
+			datalen-=sizeof(flow_remove_t);
+			memmove(&databuf[0],&databuf[sizeof(flow_remove_t)],datalen);
 
-			if( (fd->colour[0] == 0 ) && (fd->colour[1] == 0 ) && ( fd->colour[2] == 0 ) )
-				world.partVis->pGui->InitFD();
-		}
-		buf += sizeof(flow_descriptor);
-	}
-	else 
-	{
-	    Log("Unknown packet type... type=%d  || s:%u r:%u d:%u \n",
-			fp->flow.type,
-		    databuf.size(), 
-		    (int)(buf-&databuf[0]), 
-		    (int)(&databuf[databuf.size()-1]-buf)
-	       );
-	    databuf.erase(databuf.begin(), databuf.end());
-	    break;
+			break;
+
+		case 4: /* Add/update the description for a flow */
+			if(datalen <= sizeof(flow_descriptor)) {
+    				world.partVis->EndUpdate();
+				return;
+			}
+			// Flow descriptor.
+			// Check if we have it already, if we don't add it, if we do
+			// update it if its different, else do nothing.
+
+			if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
+			{
+				// Log( "Adding new fd.\n" );
+				// Not in the map yet so lets add it:
+				FlowDescriptor *fd = new FlowDescriptor();
+				fd->colour[0] = fp->fdesc.colour[0];
+				fd->colour[1] = fp->fdesc.colour[1];
+				fd->colour[2] = fp->fdesc.colour[2];
+				fd->show = true; // Initially show this.
+				strcpy( fd->name, fp->fdesc.name );
+				world.partVis->fdmap.insert( FlowDescMap::value_type(fp->fdesc.id, fd) );
+
+				if( (fd->colour[0] == 0 ) && (fd->colour[1] == 0 ) && ( fd->colour[2] == 0 ) )
+					world.partVis->pGui->InitFD();
+			}
+
+			datalen-=sizeof(flow_descriptor);
+			memmove(&databuf[0],&databuf[sizeof(flow_descriptor)],datalen);
+
+			break;
+
+		default:
+			Log("Unknown packet type... type=%d",fp->flow.type);
+			/* Skip the rest of the packet */
+			datalen=0;
+			break;
 	}
     }
 
@@ -457,9 +387,6 @@ void CSDLNetDriver::Reconnect()
 	{
 		reconnect_wait = 500.0f;
 
-		// Also, need to clear the flow desriptors since we will get a new list.
-		// (if we keep the old list we get problems if the server was changed and is sending a different fd list).
-		databuf.erase(databuf.begin(), databuf.end());
 	}
 }
 

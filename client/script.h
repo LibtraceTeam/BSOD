@@ -60,6 +60,7 @@ public:
 	virtual bool GetGlobal(const string &name, bool *val) = 0;
 
 	static CScript *Create();
+	virtual ~CScript() {};
 };
 
 #endif // __SCRIPT_H__

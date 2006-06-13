@@ -54,8 +54,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <external/GL/gl.h>
+#include <external/GL/glu.h>
 //#include <GL/glext.h>
 #include "external/GL/glext.h"
 
@@ -591,10 +591,13 @@ void CGLDisplayManager::DrawString3(const CFont &fnt, const int x, const int y, 
 		// We don't support ASCII characters out of this range. Remember the infamous 'corrupted drawing'
 		// '\n' bug?
 		// - Sam
-		if(c < '!' || c > '~')
-			c = ' ';
+		if (c<' ' || c>'~')
+			c=' ';
 
 		fnt.GetGlyph(c, top, left, width, height);
+
+		if (width==0 || height==0)
+			continue;
 
 		topf	= (float)top / (float)fnt.tex->height;
 		leftf	= (float)left / (float)fnt.tex->width;

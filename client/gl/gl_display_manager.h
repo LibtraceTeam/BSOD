@@ -79,6 +79,7 @@ public:
 
 		textureOn = true;
 		blendOn = false;
+		blendMode = CDisplayManager::Add;
 
 		// The following should be setup right at the start by the
 		// System Driver anyway.

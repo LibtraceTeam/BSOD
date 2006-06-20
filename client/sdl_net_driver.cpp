@@ -206,9 +206,9 @@ struct flow_update_t {
     float x2;
     float y2;
     float z2;
-    unsigned int id;
-	uint32 ip1;
-	uint32 ip2;
+    uint32 id;
+    uint32 ip1;
+    uint32 ip2;
 } PACKED;
 
 struct pack_update_t {
@@ -227,7 +227,7 @@ struct flow_remove_t {
 } PACKED;
 
 struct kill_all_t {
-	bool all; // 3
+	unsigned char type; // 3
 } PACKED;
 
 struct flow_descriptor
@@ -249,8 +249,6 @@ union fp_union {
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
-
-//#define NET_DEBUG
 
 void CSDLNetDriver::ReceiveData()
 {
@@ -281,14 +279,21 @@ void CSDLNetDriver::ReceiveData()
     				world.partVis->EndUpdate();
 				return;
 			}
+			assert(sizeof(flow_update_t)==37);
 			world.partVis->UpdateFlow(
 					ntohl(fp->flow.id),
-					Vector3f(ntohf(fp->flow.x1), ntohf(fp->flow.y1), ntohf(fp->flow.z1)),
-					Vector3f(ntohf(fp->flow.x2), ntohf(fp->flow.y2), ntohf(fp->flow.z2)),
-					ntohl( fp->flow.ip1 ), ntohl( fp->flow.ip2 ));
+					Vector3f(ntohf(fp->flow.x1),
+						ntohf(fp->flow.y1),
+					       	ntohf(fp->flow.z1)),
+					Vector3f(ntohf(fp->flow.x2),
+					       	ntohf(fp->flow.y2),
+					       	ntohf(fp->flow.z2)),
+					ntohl( fp->flow.ip1 ),
+				       	ntohl( fp->flow.ip2 ));
 			/* use memmove, not memcpy */
 			datalen-=sizeof(flow_update_t);
-			memmove(&databuf[0],&databuf[sizeof(flow_update_t)],datalen);
+			memmove(&databuf[0],
+				&databuf[sizeof(flow_update_t)],datalen);
 			break;
 		case 1: /* Packet */
 			if(datalen <= sizeof(pack_update_t)) {
@@ -303,7 +308,8 @@ void CSDLNetDriver::ReceiveData()
 							fp->packet.dark);
 			/* use memmove, not memcpy */
 			datalen-=sizeof(pack_update_t);
-			memmove(&databuf[0],&databuf[sizeof(pack_update_t)],datalen);
+			memmove(&databuf[0],
+				&databuf[sizeof(pack_update_t)],datalen);
 			break;
 		case 2: /* Kill a flow */
 			if(datalen <= sizeof(flow_remove_t)) {
@@ -313,18 +319,20 @@ void CSDLNetDriver::ReceiveData()
 			world.partVis->RemoveFlow(ntohl(fp->rem.id));
 
 			datalen-=sizeof(flow_remove_t);
-			memmove(&databuf[0],&databuf[sizeof(flow_remove_t)],datalen);
+			memmove(&databuf[0],
+				&databuf[sizeof(flow_remove_t)],datalen);
 			break;
 		case 3: /* Kill all flows */
-			if(datalen < sizeof(flow_remove_t)) {
+			if(datalen < sizeof(kill_all_t)) {
     				world.partVis->EndUpdate();
 				return;
 			}
 
 			world.partVis->KillAll();
 
-			datalen-=sizeof(flow_remove_t);
-			memmove(&databuf[0],&databuf[sizeof(flow_remove_t)],datalen);
+			datalen-=sizeof(kill_all_t);
+			memmove(&databuf[0],
+				&databuf[sizeof(kill_all_t)],datalen);
 
 			break;
 
@@ -334,12 +342,11 @@ void CSDLNetDriver::ReceiveData()
 				return;
 			}
 			// Flow descriptor.
-			// Check if we have it already, if we don't add it, if we do
-			// update it if its different, else do nothing.
+			// Check if we have it already, if we don't add it, if
+			// we do update it if its different, else do nothing.
 
 			if( world.partVis->fdmap.find( fp->fdesc.id ) == world.partVis->fdmap.end() )
 			{
-				// Log( "Adding new fd.\n" );
 				// Not in the map yet so lets add it:
 				FlowDescriptor *fd = new FlowDescriptor();
 				fd->colour[0] = fp->fdesc.colour[0];
@@ -354,12 +361,13 @@ void CSDLNetDriver::ReceiveData()
 			}
 
 			datalen-=sizeof(flow_descriptor);
-			memmove(&databuf[0],&databuf[sizeof(flow_descriptor)],datalen);
+			memmove(&databuf[0],
+				&databuf[sizeof(flow_descriptor)],datalen);
 
 			break;
 
 		default:
-			Log("Unknown packet type... type=%d",fp->flow.type);
+			Log("Unknown packet type... type=%d\n",fp->flow.type);
 			/* Skip the rest of the packet */
 			datalen=0;
 			break;

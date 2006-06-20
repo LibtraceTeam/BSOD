@@ -89,22 +89,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Particle visualisation file
 //
 
-// XXX DEBUG XXX
-#include "rangedset.h"
-
-RangedSet<int> flowseen;
-RangedSet<int> flowsactive;
-
-
 
 CPartVis::CPartVis( bool mm )
 :  last_timestamp(0), paused(false)
 {
 	// Need to create a couple of quads, one with the uni logo, another
 	// without the logo.
-	//filter_state = -1;
 	packetsFrame = 0;
-	//packetsFrameIn = 0;
 
 	diff = 0.0f;
 	last_gc = world.sys->TimerGetTime();
@@ -513,8 +504,6 @@ void CPartVis::UpdateFlow(unsigned int flow_id, Vector3f v1, Vector3f v2, uint32
 		}
 
 		flows.insert(FlowMap::value_type(flow_id, flow));
-		flowseen.insert(flow_id);
-		flowsactive.insert(flow_id);
 	} else {
 		// Found
 		Log("UpdateFlow called on flow that already exits (flow=%d)\n",
@@ -532,12 +521,7 @@ void CPartVis::UpdatePacket(unsigned int flow_id, uint32 timestamp,
 
 	if(i == flows.end()) 
 	{
-		if (flowseen.find(flow_id))
-			Log( "Flow never seen for a packet (%d).\n",flow_id);
-		else if (flowsactive.find(flow_id)) 
-			Log( "Flow not active for a packet (%d).\n",flow_id);
-		else
-			Log( "Flow not found for a packet (%d).\n",flow_id);
+		Log( "Flow not found for a packet (%d).\n",flow_id);
 		return;
 	} 
 	else 
@@ -589,17 +573,12 @@ void CPartVis::RemoveFlow(unsigned int id)
 
 	if(i == flows.end()) 
 	{
-		Log( "Removing non-existent flow %d%s%s\n", id,
-			flowsactive.find(id)?" (active)" : " (inactive)",
-			flowseen.find(id)?" (seen)" : " (unseen)"
-		   );
+		Log( "Removing non-existent flow %d%s%s\n", id);
 	} 
 	else 
 	{
-		//RemoveActiveFlow( i );
 		if( i->second->packets != 0 )
 			active_nodes.erase( i->second->active_flow_ptr );
-		//delete i->second;
 		FreePartFlow( i->second );
 		flows.erase(i);
     }
@@ -769,9 +748,11 @@ CPartFlow *CPartVis::AllocPartFlow()
 
 void CPartVis::FreePartFlow( CPartFlow *flow )
 {
+	/* output every 100 free'd flows */
 	if( flow->vertices.capacity() > (PREALLOC*6) )
 	{
-		// The flow has grown so discard it to prevent infinitely growing vectors
+		// The flow has grown so discard it to prevent infinitely
+		// growing vectors
 		delete flow;
 		flow = NULL;
 		return;
@@ -809,10 +790,12 @@ void CPartVis::GCPartFlows()
 			}
 		}
 	}
+#if 0
 	if (collected)
 		Log ("Garbage Collected %d/%d flows\n",
 				collected,partflow_pool.size()+collected);
 	else
 		Log ("No Garbage collection required (%d pooled flows)\n",
 				partflow_pool.size());
+#endif
 }

@@ -46,6 +46,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "xml_parse.h"
 
+#include <assert.h>
+
 class CFont : public IParserCallback
 {
 private:
@@ -66,8 +68,16 @@ public:
 	void Load(const string &fontName);
 	void GetGlyph(const char a, int &top, int &left, int &width, int &height) const
 	{
+		if (a<min_char) {
+			top=left=height=width=0;
+			return;
+		}
 		int s   = a - min_char + start;
-		top		= glyphs[s].yoff;
+		assert(s>=0);
+		assert(s<glyphs.size());
+		assert(a<=max_char);
+		assert(a>=min_char);
+		top	= glyphs[s].yoff;
 		left	= glyphs[s].xoff;
 		height	= glyphs[s].height;
 		width	= glyphs[s].width;

@@ -5,7 +5,7 @@
 #pragma warning( disable : 4996 )
 #endif
 
-#define PREALLOC 10 // Number of packets each flow preallocates memory for.
+#define PREALLOC 20 // Number of packets each flow preallocates memory for.
 
 class CPartFlow;
 

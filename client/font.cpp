@@ -106,6 +106,7 @@ void CFont::BeginTagFunc(const string &tag, const map<string, string, string_les
 	else if(t.find("glyph") != string::npos)
 	{
 		GlyphInfo gi;
+		gi.height=gi.width=gi.xoff=gi.yoff=0;
 		
 		i = attrs.find("height");
 		gi.height = atoi((*i).second.c_str());
@@ -119,6 +120,7 @@ void CFont::BeginTagFunc(const string &tag, const map<string, string, string_les
 
 		glyphs.push_back(gi);
 	}
+	else throw CException("Unknown tag");
 }
 
 void CFont::EndTagFunc(const string &contents)
@@ -145,8 +147,8 @@ void CFont::SetItalic(bool italic)
 
 uint32 CFont::GetHeight() const
 {
-	// All characters always have the same height currently.  This isn't really
-	// much of a limitation, most fonts work this way.
+	// All characters always have the same height currently.  This isn't
+	// really much of a limitation, most fonts work this way.
 	return glyphs[0].height;
 }
 

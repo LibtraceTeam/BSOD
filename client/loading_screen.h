@@ -50,6 +50,7 @@ class IMessageCallback
 {
 public:
 	virtual void AddMessage(string message) = 0;
+	virtual ~IMessageCallback() {};
 };
 
 class CLoadingScreen : public IMessageCallback

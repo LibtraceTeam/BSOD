@@ -63,8 +63,6 @@
 #include "bsod_server.h"
 
 
-#include "dagformat.h"
-
 #include "socket.h"
 #include "packets.h"
 #include "daemons.h"

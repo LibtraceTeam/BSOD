@@ -32,7 +32,6 @@
 #ifndef _PACKETS_H
 #define _PACKETS_H
 
-#include "dagformat.h"
 #include "libtrace.h"
 #include "RTTMap.h"
 #include "Blacklist.h"

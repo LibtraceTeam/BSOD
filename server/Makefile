@@ -4,11 +4,12 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 # change this to your libtrace path. 
 # this is left here as people often have it installed in their home
 # directories for testing things rather than using the system one
-LIBTRACE = /usr/local
+LIBTRACE ?= /usr/local
 INCLUDE =  -I. -I./lib -I$(LIBTRACE)/include
 
 CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
+# This should be fixed, but isn't.
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
 LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace
 LDFLAGS+= -L./lib -L$(LIBTRACE)/lib -rdynamic 

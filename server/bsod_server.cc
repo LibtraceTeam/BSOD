@@ -71,11 +71,6 @@
 #include "RTTMap.h"
 #include "Blacklist.h"
 
-#if 0
-extern "C"
-char *strndup(const char *, size_t);
-#endif
-
 typedef struct ip ip_t;
 
 struct sigaction sigact;
@@ -514,7 +509,11 @@ static void parse_args(const char *line, char **driver, char **args)
 		return;
 	}
 
-	*driver = strndup(line,tok-line);
+	/* strndup */
+	*driver = malloc(tok-line+1);
+	strncpy(*driver,line,tok-line);
+	*driver[tok-line]='\0';
+
 	*args = strdup(tok+1);
 }
 

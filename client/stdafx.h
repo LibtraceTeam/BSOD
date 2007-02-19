@@ -80,8 +80,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Also, make sure USE_MEM_MANAGER is defined.  If it is defined and the header file is
 // not included there will still be a performance hit, but it isn't too bad (and often
 // still worth it as bad pointers will have values like 0xfeedface).
-//#define USE_MEM_MANAGER
-//#include "external/memory/mmgr.h"
 
 #define PI 3.141592654f
 #define EPSILON 1e-12

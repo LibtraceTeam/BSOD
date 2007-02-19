@@ -50,7 +50,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 
 extern "C" {
-	#include "lua.h"
+	#include "lua40/lua.h"
 }
 
 class CLuaScript : public CScript

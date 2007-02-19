@@ -10,8 +10,6 @@
 
 #include <external/GL/gl.h>
 #include <external/GL/glu.h>
-//#include <GL/glaux.h>
-//#include <GL/glext.h>
 #include "external/GL/glext.h"
 
 #include "vector.h"
@@ -38,7 +36,7 @@ int num_flows = 0;*/
 
 // An actual flow:
 CPartFlow::CPartFlow()
-: offset(0)//, vertices(20*6), tex_coords(20*6), colours(20*6*4)
+: offset(0)
 {
 	//	num_flows++;
 	//active_flow_ptr = NULL;

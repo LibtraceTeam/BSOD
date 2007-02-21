@@ -56,7 +56,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "action.h"
 #include "exception.h"
 #include "net_driver.h"
-#include "config.h"
 #include "camera.h"
 #include "loading_screen.h"
 #include "player.h"
@@ -111,8 +110,6 @@ int BungMain(int argc, char *argv[])
 
 		Log("Parsing config file.\n");
 
-		//world.config = new CConfig;
-		//world.config->ParseFile("config.xml");
 		config->Begin();
 		config->ExecuteFile( "data/config.lua" );
 

@@ -5,7 +5,7 @@ CXXFLAGS+=-DLINUX -D_REENTRANT
 CXXFLAGS+=-Wall -W -g -O2 -Wno-non-template-friend
 LDLIBS+=-lIL -lILU -lGL -lGLU -llua40 -lz -lSDL_net
 
-SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp config.cpp entity.cpp \
+SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp entity.cpp \
  entity_manager.cpp font.cpp gui.cpp levelloader.cpp loading_screen.cpp \
  lua_script.cpp main.cpp matrix.cpp md2.cpp md3.cpp menuitem.cpp misc.cpp \
  octree.cpp partflow.cpp partvis.cpp player.cpp polygon.cpp quaternion.cpp \

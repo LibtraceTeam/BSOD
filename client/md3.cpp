@@ -51,7 +51,6 @@
 #include "reporter.h"
 #include "exception.h"
 #include "misc.h"
-#include "config.h"
 #include "vfs.h"
 #include "matrix.h"
 #include "quaternion.h"

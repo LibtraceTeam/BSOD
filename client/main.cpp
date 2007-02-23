@@ -68,9 +68,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "misc.h"
 
-//
-#include "script.h"
-
+#include "lib/libconfig.h"
 
 int BungMain(int argc, char *argv[])
 {
@@ -80,91 +78,97 @@ int BungMain(int argc, char *argv[])
 	CReporter::SetOutput(log);
 	CReporter::Report(CReporter::R_DEBUG, "Reporter initialised.\n");
 
-	auto_ptr<CScript> config = auto_ptr<CScript>(CScript::Create());
 	auto_ptr<CLoadingScreen> loadingScreen;
 
 	srand((unsigned int)time(NULL));
 	CMesh::InitIndices();
-	//CCollider::Initialise();
 
 	try {
 		int width = 800, height = 600, bpp = 16;
-		string netHost = "localhost:32500";
-		Vector3f startLoc;
-		float pitch = 0, heading = 0;
+		char *netHost = strdup("localhost:32400");
+		double startx = -10.0f;
+		double starty = 10.0f;
+		double startz = 0.0f;
+		double pitch = 0, heading = 0;
 		bool fullScreen = false;
-		float size = 1.0f;
-		float speed = 1.0f;
+		double size = 1.0f;
+		double speed = 1.0f;
 		bool jitter = true;
 		bool billboard = false;
 		bool do_gcc = true;
 		bool matrix_mode = false;
-		float alpha = 0.5f;
-		string particle = "data/particle.png";
-		bool no_gui = false;
-		bool no_cursor = false;
-		float start_x = -10.0f;
-		float end_x = 10.0f;
+		double alpha = 0.5f;
+		char *particle = strdup("data/particle.png");
+		bool show_menu = false;
+		bool show_cursor = false;
+		double start_x = -10.0f;
+		double end_x = 10.0f;
 		bool screen_saver = false;
+		char* disp = strdup("opengl");
+		char* configfile = "bsod.conf";
+
+
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
 
 		Log("Parsing config file.\n");
 
-		config->Begin();
-		config->ExecuteFile( "data/config.lua" );
+		config_t main_config[] = {
+		{ "width", 		TYPE_INT|TYPE_NULL, &width },
+		{ "height", 		TYPE_INT|TYPE_NULL, &height },
+		{ "bpp", 		TYPE_INT|TYPE_NULL, &bpp },
+		{ "fullscreen", 	TYPE_BOOL|TYPE_NULL, &fullScreen },
+		{ "pitch",		TYPE_DOUBLE|TYPE_NULL, &pitch },
+		{ "heading",		TYPE_DOUBLE|TYPE_NULL, &heading },
+		{ "jitter",		TYPE_BOOL|TYPE_NULL, &jitter },
+		{ "pointsprites",	TYPE_BOOL|TYPE_NULL, &billboard },
+		{ "gc",			TYPE_BOOL|TYPE_NULL, &do_gcc },
+		{ "matrix_mode",	TYPE_BOOL|TYPE_NULL, &matrix_mode },
+		{ "particle_opacity",	TYPE_DOUBLE|TYPE_NULL, &alpha },
+		{ "show_menu",		TYPE_BOOL|TYPE_NULL, &show_menu },
+		{ "show_cursor",	TYPE_BOOL|TYPE_NULL, &show_cursor },
+		{ "start_x",		TYPE_DOUBLE|TYPE_NULL, &start_x },
+		{ "end_x",		TYPE_DOUBLE|TYPE_NULL, &end_x },
+		{ "screen_saver",	TYPE_BOOL|TYPE_NULL, &screen_saver },
+		{ "server",		TYPE_STR|TYPE_NULL, &netHost },
+		{ "particle",		TYPE_STR|TYPE_NULL, &particle },
+		{ "startx",		TYPE_DOUBLE|TYPE_NULL, &startx },
+		{ "starty",		TYPE_DOUBLE|TYPE_NULL, &starty },
+		{ "startz",		TYPE_DOUBLE|TYPE_NULL, &startz },
+		{ "driver",		TYPE_STR|TYPE_NULL, &disp },
+		{ "size" ,		TYPE_DOUBLE|TYPE_NULL, &size },
+		{ "speed",		TYPE_DOUBLE|TYPE_NULL, &speed },
+		{ 0, 0, 0 },
+		};
 
-		assert(start_x != 0.0f);
-		assert(end_x != 0.0f );
-		config->GetGlobal( "width", &width );
-		config->GetGlobal( "height", &height );
-		config->GetGlobal( "bpp", &bpp );
-		config->GetGlobal( "network_host", &netHost );
-		config->GetGlobal( "fullscreen", &fullScreen );
-		config->GetGlobal( "start_location", &startLoc );
-		config->GetGlobal( "pitch", &pitch );
-		config->GetGlobal( "heading", &heading );
-		config->GetGlobal( "speed", &speed );
-		config->GetGlobal( "size", &size );
-		config->GetGlobal( "jitter", &jitter );
-		config->GetGlobal( "billboard", &billboard );
-		config->GetGlobal( "particle", &particle );
-		config->GetGlobal( "do_gcc", &do_gcc );
-		config->GetGlobal( "matrix_mode", &matrix_mode );
-		config->GetGlobal( "particle_opacity", &alpha );
-		config->GetGlobal( "no_gui", &no_gui );
-		config->GetGlobal( "no_cursor", &no_cursor );
-		config->GetGlobal( "start_x", &start_x );
-		config->GetGlobal( "end_x", &end_x );
-		config->GetGlobal( "screen_saver", &screen_saver );
+		if (argc>1) {
+			configfile = argv[1];
+		}
 
-		// Reset these values to their defaults if they are broken
-		// (this happens when they are not found in the config file):
-		if( start_x == 0.0f )
-			start_x = -10.0f;
-		if(end_x == 0.0f )
-			end_x = 10.0f;
-		
-		/* If GetGlobal doesn't find a value it seems to return 0.
-		 * Therefore, to avoid packets being invisible and the confusion that this causes
-		 * we make sure that the alpha value makes sense:  */
-		if( alpha == 0.0f )
-			alpha = 0.5f;
-
-		{	string disp("opengl");
-			config->GetGlobal("display", &disp);
-			if(disp.compare("direct3d") == 0 || disp.compare("d3d") == 0)
-				dispType = CSystemDriver::DISPLAY_DIRECT3D;
+		if (parse_config(main_config, configfile)) {
+			Log("Bad config file %s, giving up\n", configfile);
+			return -1;
 		}
 
 		Log("Config file parsed.\n");
+		Log("Size: %f\n", size);
 
+		/* Figure out which display driver we're using */
+		if (strcmp(disp,"direct3d") == 0 
+		  ||strcmp(disp,"d3d") == 0)
+			dispType = CSystemDriver::DISPLAY_DIRECT3D;
+		free(disp);
+
+		/* Right, setup the world */
 		world.actionHandler = new CActionHandler;
 
+		/* Set the title */
 		char title[512];
 		strcpy( title, "BSOD: " );
-		strcat( title, netHost.c_str() );
-		world.display = world.sys->InitDisplay(width, height, bpp, fullScreen, 
+		strcat( title, netHost );
+		world.display = world.sys->InitDisplay(width, height, bpp, 
+				fullScreen, 
 				dispType, title);
+
 		world.display->Initialise( billboard );
 		
 		loadingScreen = auto_ptr<CLoadingScreen>(new CLoadingScreen(width, height));
@@ -175,11 +179,15 @@ int BungMain(int argc, char *argv[])
 
 		world.entities = new CEntityManager;
 
-		world.entities->GetPlayer()->SetPosition(startLoc);
+		/* Position the user and set them looking the right direction */
+		world.entities->GetPlayer()->SetPosition(
+				Vector3f(startx,starty,startz));
 		
-		world.entities->GetPlayer()->SetBearing(Vector3f(pitch,heading,0));
+		world.entities->GetPlayer()->SetBearing(
+				Vector3f(pitch,heading,0));
+
 		world.entities->GetPlayer()->GetCamera()->
-			SetBearing(Vector3f(pitch,heading,0));
+				SetBearing(Vector3f(pitch,heading,0));
 
 		loadingScreen->AddMessage("Initialising network and connecting...");
 		world.netDriver = CNetDriver::Create();
@@ -195,8 +203,8 @@ int BungMain(int argc, char *argv[])
 		world.partVis->particle_img = particle;
 		world.partVis->do_gcc = do_gcc;
 		world.partVis->global_alpha = alpha;
-		world.partVis->no_gui = no_gui;
-		world.actionHandler->no_cursor = no_cursor;
+		world.partVis->no_gui = !show_menu;
+		world.actionHandler->no_cursor = !show_cursor;
 		world.partVis->start_x = start_x;
 		world.partVis->end_x = end_x;
 		world.actionHandler->screen_saver = screen_saver;
@@ -217,17 +225,6 @@ int BungMain(int argc, char *argv[])
 	}
 
 	try {
-		/*loadingScreen->AddMessage("Loading level...");
-		CLevelLoader lev;
-
-		string levelName = "data/bung.barc/levels/q3/bungmap.blev";
-		
-		config->GetGlobal("level_name", &levelName);
-		config->End();
-
-		lev.LoadLevel(levelName, *world.tree, *loadingScreen);
-		*/
-
 		delete loadingScreen.release();
 	}
 	catch(string error)

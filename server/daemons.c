@@ -19,7 +19,7 @@
  * to tell if we should send output to screen or syslog.
  */
 
-int daemonised = 0;
+//int daemonised = 0;
 
 void put_pid( char *fname )
 {

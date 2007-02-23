@@ -22,7 +22,7 @@ SUBDIR_LDFLAGS = -L../../lib -L$(LIBTRACE)/lib
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o 
 
-PREFIX=/usr/local/bsod
+PREFIX?=/usr/local/bsod
 
 BINDIR=$(PREFIX)/bin
 CONFDIR=$(PREFIX)/etc
@@ -33,12 +33,13 @@ BLISTDIR=$(PREFIX)/blist
 all: libconfig $(BINS) plugins 
 
 libconfig:
-	cd lib && $(MAKE)  || exit 1
+	cd lib && ./configure --prefix=$(PREFIX)
+	cd lib && $(MAKE) 
 
 
 clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)
-	cd lib && $(MAKE) clean || exit 1
+	cd lib && $(MAKE) clean 
 
 distclean: clean
 	

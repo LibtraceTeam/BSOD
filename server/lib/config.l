@@ -4,7 +4,7 @@
 %}
 
 %x double_quote
-
+%option  nounput
 %%
 
 \"	BEGIN(double_quote);

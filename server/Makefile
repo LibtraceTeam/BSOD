@@ -11,7 +11,7 @@ CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 # This should be fixed, but isn't.
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
-LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace
+LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace -lconfig
 LDFLAGS+= -L./lib -L$(LIBTRACE)/lib -rdynamic 
 SUBDIR_LDFLAGS = -L../../lib -L$(LIBTRACE)/lib
 
@@ -30,12 +30,7 @@ LIBDIR=$(PREFIX)/plugins
 BLISTDIR=$(PREFIX)/blist
 .PHONY: all clean distclean install depend plugins install-init
 
-all: libconfig $(BINS) plugins 
-
-libconfig:
-	cd lib && ./configure --prefix=$(PREFIX)
-	cd lib && $(MAKE) 
-
+all: $(BINS) plugins 
 
 clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)

@@ -59,7 +59,7 @@
 
 #include <libtrace.h>
 
-#include "lib/libconfig.h"
+#include <libconfig.h>
 #include "bsod_server.h"
 
 

@@ -1,11 +1,9 @@
 .PHONY: all clean
 
-CFLAGS=-Ilib -Wall -W -g -O2
-CXXFLAGS+=-I. -Ilib -I/usr/include/SDL
+CXXFLAGS+=-I. -I/usr/include/SDL
 CXXFLAGS+=-DLINUX -D_REENTRANT
 CXXFLAGS+=-Wall -W -g -O2 -Wno-non-template-friend
-LDFLAGS=-Llib/.libs
-LDLIBS+=-lIL -lILU -lGL -lGLU -lz -lSDL_net 
+LDLIBS+=-lIL -lILU -lGL -lGLU -lz -lSDL_net -lconfig
 
 SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp entity.cpp \
  entity_manager.cpp font.cpp gui.cpp levelloader.cpp loading_screen.cpp \
@@ -16,16 +14,11 @@ SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp entity.cpp \
 
 SOURCES+= gl/gl_display_manager.cpp
 SOURCES+= linux/linux_system_driver.cpp
-SOURCES+= lib/config.lexer.c lib/libconfig.c lib/config.parser.c
 
 OBJECTS=$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCES)))
 
 all: $(OBJECTS)
 	g++ $(LDFLAGS) $(CXXFLAGS) $(OBJECTS) -o bsod_client $(LDLIBS)
-
-lib/config.lexer.c lib/libconfig.c lib/config.parser.c:
-	cd lib && ./configure
-	$(MAKE) -C lib
 
 clean:
 	rm -f $(OBJECTS) bsod_client

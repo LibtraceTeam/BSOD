@@ -68,7 +68,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "misc.h"
 
-#include "lib/libconfig.h"
+#include <libconfig.h>
 
 int BungMain(int argc, char *argv[])
 {

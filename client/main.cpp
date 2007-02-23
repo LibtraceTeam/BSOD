@@ -101,11 +101,10 @@ int BungMain(int argc, char *argv[])
 		char *particle = strdup("data/particle.png");
 		bool show_menu = false;
 		bool show_cursor = false;
-		double start_x = -10.0f;
-		double end_x = 10.0f;
 		bool screen_saver = false;
 		char* disp = strdup("opengl");
 		char* configfile = "bsod.conf";
+		double plane_seperation;
 
 
 		CSystemDriver::DisplayType dispType = CSystemDriver::DISPLAY_OPENGL;
@@ -126,8 +125,6 @@ int BungMain(int argc, char *argv[])
 		{ "particle_opacity",	TYPE_DOUBLE|TYPE_NULL, &alpha },
 		{ "show_menu",		TYPE_BOOL|TYPE_NULL, &show_menu },
 		{ "show_cursor",	TYPE_BOOL|TYPE_NULL, &show_cursor },
-		{ "start_x",		TYPE_DOUBLE|TYPE_NULL, &start_x },
-		{ "end_x",		TYPE_DOUBLE|TYPE_NULL, &end_x },
 		{ "screen_saver",	TYPE_BOOL|TYPE_NULL, &screen_saver },
 		{ "server",		TYPE_STR|TYPE_NULL, &netHost },
 		{ "particle",		TYPE_STR|TYPE_NULL, &particle },
@@ -150,7 +147,6 @@ int BungMain(int argc, char *argv[])
 		}
 
 		Log("Config file parsed.\n");
-		Log("Size: %f\n", size);
 
 		/* Figure out which display driver we're using */
 		if (strcmp(disp,"direct3d") == 0 
@@ -160,6 +156,8 @@ int BungMain(int argc, char *argv[])
 
 		/* Right, setup the world */
 		world.actionHandler = new CActionHandler;
+
+		plane_seperation = 10.0*(width*768.0)/(height*1024.0);
 
 		/* Set the title */
 		char title[512];
@@ -205,8 +203,8 @@ int BungMain(int argc, char *argv[])
 		world.partVis->global_alpha = alpha;
 		world.partVis->no_gui = !show_menu;
 		world.actionHandler->no_cursor = !show_cursor;
-		world.partVis->start_x = start_x;
-		world.partVis->end_x = end_x;
+		world.partVis->start_x = -plane_seperation;
+		world.partVis->end_x = plane_seperation;
 		world.actionHandler->screen_saver = screen_saver;
 		if( screen_saver )
 			Log( "Running as a screensaver\n" );

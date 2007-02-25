@@ -16,6 +16,19 @@ Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information
 and read the BUNG_LICENSE included with this release.
 
 
+Changes to the client between 1.2.0 and 1.2.2
+==============================================
+
+*	IMPORTANT: Config file format changed from lua to being similar
+	to bsod_server.
+*	IMPORTANT: New dependancies:
+	*	libconfig
+	*	devil
+*	Stripped out a lot of unused code (eg XML Config file parser)
+*	Moved to external dependancies (removed everything from external/)
+*	Removed the dependancy on lua.
+*	Removed the dependancy on SCons.
+
 Changes to the client between 1.2.0 and 1.2.1
 ==============================================
 

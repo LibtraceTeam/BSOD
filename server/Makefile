@@ -5,15 +5,15 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 # this is left here as people often have it installed in their home
 # directories for testing things rather than using the system one
 LIBTRACE ?= /usr/local
-INCLUDE =  -I. -I./lib -I$(LIBTRACE)/include
+INCLUDE =  -I. -I$(LIBTRACE)/include
 
 CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 # This should be fixed, but isn't.
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
 LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace -lconfig
-LDFLAGS+= -L./lib -L$(LIBTRACE)/lib -rdynamic 
-SUBDIR_LDFLAGS = -L../../lib -L$(LIBTRACE)/lib
+LDFLAGS+= -L$(LIBTRACE)/lib -rdynamic 
+SUBDIR_LDFLAGS = -L$(LIBTRACE)/lib
 
 # For Mac OS X
 # Mac OS X doesn't do -rdynamic
@@ -34,7 +34,6 @@ all: $(BINS) plugins
 
 clean: plugins-clean
 	$(RM) *~ *.o $(BINS) $(OBJS)
-	cd lib && $(MAKE) clean 
 
 distclean: clean
 	

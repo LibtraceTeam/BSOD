@@ -512,7 +512,7 @@ static void parse_args(const char *line, char **driver, char **args)
 	/* strndup */
 	*driver = (char*)malloc(tok-line+1);
 	strncpy(*driver,line,tok-line);
-	*driver[tok-line]='\0';
+	(*driver)[tok-line]='\0';
 
 	*args = strdup(tok+1);
 }

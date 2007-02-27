@@ -54,7 +54,7 @@ RTTMap::~RTTMap(void)
 void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 {
 	//cout << "Inserting " << time_stamp << endl;
-	FlowMap::iterator i = NULL;
+	FlowMap::iterator i;
 	if( (i = m_flows->find( *flow )) != m_flows->end() )
 	{
 		TraceMap::iterator j = NULL;

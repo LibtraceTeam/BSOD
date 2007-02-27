@@ -57,7 +57,7 @@ void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 	FlowMap::iterator i;
 	if( (i = m_flows->find( *flow )) != m_flows->end() )
 	{
-		TraceMap::iterator j = NULL;
+		TraceMap::iterator j;
 		TraceMap *tmpTMap = &i->second;
 		if( ( j = tmpTMap->find( time_stamp ) ) != tmpTMap->end() )
 		{
@@ -177,7 +177,7 @@ PacketTS RTTMap::GetTimeStamp( libtrace_packet_t *packet )
 double RTTMap::Retrieve( Flow *flow, unsigned long int time_stamp )
 {
 	//cout << "Attempting to retrieve " << time_stamp << endl;
-	FlowMap::iterator i = NULL;
+	FlowMap::iterator i;
 	if( (i = m_flows->find(*flow) ) != m_flows->end() )
 	{
 		//cout << "Found flow in m_flows" << endl;
@@ -203,7 +203,7 @@ double RTTMap::Retrieve( Flow *flow, unsigned long int time_stamp )
 
 void RTTMap::Update( Flow *flow, UINT32 time_stamp, UINT32 new_time_stamp )
 {
-	FlowMap::iterator i = NULL;
+	FlowMap::iterator i;
 	if( (i = m_flows->find(*flow) ) != m_flows->end() )
 	{
 		TraceMap &tmap = i->second;

@@ -6,21 +6,17 @@ Linux:
 ----------------------------------
 
 Install:
- * libsdl-dev
  * SDL_net-dev
  * zlib-dev
  * libpng-dev
- * libstlport-dev
-
-Make sure OpenGL of some sort is also installed, you may need to install
-Mesa if the build fails to find OpenGL or GLU. You'll also need Python
-installed.
+ * devil-dev
+ * libconfig
 
 Build bsod-client:
  * make
 
 Configure bsod-client:
- * vi data/config.lua
+ * vi bsod.conf
 
 Run:
  * ./runbsod.sh
@@ -31,14 +27,11 @@ Windows
 
 Install:
  * libsdl-dev
- * SDL_net-dev
-
-The DevIL and Lua libraries included in the external/ directory need to be 
-built to provide the .lib and .dll files for bsod, then bsod itself can be
-compiled.
+ * devil-dev
+ * libconfig
 
 Configure bsod-client:
- * edit data/config.lua
+ * edit bsod.conf
 
 Run:
  * bsod.exe

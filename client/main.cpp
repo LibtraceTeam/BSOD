@@ -85,24 +85,24 @@ int BungMain(int argc, char *argv[])
 
 	try {
 		int width = 800, height = 600, bpp = 16;
-		char *netHost = strdup("localhost:32400");
+		char *netHost = NULL; 
 		double startx = -10.0f;
 		double starty = 10.0f;
 		double startz = 0.0f;
 		double pitch = 0, heading = 0;
-		bool fullScreen = false;
+		int fullScreen = false;
 		double size = 1.0f;
 		double speed = 1.0f;
-		bool jitter = true;
-		bool billboard = false;
-		bool do_gcc = true;
-		bool matrix_mode = false;
+		int jitter = true;
+		int billboard = false;
+		int do_gcc = true;
+		int matrix_mode = false;
 		double alpha = 0.5f;
-		char *particle = strdup("data/particle.png");
-		bool show_menu = false;
-		bool show_cursor = false;
-		bool screen_saver = false;
-		char* disp = strdup("opengl");
+		char *particle = NULL; 
+		int show_menu = false;
+		int show_cursor = false;
+		int screen_saver = false;
+
 		char* configfile = "bsod.conf";
 		double plane_seperation;
 
@@ -131,7 +131,6 @@ int BungMain(int argc, char *argv[])
 		{ "startx",		TYPE_DOUBLE|TYPE_NULL, &startx },
 		{ "starty",		TYPE_DOUBLE|TYPE_NULL, &starty },
 		{ "startz",		TYPE_DOUBLE|TYPE_NULL, &startz },
-		{ "driver",		TYPE_STR|TYPE_NULL, &disp },
 		{ "size" ,		TYPE_DOUBLE|TYPE_NULL, &size },
 		{ "speed",		TYPE_DOUBLE|TYPE_NULL, &speed },
 		{ 0, 0, 0 },
@@ -146,13 +145,10 @@ int BungMain(int argc, char *argv[])
 			return -1;
 		}
 
-		Log("Config file parsed.\n");
+		netHost = netHost ? netHost : strdup("localhost:32400");
+		particle = particle ? particle : strdup("data/particle.png");
 
-		/* Figure out which display driver we're using */
-		if (strcmp(disp,"direct3d") == 0 
-		  ||strcmp(disp,"d3d") == 0)
-			dispType = CSystemDriver::DISPLAY_DIRECT3D;
-		free(disp);
+		Log("Config file parsed.\n");
 
 		/* Right, setup the world */
 		world.actionHandler = new CActionHandler;

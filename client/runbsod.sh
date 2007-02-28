@@ -1,1 +1,1 @@
-./bsod-client
+exec ./bsod_client

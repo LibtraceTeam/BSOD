@@ -22,4 +22,3 @@ all: $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) bsod_client
-	$(MAKE) -C lib clean

@@ -65,8 +65,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define hash_map map
 #include "win32_system_driver.h"
 
-#include <d3dx8.h>
-#include "../d3d/d3d_display_manager.h"
 
 const int KEYBOARD_BUFFER_SIZE = 32; // Buffer size.  32 should easily be big enough (I think) - Sam
 

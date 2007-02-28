@@ -58,7 +58,7 @@
 #include <fstream>
 
 // HAX: for drawing for now
-#include <external/GL/gl.h>
+#include "external/GL/gl.h"
 
 static const float scale = 0.021f;
 static float model_g_scale = 1.0f;

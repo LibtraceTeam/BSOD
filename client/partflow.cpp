@@ -8,8 +8,8 @@
 #include <windows.h>
 #endif
 
-#include <external/GL/gl.h>
-#include <external/GL/glu.h>
+#include "external/GL/gl.h"
+#include "external/GL/glu.h"
 #include "external/GL/glext.h"
 
 #include "vector.h"

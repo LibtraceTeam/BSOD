@@ -80,7 +80,7 @@ public:
 	void AddMesh(CMesh *ent);
 	
 	bool FitInNode(Vector3f offset, float width, CMesh *ins);
-	bool COctree::FitInNode(Vector3f centre, float width, CBezier *ins);
+	bool FitInNode(Vector3f centre, float width, CBezier *ins);
 
 	void Draw(CCamera &cam);
 	void DrawBox(Vector3f offset, float width);

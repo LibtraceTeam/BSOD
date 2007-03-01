@@ -48,7 +48,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "entity_manager.h"
 #include "display_manager.h"
 #include "bezier.h"
-#include "levelloader.h"
 #include "vfs.h"
 #include "texture_manager.h"
 #include "reporter.h"

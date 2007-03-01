@@ -6,7 +6,7 @@ CXXFLAGS+=-Wall -W -g -O2 -Wno-non-template-friend
 LDLIBS+=-lIL -lILU -lGL -lGLU -lz -lSDL_net -lconfig
 
 SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp entity.cpp \
- entity_manager.cpp font.cpp gui.cpp levelloader.cpp loading_screen.cpp \
+ entity_manager.cpp font.cpp gui.cpp loading_screen.cpp \
  main.cpp matrix.cpp menuitem.cpp misc.cpp \
  octree.cpp partflow.cpp partvis.cpp player.cpp polygon.cpp quaternion.cpp \
  reporter.cpp sdl_net_driver.cpp texture_manager.cpp vector.cpp vfs.cpp \

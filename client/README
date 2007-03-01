@@ -16,7 +16,7 @@ Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information
 and read the BUNG_LICENSE included with this release.
 
 
-Changes to the client between 1.2.0 and 1.2.2
+Changes to the client between 1.3.0 and 1.4.0
 ==============================================
 
 *	IMPORTANT: Config file format changed from lua to being similar
@@ -106,10 +106,12 @@ Configuration file:
 
 After unzipping the archive and before running the bsod executable, you
 must edit the configuration file to reflect where the bsod server is being
-run. The config file is written in the lua scripting language, and contains
-pairs of the form <key> = <value>. All values are either reals, integers or 
-double quote enclosed strings. Comments can be added with a double hyphen 
-(--), and any text after that point to the end of the line will be ignored.
+run.  The config file is no longer using the lua scripting language, but 
+uses the same syntax as the BSOD server.  Strings must enclosed in quotes,
+and booleans use "true"/"on" or "false"/"off".  Comments are introduced with
+a "#", everything after that point in the line will be ignored.  There is a
+known issue that a parse error may occur if the last line of the file is not
+a blank line.
 
 Tweaking some of these options can yield large performance increases and make
 visualizations of large amounts of traffic more readable. The default values
@@ -117,17 +119,18 @@ are optimal for the University of Waikato capture, for other networks these
 values should be changed appropiately.
 
 
-option: network_host	type: string
+option: server			type: string
 Specify the host running the bsod server that will provide data to this 
 client. Takes a string of the form "host:port". The server must be running
 and connected to its data source before the client connects to the server.
 
-option:	start_location	type: {real, real, real}
-start_location is a triple specifying the X, Y and Z coordinates that the
-camera should initially be positioned at. Pressing the 'H' key while the
-client is running will display the current location, which can be useful
-for getting the coordinates of the position you would like to have the
-camera start at.
+option:	startx
+option:	starty
+option:	startz
+These options specify the X, Y and Z coordinates that the camera should
+initially be positioned at. Pressing the 'H' key while the client is running
+will display the current location, which can be useful for getting the
+coordinates of the position you would like to have the camera start at.
 
 option:	pitch			type: real
 Specify the pitch the camera should have when at its initial position.
@@ -142,13 +145,7 @@ heading, which can be useful for setting the heading you would like to have
 the camera start at.
 
 
-option: display			type: string
-Specify the renderer that should be used when drawing the bsod client.
-Currently only opengl is supported and so this option should always have 
-the value "opengl".
-
-
-option: fullscreen		type: string
+option: fullscreen		type: bool
 Set this to "yes" to run the bsod client in fullscreen mode, otherwise set
 it to "no" to run it in a window.
 
@@ -188,20 +185,19 @@ visualization look better. Setting it to "no" will disable this; doing so is
 not recommended.
 
 
-option: billboard		type: string
-Can be "yes" or "no". For now this should be set to "no" as the feature is
-not implemented.
-
+option: pointsprites	type: bool
+Can be "yes" or "no".  Set to "no" if your graphics card doesn't support
+point sprites.
 
 option: particle		type: string
 Sets the path and filename of the alpha texture to use for the particles.
 
-option: matrix_mode		type: string
+option: matrix_mode		type: bool
 Just for fun, changes the images used as particles to be characters from
 a Matrix style font. Set to "yes" to enable, "no" to disable.
 
-option: do_gcc			type: string
-Every 10 minuted a garbage collection will be performed to throw away old,
+option: do_gcc			type: bool
+Every 10 minutes a garbage collection will be performed to throw away old,
 unused flows. This can mean a slight impact in performance when the garbage 
 collector runs. Setting this option to "no" may be a good idea if you have 
 a lot of memory and periodically restart the client anyway.
@@ -213,15 +209,13 @@ a lot of memory and periodically restart the client anyway.
 Controls
 ----------------------------------
 
-Help:						F1
+Menu:						F1
 Pitch up/down:				mouse up/down, up arrow/down arrow
 Heading left/right:			mouse left/right, left arrow/right arrow
 Forward:					W
 Back:						S
 Strafe left:				A
 Strafe right:				D
-Cycle traffic types left:	,
-Cycle traffic types right:	.
 Toggle HUD display:			H
 Toggle wireframe mode:		R
 Take screenshot:			M
@@ -230,13 +224,9 @@ Increase speed:				=
 Decrease speed:				-
 Quit:						Esc
 
-
-The traffic types displayed on the client can be cycled using the ',' and '.'
-keys. It defaults to showing all traffic received from the server, but by 
-cycling it, specific traffic types can be shown in isolation. A small label
-in the bottom left corner shows what traffic is currently being shown.
-Depending on how the server is configured and where it is capturing data
-from, not all traffic types will show anything useful.
+A small label in the bottom left corner shows what traffic is currently being
+shown.  Depending on how the server is configured and where it is capturing
+data from, not all traffic types will show anything useful.
 
 The HUD display can be toggled between showing the current date/time and
 the debug hud, which will show the current position, pitch and heading of 
@@ -283,8 +273,6 @@ that represents local address space (on the left hand side with default
 camera positioning) uses the file data/left.png while the world address space
 (on the right by default), uses the file data/right.png. Each particle 
 travelling through the display space is drawn as the image data/particle.png.
-
-
 
 
 

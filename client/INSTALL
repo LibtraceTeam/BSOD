@@ -6,10 +6,11 @@ Linux:
 ----------------------------------
 
 Install:
- * SDL_net-dev
- * zlib-dev
+ * libsdl1.2-dev
+ * libsdl-net1.2-dev
+ * libdevil-dev
+ * zlib1g-dev
  * libpng-dev
- * devil-dev
  * libconfig
 
 Build bsod-client:
@@ -19,16 +20,11 @@ Configure bsod-client:
  * vi bsod.conf
 
 Run:
- * ./runbsod.sh
+ * ./bsod_client
 
 
 Windows
 ----------------------------------
-
-Install:
- * libsdl-dev
- * devil-dev
- * libconfig
 
 Configure bsod-client:
  * edit bsod.conf

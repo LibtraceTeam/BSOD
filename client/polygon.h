@@ -46,7 +46,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct CTexture;
 class CBox;
-class CCollider;
 
 class CMesh
 {
@@ -64,9 +63,8 @@ public:
 	vector<Vector3f>	vertices;
 	vector<Vector2f>	texCoords;
 	CTexture 			*tex;
-	CCollider			*collider;
 
-	CMesh() { tex = NULL; collider = NULL; }
+	CMesh() { tex = NULL; }
 	virtual ~CMesh();
 
 	virtual void Draw() = 0;

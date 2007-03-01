@@ -52,8 +52,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <stdio.h>
 
-#include "collider.h"
-
 int COctree::nodes_drawn = 0;
 
 //octree C_NODE class controller
@@ -100,11 +98,6 @@ COctree::COctree()
 
 void COctree::AddMesh(CMesh *ent)
 {
-	// If no collision info is present, we build it now
-	if(ent->collider == NULL) {
-		//ent->collider = CCollider::Create();
-		//ent->collider->BuildCollisionInfo(ent);
-	}
 	AddMesh(&m_TopNode, m_origin, m_width, ent, 0);
 }
 

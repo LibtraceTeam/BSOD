@@ -48,7 +48,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "world.h"
 #include "triangle.h"
 #include "display_manager.h"
-#include "collider.h"
 #include "reporter.h"
 #include "bezier.h"
 
@@ -58,17 +57,10 @@ uint32 CMesh::mesh_indices[2000];
 
 CMesh::~CMesh()
 { 
-	if(collider) delete collider; 
 }
 
 void CMesh::Dump()
 {
-	/*vector<Vector3f>	vertices;
-	vector<Vector2f>	texCoords;
-	//vector<Vector3f>	normals;
-	CTexture 			*tex;
-	CCollider			*collider;*/
-
 	unsigned int i;
 
 	Log("Vertices:{");

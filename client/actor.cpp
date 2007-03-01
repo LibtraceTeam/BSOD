@@ -47,7 +47,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "world.h"
 #include "net_driver.h"
 
-#include "collider.h"
 #include "reporter.h"
 
 #include "display_manager.h"

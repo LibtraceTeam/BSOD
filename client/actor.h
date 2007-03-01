@@ -44,7 +44,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __ACTOR_H__
 #define __ACTOR_H__
 
-class CMD3;
 class CMotion;
 
 #include "entity.h"
@@ -78,8 +77,6 @@ public:
 
 
 	
-	CMD3		*m_model; 
-
 	CActor();
 	virtual ~CActor();
 	

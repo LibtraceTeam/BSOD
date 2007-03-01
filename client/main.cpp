@@ -64,8 +64,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "partvis.h"
 
 
-#include "md3.h"
-
 #include "misc.h"
 
 #include <libconfig.h>
@@ -169,8 +167,6 @@ int BungMain(int argc, char *argv[])
 		
 		world.tree = new COctree;
 		
-		world.resources = new CResourceManager;
-
 		world.entities = new CEntityManager;
 
 		/* Position the user and set them looking the right direction */

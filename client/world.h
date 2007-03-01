@@ -74,7 +74,6 @@ public:
 	CPhysicsHandler	*physicsHandler;
 	CNetDriver		*netDriver;
 	CConfig			*config;
-	CResourceManager *resources;
 	CPartVis	*partVis;
 	ISoundProvider	*soundProvider;
 	bool debug_display;

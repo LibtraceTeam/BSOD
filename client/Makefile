@@ -7,7 +7,7 @@ LDLIBS+=-lIL -lILU -lGL -lGLU -lz -lSDL_net -lconfig
 
 SOURCES= action.cpp actor.cpp bezier.cpp camera.cpp entity.cpp \
  entity_manager.cpp font.cpp gui.cpp levelloader.cpp loading_screen.cpp \
- main.cpp matrix.cpp md2.cpp md3.cpp menuitem.cpp misc.cpp \
+ main.cpp matrix.cpp menuitem.cpp misc.cpp \
  octree.cpp partflow.cpp partvis.cpp player.cpp polygon.cpp quaternion.cpp \
  reporter.cpp sdl_net_driver.cpp texture_manager.cpp vector.cpp vfs.cpp \
  world.cpp xml_parse.cpp 

@@ -74,7 +74,6 @@ CWorld::CWorld()
 	netDriver = NULL;
 	soundProvider = NULL;
 	entities = NULL;
-	resources = NULL;
 	partVis = NULL;
 	debug_display = false;
 }

@@ -125,29 +125,6 @@ CMatrix4f CMatrix4f::operator +(CMatrix4f &other)
 
 CMatrix4f &CMatrix4f::FromRowMajor(float m[4][4])
 {
-	// Maybe this should really be called FromD3DMatrix or some shit.
-	/*
-	data[0] = m[0][0];
-	data[1] = m[1][0];
-	data[2] = m[2][0];
-	data[3] = m[3][0];
-
-	data[4] = m[0][1];
-	data[5] = m[1][1];
-	data[6] = m[2][1];
-	data[7] = m[3][1];
-
-	data[8] = m[0][2];
-	data[9] = m[1][2];
-	data[10] = m[2][2];
-	data[11] = m[3][2];
-
-	data[12] = m[0][3];
-	data[13] = m[1][3];
-	data[14] = m[2][3];
-	data[15] = m[3][3];
-	*/
-
 	return *this;
 }
 

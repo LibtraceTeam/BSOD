@@ -50,7 +50,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "collider.h"
 #include "reporter.h"
 
-#include "md3.h"
 #include "display_manager.h"
 #include "entity_manager.h"
 
@@ -62,7 +61,6 @@ static float maxspeed = 5.0f;
 
 CActor::CActor()
 {
-	m_model = NULL;
 	m_InContact = false;
 	SetGhost(false);
 	//SetHealth(100);
@@ -70,16 +68,11 @@ CActor::CActor()
 
 CActor::~CActor()
 {
-	if(m_model)
-		delete m_model;
 }
 
 void CActor::Update(float diff)
 {
 	CEntity::Update(diff);
-
-	if(m_model)
-		m_model->Update(diff);
 
     SetPosition(
             GetPosition() + GetVelocity() * maxspeed * diff
@@ -247,16 +240,5 @@ bool CActor::CheckTree(const COctree::c_node *node, const Vector3f &offset, floa
 		}
 	}
 	
-	// Finally check for intersections with objects in this octree node.
-	list<CMesh *>::const_iterator i = node->m_objs.begin();
-	for(; i != node->m_objs.end(); ++i) {
-		float depth;
-		if( m_model->collider->Collides((*i)->collider, futurePos, collisionPoint, depth) )
-		{
-			return true;
-		}
-
-	}
-
 	return false;
 }

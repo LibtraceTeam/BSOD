@@ -62,8 +62,6 @@ CEntityManager::CEntityManager() {
 
 	player = new CPlayer;
 	player->GetCamera()->id = 0;
-    // Could load an MD3 for the player here, but no point, as it isn't
-    // displayed (don't want to see your own model, it only gets in the way)
 
 	player->SetPosition(Vector3f(4.0f, 0.0f, 0.0f));
 //	player->LookAt(Vector3f(0.0f, 0.0f, 0.0f));
@@ -155,22 +153,6 @@ void CEntityManager::UpdateEntity(int id, const Vector3f position, const Vector3
 
 	ent->id = id;
 	
-	/*CMD3 *mdl;
-	mdl = new CMD3();
-
-	world.resources->LoadMD3("players/tankjr", *mdl);*/
-	
-	//mdl->LoadMD3("tankjr");
-	//mdl->collider = CCollider::Create();
-//	mdl->collider->BuildCollisionInfo(mdl);
-
-	/*CMD2 *act;
-	act = new CMD2();
-	act->LoadMD2("md2s/yohko/tris.md2");
-	act->collider = CCollider::Create();
-	act->collider->BuildCollisionInfo(act);*/
-//	ent->m_model = mdl;
-
 	ent->SetPosition(position);
 	ent->SetBearing(bearing);
 	
@@ -180,31 +162,6 @@ void CEntityManager::UpdateEntity(int id, const Vector3f position, const Vector3
 bool CEntityManager::CollideEntities(CActor *subject, const Vector3f &futurePos, 
 					   Vector3f &collisionPoint, Vector3f &surfaceNorm) 
 {
-	// TODO: reimplement this function in a better way
-/*	list<CEntity *>::iterator i = entities.begin();
-	list< t3DModel * >::iterator iter_mdl_objs;
-
-	for(; i != entities.end(); ++i) {
-		
-		float depth;
-		if( subject != *i && ((CActor *)*i)->m_model) {
-			CMD3 *obj = ((CActor *)*i)->m_model;
-			iter_mdl_objs = obj->m_Objects.begin();
-			for(; iter_mdl_objs != obj->m_Objects.end(); ++iter_mdl_objs) {
-				for(int i = 0; i < (int)(*iter_mdl_objs)->pObject.size(); i++) {
-					if(subject->m_model->collider->Collides(
-						(*iter_mdl_objs)->pObject[i].collider, 
-						futurePos, 
-						collisionPoint, 
-						//surfaceNorm, 
-						depth ) ) {
-						return true;
-					}
-				}
-			}
-		}
-
-	}*/
 	return false;
 }
 

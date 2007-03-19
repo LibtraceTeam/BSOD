@@ -157,20 +157,16 @@ int main(int argc, char *argv[])
 	static struct libtrace_filter_t *filter = 0;
 	struct libtrace_packet_t *packet;
 	time_t next_save = 0;
-	time_t lastts = 0;
-
-
 
 	FD_ZERO(&listen_set);
 	FD_ZERO(&event_set);
-
 
 	// setup signal handlers
 	sigact.sa_handler = sigusr_hnd;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
-		printf("sigaction SIGUSR1: %d\n",errno);
+		Log("sigaction SIGUSR1: %d\n",errno);
 	}
 	
 	sigact.sa_handler = SIG_IGN;
@@ -357,11 +353,6 @@ int main(int argc, char *argv[])
 				theList->save();
 			}
 
-			/* Every second update the current time */
-			if (packettime.tv_sec - lastts >= 1) {
-				printf("%s\r",asctime(gmtime((time_t*)&packettime.tv_sec)));
-				lastts=packettime.tv_sec;
-			}
 		}
 		// We've finished with this trace
 		trace_destroy(trace);
@@ -491,8 +482,8 @@ void do_configuration(int argc, char **argv) {
 	// if any options were omitted from the config file,
 	// set them here
 	fix_defaults();
-	printf("Darknet: %s\n",enable_darknet ? "Yes" : "No");
-	printf("RTTEst: %s\n",enable_rttest ? "Yes" : "No");
+	Log("Darknet: %s\n",enable_darknet ? "Yes" : "No");
+	Log("RTTEst: %s\n",enable_rttest ? "Yes" : "No");
 }
 
 /** Parse out the arguments and the driver name 
@@ -530,7 +521,7 @@ static void *get_module(const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
-	printf("Loading module %s...\n",tmp);
+	Log("Loading module %s...\n",tmp);
 
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
@@ -542,7 +533,7 @@ static void *get_module(const char *name)
 	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
 
 	if (init_func) {
-		printf(" Initialising module %s...\n",tmp);
+		Log(" Initialising module %s...\n",tmp);
 		if (!init_func(args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
@@ -551,7 +542,7 @@ static void *get_module(const char *name)
 		}
 	}
 	else {
-		printf(" No initialisation required for %s\n",tmp);
+		Log(" No initialisation required for %s\n",tmp);
 		dlerror(); /* This is needed to clear the error flag */
 	}
 
@@ -574,7 +565,7 @@ static void *get_position_module(side_t side, const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
-	printf("Loading module %s...\n",tmp);
+	Log("Loading module %s...\n",tmp);
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s: %s\n",
@@ -585,7 +576,7 @@ static void *get_position_module(side_t side, const char *name)
 	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
 
 	if (init_func) {
-		printf(" Initialising module %s...\n",tmp);
+		Log(" Initialising module %s...\n",tmp);
 		if (!init_func(side,args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
@@ -594,7 +585,7 @@ static void *get_position_module(side_t side, const char *name)
 		}
 	}
 	else {
-		printf(" Initialisation not required for %s\n",tmp);
+		Log(" Initialisation not required for %s\n",tmp);
 		dlerror();
 	}
 

@@ -62,7 +62,7 @@ extern int fd_max;
 
 struct client_buffer
 {
-	char *data;
+	void *data;
 	size_t datalen;
 	size_t offset;
 };
@@ -119,15 +119,6 @@ struct flow_descriptor_t {
 	uint8_t colour[3];
 	char name[256];
 } __attribute__((packed));
-
-/* a packet can be any one of these types - an enum would be nice here */
-union pack_union {
-	struct flow_update_t flow;
-	struct pack_update_t packet;
-	struct flow_remove_t rem;
-	struct kill_all_t kall;
-	struct flow_descriptor_t fdesc;
-};
 
 int listen_socket;
 fd_set read_fds;
@@ -190,6 +181,11 @@ void remove_fd(struct client *tmp)
 	{
 		tmp->next->prev = tmp->prev;
 		tmp->prev->next = tmp->next;
+	}
+
+	while (!tmp->buffer.empty()) {
+		free(tmp->buffer.front().data);
+		tmp->buffer.pop_front();
 	}
 
 	delete tmp;
@@ -256,7 +252,7 @@ int flush_data(struct client *client)
 {
 	while (!client->buffer.empty()) {
 		int ret=send(client->fd,
-				client->buffer.front().data+client->buffer.front().offset,
+				(char*)client->buffer.front().data+client->buffer.front().offset,
 				client->buffer.front().datalen-client->buffer.front().offset,
 				0);
 
@@ -367,7 +363,7 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 				// keep track of the maximum
 				fd_max = newfd;
 			}
-			printf("server: new connection from %s\n", 
+			Log("server: new connection from %s\n", 
 					inet_ntoa(remoteaddr.sin_addr));
 			// Update all clients with the colour table
 			// This could be done better by targeting only the new
@@ -383,9 +379,10 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
  *
  * If this overflows the clients queue, disconnect the client.
  */
-void enqueue_data(struct client *client,char *buffer, size_t size)
+void enqueue_data(struct client *client,void *buffer, size_t size)
 {
 	struct client_buffer sendq;
+	assert(buffer);
 	client->data_waiting+=size;
 	if (client->data_waiting>10*1024*1024) { // 10MB
 		Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i for max sendq exceeded\n",client->fd);
@@ -393,7 +390,12 @@ void enqueue_data(struct client *client,char *buffer, size_t size)
 		return;
 	}
 	sendq.datalen = size;
-	sendq.data = (char*) malloc(sendq.datalen);
+	sendq.data = malloc(sendq.datalen);
+	if (sendq.data == NULL) {
+		Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i: Out of memory\n",client->fd);
+		remove_fd(client);
+		return;
+	}
 	memcpy(sendq.data,buffer,sendq.datalen);
 	sendq.offset = 0;
 	client->buffer.push_back(sendq);
@@ -404,32 +406,18 @@ void enqueue_data(struct client *client,char *buffer, size_t size)
  * Takes a packet as part of a union, works out which one it is and
  * sends it to all clients.
  */
-int send_all(pack_union *data)
+int send_all(void *data, int size)
 {
 	struct client *tmp;
 	struct client *next;
-	int size = 0;
 
-	if(data->flow.type == 0x01)
-		size = sizeof(pack_update_t);
-	else if(data->flow.type == 0x00)
-		size = sizeof(flow_update_t);
-	else if(data->flow.type == 0x02)
-		size = sizeof(flow_remove_t);
-	else if(data->flow.type == 0x03)
-	    size = sizeof(kill_all_t);
-	else if(data->flow.type == 0x04)
-		size = sizeof(flow_descriptor_t);
-	else
-	{
-		Log(LOG_DAEMON|LOG_ALERT,"Bad packet type\n");
-		return 1;
-	}
+	assert(data);
+
 	// send to all clients 
 	for(tmp=clients;tmp != NULL; tmp = next)
 	{
 		next=tmp->next;
-		enqueue_data(tmp, (char*)data, size);
+		enqueue_data(tmp, data, size);
 	}
 
 	return 0;
@@ -442,9 +430,7 @@ int send_kill_flow(uint32_t id)
 	update.type = 0x02;
 	update.id = htonl(id);
 
-	union pack_union *punion;
-	punion = (pack_union *)&update;
-	send_all(punion);
+	send_all(&update,sizeof(update));
 
 	return 0;
 }
@@ -464,9 +450,7 @@ int send_new_flow(float start[3], float end[3], uint32_t id, uint32_t ip1, uint3
 	update.ip1 = htonl(ip1);
 	update.ip2 = htonl(ip2);
 
-	union pack_union *punion;
-	punion = (pack_union *)&update;
-	send_all(punion);
+	send_all(&update,sizeof(update));
 
 	return 0;
 }
@@ -491,8 +475,7 @@ int send_update_flow(struct client *client,
 	update.ip1 = htonl(ip1);
 	update.ip2 = htonl(ip2);
 
-	// send to single client 
-	enqueue_data(client, (char*)&update, sizeof(struct flow_update_t));
+	enqueue_data(client, &update, sizeof(update));
 
 	return 0;
 }
@@ -510,9 +493,7 @@ int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,
 	update.speed = htonf(speed);
 	update.dark = dark;
 
-	union pack_union *punion;
-	punion = (pack_union *)&update;
-	send_all(punion);
+	send_all(&update,sizeof(update));
 
 	return 0;
 }
@@ -523,9 +504,7 @@ int send_kill_all()
     struct kill_all_t kall;
     kall.type = 0x03;
 
-    union pack_union *punion;
-    punion = (pack_union *)&kall;
-    send_all(punion);
+    send_all(&kall,sizeof(kall));
 
     return 0;
 }
@@ -542,9 +521,7 @@ int send_colour_table(struct modptrs_t *modptrs)
 		fd.type = 0x04;
 		strcpy( fd.name, name );
 		fd.id = i;
-		union pack_union *punion;
-		punion = (pack_union *)&fd;
-		send_all(punion);
+		send_all(&fd,sizeof(fd));
 		i++;
 		if( i > 256 ) // Sanity check.
 			exit( -99 );

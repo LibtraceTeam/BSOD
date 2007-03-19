@@ -35,15 +35,6 @@
 
 using namespace std;
 
-#define DEBUG
-
-#ifdef DEBUG
-#define spew(x) cout << x << endl;
-#else
-#define spew(x) 
-#endif
-
-
 #define UINT16 unsigned short int
 #define UINT32 unsigned long int
 #define BYTE unsigned char

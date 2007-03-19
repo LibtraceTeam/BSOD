@@ -231,7 +231,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	struct libtrace_ip *p = trace_get_ip(packet);
 
 	if (!p) {
-		printf("not an ip packet\n");
 		return 0;
 	}
 	assert(secs-lastts >= 0);
@@ -384,7 +383,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 					if( (the_time = map->Retrieve( rtt_flow, 
 									htonl(tcpptr->ack_seq) - 1 )) >= 0.0f )
 					{
-						//printf( "TCP\n" );
 						speed = convert_speed( now-the_time );
 					}
 				}
@@ -401,7 +399,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 					// Echo reply:
 					if( (the_time = map->Retrieve( rtt_flow_inverse, icmpInfo->un.echo.id ) ) >= 0.0f )
 					{
-						//printf( "ICMP\n" );
 						speed = convert_speed(now-the_time);
 					}
 				}
@@ -483,7 +480,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 // This function could probably be replaced with something a little more clever.
 float convert_speed( float speed )
 {
-	//printf( "Converting speed...\n" );
 	if( speed <= 0.0005f ) 	return( 4.0f ); 
 	if( speed <= 0.005f ) 	return( 3.0f );
 	if( speed <= 0.05f )	return( 2.0f ); 

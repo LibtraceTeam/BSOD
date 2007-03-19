@@ -35,6 +35,8 @@
 #include <stdlib.h> 
 #include <stdarg.h> 
 #include <assert.h> 
+#include <time.h>
+#include <string.h>
 
 #include "debug.h"
 #include "daemons.h"
@@ -49,11 +51,15 @@ void Log(int priority, char *fmt, ...)
         assert(daemonised == 0 || daemonised == 1);
 
         va_start(ap, fmt);
+	vsnprintf(buffer, sizeof(buffer), fmt, ap);
 
         if(! daemonised){
-                vfprintf(stderr, fmt, ap);
+		time_t ts=time(NULL);
+		char date[32];
+		ctime_r(&ts,date);
+		date[strlen(date)-1]='\0';
+		fprintf(stderr,"%s: %s",date,buffer);
         } else {
-                vsnprintf(buffer, sizeof(buffer), fmt, ap);
                 syslog(priority, "%s", buffer);
         }
         va_end(ap);

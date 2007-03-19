@@ -41,7 +41,7 @@ void blacklist::load(void)
 {
 	FILE *f=fopen(BLpath.c_str(),"r");
 	if (!f) {
-		fprintf(stderr,"Can't read blacklist file %s\n",BLpath.c_str());
+		Log("Can't read blacklist file %s\n",BLpath.c_str());
 		return;
 	}
 	while(!feof(f)) {
@@ -73,7 +73,7 @@ void blacklist::save(void)
 
 	if( f == NULL )
 	{
-		printf( "Warning: Failed to write out lightlist.\n" );
+		Log( "Warning: Failed to write out lightlist.\n" );
 		return;
 	}
 

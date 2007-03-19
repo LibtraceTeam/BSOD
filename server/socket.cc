@@ -363,7 +363,8 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 				// keep track of the maximum
 				fd_max = newfd;
 			}
-			Log("server: new connection from %s\n", 
+			Log(LOG_DAEMON|LOG_DEBUG,
+					"server: new connection from %s\n", 
 					inet_ntoa(remoteaddr.sin_addr));
 			// Update all clients with the colour table
 			// This could be done better by targeting only the new

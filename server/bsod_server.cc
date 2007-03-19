@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
-		Log("sigaction SIGUSR1: %d\n",errno);
+		Log(LOG_DAEMON|LOG_DEBUG,"sigaction SIGUSR1: %d\n",errno);
 	}
 	
 	sigact.sa_handler = SIG_IGN;
@@ -482,8 +482,8 @@ void do_configuration(int argc, char **argv) {
 	// if any options were omitted from the config file,
 	// set them here
 	fix_defaults();
-	Log("Darknet: %s\n",enable_darknet ? "Yes" : "No");
-	Log("RTTEst: %s\n",enable_rttest ? "Yes" : "No");
+	Log(LOG_DAEMON|LOG_DEBUG,"Darknet: %s\n",enable_darknet ? "Yes" : "No");
+	Log(LOG_DAEMON|LOG_DEBUG,"RTTEst: %s\n",enable_rttest ? "Yes" : "No");
 }
 
 /** Parse out the arguments and the driver name 
@@ -521,7 +521,7 @@ static void *get_module(const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
-	Log("Loading module %s...\n",tmp);
+	Log(LOG_DAEMON|LOG_DEBUG,"Loading module %s...\n",tmp);
 
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
@@ -533,7 +533,7 @@ static void *get_module(const char *name)
 	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
 
 	if (init_func) {
-		Log(" Initialising module %s...\n",tmp);
+		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
 		if (!init_func(args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
@@ -542,7 +542,7 @@ static void *get_module(const char *name)
 		}
 	}
 	else {
-		Log(" No initialisation required for %s\n",tmp);
+		Log(LOG_DAEMON|LOG_DEBUG," No initialisation required for %s\n",tmp);
 		dlerror(); /* This is needed to clear the error flag */
 	}
 
@@ -565,7 +565,7 @@ static void *get_position_module(side_t side, const char *name)
 	
 	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
 
-	Log("Loading module %s...\n",tmp);
+	Log(LOG_DAEMON|LOG_DEBUG,"Loading module %s...\n",tmp);
 	void *handle = dlopen(tmp,RTLD_LAZY);
 	if (!handle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s: %s\n",
@@ -576,7 +576,7 @@ static void *get_position_module(side_t side, const char *name)
 	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
 
 	if (init_func) {
-		Log(" Initialising module %s...\n",tmp);
+		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
 		if (!init_func(side,args)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
@@ -585,7 +585,7 @@ static void *get_position_module(side_t side, const char *name)
 		}
 	}
 	else {
-		Log(" Initialisation not required for %s\n",tmp);
+		Log(LOG_DAEMON|LOG_DEBUG," Initialisation not required for %s\n",tmp);
 		dlerror();
 	}
 

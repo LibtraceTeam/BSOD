@@ -29,6 +29,7 @@
 
 
 #include "Blacklist.h"
+#include "debug.h"
 
 blacklist::blacklist(const char *path)
 {
@@ -41,7 +42,7 @@ void blacklist::load(void)
 {
 	FILE *f=fopen(BLpath.c_str(),"r");
 	if (!f) {
-		Log("Can't read blacklist file %s\n",BLpath.c_str());
+		Log(LOG_DAEMON|LOG_WARNING,"Can't read blacklist file %s\n",BLpath.c_str());
 		return;
 	}
 	while(!feof(f)) {
@@ -73,7 +74,8 @@ void blacklist::save(void)
 
 	if( f == NULL )
 	{
-		Log( "Warning: Failed to write out lightlist.\n" );
+		Log(LOG_DAEMON|LOG_WARNING, 
+				"Warning: Failed to write out lightlist.\n" );
 		return;
 	}
 

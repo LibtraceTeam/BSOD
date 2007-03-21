@@ -52,7 +52,7 @@ private:
 	TCPsocket       clientsock;
 	SDLNet_SocketSet set;
 	
-	char		databuf[1024]; /* never recieve messages over 1k */
+	char		databuf[65536]; /* never recieve messages over 64k */
 	unsigned int	datalen;
 	string          address;
 	

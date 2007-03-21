@@ -49,7 +49,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "triangle.h"
 #include "display_manager.h"
 #include "reporter.h"
-#include "bezier.h"
 
 uint32 CMesh::fan_indices[2000];
 uint32 CMesh::strip_indices[2000];
@@ -127,7 +126,6 @@ void CMesh::InitIndices() {
 		strip_indices[i + 5] = temp[0];
 	}*/
 
-	CBezier::InitIndices();
 }
 
 uint32 *CTriangleMesh::GetTriangleIndices() 

@@ -230,12 +230,6 @@ void CWorld::Draw()
  */
 void CWorld::Update(float diff)
 {
-	// This means we only send 'net data 10 times a second
-	/*if(count_net > (1.0f / net_ps)) {
-		count_net = 0.0f;
-		netDriver->SendData(world.entities->GetPlayer());
-		netDriver->ReceiveData();
-	}*/
 	if( !netDriver->Reconnecting() )
 		netDriver->ReceiveData();
 	else

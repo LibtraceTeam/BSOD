@@ -47,7 +47,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "world.h"
 #include "display_manager.h"
 #include "camera.h"
-#include "bezier.h"
 
 #include <time.h>
 #include <stdio.h>

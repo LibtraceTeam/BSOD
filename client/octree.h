@@ -47,7 +47,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Container of worlds - objects...
 
 class CCamera;
-class CBezier;
 
 class COctree {
 public:
@@ -80,7 +79,6 @@ public:
 	void AddMesh(CMesh *ent);
 	
 	bool FitInNode(Vector3f offset, float width, CMesh *ins);
-	bool FitInNode(Vector3f centre, float width, CBezier *ins);
 
 	void Draw(CCamera &cam);
 	void DrawBox(Vector3f offset, float width);

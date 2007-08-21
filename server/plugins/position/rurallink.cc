@@ -84,7 +84,7 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 	/* Outer box */
 #define	OUTER_WIDTH 4
 #define OUTER_HEIGHT 8
-	y2 = (ip>>5) & (OUTER_HEIGHT-1);
+	y2 = (ip>>4) & (OUTER_HEIGHT-1);
 	x2 = (ip>>7) & (OUTER_WIDTH-1);
 
 	/* The amount of padding around the inner boxes */

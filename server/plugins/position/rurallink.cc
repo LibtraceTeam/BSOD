@@ -68,11 +68,11 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 
 	if (CHK_SOURCE(side,dir)) 
 	{
-		ip = ntonl(ipptr->ip_src.s_addr);
+		ip = ntohl(ipptr->ip_src.s_addr);
 	}
 	else 
 	{
-		ip = ntonl(ipptr->ip_dst.s_addr);
+		ip = ntohl(ipptr->ip_dst.s_addr);
 	}
 
 	/* Inner box */

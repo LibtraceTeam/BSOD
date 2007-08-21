@@ -92,8 +92,8 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 	ry = y1 + y2*INNER_HEIGHT;
 
 	/* Now place them */
-	coord[1] = ((float)(rx+.5)/(OUTER_WIDTH*INNER_WIDTH))*20.0-10;
-	coord[2] = ((float)(ry+.5)/(OUTER_HEIGHT*INNER_HEIGHT))*20.0-10;
+	coord[1] = 10-((float)(ry+.5)/(OUTER_HEIGHT*INNER_HEIGHT))*20.0;
+	coord[2] = 10-((float)(rx+.5)/(OUTER_WIDTH*INNER_WIDTH))*20.0;
 
 	return 0;
 }

@@ -76,7 +76,7 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 	/* Inner box */
 #define INNER_WIDTH 8
 #define INNER_HEIGHT 2
-	y1 = ip&(INNER_HEIGHT-1);
+	y1 =  ip     & (INNER_HEIGHT-1);
 	x1 = (ip>>1) & (INNER_WIDTH-1);
 
 	/* Outer box */
@@ -87,9 +87,9 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 
 	/* Now place them */
 
-	coord[1] = ((float) (x1 + x2*(OUTER_WIDTH+1)))*20
+	coord[1] = ((float) (x1 + x2*(INNER_WIDTH+1)))*20
 			/(INNER_WIDTH+OUTER_WIDTH+1)-10;
-	coord[2] = ((float) (y1 + y2*(OUTER_HEIGHT+1)))*20
+	coord[2] = ((float) (y1 + y2*(INNER_HEIGHT+1)))*20
 			/(INNER_HEIGHT+OUTER_HEIGHT+1)-10;
 
 	return 0;

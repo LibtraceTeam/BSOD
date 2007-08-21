@@ -88,8 +88,8 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 	x2 = (ip>>7) & (OUTER_WIDTH-1);
 
 	/* The amount of padding around the inner boxes */
-	rx = x1 + x2*(INNER_WIDTH+SEPARATION_WIDTH);
-	ry = y1 + y2*(INNER_HEIGHT+SEPARATION_HEIGHT);
+	rx = x1 + x2*INNER_WIDTH;
+	ry = y1 + y2*INNER_HEIGHT;
 
 	/* Now place them */
 	coord[1] = ((float)(rx+.5)/(OUTER_WIDTH*INNER_WIDTH))*20.0-10;

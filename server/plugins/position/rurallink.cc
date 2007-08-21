@@ -61,6 +61,8 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 	uint32_t ip;
 	int x1,y1;
 	int x2,y2;
+
+	int rx, ry;
 	if (!ipptr)
 		return 1;
 
@@ -89,11 +91,14 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 #define SEPARATION_WIDTH 1
 #define SEPARATION_HEIGHT 1
 
+	rx = x1 + x2*(INNER_WIDTH+SEPARATION_WIDTH);
+	ry = y1 + y2*(INNER_HEIGHT+SEPRATION_HEIGHT);
+
 	/* Now place them */
-	coord[1] = ((float) (x1 + x2*(INNER_WIDTH+SEPARATION_WIDTH)))*20
-			/(OUTER_WIDTH*(INNER_WIDTH+SEPARATION_WIDTH))-10;
-	coord[2] = ((float) (y1 + y2*(INNER_HEIGHT+SEPARATION_HEIGHT)))*20
-			/(OUTER_HEIGHT*(INNER_HEIGHT+SEPARATION_HEIGHT))-10;
+	coord[1] = ((float)rx/(OUTER_WIDTH*(INNER_WIDTH+SEPERATION_WIDTH)))
+			*20.0-10;
+	coord[2] = ((float)ry/(OUTER_HEIGHT*(INNER_HEIGHT+SEPERATION_HEIGHT)))
+			*20.0-10;
 
 	return 0;
 }

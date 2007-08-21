@@ -92,7 +92,7 @@ int mod_get_position(float coord[3], side_t side, direction_t dir, struct libtra
 #define SEPARATION_HEIGHT 1
 
 	rx = x1 + x2*(INNER_WIDTH+SEPARATION_WIDTH);
-	ry = y1 + y2*(INNER_HEIGHT+SEPRATION_HEIGHT);
+	ry = y1 + y2*(INNER_HEIGHT+SEPARATION_HEIGHT);
 
 	/* Now place them */
 	coord[1] = ((float)rx/(OUTER_WIDTH*(INNER_WIDTH+SEPARATION_WIDTH)))

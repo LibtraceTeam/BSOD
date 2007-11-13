@@ -108,6 +108,7 @@ int shownondata = 0;
 int showdata = 1;
 int showcontrol = 1;
 int sampling = 0;
+bool live = true;
 
 static void sigusr_hnd(int sig);
 static void sigterm_hnd(int sig);
@@ -131,6 +132,8 @@ static void close_modules();
 static void init_times();
 static void offline_delay(struct timeval tv);
 static void init_signals();
+static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
+		RTTMap *rttmap);
 
 int main(int argc, char *argv[])
 {
@@ -143,20 +146,14 @@ int main(int argc, char *argv[])
 	// socket stuff
 	int listen_socket;
 	fd_set listen_set, event_set;
+
 	struct client *new_client = NULL;
 
-	bool live = true;
-
-
-	struct timeval packettime;
-
-	int psize = 0;
-	int packet_count = 0;
+	struct timeval last_packet_time;
 
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
 	struct libtrace_packet_t *packet;
-	time_t next_save = 0;
 
 	FD_ZERO(&listen_set);
 	FD_ZERO(&event_set);
@@ -269,59 +266,8 @@ int main(int argc, char *argv[])
 
 		while(loop) // loop on packets
 		{
-			// If we get a USR1, we want to restart. Break out of
-			// this while() and go into cleanup
-			if (restart_config == 1) {
+			if (!bsod_read_packet(packet, theList, rttmap))
 				break;
-			}
-
-			if (terminate_bsod) {
-				loop=0;
-				break;
-			}
-			
-			/* check for new clients */
-			new_client = check_clients(&modptrs, false);
-			if(new_client)
-				send_flows(new_client);
-
-			/* get a packet, and process it */
-			if((psize = trace_read_packet(trace, packet)) <= 0) {
-			    break;
-			}
-
-			++packet_count;
-
-			// If we're sampling packets, skip packets that
-			// don't meet our sampling criteria
-			if (sampling && packet_count % sampling != 0)
-				continue;
-
-			packettime = trace_get_timeval(packet);
-		
-			/* this time checking only matters when reading from a
-			 * prerecorded trace file. It limits it to a seconds
-			 * worth of data a second, which is still a large
-			 * chunk
-			 */ 
-				
-			if(!live)
-			{
-				offline_delay(packettime);
-			}
-
-			
-			// if sending fails, assume we just lost a client
-			if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0) {
-				continue;
-			}
-
-			if (packettime.tv_sec > next_save) {
-				/* Save the blacklist every 5 min */
-				next_save = packettime.tv_sec + 300;
-				theList->save();
-			}
-
 		}
 
 		if (trace_is_err(trace)) {
@@ -329,13 +275,15 @@ int main(int argc, char *argv[])
 			Log(LOG_DAEMON|LOG_ALERT, 
 				"trace_read_packet failure: %s\n",
 					err.problem);
+		} else {
+			// expire any outstanding flows
+			last_packet_time = trace_get_timeval(packet);
+			expire_flows(last_packet_time.tv_sec+3600);
 		}
 		// We've finished with this trace
 		trace_destroy(trace);
-		trace = 0;
+		trace = NULL;
 
-		// expire any outstanding flows
-		expire_flows(packettime.tv_sec+3600);
 		
 		// the loop criteria is to loop if we want to loop always, or if
 		// we get a USR1 we restart - the code path is the same.
@@ -351,6 +299,70 @@ int main(int argc, char *argv[])
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 
 	return 0;
+}
+
+static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
+		RTTMap *rttmap) {
+	static time_t next_save = 0;
+	static int packet_count = 0;
+	
+	struct timeval packettime;
+	int psize = 0;
+	struct client *new_client = NULL;
+
+	// If we get a USR1, we want to restart. Break out of
+	// this while() and go into cleanup
+	if (restart_config == 1) {
+		return 0;
+	}
+
+	if (terminate_bsod) {
+		loop=0;
+		return 0;
+	}
+	
+	/* check for new clients */
+	new_client = check_clients(&modptrs, false);
+	if(new_client)
+		send_flows(new_client);
+
+	/* get a packet, and process it */
+	if((psize = trace_read_packet(trace, packet)) <= 0) {
+	    return 0;
+	}
+
+	++packet_count;
+
+	// If we're sampling packets, skip packets that
+	// don't meet our sampling criteria
+	if (sampling && packet_count % sampling != 0)
+		return 1;
+
+	packettime = trace_get_timeval(packet);
+
+	/* this time checking only matters when reading from a
+	 * prerecorded trace file. It limits it to a seconds
+	 * worth of data a second, which is still a large
+	 * chunk
+	 */ 
+		
+	if(!live)
+	{
+		offline_delay(packettime);
+	}
+
+	
+	// if sending fails, assume we just lost a client
+	if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0) {
+		return 1;
+	}
+
+	if (packettime.tv_sec > next_save) {
+		/* Save the blacklist every 5 min */
+		next_save = packettime.tv_sec + 300;
+		theList->save();
+	}
+	return 1;
 }
 
 

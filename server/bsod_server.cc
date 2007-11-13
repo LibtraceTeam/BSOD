@@ -62,7 +62,6 @@
 #include <libconfig.h>
 #include "bsod_server.h"
 
-
 #include "socket.h"
 #include "packets.h"
 #include "daemons.h"
@@ -131,6 +130,7 @@ static int load_modules();
 static void close_modules();
 static void init_times();
 static void offline_delay(struct timeval tv);
+static void init_signals();
 
 int main(int argc, char *argv[])
 {
@@ -160,36 +160,7 @@ int main(int argc, char *argv[])
 
 	FD_ZERO(&listen_set);
 	FD_ZERO(&event_set);
-
-	// setup signal handlers
-	sigact.sa_handler = sigusr_hnd;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
-		Log(LOG_DAEMON|LOG_DEBUG,"sigaction SIGUSR1: %d\n",errno);
-	}
-	
-	sigact.sa_handler = SIG_IGN;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-
-	if(sigaction(SIGPIPE, &sigact, NULL) < 0) {
-		perror("sigaction");
-		exit(-1);
-	}
-
-	sigact.sa_handler = sigterm_hnd;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-
-	if (sigaction(SIGTERM, &sigact, NULL) < 0) {
-		perror("sigaction(SIGTERM)");
-		exit(1);
-	}
-	if (sigaction(SIGINT, &sigact, NULL) < 0) {
-		perror("sigaction(SIGINT)");
-		exit(1);
-	}
+	init_signals();
 
 	//-------------------------------------------------------
 	// do some command line stuff for ports and things
@@ -316,9 +287,6 @@ int main(int argc, char *argv[])
 
 			/* get a packet, and process it */
 			if((psize = trace_read_packet(trace, packet)) <= 0) {
-			    if (psize < 0) {
-				perror("libtrace_read_packet");
-			    }
 			    break;
 			}
 
@@ -344,8 +312,9 @@ int main(int argc, char *argv[])
 
 			
 			// if sending fails, assume we just lost a client
-			if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0)
+			if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0) {
 				continue;
+			}
 
 			if (packettime.tv_sec > next_save) {
 				/* Save the blacklist every 5 min */
@@ -353,6 +322,13 @@ int main(int argc, char *argv[])
 				theList->save();
 			}
 
+		}
+
+		if (trace_is_err(trace)) {
+			struct trace_err_t err;
+			Log(LOG_DAEMON|LOG_ALERT, 
+				"trace_read_packet failure: %s\n",
+					err.problem);
 		}
 		// We've finished with this trace
 		trace_destroy(trace);
@@ -384,6 +360,39 @@ static void sigusr_hnd(int signo) {
 
 static void sigterm_hnd(int signo) {
 	terminate_bsod = 1;
+}
+
+static void init_signals() {
+	// setup signal handlers
+	sigact.sa_handler = sigusr_hnd;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
+		Log(LOG_DAEMON|LOG_DEBUG,"sigaction SIGUSR1: %d\n",errno);
+	}
+	
+	sigact.sa_handler = SIG_IGN;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+
+	if(sigaction(SIGPIPE, &sigact, NULL) < 0) {
+		perror("sigaction");
+		exit(-1);
+	}
+
+	sigact.sa_handler = sigterm_hnd;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+
+	if (sigaction(SIGTERM, &sigact, NULL) < 0) {
+		perror("sigaction(SIGTERM)");
+		exit(1);
+	}
+	if (sigaction(SIGINT, &sigact, NULL) < 0) {
+		perror("sigaction(SIGINT)");
+		exit(1);
+	}
+
 }
 
 void set_defaults() {

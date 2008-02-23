@@ -4,7 +4,7 @@ LFLAGS=-Pcolour_
 CXXFLAGS=-g -fPIC -shared -Wall -W -pipe -pedantic
 LDLIBS=-lfl -ltrace
 LD=g++
-OBJS=bpfcolour.so colours.so
+OBJS=bpfcolour.so colours.so sipcolour.so
 
 all: $(OBJS)
 

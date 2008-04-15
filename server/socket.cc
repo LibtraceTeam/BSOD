@@ -285,7 +285,7 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait) {
 	 *  1.2 == 0x12
 	 *  10.13 = 0xad
 	 */
-	char protocol_version = 0x14;
+	char protocol_version = 0x20;
 	struct sockaddr_in remoteaddr;
 	socklen_t sock_size;
 	int newfd;

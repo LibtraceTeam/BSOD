@@ -1,0 +1,292 @@
+// vim: syntax=c
+/*
+ *
+ * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Author:  Perry Lorier
+ *          
+ * All rights reserved.
+ *
+ * This code has been developed by the University of Waikato WAND 
+ * research group. For further information please see http://www.wand.net.nz/
+ *
+ * This is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with bsod-server; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id: lru 297 2006-01-09 04:55:20Z perry $
+ *
+ */
+
+
+
+#ifndef LRU
+#define LRU
+// vim: syntax=cpp
+
+#include <map>
+#include <list>
+
+/* This creates something that looks vaguely like a map<key_t,value_t>
+ * but supports .pop() and .front() to get the oldest modified data
+ */
+
+template <class key_t, class value_t>
+class lru_const_iterator;
+
+template <class key_t, class value_t>
+class lru_iterator;
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_const_iterator<key1_t,value1_t> &a, const lru_iterator<key1_t,value1_t> &b);
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_iterator<key1_t,value1_t> &a, const lru_const_iterator<key1_t,value1_t> &b);
+
+template <class key_t, class value_t>
+class lru_iterator {
+	private: 
+		typedef std::list<key_t> lru_t;
+		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
+		typename data_t::iterator where;
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_iterator<key1_t,value1_t> &a, 
+		                         const lru_const_iterator<key1_t,value1_t> &b);
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_const_iterator<key1_t,value1_t> &a, 
+		                         const lru_iterator<key1_t,value1_t> &b);
+		bool intpairdirty; /* is the "internal pair" not up to date?*/
+		std::pair<key_t,value_t> intpair;
+	public:
+		lru_iterator() : intpairdirty(true) { };
+		lru_iterator(const lru_iterator &x) : where(x.where), intpairdirty(true) {};
+		lru_iterator(typename data_t::iterator &_where) : where(_where), intpairdirty(true) {};
+		lru_iterator<key_t,value_t> &operator ++() {
+			++where;
+			intpairdirty=true;
+			return *this;
+		}
+		lru_iterator<key_t,value_t> operator ++(int) {
+			lru_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			++where;
+			intpairdirty=true;
+			return tmp;
+		}
+		lru_iterator<key_t,value_t> &operator --() {
+			--where;
+			intpairdirty=true;
+			return *this;
+		}
+		lru_iterator<key_t,value_t> operator --(int) {
+			lru_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			--where;
+			intpairdirty=true;
+			return tmp;
+		}
+		std::pair<key_t,value_t> operator *() {
+			if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return intpair;
+		}
+		std::pair<key_t,value_t> *operator ->() {
+		 	if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return &intpair;
+		}
+		bool operator ==( const lru_iterator<key_t,value_t> &b) {
+			return where==b.where;
+		}
+		bool operator !=( const lru_iterator<key_t,value_t> &b) {
+			return where!=b.where;
+		}
+};
+
+template <class key_t, class value_t>
+class lru_const_iterator {
+	private: 
+		typedef std::list<key_t> lru_t;
+		typedef std::map<key_t,std::pair<typename lru_t::iterator,value_t> > data_t;
+		typename data_t::const_iterator where;
+
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_const_iterator<key1_t,value1_t> &a, 
+		                         const lru_iterator<key1_t,value1_t> &b);
+		template <class key1_t, class value1_t>
+		friend bool operator ==( const lru_iterator<key1_t,value1_t> &a, 
+		                         const lru_const_iterator<key1_t,value1_t> &b);
+		bool intpairdirty;
+		std::pair<key_t,value_t> intpair;
+	public:
+		lru_const_iterator() : intpairdirty(true) { };
+		lru_const_iterator(const lru_const_iterator &x) : where(x.where), intpairdirty(true) {};
+		lru_const_iterator(typename data_t::const_iterator &_where) : where(_where), intpairdirty(true) {};
+		lru_const_iterator<key_t,value_t> &operator ++() {
+			++where;
+			intpairdirty=true;
+			return *this;
+		}
+		lru_const_iterator<key_t,value_t> operator ++(int) {
+			lru_const_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			++where;
+			intpairdirty=true;
+			return tmp;
+		}
+		lru_const_iterator<key_t,value_t> &operator --() {
+			--where;
+			intpairdirty=true;
+			return *this;
+		}
+		lru_const_iterator<key_t,value_t> operator --(int) {
+			lru_const_iterator <key_t,value_t> tmp;
+			tmp=*this;
+			--where;
+			intpairdirty=true;
+			return tmp;
+		}
+		std::pair<key_t,value_t> operator *() {
+			if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return intpair;
+		}
+		std::pair<key_t,value_t> *operator ->() {
+		 	if (intpairdirty) {
+				intpair=std::pair<key_t,value_t>(where->first,where->second.second);
+				intpairdirty=false;
+			}
+			return &intpair;
+		}
+		bool operator ==( const lru_const_iterator<key_t,value_t> &b) {
+			return where==b.where;
+		}
+		bool operator !=( const lru_const_iterator<key_t,value_t> &b) {
+			return where!=b.where;
+		}
+};
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_const_iterator<key1_t,value1_t> &a, const lru_iterator<key1_t,value1_t> &b) {
+	return a.where == b.where;
+}
+
+template <class key1_t, class value1_t>
+bool operator ==(const lru_iterator<key1_t,value1_t> &a, const lru_const_iterator<key1_t,value1_t> &b) {
+	return a.where == b.where;
+}
+
+template <class key_t,class value_t>
+class lru {
+	private: 
+		typedef  std::list<key_t> lru_t;
+		lru_t lru_list;
+		typedef std::pair<typename lru_t::iterator,value_t> map_data_t;
+		typedef std::map<key_t,map_data_t> data_t;
+		data_t data;
+
+	public:
+		typedef lru_const_iterator<key_t,value_t> const_iterator;
+		typedef lru_iterator<key_t,value_t> iterator;
+
+		std::pair<key_t,value_t > front() {
+			key_t & key = lru_list.front();
+			return std::pair<key_t,value_t>(key,data[key].second);
+		}
+		void pop() {
+			key_t key = lru_list.front();
+			lru_list.pop_front();
+			data.erase(key);
+		}
+		bool empty() const {
+			return lru_list.empty();
+		}
+		size_t size() const {
+			return data.size();
+		}
+		const_iterator begin(void) const {
+			typename data_t::const_iterator i = data.begin();
+			const_iterator ci(i);
+			return ci;
+		}
+
+		const_iterator end(void) const {
+			typename data_t::const_iterator i = data.end();
+			const_iterator ci(i);
+			return ci;
+		}
+
+		iterator find(key_t &key) {
+			typename data_t::iterator i = data.find(key);
+			if (i != data.end()) {
+				lru_list.erase(i->second.first);
+				i->second.first = lru_list.insert(lru_list.end(),key);
+			}
+			iterator ii(i); 
+			return ii;
+		}
+
+		void erase(key_t k) {
+			// Remove from the LRU
+			typename data_t::iterator i = data.find(k);
+			assert(i!=data.end());
+			lru_list.erase(i->second.first);
+			// Remove from the map
+			data.erase(i);
+		}
+
+		iterator insert(std::pair<key_t,value_t> &p) {
+			typename data_t::iterator i;
+			i = data.find(p.first);
+			if (i != data.end()) {
+				lru_list.erase(i->second.first);
+			}
+			/* good god */
+			i = data.insert(typename data_t::value_type(
+					p.first,
+					map_data_t(
+						lru_list.insert(lru_list.end(),p.first),
+						p.second
+						)
+					)).first;
+
+			return iterator(i);
+		}
+		
+		/* Add/update an item, updating the LRU at the same time */
+		value_t &operator[](const key_t &k) {
+			typename data_t::iterator i;
+			i = data.find(k);
+			/* Does this already exist? */
+			if (i != data.end()) {
+				/* Remove from the LRU */
+				lru_list.erase(i->second.first);
+			}
+			else {
+				data[k];
+			}
+			/* Add it to the LRU and keep a reference
+			 * to the iterator in the map so we can 
+			 * easily move it around later 
+			 */
+			i->second.first = lru_list.insert(lru_list.end(),k);
+			return data[k].second;
+		}
+};
+
+#endif

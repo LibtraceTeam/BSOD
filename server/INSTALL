@@ -1,0 +1,50 @@
+Installing bsod-server:
+
+----------------------------------
+The bsod server requires:
+
+* libtrace (http://research.wand.net.nz/software/)
+* g++-3.0 or greater (known to work with 3.0, fails with 2.95)
+
+
+
+----------------------------------
+To make and install the bsod server:
+
+Ensure that libtrace is properly installed (refer to the
+documentation that comes with it for information on how to do this).
+
+
+Linux:
+
+tar xzvf bsod-server-x.y.z.tar.gz
+cd bsod-server-x.y.z
+make
+(as root )
+make install 
+
+
+FreeBSD:
+
+Exactly the same as the above, replacing 'make' with 'gmake'.
+You will probably need to remove the reference to -ldl from the Makefile
+in order to compile. We should have an automake system ready for the
+next release which will solve this problem.
+
+
+
+----------------------------------
+Running the bsod server:
+
+You will have need to edit the default configuration in to get a meaningful
+visualisation. At least the direction module will have to be configured
+otherwise you will see a blank visualisation.  See the appropriate section in
+the README for more information on the format of the file and the options that
+can be configured.
+
+Usage: /usr/local/bsod/bin/bsod_server [-h] [-b] -C <configfile>
+    -h			this help screen
+    -b			background (daemonise) the bsod server
+    -C <configfile>	specify an alternate configuration file instead of
+			the default /usr/local/bsod/etc/bsod_server.conf
+

@@ -87,6 +87,8 @@ char *basedir = 0;
 char *filterstring = 0;
 char *dirmod = 0;
 char *colmod = 0;
+char *leftpos = 0;
+char *rightpos = 0;
 char *macaddrfile = 0;
 char *blacklistdir = 0;
 char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
@@ -101,6 +103,8 @@ int sampling = 0;
 bool live = true;
 void *dirhandle = 0;
 void *colourhandle = 0;
+void *lefthandle = 0;
+void *righthandle = 0;
 
 static void sigusr_hnd(int sig);
 static void sigterm_hnd(int sig);
@@ -370,6 +374,8 @@ void do_configuration(int argc, char **argv) {
 		CFG_STR("basedir", "/usr/local/bsod/", CFGF_NONE),
 		CFG_STR("dir_module", "plugins/direction/interface.so", CFGF_NONE),
 		CFG_STR("colour_module", "plugin/colour/colours.so", CFGF_NONE),
+		CFG_STR("lpos_module", "plugin/position/random.so", CFGF_NONE),
+		CFG_STR("rpos_module", "plugin/position/radial.so", CFGF_NONE),
 		CFG_INT("shownondata", 1, CFGF_NONE),
 		CFG_INT("showdata", 1, CFGF_NONE),
 		CFG_INT("showcontrol", 1, CFGF_NONE),
@@ -395,6 +401,8 @@ void do_configuration(int argc, char **argv) {
 	basedir = cfg_getstr(cfg, "basedir");
 	dirmod = cfg_getstr(cfg, "dir_module");
 	colmod = cfg_getstr(cfg, "colour_module");
+	leftpos = cfg_getstr(cfg, "lpos_module");
+	rightpos = cfg_getstr(cfg, "rpos_module");
 	shownondata = cfg_getint(cfg, "shownondata");
 	showdata = cfg_getint(cfg, "showdata");
 	showcontrol = cfg_getint(cfg, "showcontrol");
@@ -472,6 +480,50 @@ static void *get_module(const char *name) {
 	return handle;
 }
 
+/**
+ * Load a position module, calling it's initialisation function if appropriate
+ */
+static void *get_position_module(side_t side, const char *name)
+{
+	char tmp[4096];
+	char *driver;
+	char *args;
+
+	parse_args(name,&driver,&args);
+	
+	snprintf(tmp,sizeof(tmp),"%s%s",basedir,driver);
+
+	Log(LOG_DAEMON|LOG_DEBUG,"Loading module %s...\n",tmp);
+	void *handle = dlopen(tmp,RTLD_LAZY);
+	if (!handle) {
+		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s: %s\n",
+				driver,dlerror());
+		return NULL;
+	}
+
+	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
+
+	if (init_func) {
+		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
+		if (!init_func(side,args)) {
+			Log(LOG_DAEMON|LOG_ALERT,
+			     "Initialisation function failed for %s\n",driver);
+			dlclose(handle);
+			handle = NULL;
+		}
+	}
+	else {
+		Log(LOG_DAEMON|LOG_DEBUG," Initialisation not required for %s\n",tmp);
+		dlerror();
+	}
+
+	free(driver);
+	free(args);
+
+	return handle;
+}
+
+
 static int load_modules() {
 	char *error = 0;
 	char tmp[4096];
@@ -491,6 +543,34 @@ static int load_modules() {
 	}
 
 	modptrs.colour = (colfptr)dlsym(colourhandle, "mod_get_type");
+	if ((error = (char*)dlerror()) != NULL) {
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		return 0;
+	}
+	
+	modptrs.info = (inffptr) dlsym(colourhandle, "mod_get_info");
+	if ((error = (char*)dlerror()) != NULL) {
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		Log(LOG_DAEMON|LOG_ALERT,"Are you using an old colour module?\n");
+		return 0;
+	}
+
+	lefthandle = get_position_module(SIDE_LEFT, leftpos);
+	if (!lefthandle) {
+		return 0;
+	}
+
+	modptrs.left = (posfptr) dlsym(lefthandle, "mod_get_position");
+	if ((error = (char*)dlerror()) != NULL) {
+		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
+		return 0;
+	}
+
+	righthandle = get_position_module(SIDE_RIGHT,rightpos);
+	if (!righthandle) {
+		return 0;
+	}
+	modptrs.right = (posfptr) dlsym(righthandle,"mod_get_position");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		return 0;

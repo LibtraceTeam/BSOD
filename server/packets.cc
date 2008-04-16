@@ -90,12 +90,12 @@ extern int showcontrol;
 bool enable_rttest = true;
 bool enable_darknet = true;
 
-
 struct flow_id_t {
-	unsigned char type; // Type of flow.
+	float start[3];
+	float end[3];
+	unsigned char type; // Type of flow. ("colour")
 	uint32_t ip1;
 	uint32_t ip2;
-	int8_t dir;
 };
 
 struct flow_info_t {
@@ -158,10 +158,10 @@ void send_flows(struct client *client)
 	for(flow_lru_t::const_iterator flow_iterator=flows.begin();
 			flow_iterator!=flows.end();
 			++flow_iterator) {
-		send_update_flow(client,(*flow_iterator).second.flow_id, 
-					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2,
-					(*flow_iterator).first.dir, (*flow_iterator).first.type
-					);
+		send_update_flow(client,(*flow_iterator).first.start, 
+					(*flow_iterator).first.end,
+					(*flow_iterator).second.flow_id, 
+					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2 );
 	}
 }
 
@@ -288,6 +288,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	bool is_dark = false;
 	libtrace_tcp_t *tcpptr = 0;
 	int datasize = -1;
+	int direction = -1;
 	int force_display = 0;
 
 	flow_id_t tmpid;
@@ -305,13 +306,14 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
                 return 0;
 
 	// get direction
-	tmpid.dir = modptrs->direction(packet);
+	//tmpid.dir = modptrs->direction(packet);
+	direction = modptrs->direction(packet);
 #ifdef INVERSE_DIRECTION
-	tmpid.dir = !tmpid.dir;
+	direction = !direction;
 #endif
 
 	// Get the right IP addresses for each end of the flow:
-	if( tmpid.dir == DIR_OUTBOUND ) {
+	if( direction == DIR_OUTBOUND ) {
 		tmpid.ip1 = ip->ip_src.s_addr;
 		tmpid.ip2 = ip->ip_dst.s_addr;
 	} else {
@@ -320,15 +322,15 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	}
 
 	current = update_flow(tmpid, secs, &new_flow);
-	if(new_flow && send_new_flow(current->second.flow_id, 
-				tmpid.ip1, tmpid.ip2, tmpid.dir, tmpid.type))
+	if(new_flow && send_new_flow(tmpid.start, tmpid.end,
+				current->second.flow_id, tmpid.ip1, tmpid.ip2)!=0)
 		return 1;
 	
 	expire_flows(secs);
 
 	float speed = calculate_rtt(packet, ip, tcpptr, map, isTCP);
 
-	is_dark = is_darknet(tmpid.dir, ip, theList);	
+	is_dark = is_darknet(direction, ip, theList);	
 
 	if (datasize > -1 && !force_display) {
 		// if we don't show non-data, and datasize is 0, return early
@@ -339,8 +341,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			return 0;
 	}
 
-	if(send_new_packet(secs, current->second.flow_id,
-				ntohs(ip->ip_len), speed, is_dark))
+	if(send_new_packet(secs, current->second.flow_id, tmpid.type, 
+				ntohs(ip->ip_len), speed, is_dark) !=0)
 		return 1;
 
 	return 0;

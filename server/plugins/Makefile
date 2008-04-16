@@ -4,7 +4,7 @@ CXXFLAGS+=-g -fPIC -shared -Wall -Wimplicit -Wformat -W -pipe -pedantic
 CXXFLAGS+=$(INCLUDE)
 LDFLAGS+=-shared -fPIC
 
-DIRS := direction colour
+DIRS := position direction colour
 SOURCES := $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))
 
 OBJS := $(patsubst %.cc, %.so, $(SOURCES))
@@ -34,5 +34,3 @@ install:
 	for obj in $(OBJS); do install -m 644 $$obj $(LIBDIR)/$$(dirname $$obj) ; done
 	
 # vim: noet ts=8 sw=8
-:wq
-:wq

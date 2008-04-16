@@ -79,11 +79,15 @@ struct client {
 /* structure for flow update packets */
 struct flow_update_t {
 	unsigned char type;
+	float x1; 
+	float y1; 
+	float z1; 
+	float x2;
+	float y2;
+	float z2; 
 	uint32_t count;
 	uint32_t ip1;
 	uint32_t ip2;
-	int8_t dir;
-	uint16_t protocol;
 } __attribute__((packed));
 
 /* structure for new packet packets */
@@ -91,6 +95,7 @@ struct pack_update_t {
 	unsigned char type;
 	uint32_t ts;
 	uint32_t id; // Flow id
+	unsigned char id_num; // packet type id
 	uint16_t size;
 	float speed; // This affects the speed of the entire flow based on RTT
 	bool dark;
@@ -105,6 +110,14 @@ struct flow_remove_t {
 // Kill all
 struct kill_all_t {
     unsigned char type;
+} __attribute__((packed));
+
+// Colour table
+struct flow_descriptor_t {
+	unsigned char type;
+	unsigned char id;
+	uint8_t colour[3];
+	char name[256];
 } __attribute__((packed));
 
 int listen_socket;
@@ -276,7 +289,8 @@ int flush_data(struct client *client)
 
 //-----------------------------------------------------------------
 /* Pickup any new clients. */
-struct client *check_clients(struct modptrs_t *modptrs, bool wait) {
+struct client *check_clients(struct modptrs_t *modptrs, bool wait)
+{
 	/* Protocol version is a single byte, the upper nibble is the 
 	 * major version, and the lower nibble is the minor
 	 * version.  The number is the lowest release version that can
@@ -285,7 +299,7 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait) {
 	 *  1.2 == 0x12
 	 *  10.13 = 0xad
 	 */
-	char protocol_version = 0x20;
+	char protocol_version = 0x14;
 	struct sockaddr_in remoteaddr;
 	socklen_t sock_size;
 	int newfd;
@@ -299,7 +313,8 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait) {
 
 	if (wait) {
 		tvp = NULL;
-	} else {
+	}
+	else {
 		tvp = &tv;
 	}
 
@@ -322,28 +337,39 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait) {
 	struct client *next;
 	while(tmp) {
 		next = tmp->next;
-		if (!flush_data(tmp))
+		if (!flush_data(tmp)) {
 			remove_fd(tmp);
+		}
 		tmp = next;
 	}
 
 	/* if listen_socket is in the set, we have a new client */
-	if (FD_ISSET(listen_socket, &xread_fds)) {
+	if (FD_ISSET(listen_socket, &xread_fds))
+	{
 		// handle new connections
 		sock_size = sizeof(struct sockaddr_in);
 		if ((newfd = accept(listen_socket, (struct sockaddr *)&remoteaddr,
 						&sock_size)) == -1) { 
 			perror("accept");
-		} else {
+		} 
+		else 
+		{
 			fcntl(newfd, F_SETFL, O_NONBLOCK);
 			FD_SET(newfd, &xread_fds);
 			write(newfd,&protocol_version,1);
 			ret=add_fd(newfd);
 			if (newfd > fd_max) 
+			{    
+				// keep track of the maximum
 				fd_max = newfd;
+			}
 			Log(LOG_DAEMON|LOG_DEBUG,
 					"server: new connection from %s\n", 
 					inet_ntoa(remoteaddr.sin_addr));
+			// Update all clients with the colour table
+			// This could be done better by targeting only the new
+			// client.
+			send_colour_table(modptrs);	
 		}
 	}
 
@@ -411,17 +437,19 @@ int send_kill_flow(uint32_t id)
 }
 
 //------------------------------------------------------------------
-int send_new_flow(uint32_t id, uint32_t ip1, uint32_t ip2, 
-		int8_t direction, unsigned char prot )
+int send_new_flow(float start[3], float end[3], uint32_t id, uint32_t ip1, uint32_t ip2 )
 {
 	struct flow_update_t update;
 	update.type = 0x00;
+	update.x1 = htonf(start[0]);
+	update.y1 = htonf(start[1]);
+	update.z1 = htonf(start[2]);
+	update.x2 = htonf(end[0]);
+	update.y2 = htonf(end[1]);
+	update.z2 = htonf(end[2]);
 	update.count = htonl(id);
-	//Log(LOG_INFO, "new flow: %u\n", id);
 	update.ip1 = htonl(ip1);
 	update.ip2 = htonl(ip2);
-	update.dir = direction;
-	update.protocol = prot;
 
 	send_all(&update,sizeof(update));
 
@@ -433,17 +461,20 @@ int send_new_flow(uint32_t id, uint32_t ip1, uint32_t ip2,
  * send_new_flow in that it doesn't send to all clients 
  */
 int send_update_flow(struct client *client, 
-		uint32_t id, uint32_t ip1, uint32_t ip2,
-		int8_t direction, unsigned char prot)
+		float start[3], float end[3], uint32_t id, uint32_t ip1, uint32_t ip2 )
 {
 
 	struct flow_update_t update;
 	update.type = 0x00;
+	update.x1 = htonf(start[0]);
+	update.y1 = htonf(start[1]);
+	update.z1 = htonf(start[2]);
+	update.x2 = htonf(end[0]);
+	update.y2 = htonf(end[1]);
+	update.z2 = htonf(end[2]);
 	update.count = htonl(id);
 	update.ip1 = htonl(ip1);
 	update.ip2 = htonl(ip2);
-	update.dir = direction;
-	update.protocol = prot;
 
 	enqueue_data(client, &update, sizeof(update));
 
@@ -451,13 +482,14 @@ int send_update_flow(struct client *client,
 }
 
 //-------------------------------------------------------------------
-int send_new_packet(uint32_t ts, uint32_t id,
+int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,
 		uint16_t size, float speed, bool dark)
 {
 	struct pack_update_t update;
 	update.type = 0x01;
 	update.ts = htonl(ts);
 	update.id = htonl(id);
+	update.id_num = id_num;
 	update.size = htons(size);
 	update.speed = htonf(speed);
 	update.dark = dark;
@@ -467,6 +499,7 @@ int send_new_packet(uint32_t ts, uint32_t id,
 	return 0;
 }
 
+
 int send_kill_all()
 {
     struct kill_all_t kall;
@@ -475,4 +508,25 @@ int send_kill_all()
     send_all(&kall,sizeof(kall));
 
     return 0;
+}
+
+// Sends a table of colours, their associated protocol names and id number
+int send_colour_table(struct modptrs_t *modptrs)
+{
+	char name[256];
+	int i = 0;
+	struct flow_descriptor_t fd;
+	do 
+	{
+		modptrs->info( fd.colour, name, i );
+		fd.type = 0x04;
+		strcpy( fd.name, name );
+		fd.id = i;
+		send_all(&fd,sizeof(fd));
+		i++;
+		if( i > 256 ) // Sanity check.
+			exit( -99 );
+	} while( !(fd.colour[0]==0 && fd.colour[1]==0 && fd.colour[2]==0) );
+
+	return( 0 );
 }

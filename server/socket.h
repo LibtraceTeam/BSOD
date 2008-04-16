@@ -35,15 +35,14 @@
 int setup_listen_socket();
 int bind_tcp_socket(int listener, int port);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
-int send_new_flow(uint32_t count, uint32_t ip1, uint32_t ip2, 
-		int8_t direction, unsigned char prot);
-int send_update_flow(struct client *client, uint32_t count, 
-		uint32_t ip1, uint32_t ip2, int8_t direction, 
-		unsigned char prot);
-int send_new_packet(uint32_t ts, uint32_t id, 
+int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
+int send_update_flow(struct client *client, 
+		float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
+int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num, 
 	uint16_t size, float speed, bool dark);
 int send_kill_flow(uint32_t id);
 void hax_fdmax(int fd);
 int send_kill_all();
+int send_colour_table(struct modptrs_t *modptrs);
 
 #endif // _SOCKET_H

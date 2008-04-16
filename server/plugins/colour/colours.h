@@ -25,7 +25,7 @@
  * along with bsod-server; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: colours.h 228 2005-04-06 05:31:45Z perry $
+ * $Id$
  *
  */
 
@@ -39,7 +39,8 @@
  */
 
 extern "C" {
-int mod_get_type(unsigned char *id_num, struct libtrace_packet_t *packet);
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet);
+void mod_get_info(uint8_t colours[3], char name[256], int id );
 }
 
 

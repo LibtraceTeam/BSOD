@@ -48,7 +48,13 @@ typedef enum {
 	SIDE_RIGHT = 1
 } side_t;
 
+
 typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *);
+typedef void (* inffptr)(uint8_t*,char[256],int);
+typedef int (* posfptr)(float[3], 
+		side_t side,
+		direction_t dir,
+		struct libtrace_packet_t *);
 typedef int (* dirfptr)(struct libtrace_packet_t *);
 typedef void (* initdirfptr)(char* );
 typedef int (* initfuncfptr)(const char *);
@@ -57,8 +63,12 @@ typedef int (* endfptr)();
 typedef int (* endsidefptr)(side_t side);
 struct modptrs_t {
 	colfptr colour;
+	inffptr info;
+	posfptr left;
+	posfptr right;
 	dirfptr direction;
 	initdirfptr init_dir;
 };
+
 
 #endif // _BSOD_SERVER_H

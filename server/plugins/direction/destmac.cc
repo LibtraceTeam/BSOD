@@ -25,7 +25,7 @@
  * along with bsod-server; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: destmac.cc 317 2006-03-27 21:40:33Z bcj3 $
+ * $Id$
  *
  */
 
@@ -104,10 +104,15 @@ int init_module(const char* filename)
 	macsloaded++;
     }
 
+
     free(buffer);
 
     return(1);
 }
+
+
+
+
 
 /**
  * destmac looks at the destination MAC of the packet
@@ -116,11 +121,8 @@ extern "C"
 int mod_get_direction(struct libtrace_packet_t *packet)
 {
     struct ether_header *ethptr;
-    libtrace_linktype_t lt;
-    uint32_t remain;
 
-    //ethptr = (struct ether_header *)trace_get_link(packet);
-    ethptr = (struct ether_header *)trace_get_layer2(packet, &lt, &remain);
+    ethptr = (struct ether_header *)trace_get_link(packet);
 
 
     /* Set direction bit based on upstream routers' MAC */

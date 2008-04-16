@@ -27,6 +27,26 @@ typedef enum counters {
 	LAST = 16 // This must always be the last value in the enum to mark how many items there are!
 } counters_t;
 
+// Define colours to use for the various protocols
+static uint8_t countercolours[][3] = {
+	{100,  5,100}, /* TCP     purple		*/
+	{  5, 10,200}, /* HTTP    blue		*/
+	{150,150,240}, /* HTTPS   light blue/purple	*/
+	{200,  5,  5}, /* MAIL    red		*/
+	{  5,150,  5}, /* FTP     green		*/
+	{  5,250,  5}, /* VPN     white		*/
+	{200,200,  5}, /* DNS     yellow		*/
+	{ 30, 85, 30}, /* NTP     matte green	*/
+	{110,110,110}, /* SSH     grey		*/
+	{150,100, 50}, /* UDP     light brown	*/
+	{  5,250,200}, /* ICMP    teal		*/
+	{240,230,140}, /* IRC     khaki brown	*/
+	{200,100,  5}, /* WINDOWS orange		*/
+	{ 50,150, 50}, /* P2P     Icky green        */
+	{ 85, 30, 30}, /* GAMES   Icky green        */
+	{255,192,203}  /* OTHER   pink		*/
+};
+
 struct ports_t {
 	uint16_t src;
 	uint16_t dst;
@@ -63,12 +83,32 @@ static uint16_t get_destination_port(struct libtrace_ip *ip)
 	return htons(port->dst);
 }
 
+// Define the names displayed on the client when a filter is applied:
+char counternames [][256] = {
+	"TCP",
+	"HTTP",
+	"HTTPS",
+	"Mail",
+	"FTP",
+	"VPN",
+	"DNS",
+	"NTP",
+	"SSH",
+	"UDP",
+	"ICMP",
+	"IRC",
+	"Windows",
+	"P2P",
+	"GAMES",
+	"Other"
+};
+
 /*
 * Sets the colour array (RGB) to be the colour appropriate to the 
 * port/protocol being used.
 */
 extern "C"
-int mod_get_type(unsigned char *id_num, struct libtrace_packet_t *packet)
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
 {
 
 	struct libtrace_ip *ip = trace_get_ip(packet);
@@ -217,7 +257,23 @@ int mod_get_type(unsigned char *id_num, struct libtrace_packet_t *packet)
 		};break;
 	};
 	//printf("%u %u %u \n", colour[0], colour[1], colour[2]);
-	
+	//
 	return 0;
 
+}
+
+void mod_get_info(uint8_t colours[3], char name[256], int id )
+{
+	if( id >= LAST )
+	{
+		// We never want anything to be pure black (it would be invisible)
+		// so we mark the end of the list with pure black RGB=0,0,0).
+		colours[0] = colours[1] = colours[2] = 0;
+		strcpy( name, "<NULL>" );
+		return;
+	}
+	colours[0] = countercolours[id][0];
+	colours[1] = countercolours[id][1];
+	colours[2] = countercolours[id][2];
+	strcpy( name, counternames[id] );
 }

@@ -542,7 +542,7 @@ static int load_modules() {
 		return 0;
 	}
 
-	modptrs.colour = (colfptr)dlsym(colourhandle, "mod_get_type");
+	modptrs.colour = (colfptr)dlsym(colourhandle, "mod_get_colour");
 	if ((error = (char*)dlerror()) != NULL) {
 		Log(LOG_DAEMON|LOG_ALERT,"%s\n",error);
 		return 0;

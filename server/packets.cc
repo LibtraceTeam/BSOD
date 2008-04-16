@@ -165,6 +165,40 @@ void send_flows(struct client *client)
 	}
 }
 
+//-------------------------------------------------------------
+int get_start_pos(float start[3], struct libtrace_packet_t *packet, 
+		int iface, struct modptrs_t *modptrs)
+{
+	if(iface == DIR_OUTBOUND) {
+		start[0] = -10;
+		modptrs->left(start, SIDE_RIGHT, DIR_OUTBOUND, packet);
+	} else if(iface == DIR_INBOUND) {
+		start[0] = 10;
+		modptrs->right(start, SIDE_LEFT, DIR_INBOUND, packet);
+	} else
+		return 1;
+
+	return 0;
+}
+
+//------------------------------------------------------------
+int get_end_pos(float end[3], struct libtrace_packet_t *packet, 
+		int iface, struct modptrs_t *modptrs)
+{
+	if(iface == DIR_OUTBOUND) {
+		end[0] = 10;
+		modptrs->right(end, SIDE_LEFT, DIR_OUTBOUND, packet);
+	} else if(iface == DIR_INBOUND) {
+		end[0] = -10;
+		modptrs->left(end, SIDE_RIGHT, DIR_INBOUND, packet);
+	} else
+		return 1;
+
+	return 0;
+}
+
+
+
 //------------------------------------------------------------
 // BNG RTT code
 float calculate_rtt(libtrace_packet_t * packet, libtrace_ip_t * p, libtrace_tcp_t * tcpptr, RTTMap * map, bool isTCP) {
@@ -311,7 +345,19 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 #ifdef INVERSE_DIRECTION
 	direction = !direction;
 #endif
+	if(get_start_pos(tmpid.start, 
+			packet,
+			direction,
+			modptrs) != 0)
+		return 0;
 
+	if(get_end_pos(tmpid.end, 
+			packet,
+			direction,
+			modptrs) != 0)
+		return 0;
+
+	
 	// Get the right IP addresses for each end of the flow:
 	if( direction == DIR_OUTBOUND ) {
 		tmpid.ip1 = ip->ip_src.s_addr;

@@ -1,0 +1,21 @@
+- Configuration system (DONE)
+- Use RTT as speed (DONE)
+- Pointsprite size (Partially done, doesn't do per-particle size, only global)
+- Colours from server (DONE)
+- Toggles for protocols (DONE)
+- Log file
+- Modules for layout
+- Modules for type->color mappings
+- DNS query on click
+- Rendering module needs to be chosen in cfg file
+
+On startup, server:
+- Sends mapping of type -> colours
+- Sends mapping of type -> name
+- Send the texture names of the left + right panels
+
+On flow create server:
+- Sends startpos, endpos
+- Send type ID
+
+std::tr2::map

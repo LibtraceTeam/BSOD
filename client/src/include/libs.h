@@ -45,7 +45,7 @@ typedef unsigned char byte;
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
 
-#ifndef CLUSTERGL_COMPAT
+#ifdef ENABLE_PS_PARTICLES
 	//CG headers
 	#include <Cg/cg.h>		
 	#include <Cg/cgGL.h>	

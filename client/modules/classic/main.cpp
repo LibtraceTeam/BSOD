@@ -17,14 +17,16 @@ bool ClassicModule::init(){
 
 	LOG("Module Init!\n");
 	
-	mApp->camSetPos(0, 0, 27);//22
-	mApp->camLookAt(0,0,0); //y= -2.5
+	mApp->camSetPos(0, 0, 22);//22
+	mApp->camLookAt(0,-2.5,0); //y= -2.5
 
 	//hack!
 	mApp->texLoad("particle.bmp", 0);
-	mApp->texLoad("wm.png", 0);
-	mApp->texLoad("ticked.png", 0);
-	mApp->texLoad("unticked.png", 0);
+	if(mApp->bCGLCompat == false){
+		mApp->texLoad("wm.png", 0);
+		mApp->texLoad("ticked.png", 0);
+		mApp->texLoad("unticked.png", 0);
+	}
 
 	mTex = mApp->texLoad("waikato.png", 0);
 	mEarthTex = mApp->texLoad("earth.png", 0);
@@ -40,10 +42,8 @@ bool ClassicModule::init(){
 	mViewFlows.clear();
 	
 	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 30.0f;
-
-#ifndef CLUSTERGL_COMPAT
-	mDisplayList = glGenLists(1);
-#endif
+	if(!mApp->bCGLCompat)
+		mDisplayList = glGenLists(1);
 	
 	return true;
 }
@@ -244,9 +244,9 @@ void ClassicModule::delAll(){
 **********************************************/
 void ClassicModule::updateList(){
 
-#ifndef CLUSTERGL_COMPAT
-	glNewList(mDisplayList,GL_COMPILE);
-#endif
+	if(!App::S()->bCGLCompat)
+		glNewList(mDisplayList,GL_COMPILE);
+
 
 	glColor3f(1,1,1);
 	glEnable(GL_TEXTURE_2D);
@@ -276,11 +276,11 @@ void ClassicModule::updateList(){
 	
 
 	//Points
-#ifndef CLUSTERGL_COMPAT
-	glDisable(GL_TEXTURE_2D);
-#else
-	App::S()->texGet("particle.bmp")->bind();
-#endif
+	if(!App::S()->bCGLCompat)
+		glDisable(GL_TEXTURE_2D);
+	else
+		App::S()->texGet("particle.bmp")->bind();
+
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
@@ -316,9 +316,10 @@ void ClassicModule::updateList(){
 	glEnd();
 		
 	glDisable(GL_BLEND);
-#ifndef CLUSTERGL_COMPAT
-	glEndList();
-#endif
+	
+	if(!App::S()->bCGLCompat)
+		glEndList();
+
 }
 
 float fRenderTimer = 2.0f;
@@ -331,17 +332,18 @@ void ClassicModule::render(){
 	//Update the point timer
 	fRenderTimer += fTimeScale;
 	
-#ifndef CLUSTERGL_COMPAT
-	if(fRenderTimer > 1.5f){
-		updateList(); //rerender
-		fRenderTimer = 0.5f;
-	}
+	if(!App::S()->bCGLCompat){
+		if(fRenderTimer > 1.5f){
+			updateList(); //rerender
+			fRenderTimer = 0.5f;
+		}
 		
-	//Call the existing list
-	glCallList(mDisplayList);
-#else
-	updateList(); //rerender
-#endif
+		//Call the existing list
+		glCallList(mDisplayList);
+	
+	}else{
+		updateList(); //rerender
+	}
 		
 		
 	//Selected flow

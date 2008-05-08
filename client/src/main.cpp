@@ -83,7 +83,7 @@ int App::init(App *a, int argc, char **argv){
 	
 	//Set default options
 	setOption(OPTION_ROTATE_X, false);
-	setOption(OPTION_ROTATE_Y, false);
+	setOption(OPTION_ROTATE_Y, true);
 	setOption(OPTION_ROTATE_Z, false);
 		
 	//Load the rendering module

@@ -21,7 +21,7 @@ void App::calcFps(){
 		iFrameCounter = 0;	
 	
 		fTimeScale = 1.0f / (float)iFPS;
-//		LOG("%d fps\n", iFPS);
+		LOG("%d fps\n", iFPS);
 	}
 	
 	
@@ -45,7 +45,7 @@ void App::renderMain(){
 	glTranslatef(0, 0, fZoom);
 				
 	glRotatef(fRot[0], 1, 0, 0);
-	glRotatef(fRot[1], 0, 1, 0);
+	glRotatef(fRot[1], 1, 0, 0);
 	glRotatef(fRot[2], 0, 0, 1);
 	
 	if(mCurrentModule){

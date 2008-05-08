@@ -69,14 +69,13 @@ Texture *App::texLoad(string name, int flags){
 	}
 		
 	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
-	
-	tex->mData = ilGetData();
-		
+			
 	tex->iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
 	if(flags != TEXTURE_NO_GL){	
 		if(!bCGLCompat){
+			tex->mData = ilGetData();
 			tex->iGLID = ilutGLBindMipmaps();
 		}else{
 			glEnable(GL_TEXTURE_2D);
@@ -142,6 +141,7 @@ void App::texRegenerate(Texture *t, byte *buffer, int width, int height){
 		Starts up the texture sys
 **********************************************/
 bool App::texInit(){
+	
 	
 	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION || 
 		iluGetInteger(ILU_VERSION_NUM) < ILU_VERSION || 

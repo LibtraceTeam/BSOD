@@ -1,6 +1,13 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+//Toggle this depending if we're running under CGL or not
+#define CLUSTERGL_COMPAT
+
+//Toggle pixel-shader particle system
+//#define ENABLE_PS_SHADERS
+
+
 #include "libs.h"
 
 /*********************************************
@@ -26,8 +33,6 @@
 #define OPTION_ROTATE_Y 2
 #define OPTION_ROTATE_Z 3
 
-//Toggle this depending if we're running under CGL or not
-//#define CLUSTERGL_COMPAT
 
 /*********************************************
 				Application class

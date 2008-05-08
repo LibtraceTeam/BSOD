@@ -13,8 +13,11 @@ OBJS := $(patsubst %.cpp, %.o, $(SOURCES))
 DEPS := $(wildcard include/*.h) 
 
 #compiler-type things
-CXXFLAGS=-Iinclude -O3 -W -Wextra -g -pg
-LDFLAGS=-lGL -lGLU `sdl-config --cflags --libs` -lIL -lILU -lILUT -lSDL_ttf -lSDL_net -lconfuse -lCg -lCgGL 
+CXXFLAGS=-Iinclude -O3 -W -Wextra -g -pg -fPIC
+LDFLAGS=-lGL -lGLU `sdl-config --cflags --libs` -lIL -lILU -lILUT -lSDL_ttf -lSDL_net -lconfuse 
+
+#CGL libs
+#-lCg -lCgGL 
 
 #------------------------------------------------------#
 #					Compile

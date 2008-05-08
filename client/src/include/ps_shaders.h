@@ -1,5 +1,7 @@
 #include "main.h"
 
+#ifdef ENABLE_PS_SHADERS
+
 #ifndef PS_SHADERS
 #define PS_SHADERS
 
@@ -10,12 +12,12 @@
 class PSShaders : public IParticleSystem{
 
 	int iNumActive;
-
+#ifndef CLUSTERGL_COMPAT
 	CGcontext	cgContext;		
 	CGprogram	cgProgram;		
 	CGprofile	cgVertexProfile;	
 	CGparameter	position, color, modelViewMatrix, time;
-	
+#endif	
 	float fTime;
 public:
 
@@ -34,4 +36,5 @@ public:
 	void delColor(Color c){}
 };
 
+#endif
 #endif

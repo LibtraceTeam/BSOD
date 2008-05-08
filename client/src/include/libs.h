@@ -45,9 +45,11 @@ typedef unsigned char byte;
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
 
-//CG headers
-#include <Cg/cg.h>		
-#include <Cg/cgGL.h>	
+#ifndef CLUSTERGL_COMPAT
+	//CG headers
+	#include <Cg/cg.h>		
+	#include <Cg/cgGL.h>	
+#endif
 
 
 // GL_ARB_point_parameters

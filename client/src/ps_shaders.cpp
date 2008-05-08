@@ -1,5 +1,7 @@
 #include "ps_shaders.h"
 
+#ifdef ENABLE_PS_SHADERS
+
 #define NUM_VERTS 100
 	
 typedef struct{
@@ -200,4 +202,5 @@ void PSShaders::update(){
 void PSShaders::shutdown(){
 	cgDestroyContext(cgContext);
 }
-	
+
+#endif

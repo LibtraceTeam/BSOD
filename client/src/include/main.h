@@ -18,7 +18,7 @@
 
 #define DEFAULT_PORT 54567
 #define CONFIG_FILE "bsod2.cfg"
-#define PARTICLE_FPS 0.03333333 //30fps 
+#define PARTICLE_FPS 0.025 //40fps (0.3333 = 30fps)
 #define MAX_FLOW_DESCRIPTORS 64
 
 #define OPTION_RESET_ROTATION 0
@@ -27,7 +27,7 @@
 #define OPTION_ROTATE_Z 3
 
 //Toggle this depending if we're running under CGL or not
-#define CLUSTERGL_COMPAT
+//#define CLUSTERGL_COMPAT
 
 /*********************************************
 				Application class

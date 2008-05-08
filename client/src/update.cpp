@@ -76,7 +76,7 @@ void App::updateMain(){
 	fNextParticleUpdate -= fTimeScale;
 	
 	//Update particle system if necessary
-	//if(fNextParticleUpdate < 0.0f){
+	if(fNextParticleUpdate < 0.0f){
 		mParticleSystem->update();
 		fNextParticleUpdate = PARTICLE_FPS;
 		
@@ -90,7 +90,7 @@ void App::updateMain(){
 				generateTestData();
 			}
 		}		
-	//}			
+	}			
 	
 	if(bDrag){
 	

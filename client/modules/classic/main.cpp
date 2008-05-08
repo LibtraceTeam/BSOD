@@ -17,9 +17,15 @@ bool ClassicModule::init(){
 
 	LOG("Module Init!\n");
 	
-	mApp->camSetPos(0, 0, 27);
-	mApp->camLookAt(0,0,0);
-	
+	mApp->camSetPos(0, 0, 27);//22
+	mApp->camLookAt(0,0,0); //y= -2.5
+
+	//hack!
+	mApp->texLoad("particle.bmp", 0);
+	mApp->texLoad("wm.png", 0);
+	mApp->texLoad("ticked.png", 0);
+	mApp->texLoad("unticked.png", 0);
+
 	mTex = mApp->texLoad("waikato.png", 0);
 	mEarthTex = mApp->texLoad("earth.png", 0);
 	
@@ -33,7 +39,7 @@ bool ClassicModule::init(){
 	
 	mViewFlows.clear();
 	
-	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 24.0f;
+	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 30.0f;
 
 #ifndef CLUSTERGL_COMPAT
 	mDisplayList = glGenLists(1);
@@ -47,7 +53,7 @@ bool ClassicModule::init(){
 **********************************************/
 void ClassicModule::update(float currentTime, float timeDelta){
 
-	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 24.0f;
+	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 30.0f;
 	
 	fTimeScale = timeDelta;
 
@@ -124,7 +130,7 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 		
 	Flow *f = getFlowByID(flowID);
 	
-	if(f){
+	if(f || !type){
 		
 		//Figure out size multiplier
 		//NOTE: We set base size to 1.0, so this is actually the *actual* size
@@ -142,6 +148,11 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 						
 		//And add the particle
 		PSParams *p = &f->mParams;
+		
+		if(!p){
+			return;
+		}
+		
 		App::S()->ps()->add(p->mPos, p->mVel, type->mColor, p->size, p->life);
 		
 		f->mDescr = type;
@@ -165,7 +176,7 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 }
 
 /*********************************************
-	Flow has expiredspeedMultiplier
+	Flow has expired
 **********************************************/
 void ClassicModule::delFlow(int flowID){
 	
@@ -237,7 +248,7 @@ void ClassicModule::updateList(){
 	glNewList(mDisplayList,GL_COMPILE);
 #endif
 
-	glColor3f(0.5f, 0.5f, 0.5f);
+	glColor3f(1,1,1);
 	glEnable(GL_TEXTURE_2D);
 	
 	//Left slab	
@@ -265,7 +276,11 @@ void ClassicModule::updateList(){
 	
 
 	//Points
+#ifndef CLUSTERGL_COMPAT
 	glDisable(GL_TEXTURE_2D);
+#else
+	App::S()->texGet("particle.bmp")->bind();
+#endif
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);

@@ -23,12 +23,9 @@ void App::generateTestData(){
 
 	//Update network here in future
 	//For now we do random stuff
-	if(randInt(1, (flowCount + 1) * 100) == 77){
-	
-		if(flowCount > 50){
-			return;
-		}
-	
+	int flow = randInt(1, (flowCount + 1) * 100);
+	if(flowCount < 30){
+		
 		IPaddress src;
 		IPaddress dest;
 				
@@ -37,18 +34,18 @@ void App::generateTestData(){
 				
 		mCurrentModule->newFlow(flowCount++, src, dest, start, end);
 		
-		LOG("New flow %d\n", flowCount);
+		//LOG("New flow %d\n", flowCount);
 		
 	}
 	
-	//if(randInt(1, 10) == 7){	
+	//if(randInt(1, 10) > 7){	
 	
-		if(flowCount <= 0 || flowCount >= 10){
+		if(flowCount <= 0){
 			return;
 		}
 			
 		for(int i=0;i<randInt(0, flowCount);i++){		
-			mCurrentModule->newPacket(randInt(0, flowCount), randInt(100, 1500), 50, getFD(i));
+			mCurrentModule->newPacket(i % flowCount, randInt(100, 1500), 50, getFD(i));
 		}
 	//}
 
@@ -68,7 +65,7 @@ void App::updateMain(){
 		return;
 	}
 	
-	float fCamSpeed = fTimeScale * 2.0f;
+	float fCamSpeed = fTimeScale * 4.0f;
 	
 	//Options
 	if(bOptions[OPTION_ROTATE_X])	fRot[0] += fCamSpeed;
@@ -79,7 +76,7 @@ void App::updateMain(){
 	fNextParticleUpdate -= fTimeScale;
 	
 	//Update particle system if necessary
-	if(fNextParticleUpdate < 0.0f){
+	//if(fNextParticleUpdate < 0.0f){
 		mParticleSystem->update();
 		fNextParticleUpdate = PARTICLE_FPS;
 		
@@ -93,7 +90,7 @@ void App::updateMain(){
 				generateTestData();
 			}
 		}		
-	}			
+	//}			
 	
 	if(bDrag){
 	

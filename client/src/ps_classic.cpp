@@ -6,16 +6,22 @@ void PSSprites::render(){
 	if(bNeedRecompile){	
 		glNewList(mDisplayList,GL_COMPILE);
 #endif
-	/*
-		glEnable(GL_TEXTURE_2D);		
-		App::S()->texGet("particle.bmp")->bind();		
+		glColor3f(1,1,1);	
+		glEnable(GL_TEXTURE_2D);	
+		Texture *tex = App::S()->texGet("particle.bmp");
+		if(!tex){
+			//LOG("Bad texture in PSSprites!\n");
+			//return;
+		}else{
+			tex->bind();		
+		}
 		glDepthMask(GL_FALSE);		
 		//glDisable(GL_DEPTH_TEST);		
 		glEnable(GL_BLEND);							
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
-	*/
-		glDisable(GL_TEXTURE_2D);
+	
 		float lastSize = 0.0f;
+		float lastColor[3] = {0,0,0};
 	
 		glBegin( GL_POINTS );
 		
@@ -30,12 +36,18 @@ void PSSprites::render(){
 			if(p->size != lastSize){
 				glEnd();
 				glPointSize(p->size); //hack!	
-				glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
+				//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
 				lastSize = p->size;
+				//glColor4f(p->r, p->g, p->b, p->a);			
 				glBegin(GL_POINTS);
 			}
-						
-			glColor4f(p->r, p->g, p->b, p->a);						
+			
+			if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
+				glColor4f(p->r, p->g, p->b, p->a);	
+				lastColor[0] = p->r;
+				lastColor[1] = p->g;
+				lastColor[2] = p->b;
+			}
 			glVertex3f(p->x, p->y, p->z);
 		
 		}	
@@ -55,8 +67,10 @@ void PSSprites::render(){
 
 bool PSSprites::init(){
 
-	char *ext = (char*)glGetString( GL_EXTENSIONS );
 
+#ifndef CLUSTERGL_COMPAT
+	char *ext = (char*)glGetString( GL_EXTENSIONS );
+	
 	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
 		LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
 		return false;
@@ -73,7 +87,7 @@ bool PSSprites::init(){
 	}
 		
 	LOG("GL_ARB_point_parameters loaded OK\n");
-	
+
 
 	float maxSize = 0.0f;
 	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
@@ -87,7 +101,7 @@ bool PSSprites::init(){
 	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
 	glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
 	glEnable( GL_POINT_SPRITE_ARB );
-	
+#endif	
 	return PSClassic::init();
 }
 
@@ -295,7 +309,7 @@ void PSClassic::delAll(){
 }
 
 void PSClassic::delColor(Color c){
-	for(int i=0;i<mActive.size();i++){
+	for(int i=0;i<(int)mActive.size();i++){
 		if(mActive[i]->r == c.r && 
 			mActive[i]->g == c.g && 
 			mActive[i]->b == c.b){			

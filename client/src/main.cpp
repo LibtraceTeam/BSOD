@@ -48,11 +48,12 @@ int App::init(App *a, int argc, char **argv){
 	}
 	
 			
-	//Make the window
+	//Make the window	
 	if(!utilCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SCREEN_FULLSCREEN)){
 		ERR("Couldn't make window!\n");
 		utilShutdown(1);
 	}
+
 	
 	keyInit();
 		
@@ -73,16 +74,31 @@ int App::init(App *a, int argc, char **argv){
 	//Set up the root UIScreen so that the module init can do GUI stuff if it really wants
 	mUIRoot.initGeneric("screen", Vector2(0,0), Vector2(SCREEN_WIDTH, SCREEN_HEIGHT));
 	
+	//Rotataion
+	for(int i=0;i<3;i++){
+		fRot[i] = 0.0f;
+	}
 	
+	fRot[0] = 20;
+	
+	//Set default options
+	setOption(OPTION_ROTATE_X, false);
+	setOption(OPTION_ROTATE_Y, false);
+	setOption(OPTION_ROTATE_Z, false);
+		
 	//Load the rendering module
 	loadModule(mRenderModule);
 			
 	//Make the application GUI
 	makeGUI();	
-			
+	
+	for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
+		mFlowDescriptors[i] = NULL;
+	}
+				
 	//If we didn't connect, add some fake FDs
 	if(!isConnected()){
-		for(int i=0;i<10;i++){
+		for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
 			addFlowDescriptor(i, Color(randFloat(0, 1), randFloat(0, 1), randFloat(0, 1)), "FlowType " + toString(i));
 		}
 	}

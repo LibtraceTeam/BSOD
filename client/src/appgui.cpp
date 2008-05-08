@@ -56,7 +56,7 @@ void onProtoOptionPress(UIEvent evt, int eventData, void *userData){
 }
 
 void onProtoOptionToggleAll(UIEvent evt, int eventData, void *userData){	
-	bool show = ((int)userData == 1);	
+	bool show = false; //((int)userData == 1);	
 	for(int i=0;i<(int)mProtoOptions.size();i++){
 		ProtoOption *opt = mProtoOptions[i];
 		opt->shown = show;	

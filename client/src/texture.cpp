@@ -78,23 +78,23 @@ Texture *App::texLoad(string name, int flags){
 	if(flags != TEXTURE_NO_GL){
 	
 #ifndef CLUSTERGL_COMPAT
-	tex->iGLID = ilutGLBindMipmaps();
+		tex->iGLID = ilutGLBindMipmaps();
 #else			    
-	glEnable(GL_TEXTURE_2D);
-		
-    glGenTextures( 1, &tex->iGLID );   
-    
-    LOG("(got id %d)\n", tex->iGLID);
-    
-    glBindTexture( GL_TEXTURE_2D, tex->iGLID );
-    glTexImage2D( GL_TEXTURE_2D, 0, 3, tex->iSizeX, tex->iSizeY, 0, GL_RGB,
-		  		GL_UNSIGNED_BYTE, ilGetData() ); 
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    	
-		  		
-		  		 
+		glEnable(GL_TEXTURE_2D);
+
+		glGenTextures( 1, &tex->iGLID );   
+
+
+		glBindTexture( GL_TEXTURE_2D, tex->iGLID );
+		glTexImage2D( GL_TEXTURE_2D, 0, 3, tex->iSizeX, tex->iSizeY, 0, GL_RGB,
+					GL_UNSIGNED_BYTE, ilGetData() ); 
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    	
+			  		
+			  		 
 #endif
-	
+		LOG("(got id %d)\n", tex->iGLID);
+	    
 	}	 
 	
 	return tex;
@@ -162,12 +162,12 @@ bool App::texInit(){
 	ilutRenderer(ILUT_OPENGL);
 	
 	//preload any common textures here
-	texLoad("particle.bmp", 0);
+	//texLoad("particle.bmp", 0);
 	
 #ifndef CLUSTERGL_COMPAT
-	texLoad("wm.png", 0);
-	texLoad("ticked.png", 0);
-	texLoad("unticked.png", 0);
+	//texLoad("wm.png", 0);
+	//texLoad("ticked.png", 0);
+	//texLoad("unticked.png", 0);
 #endif
 
 	LOG("Finished loading initial textures!\n");

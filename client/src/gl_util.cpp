@@ -72,24 +72,33 @@ void App::utilShutdown( int returnCode )
 	LOG("Shutting down with returnCode %d\n", returnCode);
 	
 	closeSocket();
-    
+    	
+	LOG("Deleting module\n");
+
 	if(mCurrentModule){
 		mCurrentModule->shutdown();
 		delete mCurrentModule;
 	}
+
+	LOG("Deleting PS\n");
 		   
 	if(mParticleSystem){
 		mParticleSystem->shutdown();
 		delete mParticleSystem;
 	}
+
+	LOG("Freeing textures\n");
 		   
 	//Free textures
 	texShutdown();
 	
-	//clean up the window 
-    SDL_Quit( );
+	//clean up the window
+	
+	LOG("All done, about to quit!\n");
+	
+    	//SDL_Quit( );
     
-    exit( returnCode );
+    	exit( returnCode );
     
     
     //todo: more cleanup here?    
@@ -196,6 +205,7 @@ static int initGL( )
 **********************************************/
 bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
    
+#ifndef CLUSTERGL_COMPAT
 	//this holds some info about our display
 	const SDL_VideoInfo *videoInfo;
 		//initialize SDL 
@@ -239,7 +249,8 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 
 	// get a SDL surface 
-	surface = SDL_SetVideoMode( sizeX, sizeY, bpp, videoFlags );
+
+	surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
 
 	// Verify there is a surface 
 	if ( !surface ){
@@ -249,6 +260,7 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	
 	//Set the window caption
 	SDL_WM_SetCaption( "BSOD Client", NULL );
+#endif
 
 	//initialize OpenGL 
 	if(!initGL( )){
@@ -256,8 +268,13 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 
 	//resize the initial window
+   
+#ifndef CLUSTERGL_COMPAT
 	resizeWindow( sizeX, sizeY );
-	
+#else
+	resizeWindow( 640, 480 );
+#endif
+
 	LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
 
 	return true;

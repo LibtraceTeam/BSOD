@@ -359,13 +359,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 	
 	// Get the right IP addresses for each end of the flow:
-	if( direction == DIR_OUTBOUND ) {
-		tmpid.ip1 = ip->ip_src.s_addr;
-		tmpid.ip2 = ip->ip_dst.s_addr;
-	} else {
-		tmpid.ip1 = ip->ip_dst.s_addr;
-		tmpid.ip2 = ip->ip_src.s_addr;
-	}
+	tmpid.ip1 = ip->ip_src.s_addr;
+	tmpid.ip2 = ip->ip_dst.s_addr;
 
 	current = update_flow(tmpid, secs, &new_flow);
 	if(new_flow && send_new_flow(tmpid.start, tmpid.end,

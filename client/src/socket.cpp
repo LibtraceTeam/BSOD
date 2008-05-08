@@ -206,13 +206,11 @@ void App::updateSocket(){
 			uint16_t proto = pkt->type;
 			
 			
-			Vector3 start = Vector3(ntohf(pkt->x1), ntohf(pkt->y1), ntohf(pkt->z1));
-			Vector3 end = Vector3(ntohf(pkt->x2), ntohf(pkt->y2), ntohf(pkt->z2));
+			Vector3 start = Vector3(ntohf(pkt->x1), ntohf(pkt->z1), ntohf(pkt->y1));
+			Vector3 end = Vector3(ntohf(pkt->x2), ntohf(pkt->z2), ntohf(pkt->y2));
 			
-			if(start.x > end.x){
-				Vector3 tmp = start;
-				
-			}
+			start.x = -start.x;
+			end.x = -end.x;
 			
 			//LOG("%s: %f/%f/%f\n", inet_ntoa(ip1), start.x, start.y, start.z);
 			//LOG("%s: %f/%f/%f\n\n", inet_ntoa(ip2), end.x, end.y, end.z);

@@ -72,7 +72,7 @@ void ClassicModule::update(float currentTime, float timeDelta){
 		}
 				
 		if(mViewFlows[i]->shade > 0.0f){
-			mViewFlows[i]->shade -= timeDelta * 0.1f;
+			//mViewFlows[i]->shade -= timeDelta * 0.1f;
 			
 			if(mViewFlows[i]->shade < 0.0f){
 				mViewFlows[i]->hide = true;
@@ -101,18 +101,20 @@ void ClassicModule::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 st
 	//How many seconds it takes to go from one side to the other
 	//This will be scaled per-particle based on the RTT
 	float speed = 10.0f;
+		
+	//Size of the particle
+	float size = 1.0f;
 	
 	Flow *f = NULL;
 	
 	if(end.x < 0){
-		speed = -10;
+		speed = -10; //hack! this means it will go the other way	
+		f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), speed, size);
+	}else{
+		f = addFlow(flowID, Vector2(end.y, end.z), Vector2(start.y, start.z), speed, size);
 	}
 		
-	//Size of the particle
-	float size = 1.0f;
-		
 	//Make the flow object
-	f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), speed, size);
 	
 	//clear text to start
 	for(int i=0;i<3;i++){
@@ -149,9 +151,9 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 		float speedMultiplier = (3.0f / rtt) * mApp->fParticleSpeedScale;
 						
 		//And add the particle
-		PSParams *p = NULL;
-		if(rtt > 0)		p = &f->mParamsStart;
-		else			p = &f->mParamsEnd;
+		PSParams *p = &f->mParamsStart;
+		//if(rtt > 0)		p = &f->mParamsStart;
+		//else			p = &f->mParamsEnd;
 					
 		if(!p){
 			LOG("Bad params!\n");
@@ -174,7 +176,7 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 				mViewFlows.push_back(f);
 			}
 		
-			f->shade += 0.1f;
+			f->shade = 1.0f;//+= 0.1f;
 		}
 						
 	}else{

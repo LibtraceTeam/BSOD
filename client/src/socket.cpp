@@ -197,10 +197,7 @@ void App::updateSocket(){
 			struct in_addr ip1, ip2;
 			ip1.s_addr = ntohl(pkt->ip1);
 			ip2.s_addr = ntohl(pkt->ip2);
-		
-			//LOG("New flow %u: %s -> ", ntohl(pkt->id), inet_ntoa(ip1));
-			//LOG("%s\n", inet_ntoa(ip2) );
-			
+					
 			IPaddress src;
 			IPaddress dest;
 			
@@ -212,8 +209,13 @@ void App::updateSocket(){
 			Vector3 start = Vector3(ntohf(pkt->x1), ntohf(pkt->y1), ntohf(pkt->z1));
 			Vector3 end = Vector3(ntohf(pkt->x2), ntohf(pkt->y2), ntohf(pkt->z2));
 			
-			//LOG("%f/%f/%f\n", start.x, start.y, start.z);
-			//LOG("%f/%f/%f\n\n", end.x, end.y, end.z);
+			if(start.x > end.x){
+				Vector3 tmp = start;
+				
+			}
+			
+			//LOG("%s: %f/%f/%f\n", inet_ntoa(ip1), start.x, start.y, start.z);
+			//LOG("%s: %f/%f/%f\n\n", inet_ntoa(ip2), end.x, end.y, end.z);
 			
 			mCurrentModule->newFlow(ntohl(pkt->id), src, dest, start, end);			
 		}

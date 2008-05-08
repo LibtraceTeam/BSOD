@@ -38,7 +38,7 @@ void PSSprites::renderAll(){
 		}
 		
 		if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
-			glColor4f(p->r, p->g, p->b, p->a);	
+			glColor4f(p->r, p->g, p->b, 1.0f);	
 			lastColor[0] = p->r;
 			lastColor[1] = p->g;
 			lastColor[2] = p->b;

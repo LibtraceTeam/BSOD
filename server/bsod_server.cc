@@ -74,7 +74,6 @@
 int restart_config = 1;
 int terminate_bsod = 0;
 int fd_max;
-int daemonised = 0;
 
 libtrace_t *trace = 0;
 

@@ -81,6 +81,7 @@ class App{
 	bool mouseDown(int button){return bMouse[button];}
 	void onMouseEvent(int code, int eventType);
 
+
 	//Update.cpp
 	void updateMain();
 	void generateTestData();
@@ -235,6 +236,8 @@ public:
 	//CGL
 	bool bCGLCompat;
 	bool bHeadless;
+	
+	void onKey(char code);
 
 };
 

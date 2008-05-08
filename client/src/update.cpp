@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 #define CAMERA_SPEED 0.5f
 
 float infinity = std::numeric_limits<float>::infinity();
@@ -66,6 +67,7 @@ void App::updateMain(){
 	}
 	
 	float fCamSpeed = fTimeScale * 4.0f;
+	
 	
 	//Options
 	if(bOptions[OPTION_ROTATE_X])	fRot[0] += fCamSpeed;

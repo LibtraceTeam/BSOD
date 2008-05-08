@@ -72,7 +72,7 @@ void ClassicModule::update(float currentTime, float timeDelta){
 		}
 				
 		if(mViewFlows[i]->shade > 0.0f){
-			//mViewFlows[i]->shade -= timeDelta * 0.1f;
+			mViewFlows[i]->shade -= timeDelta * 0.1f;
 			
 			if(mViewFlows[i]->shade < 0.0f){
 				mViewFlows[i]->hide = true;
@@ -176,7 +176,7 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 				mViewFlows.push_back(f);
 			}
 		
-			f->shade = 1.0f;//+= 0.1f;
+			f->shade += 0.1f;
 		}
 						
 	}else{

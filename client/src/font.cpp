@@ -130,7 +130,7 @@ GLuint getList(char c) {
 
 char message[512];
   
-void App::writeText(int x, int y, char *fmt, ...){
+void App::writeText(int x, int y, const char *fmt, ...){
 
 #ifdef CLUSTERGL_COMPAT
 	return;
@@ -160,7 +160,7 @@ void App::writeText(int x, int y, char *fmt, ...){
 }
 
 
-void App::writeTextCentered(int x, int y, char *fmt, ...){
+void App::writeTextCentered(int x, int y, const char *fmt, ...){
 #ifdef CLUSTERGL_COMPAT
 	return;
 #endif

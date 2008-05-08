@@ -4,7 +4,7 @@
 /*********************************************
 				UIElement
 **********************************************/
-void UIElement::initGeneric(char *name, Vector2 pos, Vector2 size){
+void UIElement::initGeneric(const char *name, Vector2 pos, Vector2 size){
 	
 	mPos = pos;
 	mSize = size;

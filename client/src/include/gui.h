@@ -65,7 +65,7 @@ protected:
 public:
 	virtual ~UIElement(){}
 	
-	void initGeneric(char *name, Vector2 pos, Vector2 size);
+	void initGeneric(const char *name, Vector2 pos, Vector2 size);
 	
 	//Parent
 	UIElement *parent(){return mParent;}
@@ -86,7 +86,7 @@ public:
 	void setColor(Color c){mColor = c;}
 	string getData(){return mData;}
 	void setData(string s){mData = s;}
-	void setData(char *c){mData = c;}
+	void setData(const char *c){mData = c;}
 	UIElement *getChild(int i){ return mChildren[i]; }
 		
 	//Event handling

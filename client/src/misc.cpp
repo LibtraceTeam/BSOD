@@ -34,7 +34,7 @@ float App::randFloat(float low, float high){
 
 static char message[512];
 
-void LOG(char *fmt, ...){
+void LOG(const char *fmt, ...){
   	va_list args;
     va_start(args, fmt);
     vsnprintf(message, 512, fmt, args);
@@ -46,7 +46,7 @@ void LOG(char *fmt, ...){
 
 }
 
-void ERR(char *fmt, ...){
+void ERR(const char *fmt, ...){
   	va_list args;
     va_start(args, fmt);
     vsnprintf(message, 512, fmt, args);
@@ -58,7 +58,7 @@ void ERR(char *fmt, ...){
 
 }
 
-void WARN(char *fmt, ...){
+void WARN(const char *fmt, ...){
   	va_list args;
     va_start(args, fmt);
     vsnprintf(message, 512, fmt, args);

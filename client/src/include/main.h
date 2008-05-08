@@ -144,8 +144,8 @@ public:
 	int init(App *a, int argc, char **argv);
 
 	//font.cpp	
-	virtual void writeText(int x, int y, char *fmt, ...);
-	virtual void writeTextCentered(int x, int y, char *fmt, ...);
+	virtual void writeText(int x, int y, const char *fmt, ...);
+	virtual void writeTextCentered(int x, int y, const char *fmt, ...);
 
 	//misc.cpp
 	virtual int randInt(int low, int high);
@@ -181,7 +181,7 @@ public:
 			
 	//GUI element maker
 	template<typename T>
-	T *guiCreate(char *name, Vector2 pos, 
+	T *guiCreate(const char *name, Vector2 pos, 
 							Vector2 size, UIElement *parent){				
 		T *element = new T;
 		element->initGeneric(name, pos, size);
@@ -242,9 +242,9 @@ public:
 #ifndef MODULE
 
 //Logging funcs (misc.cpp)
-extern void LOG(char *fmt, ...);
-extern void ERR(char *fmt, ...);
-extern void WARN(char *fmt, ...);
+extern void LOG(const char *fmt, ...);
+extern void ERR(const char *fmt, ...);
+extern void WARN(const char *fmt, ...);
 extern int splitString(const std::string &input, const std::string &delimiter, 
 				std::vector<std::string> &results, bool includeEmpties = false);
 

@@ -21,9 +21,9 @@
 
 //int daemonised = 0;
 
-void put_pid( char *fname )
+void put_pid( const char *fname )
 {
-        char *defname = "WandProject";
+        const char *defname = "WandProject";
         char buf[512];
         int fd;
 

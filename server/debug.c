@@ -43,7 +43,7 @@
 
 extern int daemonised;
 
-void Log(int priority, char *fmt, ...)
+void Log(int priority, const char *fmt, ...)
 {
         va_list ap;
         char buffer[513];

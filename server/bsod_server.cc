@@ -91,7 +91,7 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *macaddrfile = 0;
 char *blacklistdir = 0;
-char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
+const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
 
 int port = 32500;
@@ -105,6 +105,7 @@ void *dirhandle = 0;
 void *colourhandle = 0;
 void *lefthandle = 0;
 void *righthandle = 0;
+int daemonised=0;
 
 static void sigusr_hnd(int sig);
 static void sigterm_hnd(int sig);
@@ -233,7 +234,8 @@ int restart() {
 void daemonise(char * arg) {
 	if (background == 1) {
 		// don't chdir
-		daemonise(arg, 0);
+		daemon(1, 0);
+		daemonised=1;
 		// write out pidfile
 		put_pid(pidfile);
 	}

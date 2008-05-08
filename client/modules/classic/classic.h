@@ -54,7 +54,8 @@ public:
 	float shade;
 	
 	FlowDescriptor *mDescr;	
-	PSParams mParams;
+	PSParams mParamsStart;
+	PSParams mParamsEnd;
 	
 	IPaddress mSrc;
 	IPaddress mDst;
@@ -103,6 +104,8 @@ class ClassicModule : public IModule{
 		
 	void updateList();	
 	GLuint mDisplayList;
+	
+	void setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, float speed, float size, bool negative);
 	
 public:
 

@@ -45,23 +45,18 @@ Flow *ClassicModule::getFlowByID(int id){
 	return mFlowMap[id];
 }
 
-/*********************************************
-		 	Create a flow
-**********************************************/
-Flow *ClassicModule::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, float size){
-
-	//speed = how many seconds it takes to get across, so smaller=faster
-	//If speed<0, we assume it's going left. If not, right.
-	bool negative = speed < 0.0f;
+void ClassicModule::setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, float speed, float size, bool negative){
 	
+	if(!p){
+		LOG("Bad params in setup!\n");
+		return;
+	}
+	
+	float d = fPlaneDistance / 2.0f;	
+		
 	if(negative){
 		speed *= -1; //otherwise the calculations break...
 	}
-	
-	Flow *f = getFreeFlow();
-	PSParams *p = &f->mParams;
-		
-	float d = fPlaneDistance / 2.0f;	
 	
 	//Set up the standard parameters
 	if(negative){
@@ -85,6 +80,25 @@ Flow *ClassicModule::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, fl
 		p->mVel.y = ((p1.y - p2.y) / speed);
 	}
 					
+	
+}
+
+/*********************************************
+		 	Create a flow
+**********************************************/
+Flow *ClassicModule::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, float size){
+
+	//speed = how many seconds it takes to get across, so smaller=faster
+	//If speed<0, we assume it's going left. If not, right.
+	bool negative = speed < 0.0f;	
+	Flow *f = getFreeFlow();
+
+	setupParams(f, &f->mParamsStart, p1, p2, speed, size, negative);
+	setupParams(f, &f->mParamsEnd, p1, p2, speed, size, !negative);
+	
+	//LOG("Flow: Start at %f/, end at %f/\n", f->mParamsStart.mPos.x, f->mParamsEnd.mPos.x);
+	
+	float d = fPlaneDistance / 2.0f;				
 	f->x = -d; f->y = p1.y; f->z = p1.x;
 	f->x2 = d; f->y2 = p2.y; f->z2 = p2.x;
 	

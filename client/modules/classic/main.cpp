@@ -17,8 +17,8 @@ bool ClassicModule::init(){
 
 	LOG("Module Init!\n");
 	
-	mApp->camSetPos(0, 0, 22);//22
-	mApp->camLookAt(0,-2.5,0); //y= -2.5
+	mApp->camSetPos(0, 0, 27);//22
+	mApp->camLookAt(0,0,0); //y= -2.5
 
 	//hack!
 	mApp->texLoad("particle.bmp", 0);
@@ -102,15 +102,17 @@ void ClassicModule::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 st
 	//This will be scaled per-particle based on the RTT
 	float speed = 10.0f;
 	
+	Flow *f = NULL;
+	
 	if(end.x < 0){
-		speed *= -1;
+		speed = -10;
 	}
 		
 	//Size of the particle
 	float size = 1.0f;
 		
 	//Make the flow object
-	Flow *f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), speed, size);
+	f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), speed, size);
 	
 	//clear text to start
 	for(int i=0;i<3;i++){
@@ -147,12 +149,17 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 		float speedMultiplier = (3.0f / rtt) * mApp->fParticleSpeedScale;
 						
 		//And add the particle
-		PSParams *p = &f->mParams;
-		
+		PSParams *p = NULL;
+		if(rtt > 0)		p = &f->mParamsStart;
+		else			p = &f->mParamsEnd;
+					
 		if(!p){
+			LOG("Bad params!\n");
 			return;
 		}
 		
+		
+				
 		App::S()->ps()->add(p->mPos, p->mVel, type->mColor, p->size, p->life);
 		
 		f->mDescr = type;

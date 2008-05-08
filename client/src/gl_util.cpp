@@ -43,24 +43,24 @@ void App::utilBeginRender(){
 **********************************************/
 void App::utilEndRender(){
 
-#ifndef CLUSTERGL_COMPAT
+	if(!bCGLCompat){
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 
-	//Make it ortho
-	//(0,0) == top-left
-	glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1);
+		//Make it ortho
+		//(0,0) == top-left
+		glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glDisable(GL_DEPTH_TEST);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glDisable(GL_DEPTH_TEST);
 	
-	//now in 2D mode
-	render2D();
+		//now in 2D mode
+		render2D();
+		
+	}
 	
-#endif
-
 	SDL_GL_SwapBuffers( );
 }
 
@@ -96,10 +96,9 @@ void App::utilShutdown( int returnCode )
 	
 	LOG("All done, about to quit!\n");
 	
-    	//SDL_Quit( );
+    //SDL_Quit( );
     
-    	exit( returnCode );
-    
+    exit( returnCode );    
     
     //todo: more cleanup here?    
 
@@ -204,78 +203,84 @@ static int initGL( )
 	Creates a window with specified attribs
 **********************************************/
 bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
-   
-#ifndef CLUSTERGL_COMPAT
-	//this holds some info about our display
-	const SDL_VideoInfo *videoInfo;
-		//initialize SDL 
-	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
-		LOG( "Video initialization failed: %s\n", SDL_GetError( ) );
-		return false;
-	}
+
+	if(!bHeadless){   
+
+		//this holds some info about our display
+		const SDL_VideoInfo *videoInfo;
+			//initialize SDL 
+		if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
+			LOG( "Video initialization failed: %s\n", SDL_GetError( ) );
+			return false;
+		}
 	
-	SDL_EnableUNICODE(1);
+		SDL_EnableUNICODE(1);
 
-	// Fetch the video info
-	videoInfo = SDL_GetVideoInfo( );
+		// Fetch the video info
+		videoInfo = SDL_GetVideoInfo( );
 
-	if ( !videoInfo ){
-		LOG( "Video query failed: %s\n", SDL_GetError( ) );
-		return false;
-	}
+		if ( !videoInfo ){
+			LOG( "Video query failed: %s\n", SDL_GetError( ) );
+			return false;
+		}
 
-	//the flags to pass to SDL_SetVideoMode
-	videoFlags  = SDL_OPENGL;         
-	videoFlags |= SDL_GL_DOUBLEBUFFER;
-	videoFlags |= SDL_HWPALETTE;     
-	videoFlags |= SDL_RESIZABLE;     
+		//the flags to pass to SDL_SetVideoMode
+		videoFlags  = SDL_OPENGL;         
+		videoFlags |= SDL_GL_DOUBLEBUFFER;
+		videoFlags |= SDL_HWPALETTE;     
+		videoFlags |= SDL_RESIZABLE;     
 
-	//This checks to see if surfaces can be stored in memory 
-	if ( videoInfo->hw_available )
-		videoFlags |= SDL_HWSURFACE;
-	else
-		videoFlags |= SDL_SWSURFACE;
+		//This checks to see if surfaces can be stored in memory 
+		if ( videoInfo->hw_available )
+			videoFlags |= SDL_HWSURFACE;
+		else
+			videoFlags |= SDL_SWSURFACE;
 
-	// This checks if hardware blits can be done 
-	if ( videoInfo->blit_hw )
-		videoFlags |= SDL_HWACCEL;
+		// This checks if hardware blits can be done 
+		if ( videoInfo->blit_hw )
+			videoFlags |= SDL_HWACCEL;
 		
-	//Sets up OpenGL double buffering
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+		//Sets up OpenGL double buffering
+		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	
-	// Fullscreen?
-	if(fullscreen){
-		videoFlags |= SDL_FULLSCREEN;
-	}
+		// Fullscreen?
+		if(fullscreen){
+			videoFlags |= SDL_FULLSCREEN;
+		}
 
-	// get a SDL surface 
+		// get a SDL surface 
 
-	surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
+		surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
 
-	// Verify there is a surface 
-	if ( !surface ){
-		LOG( "Video mode set failed: %s\n", SDL_GetError( ) );
-		return false;
-	}
+		// Verify there is a surface 
+		if ( !surface ){
+			LOG( "Video mode set failed: %s\n", SDL_GetError( ) );
+			return false;
+		}
 	
-	//Set the window caption
-	SDL_WM_SetCaption( "BSOD Client", NULL );
-#endif
+		//Set the window caption
+		SDL_WM_SetCaption( "BSOD Client", NULL );
+	
+	}
 
 	//initialize OpenGL 
 	if(!initGL( )){
 		return false;
 	}
 
-	//resize the initial window
-   
-#ifndef CLUSTERGL_COMPAT
-	resizeWindow( sizeX, sizeY );
-#else
-	resizeWindow( 640, 480 );
-#endif
+	//resize the initial window   
+	if(bCGLCompat) 	resizeWindow( 640, 480 );
+	else			resizeWindow( sizeX, sizeY );
+	
+	if(bCGLCompat){
+		LOG("Using ClusterGL compatability mode!\n");
+	}
 
-	LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
+	if(!bHeadless){
+		LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
+	}else{
+		LOG("Running headless!\n");
+	}
 
 	return true;
 }

@@ -1,9 +1,6 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-//Toggle this depending if we're running under CGL or not
-#define CLUSTERGL_COMPAT
-
 //Toggle pixel-shader particle system
 //#define ENABLE_PS_SHADERS
 
@@ -234,6 +231,10 @@ public:
 	//Skip
 	int iDropPacketThresh;
 	int iDropFlowThresh;
+	
+	//CGL
+	bool bCGLCompat;
+	bool bHeadless;
 
 };
 

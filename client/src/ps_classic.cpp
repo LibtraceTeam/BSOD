@@ -1,107 +1,111 @@
 #include "ps_classic.h"
 
-void PSSprites::render(){
+void PSSprites::renderAll(){
+	glColor3f(1,1,1);	
+	glEnable(GL_TEXTURE_2D);	
+	Texture *tex = App::S()->texGet("particle.bmp");
+	if(!tex){
+		//LOG("Bad texture in PSSprites!\n");
+		//return;
+	}else{
+		tex->bind();		
+	}
+	glDepthMask(GL_FALSE);		
+	//glDisable(GL_DEPTH_TEST);		
+	glEnable(GL_BLEND);							
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
 
-#ifndef CLUSTERGL_COMPAT
-	if(bNeedRecompile){	
-		glNewList(mDisplayList,GL_COMPILE);
-#endif
-		glColor3f(1,1,1);	
-		glEnable(GL_TEXTURE_2D);	
-		Texture *tex = App::S()->texGet("particle.bmp");
-		if(!tex){
-			//LOG("Bad texture in PSSprites!\n");
-			//return;
-		}else{
-			tex->bind();		
+	float lastSize = 0.0f;
+	float lastColor[3] = {0,0,0};
+
+	glBegin( GL_POINTS );
+	
+	for(int i=0;i<iNumActive;i++){
+	
+		Particle *p = mActive[i];
+	
+		if(!p->active){
+			continue;
 		}
-		glDepthMask(GL_FALSE);		
-		//glDisable(GL_DEPTH_TEST);		
-		glEnable(GL_BLEND);							
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
 	
-		float lastSize = 0.0f;
-		float lastColor[3] = {0,0,0};
+		if(p->size != lastSize){
+			glEnd();
+			glPointSize(p->size); //hack!	
+			//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
+			lastSize = p->size;
+			//glColor4f(p->r, p->g, p->b, p->a);			
+			glBegin(GL_POINTS);
+		}
+		
+		if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
+			glColor4f(p->r, p->g, p->b, p->a);	
+			lastColor[0] = p->r;
+			lastColor[1] = p->g;
+			lastColor[2] = p->b;
+		}
+		glVertex3f(p->x, p->y, p->z);
 	
-		glBegin( GL_POINTS );
-		
-		for(int i=0;i<iNumActive;i++){
-		
-			Particle *p = mActive[i];
-		
-			if(!p->active){
-				continue;
-			}
-		
-			if(p->size != lastSize){
-				glEnd();
-				glPointSize(p->size); //hack!	
-				//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
-				lastSize = p->size;
-				//glColor4f(p->r, p->g, p->b, p->a);			
-				glBegin(GL_POINTS);
-			}
-			
-			if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
-				glColor4f(p->r, p->g, p->b, p->a);	
-				lastColor[0] = p->r;
-				lastColor[1] = p->g;
-				lastColor[2] = p->b;
-			}
-			glVertex3f(p->x, p->y, p->z);
-		
-		}	
-		glEnd();		
-	
-		glDisable(GL_BLEND);	
-		glDepthMask(GL_TRUE);
-		//glEnable(GL_DEPTH_TEST);
-
-#ifndef CLUSTERGL_COMPAT		
-		glEndList();	
-		bNeedRecompile = false;			
 	}	
-	glCallList(mDisplayList);	
-#endif
+	glEnd();		
+
+	glDisable(GL_BLEND);	
+	glDepthMask(GL_TRUE);
+	//glEnable(GL_DEPTH_TEST);
+}
+
+void PSSprites::render(){
+	if(App::S()->bCGLCompat){
+		renderAll();		
+	}else{
+		if(bNeedRecompile){	
+			glNewList(mDisplayList,GL_COMPILE);
+			renderAll();	
+			glEndList();	
+			bNeedRecompile = false;			
+		}	
+		glCallList(mDisplayList);		
+	}
 }
 
 bool PSSprites::init(){
 
+	if(!App::S()->bCGLCompat){
 
-#ifndef CLUSTERGL_COMPAT
-	char *ext = (char*)glGetString( GL_EXTENSIONS );
+		char *ext = (char*)glGetString( GL_EXTENSIONS );
 	
-	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
-		LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
-		return false;
-	}else{	
-	
-		//FIXME: Windows needs wglGetProcAddress, probably
-		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)glXGetProcAddress((byte *)"glPointParameterfARB");
-		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glXGetProcAddress((byte *)"glPointParameterfvARB");
-
-		if( !glPointParameterfARB || !glPointParameterfvARB ){
-			LOG("GL_ARB_point_parameter functions were not found, falling back to triangles\n");
+		if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
+			LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
 			return false;
+		}else{	
+	
+			//FIXME: Windows needs wglGetProcAddress, probably
+			glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)glXGetProcAddress((byte *)"glPointParameterfARB");
+			glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glXGetProcAddress((byte *)"glPointParameterfvARB");
+
+			if( !glPointParameterfARB || !glPointParameterfvARB ){
+				LOG("GL_ARB_point_parameter functions were not found, falling back to triangles\n");
+				return false;
+			}
 		}
-	}
 		
-	LOG("GL_ARB_point_parameters loaded OK\n");
+		LOG("GL_ARB_point_parameters loaded OK\n");
 
 
-	float maxSize = 0.0f;
-	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
+		float maxSize = 0.0f;
+		glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
 
-	if( maxSize > 5.0f * App::S()->fParticleSizeScale)
-		maxSize = 5.0f * App::S()->fParticleSizeScale;
-		    
-	glPointSize( maxSize );
-	glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
-	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
-	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
-	glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
-	glEnable( GL_POINT_SPRITE_ARB );
-#endif	
+		if( maxSize > 5.0f * App::S()->fParticleSizeScale)
+			maxSize = 5.0f * App::S()->fParticleSizeScale;
+				
+		glPointSize( maxSize );
+		glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
+		glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
+		glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
+		glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
+		glEnable( GL_POINT_SPRITE_ARB );
+
+	}
+
 	return PSClassic::init();
 }
 
@@ -126,9 +130,9 @@ bool PSClassic::init(){
 	iNumActive = 0;
 	
 	bNeedRecompile = true;
-#ifndef CLUSTERGL_COMPAT
-	mDisplayList = glGenLists(1);
-#endif
+
+	if(!App::S()->bCGLCompat)
+		mDisplayList = glGenLists(1);
 				
 	return true; //We assume we can always do this!
 }

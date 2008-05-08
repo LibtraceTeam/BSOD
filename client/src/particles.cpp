@@ -21,7 +21,7 @@ void App::initParticleSystem(){
 	if(iParticleMethod == PARTICLE_SYSTEM_UNSPECIFIED){
 		LOG("Attempting to autodetect the best particle method...");
 
-#ifndef CLUSTERGL_COMPAT
+#ifdef ENABLE_PS_SHADERS
 		PSINIT(PSShaders, PARTICLE_SYSTEM_SHADERS, "Shaders");
 #endif
 		
@@ -39,7 +39,7 @@ void App::initParticleSystem(){
 	//Explicit override 
 	else if(iParticleMethod == PARTICLE_SYSTEM_CLASSIC)			mParticleSystem = new PSClassic;
 	else if(iParticleMethod == PARTICLE_SYSTEM_POINTSPRITES)	mParticleSystem = new PSSprites;
-#ifndef CLUSTERGL_COMPAT
+#ifdef ENABLE_PS_SHADERS
 	else if(iParticleMethod == PARTICLE_SYSTEM_SHADERS)			mParticleSystem = new PSShaders;
 #endif
 	else{

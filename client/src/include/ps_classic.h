@@ -39,6 +39,7 @@ protected:
 	GLuint mDisplayList;
 	bool bNeedRecompile;
 	
+	
 public:
 
 	//overridden by PSSprites
@@ -62,6 +63,8 @@ public:
 			A point-sprite system
 **********************************************/
 class PSSprites : public PSClassic{
+
+	void renderAll();
 public:
 	bool init();
 	void render();

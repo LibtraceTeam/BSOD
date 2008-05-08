@@ -75,26 +75,19 @@ Texture *App::texLoad(string name, int flags){
 	tex->iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
-	if(flags != TEXTURE_NO_GL){
-	
-#ifndef CLUSTERGL_COMPAT
-		tex->iGLID = ilutGLBindMipmaps();
-#else			    
-		glEnable(GL_TEXTURE_2D);
-
-		glGenTextures( 1, &tex->iGLID );   
-
-
-		glBindTexture( GL_TEXTURE_2D, tex->iGLID );
-		glTexImage2D( GL_TEXTURE_2D, 0, 3, tex->iSizeX, tex->iSizeY, 0, GL_RGB,
-					GL_UNSIGNED_BYTE, ilGetData() ); 
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    	
-			  		
-			  		 
-#endif
-		LOG("(got id %d)\n", tex->iGLID);
-	    
+	if(flags != TEXTURE_NO_GL){	
+		if(!bCGLCompat){
+			tex->iGLID = ilutGLBindMipmaps();
+		}else{
+			glEnable(GL_TEXTURE_2D);
+			glGenTextures( 1, &tex->iGLID );   
+			glBindTexture( GL_TEXTURE_2D, tex->iGLID );
+			glTexImage2D( GL_TEXTURE_2D, 0, 3, tex->iSizeX, tex->iSizeY, 0, GL_RGB,
+						GL_UNSIGNED_BYTE, ilGetData() ); 
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
+		}
+		LOG("(got id %d)\n", tex->iGLID);	    
 	}	 
 	
 	return tex;
@@ -162,13 +155,12 @@ bool App::texInit(){
 	ilutRenderer(ILUT_OPENGL);
 	
 	//preload any common textures here
-	//texLoad("particle.bmp", 0);
-	
-#ifndef CLUSTERGL_COMPAT
-	//texLoad("wm.png", 0);
-	//texLoad("ticked.png", 0);
-	//texLoad("unticked.png", 0);
-#endif
+	/*
+	texLoad("particle.bmp", 0);	
+	texLoad("wm.png", 0);
+	texLoad("ticked.png", 0);
+	texLoad("unticked.png", 0);
+	*/
 
 	LOG("Finished loading initial textures!\n");
 	

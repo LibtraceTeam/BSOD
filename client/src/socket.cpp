@@ -198,7 +198,7 @@ void App::updateSocket(){
 			ip1.s_addr = ntohl(pkt->ip1);
 			ip2.s_addr = ntohl(pkt->ip2);
 		
-			//LOG("New flow %u: %s -> ", ntohl(pkt->count), inet_ntoa(ip1));
+			//LOG("New flow %u: %s -> ", ntohl(pkt->id), inet_ntoa(ip1));
 			//LOG("%s\n", inet_ntoa(ip2) );
 			
 			IPaddress src;
@@ -250,15 +250,19 @@ void App::updateSocket(){
 					continue;
 				}
 			}
-				 
-			// LOG("Packet: %d, %f\n", ntohs(pkt->size), ntohf(pkt->speed));
+				
+			//if(pkt->packetType == 6)
+				//LOG("Packet: %d, %f\n", ntohs(pkt->size), ntohf(pkt->speed));
 
 			uint16_t size = ntohs(pkt->size);
 			float rtt = ntohf(pkt->speed);
 
-			if(rtt < 0.0f){
+			if(rtt < 0.0f){				
 				rtt = -rtt;
 			}
+		
+			
+		
 			
 			mCurrentModule->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));	
 			

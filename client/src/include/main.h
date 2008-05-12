@@ -55,6 +55,7 @@ class App{
 	void handleKeyEvent( SDL_keysym *keysym , int type );
 
 	//gl_util.cpp
+	bool done;
 	bool utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen);
 	void utilEventLoop();
 	void utilBeginRender();
@@ -159,6 +160,7 @@ public:
 	//gl_util.cpp
 	virtual void utilCube(float x, float y, float z);
 	virtual void utilShutdown(int returnCode);
+	virtual void notifyShutdown(){done = true;}
 	virtual Vector2 utilProject(float x, float y, float z);
 
 	//flow_descr.cpp

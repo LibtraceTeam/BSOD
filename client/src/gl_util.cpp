@@ -8,7 +8,6 @@
 **********************************************/
 static SDL_Surface *surface; //used for the screen
 static int videoFlags;
-static int done = false;    
 static int isActive = true;
 static SDL_Event event;
 
@@ -72,32 +71,34 @@ void App::utilShutdown( int returnCode )
 	LOG("Shutting down with returnCode %d\n", returnCode);
 	
 	closeSocket();
-    	
-	LOG("Deleting module\n");
-
-	if(mCurrentModule){
-		mCurrentModule->shutdown();
-		delete mCurrentModule;
-	}
-
-	LOG("Deleting PS\n");
+    
+	LOG("Shutting down PS (of type %d)\n", mParticleSystem->getType());
 		   
 	if(mParticleSystem){
 		mParticleSystem->shutdown();
-		delete mParticleSystem;
 	}
+	
+		
+	LOG("Deleting module\n");
+
+	if(mCurrentModule){
+		mCurrentModule->shutdown();		
+	}
+
 
 	LOG("Freeing textures\n");
 		   
 	//Free textures
 	texShutdown();
 	
-	//clean up the window
+	delete mCurrentModule;
+	delete mParticleSystem;
 	
 	LOG("All done, about to quit!\n");
 	
-    //SDL_Quit( );
-    
+	done = true;    
+	
+    SDL_Quit( );   
     exit( returnCode );    
     
     //todo: more cleanup here?    
@@ -345,7 +346,7 @@ void App::utilEventLoop(){
 		}
 
 	    /* draw the scene */
-	    if ( isActive ){
+	    if ( isActive && !done){
 			renderMain();
 			updateMain();
 		}

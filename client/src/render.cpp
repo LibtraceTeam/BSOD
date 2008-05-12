@@ -15,7 +15,7 @@ void App::calcFps(){
 	
 	int thisFrame = SDL_GetTicks();	
 	int diff = thisFrame - iLastFrameTicks;
-	if(diff > 1000){
+	if(diff >= 1000){
 		iLastFrameTicks = thisFrame;
 		iFPS = iFrameCounter;
 		iFrameCounter = 0;	
@@ -23,7 +23,6 @@ void App::calcFps(){
 		fTimeScale = 1.0f / (float)iFPS;
 		LOG("%d fps\n", iFPS);
 	}
-	
 	
 }
 

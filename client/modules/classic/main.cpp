@@ -234,11 +234,13 @@ void ClassicModule::delAll(){
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
 #ifdef USE_TR1
 	for(std::tr1::unordered_map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){
-		delete it->second;
+		if(it->second)
+			delete it->second;
 	}
 #else
 	for(map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){
-		delete it->second;
+		if(it->second)
+			delete it->second;
 	}
 #endif
 
@@ -430,22 +432,22 @@ void ClassicModule::shutdown(){
 }
 
 int DnsLeft(void *data){
-	LOG("Resolving left\n");
+	//LOG("Resolving left\n");
 	Flow *f = (Flow *)data;		
 	const char *left = SDLNet_ResolveIP(&f->mSrc);		
 	if(left){	f->leftText[2] = string( left );	}
 	else{	f->leftText[2] = "Couldn't resolve";	}	
-	LOG("Resoved left: %s\n", f->leftText[2].c_str());	
+	//LOG("Resoved left: %s\n", f->leftText[2].c_str());	
 	return left ? true : false;
 }
 
 int DnsRight(void *data){
-	LOG("Resolving right\n");
+	//LOG("Resolving right\n");
 	Flow *f = (Flow *)data;		
 	const char *right = SDLNet_ResolveIP(&f->mDst);		
 	if(right){	f->rightText[2] = string( right );	}
 	else{	f->rightText[2] = "Couldn't resolve";	}	
-	LOG("Resoved right: %s\n", f->rightText[2].c_str());	
+	//LOG("Resoved right: %s\n", f->rightText[2].c_str());	
 	return right ? true : false;
 }
 

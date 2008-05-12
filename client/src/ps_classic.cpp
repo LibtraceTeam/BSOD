@@ -123,6 +123,10 @@ bool PSClassic::init(){
 		mParticles[i].active = false;
 		mParticles[i].life = 0.0f;
 		mParticles[i].index = i;
+		mParticles[i].r = 1.0f;
+		mParticles[i].g = 1.0f;
+		mParticles[i].b = 1.0f;
+		mParticles[i].a = 1.0f;	
 		
 		mFree.push(&mParticles[i]);		
 	}

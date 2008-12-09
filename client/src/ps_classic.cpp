@@ -10,12 +10,14 @@ struct ParticleSort{
 
 
 
+
+
 /*******************************************************************************
 							PointSprites
 *******************************************************************************/
 void PSSprites::renderAll(){
-	glColor3f(1,1,1);	
-	glEnable(GL_TEXTURE_2D);	
+	
+	//Get the texture first
 	Texture *tex = App::S()->texGet("particle.bmp");
 	if(!tex){
 		LOG("Bad texture in PSSprites!\n");
@@ -23,55 +25,60 @@ void PSSprites::renderAll(){
 	}else{
 		tex->bind();		
 	}
+	
+	//Set GL state
+	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
-	//glDisable(GL_DEPTH_TEST);		
 	glEnable(GL_BLEND);							
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
-
-	float lastSize = 0.0f;
-	float lastColor[3] = {0,0,0};
 	
-	//int inactive = 0;
-	iLastColorChanges = 0;
-
+	//Set a default size here
+	glPointSize(App::S()->fParticleSizeScale * 2); 	
+	
+	//And begin drawing
 	glBegin( GL_POINTS );
 	
-	for(int i=0;i<iNumActive;i++){
+	map<float, vector<Particle *> *>::const_iterator itr;
 	
-		Particle *p = mActive[i];
+	//Iterate over all the different colors
+	for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){	
 	
-		if(!p->active){
-			//inactive++;
-			continue;
-		}
-	
-		if(p->size != lastSize){
-			glEnd();
-			glPointSize(p->size); //hack!	
-			//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
-			lastSize = p->size;
-			//glColor4f(p->r, p->g, p->b, p->a);			
-			glBegin(GL_POINTS);
-		}
+		//The list of particles for this color
+		vector<Particle *> *list = itr->second;	
 		
-		
-		if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
-			glColor4f(p->r, p->g, p->b, 1.0f);	
-			lastColor[0] = p->r;
-			lastColor[1] = p->g;
-			lastColor[2] = p->b;
-			
-			iLastColorChanges++;
-		}
-		glVertex3f(p->x, p->y, p->z);
+		//Get the color and set it
+		Color c = mColorLookup[itr->first];
+		glColor3f(c.r, c.g, c.b);
+					
+		//Go through the entire list	
+		for(int i=0;i<(int)list->size();i++){			
+			Particle *p = (*list)[i];		
+							
+			//if(!p->active){
+			//	continue;
+			//}
 	
-	}	
+			/*
+			if(p->size != lastSize){
+				glEnd();
+				glPointSize(p->size); //hack!	
+				//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
+				lastSize = p->size;
+				glBegin(GL_POINTS);
+			}		
+			*/	
+			glVertex3f(p->x, p->y, p->z);
+		}	
+	}
+	
+	//Finish drawing	
 	glEnd();		
 
+	//And clean up
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
 	//glEnable(GL_DEPTH_TEST);
-		
+			
 }
 
 void PSSprites::render(){
@@ -172,36 +179,49 @@ void PSClassic::shutdown(){
 **********************************************/
 void PSClassic::update(){
 
-	for(int i=0;i<(int)mActive.size();i++){
+	map<float, vector<Particle *> *>::const_iterator itr;
+	
+	for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){	
+		vector<Particle *> *list = itr->second;	
 		
-		Particle *p = mActive[i];
+		for(int i=0;i<(int)list->size();i++){			
+			Particle *p = (*list)[i];			
+			
+			if(!p){
+				continue;
+			}
+			
+			if(!p->active){
+				continue;
+			}	
+		
 				
-		//if(!p->active){
-		//	continue;
-		//}
+			//if(!p->active){
+			//	continue;
+			//}
 		
-		if(p->life < 0){
-			del(i);
-			i--;
-			continue;
-		}
+			if(p->life < 0){
+				del(itr->first, i);
+				i--;
+				continue;
+			}
 								
-		//Move the particle
-		p->x += p->vx;
-		p->y += p->vy;
-		p->z += p->vz;
-		p->life -= PARTICLE_FPS;
+			//Move the particle
+			p->x += p->vx;
+			p->y += p->vy;
+			p->z += p->vz;
+			p->life -= PARTICLE_FPS;
 		
 			
-		if(p->life < 0.5f)
-			p->a = (p->life * 2.0f);		
-		else if(p->a < 1.0f)
-			p->a += (PARTICLE_FPS * 2.0f);
+			if(p->life < 0.5f)
+				p->a = (p->life * 2.0f);		
+			else if(p->a < 1.0f)
+				p->a += (PARTICLE_FPS * 2.0f);
 				
-		//TODO: More particle logic here?
+			//TODO: More particle logic here?
+		}
 	}
 	
-	iNumActive = (int)mActive.size();
 	
 	//Sort by color if needed
 	//LOG("%d\n", iLastColorChanges);
@@ -216,6 +236,8 @@ void PSClassic::update(){
 	Render using standard drawing
 **********************************************/
 void PSClassic::render(){
+
+/*
 	if(bNeedRecompile){
 	
 		glNewList(mDisplayList,GL_COMPILE);
@@ -230,28 +252,33 @@ void PSClassic::render(){
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);			
 		glHint(GL_POINT_SMOOTH_HINT,GL_NICEST);		
 	
+		map<Color, vector<Particle *> *>::const_iterator itr;
 		
-		for(int i=0;i<iNumActive;i++){
+		for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){
 		
-			Particle *p = mActive[i];
+			vector<Particle *> *list = itr->second;
 		
-			//if(!p->active){
-			//	continue;
-			//}
+			for(int i=0;i<list->size();i++){
+		
+				Particle *p = mActive[i];
+		
+				//if(!p->active){
+				//	continue;
+				//}
 					
-			glColor4f(p->r, p->g, p->b, p->a);
+				glColor4f(p->r, p->g, p->b, p->a);
 		
-			float s = p->size;		
-			float x = p->x;
-			float y = p->y; 
-			float z = p->z;
+				float s = p->size;		
+				float x = p->x;
+				float y = p->y; 
+				float z = p->z;
 		
-			glBegin(GL_TRIANGLE_STRIP);	
-			glTexCoord2d(1,1); glVertex3f(x+s, y+s, z); // Top Right
-			glTexCoord2d(0,1); glVertex3f(x-s, y+s, z); // Top Left
-			glTexCoord2d(1,0); glVertex3f(x+s, y-s, z); // Bottom Right
-			glTexCoord2d(0,0); glVertex3f(x-s, y-s, z); // Bottom Left
-			glEnd();
+				glBegin(GL_TRIANGLE_STRIP);	
+					glTexCoord2d(1,1); glVertex3f(x+s, y+s, z); // Top Right
+					glTexCoord2d(0,1); glVertex3f(x-s, y+s, z); // Top Left
+					glTexCoord2d(1,0); glVertex3f(x+s, y-s, z); // Bottom Right
+					glTexCoord2d(0,0); glVertex3f(x-s, y-s, z); // Bottom Left
+				glEnd();
 		}
 	
 		glEnd();
@@ -264,6 +291,7 @@ void PSClassic::render(){
 	}
 	
 	glCallList(mDisplayList);
+*/
 }
 
 /*********************************************
@@ -271,61 +299,80 @@ void PSClassic::render(){
 **********************************************/
 void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float life){
 
+	//First make sure we have capacity
 	if(mFree.empty()){
-		//LOG("PSClassic: No particles in free list!\n");		
 		return;
 	}
 	
+	//And sanity check to make sure it's valid
 	Particle *p = mFree.top();
 	
 	if(!p){
 		return;
 	}
 	
+	//Take it off the list
 	mFree.pop();
 			
-	//jitter
+	//Apply some jitter
 	float jitter = App::S()->randFloat(0, 1.0f);
 	pos = pos + speed * jitter;
 		
 	p->life = life - jitter;
 	
+	//Position
 	p->x = pos.x;
 	p->y = pos.y;
 	p->z = pos.z;
 	
+	//Velocity
 	p->vx = speed.x * (float)PARTICLE_FPS;
 	p->vy = speed.y * (float)PARTICLE_FPS;
 	p->vz = speed.z * (float)PARTICLE_FPS;
 		
+	//Color
 	p->r = col.r;
 	p->g = col.g;
 	p->b = col.b;
 	
-	
-	
-	//hack!
+	//Nasty nasty hack. 
 	if(getType() == PARTICLE_SYSTEM_POINTSPRITES){
 		p->size = size * App::S()->fParticleSizeScale * 3.0f;
 	}else{
 		p->size = size * App::S()->fParticleSizeScale * 0.05f;
 	}
 	
-	mActive.push_back(p);
+	//Get the list associated with this color. We batch this way so we don't
+	//need to switch colors when rendering
+	float c = col.sum();
+	vector<Particle *> *mList = mColorMap[c];
+	
+	//If the list doesn't exist, create it
+	if(!mList){
+		mColorMap[c] = new vector<Particle *>();
+		mList = mColorMap[c];
+		mColorLookup[c] = col;
+	}
+	
+	//Add to the list
+	mList->push_back(p);
 				
+	//And mark it as active
 	p->active = true;
 		
+	//done!
 	return;
 }
 
 /*********************************************
 	Remove a particle by ID
 **********************************************/
-void PSClassic::del(int i){
-	Particle *p = mActive[i];
+void PSClassic::del(float col, int i){
+	vector<Particle *> *mList = mColorMap[col];
+	Particle *p = (*mList)[i];
 	
-	mActive[i] = mActive[mActive.size() - 1];
-	mActive.pop_back();
+	(*mList)[i] = (*mList)[mList->size() - 1];
+	mList->pop_back();
 		
 	p->active = false;
 			
@@ -333,19 +380,12 @@ void PSClassic::del(int i){
 	mFree.push(p);	
 }
 
+/*********************************************	Remove a bunch of particles
+**********************************************/
 void PSClassic::delAll(){
-	while(mActive.size() > 0){
-		del(0);
-	}
+	
 }
 
 void PSClassic::delColor(Color c){
-	for(int i=0;i<(int)mActive.size();i++){
-		if(mActive[i]->r == c.r && 
-			mActive[i]->g == c.g && 
-			mActive[i]->b == c.b){			
-			del(i);
-			i--;
-		}
-	}
+	
 }

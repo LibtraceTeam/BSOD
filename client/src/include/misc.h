@@ -47,5 +47,16 @@ public:
 	}
 	
 	void copy(Color *c);
+	
+	float sum(){
+		return (r * 1) + (g * 10) + (b * 100);
+	}	
+	
+	
 };
 
+struct ColorSort{
+    public: bool operator() (Color *a, Color *b){
+		return a->sum() > b->sum();
+    }
+};

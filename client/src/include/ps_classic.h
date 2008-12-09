@@ -35,9 +35,13 @@ protected:
 	//particle lists
 	Particle mParticles[MAX_PARTICLES];	
 	stack<Particle *> mFree; 
-	vector<Particle *> mActive;
+	
+	//Active particles	
+	//We map the color->sum() to the list
+	map<float, vector<Particle *> *> mColorMap;
+	map<float, Color> mColorLookup; //We also store the mapping of sum->col
 
-	void del(int i); //delete a specific particle	
+	void del(float col, int i); //delete a specific particle	
 	
 	GLuint mDisplayList;
 	bool bNeedRecompile;	

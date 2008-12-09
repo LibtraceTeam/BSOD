@@ -1,7 +1,8 @@
-#include "main.h"
+/*******************************************************************************
+							BSOD2 Client - texture.h
 
-#ifndef _TEXTURE_H
-#define _TEXTURE_H
+ A very simple GL texture object. Loaded and manipulated by the tex*() funcs
+*******************************************************************************/
 
 /*********************************************
 		Texture object
@@ -28,4 +29,3 @@ public:
 **********************************************/
 #define TEXTURE_NO_GL 1
 
-#endif

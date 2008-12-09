@@ -18,12 +18,6 @@ int *charWidths = NULL;
 **********************************************/
 void App::initFont(){
 
-	if(bCGLCompat){
-		LOG("Font disabled with CGLCOMPAT\n");
-		return;
-	}
-
-
 	TTF_Init();
 	TTF_Font* font = TTF_OpenFont("data/arial.ttf", 30);  
 	
@@ -133,11 +127,6 @@ char message[512];
   
 void App::writeText(int x, int y, const char *fmt, ...){
 
-	if(bCGLCompat){
-		LOG("Font disabled with CGLCOMPAT\n");
-		return;
-	}
-
 	glBindTexture(GL_TEXTURE_2D, textureId);   
 
   	va_list args;
@@ -164,11 +153,6 @@ void App::writeText(int x, int y, const char *fmt, ...){
 
 void App::writeTextCentered(int x, int y, const char *fmt, ...){
 
-	if(bCGLCompat){
-		LOG("Font disabled with CGLCOMPAT\n");
-		return;
-	}
-	
 	glBindTexture(GL_TEXTURE_2D, textureId);   
 
   	va_list args;

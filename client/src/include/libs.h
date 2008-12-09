@@ -1,28 +1,26 @@
-//DEPENDS: SDL, DevIL, SDL_ttf, libconfuse, SDL_net
+/*******************************************************************************
+							BSOD2 Client - libs.h
+							
+ This file includes all the common standard libraries that the client uses. It's
+ nice to have them all in one place
+ 
+ You'll need: SDL, DevIL, SDL_ttf, libconfuse, SDL_net
+*******************************************************************************/
+
 
 /*********************************************
-		 	stdlib
+					STL
 **********************************************/
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <list>
-#include <math.h>
 #include <sstream>
 #include <map>
-#include <dlfcn.h>
 #include <iterator>
 #include <stack>
 #include <cassert>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-//libconfuse
-#include <confuse.h>
+#include <limits>
 
 using std::string;
 using std::vector;
@@ -30,30 +28,44 @@ using std::list;
 using std::stack;
 using std::map;
 
-typedef unsigned char byte;
+/*********************************************
+					C stdlib
+**********************************************/
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <math.h>
+#include <dlfcn.h>
 
-//GL-type includes
+
+/*********************************************
+					C stdlib
+**********************************************/
+
+//libconfuse
+#include <confuse.h>
+
+
+/*********************************************
+					OpenGL
+**********************************************/
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
 #include <GL/glext.h> //for point_sprites
 
-//SDL
+
+/*********************************************
+				SDL*
+**********************************************/
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
 
-#ifdef ENABLE_PS_PARTICLES
-	//CG headers
-	#include <Cg/cg.h>		
-	#include <Cg/cgGL.h>	
-#endif
-
-
-// GL_ARB_point_parameters
-extern PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB;
-extern PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB;
 
 

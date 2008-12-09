@@ -1,7 +1,9 @@
-#include "main.h"
-
-#ifndef _PARTICLESYSTEMINTERFACE_H
-#define _PARTICLESYSTEMINTERAFCE_H
+/*******************************************************************************
+							BSOD2 Client - ps_interface.h
+							
+ This file specifices the interface that particle systems implement. Yay for
+ abstraction :)
+*******************************************************************************/
 
 //Returned by IParticleSystem::getType()
 #define PARTICLE_SYSTEM_UNSPECIFIED 	0
@@ -17,16 +19,21 @@ public:
 	virtual ~IParticleSystem(){}
 	
 	//init/terminate
-	virtual bool init()=0; //If this returns false, we should try an 'easier' type
+	virtual bool init()=0; //If false, we should try an 'easier' type
 	virtual void shutdown()=0;
 	
 	//Called automatically each frame
 	virtual void update()=0;
 	virtual void render()=0;
 		
-	//For use by modules
-	virtual void add(Vector3 pos, Vector3 speed, Color col, float size, float life)=0;
+	//Add a particle with these attributes
+	virtual void add(Vector3 pos, Vector3 speed, Color col, 
+					float size, float life)=0;
+					
+	//Clear everything
 	virtual void delAll()=0;
+	
+	//Delete particles with a specific colour
 	virtual void delColor(Color c)=0;
 	
 	//stats
@@ -35,4 +42,3 @@ public:
 };
 
 
-#endif

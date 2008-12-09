@@ -1,9 +1,11 @@
-#include "main.h"
-
-#ifndef _PARTICLES_H
-#define _PARTICLES_H
-
-#define MAX_PARTICLES 1000000 //global cap of 1m particles
+/*******************************************************************************
+							BSOD2 Client - ps_classic.h
+							
+ This contains the 'classic' type of particle systems - a very simple one that
+ renders each particle as triangles, and a slightly less simple one that uses
+ pointsprites. Because these two are very similar, they share everything but
+ their init() and render() methods.
+*******************************************************************************/
 
 /*********************************************
 		Represents one particle
@@ -12,7 +14,7 @@ class Particle{
 public:
 	bool active; //if it's alive or not
 	
-	float x,y,z; //position in 3-space relative to the origin of the parent system
+	float x,y,z; //position in 3-space relative to the origin of the parent
 	float life; //how long left till it dies
 	float r,g,b,a; //color
 	float vx, vy, vz; //speed to move per second
@@ -23,7 +25,7 @@ public:
 
 
 /*********************************************
-			A particle system. 
+		A triangle-based particle system. 
 **********************************************/
 class PSClassic : public IParticleSystem{
 protected:
@@ -37,8 +39,7 @@ protected:
 	void del(int i); //delete a specific particle	
 	
 	GLuint mDisplayList;
-	bool bNeedRecompile;
-	
+	bool bNeedRecompile;	
 	
 public:
 
@@ -60,7 +61,7 @@ public:
 
 
 /*********************************************
-			A point-sprite system
+		A point-sprite particle system
 **********************************************/
 class PSSprites : public PSClassic{
 
@@ -71,4 +72,3 @@ public:
 	int getType(){return PARTICLE_SYSTEM_POINTSPRITES;}
 };
 
-#endif

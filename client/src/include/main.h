@@ -1,43 +1,34 @@
+/*******************************************************************************
+							BSOD2 Client - main.h
+							
+ Most source files include this to get standard headers. Also contains the 
+ main application object.
+*******************************************************************************/
 #ifndef _MAIN_H
 #define _MAIN_H
 
-//Toggle pixel-shader particle system
-//#define ENABLE_PS_SHADERS
-
-
+//Pull in standard libraries
 #include "libs.h"
 
 /*********************************************
 		 Internal headers
 **********************************************/
+#include "config.h"
 #include "vector.h"
 #include "misc.h"
-#include "renderable.h"
 #include "texture.h"
-#include "module.h"
 #include "ps_interface.h"
 #include "ps_classic.h"
 #include "ps_shaders.h"
-#include "gui.h"
-
-#define DEFAULT_PORT 54567
-#define CONFIG_FILE "bsod2.cfg"
-#define PARTICLE_FPS 0.025 //40fps (0.3333 = 30fps)
-#define MAX_FLOW_DESCRIPTORS 64
-
-#define OPTION_RESET_ROTATION 0
-#define OPTION_ROTATE_X 1
-#define OPTION_ROTATE_Y 2
-#define OPTION_ROTATE_Z 3
-
+#include "flowmanager.h"
 
 /*********************************************
-				Application class
+			Application class
 **********************************************/
 class App{
 
 /*********************************************
-				Internal stuff
+				Private
 **********************************************/
 	
 	//Mouse (2D)
@@ -52,7 +43,6 @@ class App{
 	int iLastFrameTicks;
 	float fNextParticleUpdate;
 	
-	void handleKeyEvent( SDL_keysym *keysym , int type );
 
 	//gl_util.cpp
 	bool done;
@@ -81,35 +71,22 @@ class App{
 	void onKeyEvent(int code, int eventType);
 	bool mouseDown(int button){return bMouse[button];}
 	void onMouseEvent(int code, int eventType);
-
+	void handleKeyEvent( SDL_keysym *keysym , int type );
 
 	//Update.cpp
 	void updateMain();
-	void generateTestData();
 	
-	//module.cpp
-	bool loadModule(string name);
-
 	//Font.cpp
 	void initFont();
 	
 	//particles.cpp
 	IParticleSystem *mParticleSystem;	
-	void initParticleSystem();
-	
+	void initParticleSystem();	
 	int iParticleMethod;
-	
-
-	//gui.cpp
-	UIScreen mUIRoot;		
-	
+		
 	//main.cpp
 	static App *mSingleton;
-	
-	//GUI
-	void makeGUI();
-	void addOption(int i, string text, UIWindow *wnd);
-	
+		
 	//socket.cpp
 	TCPsocket mClientSocket;
 	SDLNet_SocketSet mSocketSet;
@@ -126,16 +103,9 @@ class App{
 		
 	//config.cpp
 	bool loadConfig();
-	bool bOptions[32];
-	
-	string mRenderModule;
-	
-	//flow_descr.cpp
-	FlowDescriptor *mFlowDescriptors[MAX_FLOW_DESCRIPTORS];
-	void addFlowDescriptor(byte id, Color c, string name);
-	
+			
 /*********************************************
-	Things modules can access using mApp
+				Public
 **********************************************/
 public:
 	virtual ~App(){}
@@ -148,70 +118,55 @@ public:
 	int init(App *a, int argc, char **argv);
 
 	//font.cpp	
-	virtual void writeText(int x, int y, const char *fmt, ...);
-	virtual void writeTextCentered(int x, int y, const char *fmt, ...);
+	void writeText(int x, int y, const char *fmt, ...);
+	void writeTextCentered(int x, int y, const char *fmt, ...);
 
 	//misc.cpp
-	virtual int randInt(int low, int high);
-	virtual float randFloat();
-	virtual float randFloat(float low, float high);
-	virtual void setOption(int index, bool enabled);
+	int randInt(int low, int high);
+	float randFloat();
+	float randFloat(float low, float high);
 	
 	//gl_util.cpp
-	virtual void utilCube(float x, float y, float z);
-	virtual void utilShutdown(int returnCode);
-	virtual void notifyShutdown(){done = true;}
-	virtual Vector2 utilProject(float x, float y, float z);
-
-	//flow_descr.cpp
-	virtual FlowDescriptor *getFD(byte id);
+	void utilCube(float x, float y, float z);
+	void utilPlane(float x, float y, float z);
+	void utilShutdown(int returnCode);
+	void notifyShutdown(){done = true;}
+	Vector2 utilProject(float x, float y, float z);
 
 	//Camera movement
-	virtual void camMove(float x, float y, float z);
-	virtual void camLookAt(float x, float y, float z);
-	virtual void camSetPos(float x, float y, float z);
-	virtual void beginDrag();
-	virtual void endDrag();
+	void camMove(float x, float y, float z);
+	void camLookAt(float x, float y, float z);
+	void camSetPos(float x, float y, float z);
+	void beginDrag();
+	void endDrag();
 	
 	//texture.cpp
-	virtual Texture *texLoad(string name, int flags);
-	virtual Texture *texGet(string name);
-	virtual Texture *texGenerate(string name, byte *buffer, int width, int height);
+	Texture *texLoad(string name, int flags);
+	Texture *texGet(string name);
+	Texture *texGenerate(string name, byte *buffer, int width, int height);
 	
 	//particle management
-	virtual IParticleSystem *ps(){return mParticleSystem;}
+	IParticleSystem *ps(){return mParticleSystem;}
 	
 	//Mouse
-	virtual Vector2 getMouse(){return Vector2(iMouseX, iMouseY);}
+	Vector2 getMouse(){return Vector2(iMouseX, iMouseY);}
 			
-	//GUI element maker
-	template<typename T>
-	T *guiCreate(const char *name, Vector2 pos, 
-							Vector2 size, UIElement *parent){				
-		T *element = new T;
-		element->initGeneric(name, pos, size);
-		element->init();
-		if(parent) parent->addChild(element);
-		return element;						
-	}
-	
-	virtual UIScreen *getUIRoot(){return &mUIRoot;}
-		
-	//Module	
-	IModule *mCurrentModule;
-	
 	//Camera
 	float fCameraX, fCameraY, fCameraZ;
 	float fLookX, fLookY, fLookZ;
 	float fMouseX, fMouseY, fMouseZ;
 	Vector2 dragStart;
 	bool bDrag;
+			
+	int getFPS(){return iFPS;}
 	
-	//GUI objects
-	UIWindow *wndOptions;
-	UIWindow *wndProto;
-		
-	virtual int getFPS(){return iFPS;}
+	//This contains most of the flow placement logic
+	FlowManager *mFlowMgr;
+	
+	//Flow descriptors. TOOD: clean up
+	map<byte, FlowDescriptor *> mFlowDescriptors;
+	FlowDescriptor *getFD(byte i){return mFlowDescriptors[i];}
+	void addFlowDescriptor(byte id, Color c, string name);
 	
 	
 /*********************************************
@@ -234,23 +189,15 @@ public:
 	//Skip
 	int iDropPacketThresh;
 	int iDropFlowThresh;
-	
-	//CGL
-	bool bCGLCompat;
-	bool bHeadless;
-	
-	void onKey(char code);
-
+		
 };
 
 
 
 
 /*********************************************
-				Other
+				Globals
 **********************************************/
-
-#ifndef MODULE
 
 //Logging funcs (misc.cpp)
 extern void LOG(const char *fmt, ...);
@@ -258,8 +205,6 @@ extern void ERR(const char *fmt, ...);
 extern void WARN(const char *fmt, ...);
 extern int splitString(const std::string &input, const std::string &delimiter, 
 				std::vector<std::string> &results, bool includeEmpties = false);
-
-#endif
 
 //Time scaler is global so everything can get it
 extern float fTimeScale;

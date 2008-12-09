@@ -1,4 +1,4 @@
-#include "classic.h"
+#include "main.h"
 
 /*********************************************
 Checks if a point is close to either end of a flow
@@ -28,7 +28,7 @@ int Flow::collide(float pX, float pY, float pZ){
 /*********************************************
 		Return a free flow object
 **********************************************/
-Flow *ClassicModule::getFreeFlow(){
+Flow *FlowManager::getFreeFlow(){
 
 	if(mFreeFlows.empty()){
 		Flow *f = new Flow;
@@ -41,11 +41,11 @@ Flow *ClassicModule::getFreeFlow(){
 	return f;
 }
 
-Flow *ClassicModule::getFlowByID(int id){
+Flow *FlowManager::getFlowByID(int id){
 	return mFlowMap[id];
 }
 
-void ClassicModule::setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, float speed, float size, bool negative){
+void FlowManager::setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, float speed, float size, bool negative){
 	
 	if(!p){
 		LOG("Bad params in setup!\n");
@@ -86,7 +86,7 @@ void ClassicModule::setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, fl
 /*********************************************
 		 	Create a flow
 **********************************************/
-Flow *ClassicModule::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, float size){
+Flow *FlowManager::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, float size){
 
 	//speed = how many seconds it takes to get across, so smaller=faster
 	//If speed<0, we assume it's going left. If not, right.

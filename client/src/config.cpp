@@ -13,12 +13,9 @@ bool App::loadConfig(){
 		CFG_FLOAT("ParticleSizeScale", 1.0f, CFGF_NONE),
 		CFG_FLOAT("ParticleSpeedScale", 1.0f, CFGF_NONE),
 		CFG_INT("ParticleMethod", PARTICLE_SYSTEM_UNSPECIFIED, CFGF_NONE),
-		CFG_STR("RenderModule", "classic", CFGF_NONE),
 		CFG_INT("DropPacketThresh", 60, CFGF_NONE),
 		CFG_INT("DropFlowThresh", 30, CFGF_NONE),
 		CFG_INT("Fullscreen", 0, CFGF_NONE),
-		CFG_INT("CGLCompat", 0, CFGF_NONE),
-		CFG_INT("Headless", 0, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -36,11 +33,8 @@ bool App::loadConfig(){
 	fParticleSizeScale = cfg_getfloat(cfg, "ParticleSizeScale");
 	fParticleSpeedScale = cfg_getfloat(cfg, "ParticleSpeedScale");
 	iParticleMethod = cfg_getint(cfg, "ParticleMethod");
-	mRenderModule = string(cfg_getstr(cfg, "RenderModule"));
 	iDropPacketThresh = cfg_getint(cfg, "DropPacketThresh");
 	iDropFlowThresh = cfg_getint(cfg, "DropFlowThresh");
-	bCGLCompat = cfg_getint(cfg, "CGLCompat");
-	bHeadless = cfg_getint(cfg, "Headless");
 	
 	cfg_free(cfg);
 	

@@ -1,35 +1,12 @@
-#include "classic.h"
-
-App *mApp = NULL;
-
-EXPORT IModule *init(App *a){
-	mApp = a;	
-	App::setS(mApp);
-	return (IModule *)(new ClassicModule());
-}
-
-
+#include "main.h"
 	
 /*********************************************
 		 	Entry
 **********************************************/
-bool ClassicModule::init(){	
-
-	LOG("Module Init!\n");
+bool FlowManager::init(){	
 	
-	mApp->camSetPos(0, 0, 27);//22
-	mApp->camLookAt(0,0,0); //y= -2.5
-
-	//hack!
-	mApp->texLoad("particle.bmp", 0);
-	if(mApp->bCGLCompat == false){
-		mApp->texLoad("wm.png", 0);
-		mApp->texLoad("ticked.png", 0);
-		mApp->texLoad("unticked.png", 0);
-	}
-
-	mTex = mApp->texLoad("waikato.png", 0);
-	mEarthTex = mApp->texLoad("earth.png", 0);
+	mTex = App::S()->texLoad("waikato.png", 0);
+	mEarthTex = App::S()->texLoad("earth.png", 0);
 	
 	if(!mTex || !mEarthTex){
 		LOG("Couldn't get the texture!\n");
@@ -41,9 +18,9 @@ bool ClassicModule::init(){
 	
 	mViewFlows.clear();
 	
-	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 30.0f;
-	if(!mApp->bCGLCompat)
-		mDisplayList = glGenLists(1);
+	fPlaneDistance = ((float)App::S()->iScreenX / (float)App::S()->iScreenY) * 30.0f;
+
+	mDisplayList = glGenLists(1);
 	
 	return true;
 }
@@ -51,9 +28,9 @@ bool ClassicModule::init(){
 /*********************************************
 		 	Update
 **********************************************/
-void ClassicModule::update(float currentTime, float timeDelta){
+void FlowManager::update(float currentTime, float timeDelta){
 
-	fPlaneDistance = ((float)mApp->iScreenX / (float)mApp->iScreenY) * 30.0f;
+	fPlaneDistance = ((float)App::S()->iScreenX / (float)App::S()->iScreenY) * 30.0f;
 	
 	fTimeScale = timeDelta;
 
@@ -91,7 +68,7 @@ void ClassicModule::update(float currentTime, float timeDelta){
 /*********************************************
  Called when the parent program has a new flow
 **********************************************/
-void ClassicModule::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 start, Vector3 end){
+void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 start, Vector3 end){
 
 	//Turn the SDLNet structs into in_addrs for later
 	struct in_addr ip1, ip2;
@@ -130,7 +107,7 @@ void ClassicModule::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 st
 /*********************************************
 	Parent program has a new packet
 **********************************************/
-void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *type){
+void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *type){
 		
 	Flow *f = getFlowByID(flowID);
 	
@@ -145,10 +122,10 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 
 		sizeMultiplier /= 5.0f; //yes, particles are *small*
 		
-		sizeMultiplier *= mApp->fParticleSizeScale;
+		sizeMultiplier *= App::S()->fParticleSizeScale;
 				
 		//And speed multiplier
-		float speedMultiplier = (3.0f / rtt) * mApp->fParticleSpeedScale;
+		float speedMultiplier = (3.0f / rtt) * App::S()->fParticleSpeedScale;
 						
 		//And add the particle
 		PSParams *p = &f->mParamsStart;
@@ -187,7 +164,7 @@ void ClassicModule::newPacket(int flowID, int size, float rtt, FlowDescriptor *t
 /*********************************************
 	Flow has expired
 **********************************************/
-void ClassicModule::delFlow(int flowID){
+void FlowManager::delFlow(int flowID){
 	
 	Flow *f = getFlowByID(flowID);
 	
@@ -220,7 +197,7 @@ void ClassicModule::delFlow(int flowID){
 /*********************************************
 	All flows have expired
 **********************************************/
-void ClassicModule::delAll(){
+void FlowManager::delAll(){
 	
 	//Delete everything in the free list
 	while(!mFreeFlows.empty()){
@@ -253,10 +230,9 @@ void ClassicModule::delAll(){
 /*********************************************
 	Update the display list
 **********************************************/
-void ClassicModule::updateList(){
+void FlowManager::updateList(){
 
-	if(!App::S()->bCGLCompat)
-		glNewList(mDisplayList,GL_COMPILE);
+	glNewList(mDisplayList,GL_COMPILE);
 
 
 	glColor3f(1,1,1);
@@ -270,7 +246,7 @@ void ClassicModule::updateList(){
 	glPushMatrix();
 		glTranslatef(-d, 0, 0);
 		glRotatef(90, 0, 1, 0);
-		utilSlab(SLAB_SIZE, SLAB_SIZE,0.1);	
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
 	glPopMatrix();
 	
 	
@@ -281,16 +257,12 @@ void ClassicModule::updateList(){
 	glPushMatrix();
 		glTranslatef(d, 0, 0);
 		glRotatef(270, 0, 1, 0);
-		utilSlab(SLAB_SIZE, SLAB_SIZE,0.1);	
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
 	glPopMatrix();
 	
 	
 
-	//Points
-	if(!App::S()->bCGLCompat)
-		glDisable(GL_TEXTURE_2D);
-	else
-		App::S()->texGet("particle.bmp")->bind();
+	glDisable(GL_TEXTURE_2D);
 
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
@@ -328,8 +300,7 @@ void ClassicModule::updateList(){
 		
 	glDisable(GL_BLEND);
 	
-	if(!App::S()->bCGLCompat)
-		glEndList();
+	glEndList();
 
 }
 
@@ -338,23 +309,19 @@ float fRenderTimer = 2.0f;
 /*********************************************
 		 	3D rendering
 **********************************************/
-void ClassicModule::render(){
+void FlowManager::render(){
 
 	//Update the point timer
 	fRenderTimer += fTimeScale;
 	
-	if(!App::S()->bCGLCompat){
-		if(fRenderTimer > 1.5f){
-			updateList(); //rerender
-			fRenderTimer = 0.5f;
-		}
-		
-		//Call the existing list
-		glCallList(mDisplayList);
-	
-	}else{
+	if(fRenderTimer > 1.5f){
 		updateList(); //rerender
+		fRenderTimer = 0.5f;
 	}
+	
+	//Call the existing list
+	glCallList(mDisplayList);
+
 		
 		
 	//Selected flow
@@ -377,8 +344,8 @@ void ClassicModule::render(){
 		glEnd();
 		
 		if(bNeedProject){
-			mSelectedFlow->screenP1 = mApp->utilProject(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
-			mSelectedFlow->screenP2 = mApp->utilProject(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
+			mSelectedFlow->screenP1 = App::S()->utilProject(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
+			mSelectedFlow->screenP2 = App::S()->utilProject(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
 			
 			bNeedProject = false;
 		}
@@ -395,9 +362,9 @@ void ClassicModule::render(){
 /*********************************************
 		 	2D rendering
 **********************************************/
-void ClassicModule::render2d(){
+void FlowManager::render2d(){
 
-	//mApp->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
+	//App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
 	
 	if(mSelectedFlow){	
 		Vector2 v1 = mSelectedFlow->screenP1;
@@ -414,8 +381,8 @@ void ClassicModule::render2d(){
 		
 		float y = 20;
 		for(int i=0;i<3;i++){
-			mApp->writeText((int)v1.x, (int)(v1.y + (y * i)), "%s", mSelectedFlow->leftText[i].c_str());
-			mApp->writeText((int)v2.x, (int)(v2.y + (y * i)), "%s", mSelectedFlow->rightText[i].c_str());
+			App::S()->writeText((int)v1.x, (int)(v1.y + (y * i)), "%s", mSelectedFlow->leftText[i].c_str());
+			App::S()->writeText((int)v2.x, (int)(v2.y + (y * i)), "%s", mSelectedFlow->rightText[i].c_str());
 		}
 	}
 }
@@ -423,7 +390,7 @@ void ClassicModule::render2d(){
 /*********************************************
 		 	Shutdown
 **********************************************/
-void ClassicModule::shutdown(){
+void FlowManager::shutdown(){
 
 	delAll();
 
@@ -454,7 +421,7 @@ int DnsRight(void *data){
 /*********************************************
 		 	Interaction
 **********************************************/
-bool ClassicModule::onClick(int button, float x, float y, float z){
+bool FlowManager::onClick(int button, float x, float y, float z){
 	float planeX = z;
 	float planeY = y;
 	

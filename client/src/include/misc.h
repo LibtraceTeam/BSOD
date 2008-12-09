@@ -1,4 +1,8 @@
-#include "main.h"
+/*******************************************************************************
+							BSOD2 Client - misc.h
+							
+ Basically anything weird that didn't fit got lumped into here :)
+*******************************************************************************/
 
 
 /*********************************************
@@ -8,22 +12,24 @@
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #define ABS(a)	   (((a) < 0) ? -(a) : (a))
 
+
+
+
+
+
+/*********************************************
+			 	Typedefs
+**********************************************/
 typedef unsigned char byte;
 
-//screen width, height, and bit depth
-//These used to be numbers, in order to keep
-//compatibility, they changed to point to the vars in App 
-#define SCREEN_WIDTH  App::S()->iScreenX
-#define SCREEN_HEIGHT App::S()->iScreenY
-#define SCREEN_BPP     32
-#define SCREEN_FULLSCREEN App::S()->bFullscreen
 
-#define PI 3.14159265
 
-#ifndef _COLOR
-#define _COLOR
 
-//Color struct
+
+
+/*********************************************
+	 	Simple Color object
+**********************************************/
 class Color{
 public:
 	float r, g, b;
@@ -43,5 +49,3 @@ public:
 	void copy(Color *c);
 };
 
-
-#endif

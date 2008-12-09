@@ -1,12 +1,12 @@
-#include "ps_classic.h"
+#include "main.h"
 
 void PSSprites::renderAll(){
 	glColor3f(1,1,1);	
 	glEnable(GL_TEXTURE_2D);	
 	Texture *tex = App::S()->texGet("particle.bmp");
 	if(!tex){
-		//LOG("Bad texture in PSSprites!\n");
-		//return;
+		LOG("Bad texture in PSSprites!\n");
+		return;
 	}else{
 		tex->bind();		
 	}
@@ -54,57 +54,51 @@ void PSSprites::renderAll(){
 }
 
 void PSSprites::render(){
-	if(App::S()->bCGLCompat){
-		renderAll();		
-	}else{
-		if(bNeedRecompile){	
-			glNewList(mDisplayList,GL_COMPILE);
-			renderAll();	
-			glEndList();	
-			bNeedRecompile = false;			
-		}	
-		glCallList(mDisplayList);		
-	}
+	
+	if(bNeedRecompile){	
+		glNewList(mDisplayList,GL_COMPILE);
+		renderAll();	
+		glEndList();	
+		bNeedRecompile = false;			
+	}	
+	glCallList(mDisplayList);		
+
 }
 
 bool PSSprites::init(){
 
-	if(!App::S()->bCGLCompat){
+	char *ext = (char*)glGetString( GL_EXTENSIONS );
 
-		char *ext = (char*)glGetString( GL_EXTENSIONS );
-	
-		if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
-			LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
+	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
+		LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
+		return false;
+	}else{	
+
+		//FIXME: Windows needs wglGetProcAddress, probably
+		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)glXGetProcAddress((byte *)"glPointParameterfARB");
+		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glXGetProcAddress((byte *)"glPointParameterfvARB");
+
+		if( !glPointParameterfARB || !glPointParameterfvARB ){
+			LOG("GL_ARB_point_parameter functions were not found, falling back to triangles\n");
 			return false;
-		}else{	
-	
-			//FIXME: Windows needs wglGetProcAddress, probably
-			glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)glXGetProcAddress((byte *)"glPointParameterfARB");
-			glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glXGetProcAddress((byte *)"glPointParameterfvARB");
-
-			if( !glPointParameterfARB || !glPointParameterfvARB ){
-				LOG("GL_ARB_point_parameter functions were not found, falling back to triangles\n");
-				return false;
-			}
 		}
-		
-		LOG("GL_ARB_point_parameters loaded OK\n");
-
-
-		float maxSize = 0.0f;
-		glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
-
-		if( maxSize > 5.0f * App::S()->fParticleSizeScale)
-			maxSize = 5.0f * App::S()->fParticleSizeScale;
-				
-		glPointSize( maxSize );
-		glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
-		glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
-		glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
-		glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
-		glEnable( GL_POINT_SPRITE_ARB );
-
 	}
+	
+	LOG("GL_ARB_point_parameters loaded OK\n");
+
+
+	float maxSize = 0.0f;
+	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
+
+	if( maxSize > 5.0f * App::S()->fParticleSizeScale)
+		maxSize = 5.0f * App::S()->fParticleSizeScale;
+			
+	glPointSize( maxSize );
+	glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
+	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
+	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
+	glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
+	glEnable( GL_POINT_SPRITE_ARB );
 
 	return PSClassic::init();
 }
@@ -135,8 +129,7 @@ bool PSClassic::init(){
 	
 	bNeedRecompile = true;
 
-	if(!App::S()->bCGLCompat)
-		mDisplayList = glGenLists(1);
+	mDisplayList = glGenLists(1);
 				
 	return true; //We assume we can always do this!
 }

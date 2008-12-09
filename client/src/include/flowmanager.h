@@ -1,18 +1,24 @@
-#include "module_interface.h"
-
-#ifndef CLASSIC_MODULE
-#define CLASSIC_MODULE
-
-//Pos defines
-#define MAX_FLOWS 1024
-#define SLAB_SIZE 20
-
-//Toggles between std::map and unordered_map
-#define USE_TR1
+/*******************************************************************************
+							BSOD2 Client - flowmanager.h
+							
+ Previously the 'classic' visualisation module before simplification. 
+*******************************************************************************/
 
 #ifdef USE_TR1
 	#include <tr1/unordered_map>
 #endif
+
+/*********************************************
+		Flow descriptor object
+**********************************************/
+class FlowDescriptor{
+public:
+    string mName;
+    Color mColor;
+    byte id;  
+    bool bShown;
+};
+
 
 /*********************************************
 	Particle system parameter object
@@ -65,7 +71,7 @@ public:
 /*********************************************
 	Classic visualisation module
 **********************************************/
-class ClassicModule : public IModule{
+class FlowManager{
 
 	float fPlaneDistance;
 
@@ -134,4 +140,3 @@ public:
 
 uint32_t SuperFastHash (const char * data, int len);
 
-#endif

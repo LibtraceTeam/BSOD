@@ -46,15 +46,12 @@ void App::renderMain(){
 	glRotatef(fRot[0], 1, 0, 0);
 	glRotatef(fRot[1], 0, 1, 0);
 	glRotatef(fRot[2], 0, 0, 1);
-	
-	if(mCurrentModule){
-		mCurrentModule->render();
-	}
-		
-	calculateMousePoint();
 			
+	calculateMousePoint();
+	
+	mFlowMgr->render();	
 	mParticleSystem->render();
-						
+							
 	utilEndRender();
 }
 
@@ -72,7 +69,7 @@ void App::drawStatusBar(){
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
 	//Text
-	writeText(280, 7, "%d fps, time %d", iFPS, iTime);	
+	writeText(10, 7, "%d fps, time %d", iFPS, iTime);	
 
 	if(fTimeScale == infinity || fTimeScale == 0.0f){
 		writeText(5, 25, "(waiting)");	   
@@ -92,13 +89,7 @@ void App::render2D(){
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	drawStatusBar();	
-	
-	if(mCurrentModule){
-		mCurrentModule->render2d();
-	}
-	
+		
 	//Render the GUI
-	glEnable(GL_SCISSOR_TEST);	
-	mUIRoot.render();	
-	glDisable(GL_SCISSOR_TEST);
+	
 }

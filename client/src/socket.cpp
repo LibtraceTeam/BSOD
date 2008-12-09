@@ -114,9 +114,9 @@ bool App::openSocket(){
     mDataBuf.clear();
     
     //default to showing all
-    for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
-    	mFlowDescriptors[i] = NULL;
-    }
+   // for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
+   // 	mFlowDescriptors[i] = NULL;
+   // }
     
     bConnected = true;
     
@@ -215,7 +215,7 @@ void App::updateSocket(){
 			//LOG("%s: %f/%f/%f\n", inet_ntoa(ip1), start.x, start.y, start.z);
 			//LOG("%s: %f/%f/%f\n\n", inet_ntoa(ip2), end.x, end.y, end.z);
 			
-			mCurrentModule->newFlow(ntohl(pkt->id), src, dest, start, end);			
+			mFlowMgr->newFlow(ntohl(pkt->id), src, dest, start, end);			
 		}
 		
 		
@@ -227,7 +227,7 @@ void App::updateSocket(){
 			
 			//LOG("Delete flow %u\n", ntohl(pkt->id));	
 			
-			mCurrentModule->delFlow(ntohl(pkt->id));		
+			mFlowMgr->delFlow(ntohl(pkt->id));		
 		
 		}
 		
@@ -264,7 +264,7 @@ void App::updateSocket(){
 			
 		
 			
-			mCurrentModule->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));	
+			mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));	
 			
 			iTime = ntohl(pkt->ts);			
 		}
@@ -273,7 +273,7 @@ void App::updateSocket(){
 		//Delete all
 		else if(type == FLOW_ALL_REMOVE){
 		
-			mCurrentModule->delAll();
+			//mCurrentModule->delAll();
 			
 		}
 		
@@ -300,6 +300,28 @@ void App::updateSocket(){
 	else 
 		mDataBuf.erase(mDataBuf.begin(), mDataBuf.begin() + index);
 }
+
+
+/*********************************************
+		Flow descriptor management
+**********************************************/
+void App::addFlowDescriptor(byte id, Color c, string name){
+
+    if(mFlowDescriptors[id]){
+            return; //we already have one!
+    }
+    
+
+    FlowDescriptor *f = new FlowDescriptor;
+    f->id = id;
+    f->mColor = c;
+    f->mName = name;
+    f->bShown = true; //show by default
+    
+    mFlowDescriptors[id] = f;
+}
+                                
+
 
 /*********************************************
 		Shutdown

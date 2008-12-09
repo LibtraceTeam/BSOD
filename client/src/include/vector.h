@@ -1,5 +1,9 @@
-#ifndef _VECTORMATH
-#define _VECTORMATH
+/*******************************************************************************
+							BSOD2 Client - vector.h
+							
+ Defines some simple 2D/3D math objects. TODO: Probably want to name this 
+ something that doesn't sound like it does a STL vector...
+*******************************************************************************/
 
 /*********************************************
 			3D point class
@@ -87,6 +91,9 @@ public:
 };
 
 
+/*********************************************
+			2D point class
+**********************************************/
 class Vector2{
 public:
 	float x; 
@@ -154,6 +161,9 @@ public:
     
 };
 
+/*********************************************
+			Quaternion class
+**********************************************/
 class Quaternion{
 public:
 	float w, x, y, z;
@@ -168,5 +178,3 @@ public:
 	}
 };
 
-
-#endif

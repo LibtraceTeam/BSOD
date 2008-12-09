@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "main.h"
 
 //DevIL
 #include <IL/il.h>
@@ -74,20 +74,11 @@ Texture *App::texLoad(string name, int flags){
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
 	if(flags != TEXTURE_NO_GL){	
-		if(!bCGLCompat){
-			tex->mData = ilGetData();
-			tex->iGLID = ilutGLBindMipmaps();
-		}else{
-			glEnable(GL_TEXTURE_2D);
-			glGenTextures( 1, &tex->iGLID );   
-			glBindTexture( GL_TEXTURE_2D, tex->iGLID );
-			glTexImage2D( GL_TEXTURE_2D, 0, 3, tex->iSizeX, tex->iSizeY, 0, GL_RGB,
-						GL_UNSIGNED_BYTE, ilGetData() ); 
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
-		}
+		tex->mData = ilGetData();
+		tex->iGLID = ilutGLBindMipmaps();
+		
 		LOG("(got id %d)\n", tex->iGLID);	    
-	}	 
+	}	
 	
 	return tex;
 }
@@ -155,13 +146,13 @@ bool App::texInit(){
 	ilutRenderer(ILUT_OPENGL);
 	
 	//preload any common textures here
-	/*
-	texLoad("particle.bmp", 0);	
+	mTextures.clear();
+	
 	texLoad("wm.png", 0);
 	texLoad("ticked.png", 0);
 	texLoad("unticked.png", 0);
-	*/
-
+	texLoad("particle.bmp", 0);
+		
 	LOG("Finished loading initial textures!\n");
 	
 	return true;
@@ -189,6 +180,7 @@ void App::texShutdown(){
 		Returns a texture by name
 **********************************************/
 Texture *App::texGet(string name){
+
 	for(int i=0;i<(int)mTextures.size();i++){
 		Texture *t = mTextures[i];		
 		if(t->mFilename == name){

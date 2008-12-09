@@ -42,24 +42,21 @@ void App::utilBeginRender(){
 **********************************************/
 void App::utilEndRender(){
 
-	if(!bCGLCompat){
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
-		//Make it ortho
-		//(0,0) == top-left
-		glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1);
+	//Make it ortho
+	//(0,0) == top-left
+	glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1);
 
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glDisable(GL_DEPTH_TEST);
-	
-		//now in 2D mode
-		render2D();
-		
-	}
-	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glDisable(GL_DEPTH_TEST);
+
+	//now in 2D mode
+	render2D();
+			
 	SDL_GL_SwapBuffers( );
 }
 
@@ -78,20 +75,11 @@ void App::utilShutdown( int returnCode )
 		mParticleSystem->shutdown();
 	}
 	
-		
-	LOG("Deleting module\n");
-
-	if(mCurrentModule){
-		mCurrentModule->shutdown();		
-	}
-
-
 	LOG("Freeing textures\n");
 		   
 	//Free textures
 	texShutdown();
 	
-	delete mCurrentModule;
 	delete mParticleSystem;
 	
 	LOG("All done, about to quit!\n");
@@ -139,7 +127,6 @@ static int resizeWindow( int width, int height )
 	
 	App::S()->iScreenX = width;
 	App::S()->iScreenY = height;	
-	App::S()->getUIRoot()->setSize(Vector2(width, height));
 
 	return true;
 }
@@ -204,65 +191,63 @@ static int initGL( )
 	Creates a window with specified attribs
 **********************************************/
 bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
+ 
 
-	if(!bHeadless){   
-
-		//this holds some info about our display
-		const SDL_VideoInfo *videoInfo;
-			//initialize SDL 
-		if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
-			LOG( "Video initialization failed: %s\n", SDL_GetError( ) );
-			return false;
-		}
-	
-		SDL_EnableUNICODE(1);
-
-		// Fetch the video info
-		videoInfo = SDL_GetVideoInfo( );
-
-		if ( !videoInfo ){
-			LOG( "Video query failed: %s\n", SDL_GetError( ) );
-			return false;
-		}
-
-		//the flags to pass to SDL_SetVideoMode
-		videoFlags  = SDL_OPENGL;         
-		videoFlags |= SDL_GL_DOUBLEBUFFER;
-		videoFlags |= SDL_HWPALETTE;     
-		videoFlags |= SDL_RESIZABLE;     
-
-		//This checks to see if surfaces can be stored in memory 
-		if ( videoInfo->hw_available )
-			videoFlags |= SDL_HWSURFACE;
-		else
-			videoFlags |= SDL_SWSURFACE;
-
-		// This checks if hardware blits can be done 
-		if ( videoInfo->blit_hw )
-			videoFlags |= SDL_HWACCEL;
-		
-		//Sets up OpenGL double buffering
-		SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	
-		// Fullscreen?
-		if(fullscreen){
-			videoFlags |= SDL_FULLSCREEN;
-		}
-
-		// get a SDL surface 
-
-		surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
-
-		// Verify there is a surface 
-		if ( !surface ){
-			LOG( "Video mode set failed: %s\n", SDL_GetError( ) );
-			return false;
-		}
-	
-		//Set the window caption
-		SDL_WM_SetCaption( "BSOD Client", NULL );
-	
+	//this holds some info about our display
+	const SDL_VideoInfo *videoInfo;
+		//initialize SDL 
+	if ( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
+		LOG( "Video initialization failed: %s\n", SDL_GetError( ) );
+		return false;
 	}
+
+	SDL_EnableUNICODE(1);
+
+	// Fetch the video info
+	videoInfo = SDL_GetVideoInfo( );
+
+	if ( !videoInfo ){
+		LOG( "Video query failed: %s\n", SDL_GetError( ) );
+		return false;
+	}
+
+	//the flags to pass to SDL_SetVideoMode
+	videoFlags  = SDL_OPENGL;         
+	videoFlags |= SDL_GL_DOUBLEBUFFER;
+	videoFlags |= SDL_HWPALETTE;     
+	videoFlags |= SDL_RESIZABLE;     
+
+	//This checks to see if surfaces can be stored in memory 
+	if ( videoInfo->hw_available )
+		videoFlags |= SDL_HWSURFACE;
+	else
+		videoFlags |= SDL_SWSURFACE;
+
+	// This checks if hardware blits can be done 
+	if ( videoInfo->blit_hw )
+		videoFlags |= SDL_HWACCEL;
+	
+	//Sets up OpenGL double buffering
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+	// Fullscreen?
+	if(fullscreen){
+		videoFlags |= SDL_FULLSCREEN;
+	}
+
+	// get a SDL surface 
+
+	surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
+
+	// Verify there is a surface 
+	if ( !surface ){
+		LOG( "Video mode set failed: %s\n", SDL_GetError( ) );
+		return false;
+	}
+
+	//Set the window caption
+	SDL_WM_SetCaption( "BSOD Client", NULL );
+
 
 	//initialize OpenGL 
 	if(!initGL( )){
@@ -270,19 +255,10 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 
 	//resize the initial window   
-	if(bCGLCompat) 	resizeWindow( 640, 480 );
-	else			resizeWindow( sizeX, sizeY );
+	resizeWindow( sizeX, sizeY );
 	
-	if(bCGLCompat){
-		LOG("Using ClusterGL compatability mode!\n");
-	}
-
-	if(!bHeadless){
-		LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
-	}else{
-		LOG("Running headless!\n");
-	}
-
+	LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
+	
 	return true;
 }
 
@@ -319,10 +295,10 @@ void App::utilEventLoop(){
 			    resizeWindow( event.resize.w, event.resize.h );
 			    break;
 			case SDL_KEYDOWN:
-			    mUIRoot.event(EVENT_KEY_DOWN, event.key.keysym.sym, iMouseX, iMouseY);
+			    //mUIRoot.event(EVENT_KEY_DOWN, event.key.keysym.sym, iMouseX, iMouseY);
 			    break;
 			case SDL_KEYUP:
-			    mUIRoot.event(EVENT_KEY_UP, event.key.keysym.sym, iMouseX, iMouseY);
+			    //mUIRoot.event(EVENT_KEY_UP, event.key.keysym.sym, iMouseX, iMouseY);
 			    break;
 			case SDL_QUIT:
 			    /* handle quit requests */
@@ -330,14 +306,16 @@ void App::utilEventLoop(){
 			    break;
 			
 			case SDL_MOUSEBUTTONDOWN:
-				onMouseEvent(event.button.button, EVENT_MOUSE_DOWN);
-				mUIRoot.event(EVENT_MOUSE_DOWN, event.button.button, iMouseX, iMouseY);
+				//onMouseEvent(event.button.button, EVENT_MOUSE_DOWN);
+				//mUIRoot.event(EVENT_MOUSE_DOWN, event.button.button, iMouseX, iMouseY);
+				beginDrag();
 				break;	
 				
 			case SDL_MOUSEBUTTONUP:
-				onMouseEvent(event.button.button, EVENT_MOUSE_UP);
-				mUIRoot.event(EVENT_MOUSE_UP, event.button.button, iMouseX, iMouseY);
-				mUIRoot.event(EVENT_MOUSE_CLICK, event.button.button, iMouseX, iMouseY);
+				//onMouseEvent(event.button.button, EVENT_MOUSE_UP);
+				//mUIRoot.event(EVENT_MOUSE_UP, event.button.button, iMouseX, iMouseY);
+				//mUIRoot.event(EVENT_MOUSE_CLICK, event.button.button, iMouseX, iMouseY);
+				endDrag();
 				break;	
 			
 			default:
@@ -472,3 +450,41 @@ Vector2 App::utilProject(float x, float y, float z){
 	return Vector2(pX, SCREEN_HEIGHT - pY);
 }
 
+/*********************************************
+				Draws the plane
+**********************************************/
+void App::utilPlane(float x, float y, float z){
+
+	x/=2; y/=2; z/=2;
+		
+	glEnable(GL_TEXTURE_2D);
+
+	glBegin(GL_QUADS);
+	// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);					// Normal Pointing Towards Viewer
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-x, -y,  z);	// Point 1 (Front)
+		glTexCoord2f(1.0f, 0.0f); glVertex3f( x, -y,  z);	// Point 2 (Front)
+		glTexCoord2f(1.0f, -1.0f); glVertex3f( x,  y,  z);	// Point 3 (Front)
+		glTexCoord2f(0.0f, -1.0f); glVertex3f(-x,  y,  z);	// Point 4 (Front)		
+	glEnd();								// Done Drawing Quads
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(0.25f, 0.25f, 0.25f);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	glBegin(GL_QUADS);
+	// Front Face
+		glNormal3f( 0.0f, 0.0f, 1.0f);					// Normal Pointing Towards Viewer
+		glVertex3f(-x, -y,  z);	// Point 1 (Front)
+		glVertex3f( x, -y,  z);	// Point 2 (Front)
+		glVertex3f( x,  y,  z);	// Point 3 (Front)
+		glVertex3f(-x,  y,  z);	// Point 4 (Front)		
+	glEnd();								// Done Drawing Quads
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+
+	
+}

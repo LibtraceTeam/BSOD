@@ -1,9 +1,10 @@
-#include "main.h"
+/*******************************************************************************
+							BSOD2 Client - ps_shaders.h
+							
+ This is a vertex-shader based particle system. TODO: Rip this apart!
+*******************************************************************************/
 
 #ifdef ENABLE_PS_SHADERS
-
-#ifndef PS_SHADERS
-#define PS_SHADERS
 
 /*********************************************
  A particle system that uses vertex+pixel
@@ -36,5 +37,4 @@ public:
 	void delColor(Color c){}
 };
 
-#endif
 #endif

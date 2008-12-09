@@ -1,4 +1,4 @@
-#include "ps_shaders.h"
+#include "main.h"
 
 #ifdef ENABLE_PS_SHADERS
 

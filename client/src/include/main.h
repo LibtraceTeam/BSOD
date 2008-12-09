@@ -116,6 +116,11 @@ public:
 
 	//Initial setup
 	int init(App *a, int argc, char **argv);
+	
+	//update.cpp
+	bool particleUpdateThread();
+	SDL_Thread *mParticleThread;
+	SDL_mutex  *mPartLock;
 
 	//font.cpp	
 	void writeText(int x, int y, const char *fmt, ...);

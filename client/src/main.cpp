@@ -2,6 +2,8 @@
 
 App *App::mSingleton = NULL;
 
+extern int ParticleUpdateWrapper(void *unused);
+
 /*********************************************
 		Application init
 **********************************************/
@@ -55,7 +57,7 @@ int App::init(App *a, int argc, char **argv){
 		utilShutdown(1);
 	}
 
-	
+	//Input
 	keyInit();
 		
 	//Texturing
@@ -64,29 +66,42 @@ int App::init(App *a, int argc, char **argv){
 	//font
 	initFont();
 		
+	//Time etc
 	iFPS = 0;
-	fTimeScale = iFPS / 1000;
-	
-	initParticleSystem();
-
-	
+	fTimeScale = iFPS / 1000;	
 	fZoom = 0.0f;
 	iTime = 0;
-		
+	
+	//Particle system
+	initParticleSystem();
+			
 	//Rotataion
 	for(int i=0;i<3;i++){
 		fRot[i] = 0.0f;
 	}	
 	fRot[0] = 20;
 		
+	//Flow manager
 	mFlowMgr = new FlowManager();
 	mFlowMgr->init();
 		
-	camSetPos(0, 0, 27);//22
+	//Camera
+	camSetPos(0, 0, SLAB_SIZE);//22
 	camLookAt(0,0,0); //y= -2.5
-			
-	iLastFrameTicks = SDL_GetTicks();
+	endDrag();
 	
+	//Particle thread
+	mPartLock = SDL_CreateMutex();
+	mParticleThread = SDL_CreateThread(ParticleUpdateWrapper, NULL);
+	if ( mParticleThread == NULL ) {
+		ERR("Unable to create thread: %s\n", SDL_GetError());
+		return 0;
+	}
+
+			
+	//Current time
+	iLastFrameTicks = SDL_GetTicks();
+		
 	//At this point, all the setup should be done
 	LOG("Loaded, about to go to eventLoop\n");	
 

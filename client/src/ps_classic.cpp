@@ -1,5 +1,18 @@
 #include "main.h"
 
+
+
+struct ParticleSort{
+    public: bool operator() (Particle *a, Particle *b){
+		return (a->r + a->g + a->b) > (b->r + b->g + b->b);
+    }
+};
+
+
+
+/*******************************************************************************
+							PointSprites
+*******************************************************************************/
 void PSSprites::renderAll(){
 	glColor3f(1,1,1);	
 	glEnable(GL_TEXTURE_2D);	
@@ -17,6 +30,9 @@ void PSSprites::renderAll(){
 
 	float lastSize = 0.0f;
 	float lastColor[3] = {0,0,0};
+	
+	//int inactive = 0;
+	iLastColorChanges = 0;
 
 	glBegin( GL_POINTS );
 	
@@ -25,6 +41,7 @@ void PSSprites::renderAll(){
 		Particle *p = mActive[i];
 	
 		if(!p->active){
+			//inactive++;
 			continue;
 		}
 	
@@ -37,11 +54,14 @@ void PSSprites::renderAll(){
 			glBegin(GL_POINTS);
 		}
 		
+		
 		if(lastColor[0] != p->r || lastColor[1] != p->g || lastColor[2] != p->b){
 			glColor4f(p->r, p->g, p->b, 1.0f);	
 			lastColor[0] = p->r;
 			lastColor[1] = p->g;
 			lastColor[2] = p->b;
+			
+			iLastColorChanges++;
 		}
 		glVertex3f(p->x, p->y, p->z);
 	
@@ -51,15 +71,18 @@ void PSSprites::renderAll(){
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
 	//glEnable(GL_DEPTH_TEST);
+		
 }
 
 void PSSprites::render(){
 	
 	if(bNeedRecompile){	
+		SDL_mutexP(App::S()->mPartLock);
 		glNewList(mDisplayList,GL_COMPILE);
 		renderAll();	
 		glEndList();	
 		bNeedRecompile = false;			
+		SDL_mutexV(App::S()->mPartLock);
 	}	
 	glCallList(mDisplayList);		
 
@@ -103,11 +126,12 @@ bool PSSprites::init(){
 	return PSClassic::init();
 }
 
-
-/*********************************************
-		Particle system class
-**********************************************/
+/*******************************************************************************
+							Classic particle system
+*******************************************************************************/
 bool PSClassic::init(){
+
+	iLastColorChanges = 0;
 
 	while(!mFree.empty()){
 		mFree.pop();
@@ -178,6 +202,12 @@ void PSClassic::update(){
 	}
 	
 	iNumActive = (int)mActive.size();
+	
+	//Sort by color if needed
+	//LOG("%d\n", iLastColorChanges);
+	//if(iLastColorChanges > 100){
+	//	sort(mActive.begin(), mActive.end(), ParticleSort() ); 
+	//}
 	
 	bNeedRecompile = true;
 }

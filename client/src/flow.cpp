@@ -93,8 +93,10 @@ Flow *FlowManager::addFlow(int flowID, Vector2 p1, Vector2 p2, float speed, floa
 	bool negative = speed < 0.0f;	
 	Flow *f = getFreeFlow();
 	
-	setupParams(f, &f->mParamsStart, p1, p2, speed, size, negative);
-	//setupParams(f, &f->mParamsEnd, p1, p2, speed, size, !negative);
+	//HACK! We invert it here. Probably should fix this higher up
+	setupParams(f, &f->mParamsStart, p1, p2, -speed, size, !negative);
+		
+	//setupParams(f, &f->mParamsEnd, p1, p2, speed, size, negative);
 	
 	//LOG("Flow: Start at %f/, end at %f/\n", f->mParamsStart.mPos.x, f->mParamsEnd.mPos.x);
 	

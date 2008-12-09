@@ -1,22 +1,39 @@
 #include "main.h"
 
 
-#define CAMERA_SPEED 0.5f
 
-float infinity = std::numeric_limits<float>::infinity();
+/*********************************************
+		Updates the particle logic
+ This is in a seperate thread so we can use
+ more CPUs :)
+**********************************************/
+int ParticleUpdateWrapper(void *unused){
 
-int flowCount = 0; //for testing
+	while(App::S()->particleUpdateThread()){ }
+	return 0;
+}
 
-//Camera movement
-void App::camMove(float x, float y, float z){
-	fCameraX += x; 	fCameraY += y; 	fCameraZ += z;	
+bool App::particleUpdateThread(){
+
+	//Throw away any bad frames
+	if(fTimeScale == infinity || fTimeScale == 0.0f){
+		return true;
+	}
+	
+	//TODO: This will wait the same amount of time irregardless of how long
+	//the actual logic update takes. We should calculate this properly...
+	usleep(PARTICLE_FPS * 1024 * 1024);
+	
+	//Get the mutex and update the particle logic
+	SDL_mutexP(mPartLock);		
+		mParticleSystem->update();			
+	SDL_mutexV(mPartLock);		
+			
+	return true;	
+	
 }
-void App::camSetPos(float x, float y, float z){
-	fCameraX = x; 	fCameraY = y; 	fCameraZ = z;	
-}
-void App::camLookAt(float x, float y, float z){
-	fLookX = x; fLookY = y; fLookZ = z;
-}
+
+
 
 /*********************************************
 		per-frame logic goes here
@@ -32,19 +49,6 @@ void App::updateMain(){
 	}
 	
 	float fCamSpeed = fTimeScale * 4.0f;
-		
-	//Update particle timer	
-	fNextParticleUpdate -= fTimeScale;
-	
-	//Update particle system if necessary
-	if(fNextParticleUpdate < 0.0f){
-		mParticleSystem->update();
-		fNextParticleUpdate = PARTICLE_FPS;
-	
-		if(isConnected()){
-			updateSocket();
-		}	
-	}			
 	
 	if(bDrag){
 	
@@ -62,9 +66,17 @@ void App::updateMain(){
 		dragStart = Vector2(iMouseX, iMouseY);
 		
 	}
+	
+
+	if(isConnected()){
+		updateSocket();
+	}
 }
 
 
+/*********************************************
+		Camera rotate
+**********************************************/
 void App::beginDrag(){
 	dragStart = Vector2(iMouseX, iMouseY);
 	bDrag = true;
@@ -74,3 +86,19 @@ void App::endDrag(){
 	dragStart = Vector2(0, 0);
 	bDrag = false;
 }
+
+
+
+/*********************************************
+		Camera movement
+**********************************************/
+void App::camMove(float x, float y, float z){
+	fCameraX += x; 	fCameraY += y; 	fCameraZ += z;	
+}
+void App::camSetPos(float x, float y, float z){
+	fCameraX = x; 	fCameraY = y; 	fCameraZ = z;	
+}
+void App::camLookAt(float x, float y, float z){
+	fLookX = x; fLookY = y; fLookZ = z;
+}
+

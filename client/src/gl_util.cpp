@@ -66,13 +66,19 @@ void App::utilEndRender(){
 void App::utilShutdown( int returnCode )
 {
 	LOG("Shutting down with returnCode %d\n", returnCode);
+
+	//Get rid of the particle updating thread	
+	SDL_KillThread(mParticleThread);
 	
+	//Terminate the network connection
 	closeSocket();
     
 	LOG("Shutting down PS (of type %d)\n", mParticleSystem->getType());
 		   
+	//Shut down the particle system
 	if(mParticleSystem){
 		mParticleSystem->shutdown();
+		delete mParticleSystem;
 	}
 	
 	LOG("Freeing textures\n");
@@ -80,7 +86,9 @@ void App::utilShutdown( int returnCode )
 	//Free textures
 	texShutdown();
 	
-	delete mParticleSystem;
+	//Clean up some other components
+	mFlowMgr->shutdown();
+	delete mFlowMgr;
 	
 	LOG("All done, about to quit!\n");
 	

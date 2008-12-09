@@ -36,7 +36,12 @@
 
 //Pos defines
 #define MAX_FLOWS 1024
-#define SLAB_SIZE 20
+#define SLAB_SIZE 40
 
 //Toggles between std::map and unordered_map
 #define USE_TR1
+
+
+#define CAMERA_SPEED 0.5f
+
+const float infinity = std::numeric_limits<float>::infinity();

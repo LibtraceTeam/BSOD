@@ -30,6 +30,7 @@ public:
 class PSClassic : public IParticleSystem{
 protected:
 	int iNumActive;
+	int iLastColorChanges;
 	
 	//particle lists
 	Particle mParticles[MAX_PARTICLES];	

@@ -21,6 +21,7 @@
 #include <stack>
 #include <cassert>
 #include <limits>
+#include <algorithm>
 
 using std::string;
 using std::vector;

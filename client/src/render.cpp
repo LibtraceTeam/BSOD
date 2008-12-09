@@ -1,7 +1,6 @@
 #include "main.h"
 
 float fTimeScale = 0.0f;
-extern float infinity;
 
 // GL_ARB_point_parameters
 PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB  = NULL;

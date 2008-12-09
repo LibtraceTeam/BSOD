@@ -70,6 +70,9 @@ void FlowManager::update(float currentTime, float timeDelta){
 **********************************************/
 void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 start, Vector3 end){
 
+	start = start * 2;
+	end = end * 2;
+
 	//Turn the SDLNet structs into in_addrs for later
 	struct in_addr ip1, ip2;
 	ip1.s_addr = src.host;

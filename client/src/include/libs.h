@@ -73,7 +73,7 @@ using std::map;
 				GUI
 **********************************************/
 namespace GUI{
-	#include "../../lib/openglui/GUI/GUIUtils.h"
+	#include "OpenGLUI.h"
 }
 
 

@@ -30,8 +30,9 @@
 #define SCREEN_BPP     32
 #define SCREEN_FULLSCREEN App::S()->bFullscreen
 
-#define PI 3.14159265
-
+#ifndef PI
+	#define PI 3.14159265
+#endif
 
 
 //Pos defines

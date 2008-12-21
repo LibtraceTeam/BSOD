@@ -26,14 +26,19 @@ void PSSprites::renderAll(){
 		tex->bind();		
 	}
 	
+	int count = 0;
+	int bad = 0;
+	
 	//Set GL state
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
 	glEnable(GL_BLEND);							
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
 	
 	//Set a default size here
-	glPointSize(App::S()->fParticleSizeScale * 2); 	
+	glPointSize(App::S()->fParticleSizeScale * 3); 	
+	
+	//glEnableClientState(GL_VERTEX_ARRAY);
 	
 	//And begin drawing
 	glBegin( GL_POINTS );
@@ -42,32 +47,36 @@ void PSSprites::renderAll(){
 	
 	//Iterate over all the different colors
 	for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){	
-	
+		
 		//The list of particles for this color
 		vector<Particle *> *list = itr->second;	
+		
+		//Make sure we've got at least one particle
+		if(list->size() == 0) {
+			bad++;
+			continue; 
+		}
+		
+		Particle *first = (*list)[0];
 		
 		//Get the color and set it
 		Color c = mColorLookup[itr->first];
 		glColor3f(c.r, c.g, c.b);
+				
+		//glVertexPointer(3, GL_FLOAT, sizeof(Particle), &first->x);
+		//glDrawArrays(GL_POINTS, 0, (int)list->size());
 					
 		//Go through the entire list	
 		for(int i=0;i<(int)list->size();i++){			
 			Particle *p = (*list)[i];		
 							
-			//if(!p->active){
-			//	continue;
-			//}
-	
-			/*
-			if(p->size != lastSize){
-				glEnd();
-				glPointSize(p->size); //hack!	
-				//glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, p->size );	
-				lastSize = p->size;
-				glBegin(GL_POINTS);
-			}		
-			*/	
+			if(!p->active){
+				bad++;
+				continue;
+			}				
+			
 			glVertex3f(p->x, p->y, p->z);
+			count++;
 		}	
 	}
 	
@@ -77,19 +86,19 @@ void PSSprites::renderAll(){
 	//And clean up
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
-	//glEnable(GL_DEPTH_TEST);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	
+	iNumActive = count;
 			
 }
 
 void PSSprites::render(){
 	
 	if(bNeedRecompile){	
-		SDL_mutexP(App::S()->mPartLock);
 		glNewList(mDisplayList,GL_COMPILE);
 		renderAll();	
 		glEndList();	
 		bNeedRecompile = false;			
-		SDL_mutexV(App::S()->mPartLock);
 	}	
 	glCallList(mDisplayList);		
 
@@ -375,6 +384,11 @@ void PSClassic::del(float col, int i){
 	mList->pop_back();
 		
 	p->active = false;
+	
+	//Horrible hack - this means that if an active one gets rendered by
+	//glDrawArrays (that doesn't check for p->active), it'll be nowhere to be
+	//seen. This situation probably shouldn't happen, but just to be safe...
+	p->x = -99999; p->y = -99999; p->z = -99999;
 			
 	//add to the free list
 	mFree.push(p);	

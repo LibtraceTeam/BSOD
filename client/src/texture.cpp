@@ -75,7 +75,7 @@ Texture *App::texLoad(string name, int flags){
 	
 	if(flags != TEXTURE_NO_GL){	
 		tex->mData = ilGetData();
-		tex->iGLID = ilutGLBindMipmaps();
+		tex->iGLID = ilutGLBindTexImage(); //ilutGLBindMipmaps();
 		
 		LOG("(got id %d)\n", tex->iGLID);	    
 	}	

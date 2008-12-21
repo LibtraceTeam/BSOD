@@ -36,7 +36,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 
 	//hack! We should only set this if the camera has moved...
 	bNeedProject = true; 
-	
+		
 	//Update all visable flows
 	for(int i=0;i<(int)mViewFlows.size();i++){
 
@@ -44,9 +44,9 @@ void FlowManager::update(float currentTime, float timeDelta){
 			continue;
 		}
 	
-		if(mViewFlows[i]->hide){
-			continue;
-		}
+		//if(mViewFlows[i]->hide){
+		//	continue;
+		//}
 				
 		if(mViewFlows[i]->shade > 0.0f){
 			mViewFlows[i]->shade -= timeDelta * 0.1f;
@@ -114,7 +114,7 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 		
 	Flow *f = getFlowByID(flowID);
 	
-	if(f || !type){
+	if(f && type){
 		
 		//Figure out size multiplier
 		//NOTE: We set base size to 1.0, so this is actually the *actual* size
@@ -132,7 +132,7 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 						
 		//And add the particle
 		PSParams *p = &f->mParamsStart;
-		//if(rtt > 0)		p = &f->mParamsStart;
+		//if(rtt > 0)	p = &f->mParamsStart;
 		//else			p = &f->mParamsEnd;
 					
 		if(!p){
@@ -271,6 +271,8 @@ void FlowManager::updateList(){
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glPointSize(2.0f);
+	
+	
 	glBegin(GL_POINTS);	
 	
 	
@@ -300,10 +302,12 @@ void FlowManager::updateList(){
 		
 	}
 	glEnd();
+	
 		
 	glDisable(GL_BLEND);
-	
+		
 	glEndList();
+	
 
 }
 
@@ -319,7 +323,7 @@ void FlowManager::render(){
 	
 	if(fRenderTimer > 1.5f){
 		updateList(); //rerender
-		fRenderTimer = 0.5f;
+		fRenderTimer = 0.0f;
 	}
 	
 	//Call the existing list

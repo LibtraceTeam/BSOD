@@ -2,37 +2,6 @@
 
 
 
-/*********************************************
-		Updates the particle logic
- This is in a seperate thread so we can use
- more CPUs :)
-**********************************************/
-int ParticleUpdateWrapper(void *unused){
-
-	while(App::S()->particleUpdateThread()){ }
-	return 0;
-}
-
-bool App::particleUpdateThread(){
-
-	//Throw away any bad frames
-	if(fTimeScale == infinity || fTimeScale == 0.0f){
-		return true;
-	}
-	
-	//TODO: This will wait the same amount of time irregardless of how long
-	//the actual logic update takes. We should calculate this properly...
-	usleep(PARTICLE_FPS * 1024 * 1024);
-	
-	//Get the mutex and update the particle logic
-	SDL_mutexP(mPartLock);		
-		mParticleSystem->update();			
-	SDL_mutexV(mPartLock);		
-			
-	return true;	
-	
-}
-
 
 
 /*********************************************
@@ -70,6 +39,14 @@ void App::updateMain(){
 
 	if(isConnected()){
 		updateSocket();
+	}
+	
+	fNextParticleUpdate -= fTimeScale;
+	
+	if(fNextParticleUpdate <= 0.0f){
+		mParticleSystem->update();		
+		mFlowMgr->update(0.0f, fTimeScale);
+		fNextParticleUpdate = PARTICLE_FPS;
 	}
 }
 

@@ -89,16 +89,7 @@ int App::init(App *a, int argc, char **argv){
 	camSetPos(0, 0, SLAB_SIZE);//22
 	camLookAt(0,0,0); //y= -2.5
 	endDrag();
-	
-	//Particle thread
-	mPartLock = SDL_CreateMutex();
-	mParticleThread = SDL_CreateThread(ParticleUpdateWrapper, NULL);
-	if ( mParticleThread == NULL ) {
-		ERR("Unable to create thread: %s\n", SDL_GetError());
-		return 0;
-	}
-
-			
+				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
 		

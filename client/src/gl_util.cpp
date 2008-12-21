@@ -66,9 +66,6 @@ void App::utilEndRender(){
 void App::utilShutdown( int returnCode )
 {
 	LOG("Shutting down with returnCode %d\n", returnCode);
-
-	//Get rid of the particle updating thread	
-	SDL_KillThread(mParticleThread);
 	
 	//Terminate the network connection
 	closeSocket();
@@ -466,6 +463,8 @@ void App::utilPlane(float x, float y, float z){
 	x/=2; y/=2; z/=2;
 		
 	glEnable(GL_TEXTURE_2D);
+	
+	glColor3f(1,1,1);
 
 	glBegin(GL_QUADS);
 	// Front Face

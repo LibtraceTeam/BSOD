@@ -158,6 +158,7 @@ public:
 	Vector2 dragStart;
 	bool bDrag;
 			
+	//Stats
 	int getFPS(){return iFPS;}
 	
 	//This contains most of the flow placement logic

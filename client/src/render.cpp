@@ -30,7 +30,7 @@ void App::renderMain(){
 	calcFps();
 
 	utilBeginRender();
-	
+		
 	//position the GL camera
 	gluLookAt(	fCameraX, 		fCameraY, 		fCameraZ, 
 				fLookX,			fLookY,			fLookZ, 
@@ -46,7 +46,7 @@ void App::renderMain(){
 	
 	mFlowMgr->render();	
 	mParticleSystem->render();
-							
+								
 	utilEndRender();
 }
 
@@ -84,8 +84,10 @@ void App::render2D(){
 	glShadeModel(GL_FLAT);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	drawStatusBar();	
-		
 	//Render the GUI
+	//renderGUI();
 	
+	
+	drawStatusBar();	
+			
 }

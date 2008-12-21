@@ -8,8 +8,7 @@ struct ParticleSort{
     }
 };
 
-
-
+#define MAX_SIZE 15.0f
 
 
 /*******************************************************************************
@@ -35,8 +34,17 @@ void PSSprites::renderAll(){
 	glEnable(GL_BLEND);							
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
 	
+	
+	
+	
+	float scale = (1.0f/(float)iNumActive) * 150000;	
+	scale *= App::S()->fParticleSizeScale;	
+	if(scale < 1.0f){ scale = 1.0f; }
+		
+		
+		
 	//Set a default size here
-	glPointSize(App::S()->fParticleSizeScale * 3); 	
+	glPointSize(scale); 	
 	
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	
@@ -114,8 +122,8 @@ bool PSSprites::init(){
 	float maxSize = 0.0f;
 	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
 
-	if( maxSize > 5.0f * App::S()->fParticleSizeScale)
-		maxSize = 5.0f * App::S()->fParticleSizeScale;
+	if( maxSize > MAX_SIZE * App::S()->fParticleSizeScale)
+		maxSize = MAX_SIZE * App::S()->fParticleSizeScale;
 			
 	glPointSize( maxSize );
 	glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );

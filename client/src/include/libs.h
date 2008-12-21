@@ -69,12 +69,6 @@ using std::map;
 #include <SDL/SDL_mutex.h>
 
 
-/*********************************************
-				GUI
-**********************************************/
-namespace GUI{
-	#include "OpenGLUI.h"
-}
 
 
 

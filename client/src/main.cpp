@@ -92,6 +92,12 @@ int App::init(App *a, int argc, char **argv){
 				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
+	
+	//GUI
+	//if(!initGUI()){
+	//	ERR("Couldn't start up the gui!\n");
+	//	utilShutdown(1);
+	//}
 		
 	//At this point, all the setup should be done
 	LOG("Loaded, about to go to eventLoop\n");	

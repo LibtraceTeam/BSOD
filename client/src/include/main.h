@@ -222,10 +222,6 @@ template<typename T> std::string toString(const T& x) {
   return oss.str();
 }
 
-//Point sprite functions
-extern PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB;
-extern PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB;
-
 
 #endif
 

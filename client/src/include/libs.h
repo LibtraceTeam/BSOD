@@ -53,10 +53,10 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
-#include <GL/glext.h> //for point_sprites
 
 
 /*********************************************
@@ -67,6 +67,14 @@ using std::map;
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
+
+
+/*********************************************
+				GUI
+**********************************************/
+namespace GUI{
+	#include "../../lib/openglui/GUI/GUIUtils.h"
+}
 
 
 

@@ -2,10 +2,6 @@
 
 float fTimeScale = 0.0f;
 
-// GL_ARB_point_parameters
-PFNGLPOINTPARAMETERFARBPROC  glPointParameterfARB  = NULL;
-PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB = NULL;
-
 /*********************************************
   Update the FPS counter, and wait if needed
 **********************************************/

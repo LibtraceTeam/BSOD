@@ -106,25 +106,10 @@ void PSSprites::render(){
 
 bool PSSprites::init(){
 
-	char *ext = (char*)glGetString( GL_EXTENSIONS );
-
-	if( strstr( ext, "GL_ARB_point_parameters" ) == NULL ){
-		LOG("GL_ARB_point_parameters extension was not found, falling back to triangles\n");
-		return false;
-	}else{	
-
-		//FIXME: Windows needs wglGetProcAddress, probably
-		glPointParameterfARB  = (PFNGLPOINTPARAMETERFARBPROC)glXGetProcAddress((byte *)"glPointParameterfARB");
-		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glXGetProcAddress((byte *)"glPointParameterfvARB");
-
-		if( !glPointParameterfARB || !glPointParameterfvARB ){
-			LOG("GL_ARB_point_parameter functions were not found, falling back to triangles\n");
-			return false;
-		}
+	if (!glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite")){
+		ERR("No point sprite support!\n");
+	  	return false;
 	}
-	
-	LOG("GL_ARB_point_parameters loaded OK\n");
-
 
 	float maxSize = 0.0f;
 	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );

@@ -270,7 +270,7 @@ void FlowManager::updateList(){
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
-	glPointSize(2.0f);
+	glPointSize(3.0f);
 	
 	
 	glBegin(GL_POINTS);	

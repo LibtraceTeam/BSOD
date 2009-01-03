@@ -64,8 +64,7 @@ void App::drawStatusBar(){
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
 	//Text
-	writeText(10, 7, "%d fps, time %d, %d particles", 
-						iFPS, iTime, mParticleSystem->getActive());	
+	writeText(10, 7, "%d fps", iFPS);	
 
 	if(fTimeScale == infinity || fTimeScale == 0.0f){
 		writeText(5, 25, "(waiting)");	   
@@ -83,11 +82,10 @@ void App::drawStatusBar(){
 void App::render2D(){
 	glShadeModel(GL_FLAT);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
+	
+	drawStatusBar();
+	
 	//Render the GUI
-	//renderGUI();
-	
-	
-	drawStatusBar();	
+	renderGUI();	
 			
 }

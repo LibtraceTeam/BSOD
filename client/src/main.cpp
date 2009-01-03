@@ -89,6 +89,9 @@ int App::init(App *a, int argc, char **argv){
 	camSetPos(0, 0, SLAB_SIZE);//22
 	camLookAt(0,0,0); //y= -2.5
 	endDrag();
+	
+	//gui
+	initGUI();
 				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();

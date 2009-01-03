@@ -103,6 +103,14 @@ class App{
 		
 	//config.cpp
 	bool loadConfig();
+	
+	//gui.cpp	
+	void initGUI();
+	void makeProtocolWindow();
+	void addProtocolEntry(string name, Color col, int index);
+	void renderGUI();
+	void processGUIEvent(SDL_Event e);
+
 			
 /*********************************************
 				Public

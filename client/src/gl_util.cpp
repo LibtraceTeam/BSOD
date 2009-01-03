@@ -282,36 +282,21 @@ void App::utilEventLoop(){
     while ( !done ){
 	   
 	    while ( SDL_PollEvent( &event ) ){
+	    
+	    	processGUIEvent(event);
+	    
 		    switch( event.type ){
-			case SDL_ACTIVEEVENT:
-			    /* Something's happend with our focus
-			     * If we lost focus or we are iconified, we
-			     * shouldn't draw the screen
-			     */
-			     
-			     /*
-			    if ( event.active.gain == 0 )
-				isActive = false;
-			    else
-				isActive = true;*/
-			    break;	
-			      
+						      
 			case SDL_VIDEORESIZE:
-			    /* handle resize event */
+			    //handle resize event
 			    surface = SDL_SetVideoMode( event.resize.w, event.resize.h, 16, videoFlags );
-			    if ( !surface )
-				{
+			    if ( !surface ){
 				    fprintf( stderr, "Could not get a surface after resize: %s\n", SDL_GetError( ) );
 				    utilShutdown( 1 );
 				}
 			    resizeWindow( event.resize.w, event.resize.h );
 			    break;
-			case SDL_KEYDOWN:
-			    //mUIRoot.event(EVENT_KEY_DOWN, event.key.keysym.sym, iMouseX, iMouseY);
-			    break;
-			case SDL_KEYUP:
-			    //mUIRoot.event(EVENT_KEY_UP, event.key.keysym.sym, iMouseX, iMouseY);
-			    break;
+			
 			case SDL_QUIT:
 			    /* handle quit requests */
 			    done = true;

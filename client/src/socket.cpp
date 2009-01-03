@@ -319,6 +319,8 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     f->bShown = true; //show by default
     
     mFlowDescriptors[id] = f;
+    
+    addProtocolEntry(name, c, id);
 }
                                 
 

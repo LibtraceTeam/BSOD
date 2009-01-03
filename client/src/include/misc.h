@@ -52,6 +52,22 @@ public:
 		return (r * 1) + (g * 10) + (b * 100);
 	}	
 	
+	//The same formatting that CEGUI uses
+	string toString(){
+		byte rb = r * 255;
+		byte gb = g * 255;
+		byte bb = b * 255;
+		
+		char buf[32];
+		sprintf(buf, "FF%s%X%s%X%s%X", 	rb < 0xF ? "0" : "", rb, 
+										gb < 0xF ? "0" : "", gb, 
+										bb < 0xF ? "0" : "", bb);
+		
+		printf("%s\n", buf);
+		
+		return string(buf);
+	}
+	
 	
 };
 

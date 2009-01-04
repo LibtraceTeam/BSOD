@@ -1,21 +1,9 @@
 #include "main.h"
 
-//Adapted from NeHe
-
-
-/*********************************************
-				Globals
-**********************************************/
-static SDL_Surface *surface; //used for the screen
-static int videoFlags;
-static int isActive = true;
-static SDL_Event event;
-
 /*********************************************
 		Begins a render cycle
 **********************************************/
 void App::utilBeginRender(){
-	//cls
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	
 	glMatrixMode(GL_PROJECTION);
@@ -30,18 +18,13 @@ void App::utilBeginRender(){
     
     glEnable(GL_DEPTH_TEST);
 	
-    	
-	///////////////////////////////////////
-	//			NOW IN 3D
-	//////////////////////////////////////
-	
+   	//Now in 3D	
 }
 
 /*********************************************
 			Ends a render cycle
 **********************************************/
 void App::utilEndRender(){
-
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -60,49 +43,11 @@ void App::utilEndRender(){
 	SDL_GL_SwapBuffers( );
 }
 
-/*********************************************
-		Exits the program, cleanup
-**********************************************/
-void App::utilShutdown( int returnCode )
-{
-	LOG("Shutting down with returnCode %d\n", returnCode);
-	
-	//Terminate the network connection
-	closeSocket();
-    
-	LOG("Shutting down PS (of type %d)\n", mParticleSystem->getType());
-		   
-	//Shut down the particle system
-	if(mParticleSystem){
-		mParticleSystem->shutdown();
-		delete mParticleSystem;
-	}
-	
-	LOG("Freeing textures\n");
-		   
-	//Free textures
-	texShutdown();
-	
-	//Clean up some other components
-	mFlowMgr->shutdown();
-	delete mFlowMgr;
-	
-	LOG("All done, about to quit!\n");
-	
-	done = true;    
-	
-    SDL_Quit( );   
-    exit( returnCode );    
-    
-    //todo: more cleanup here?    
-
-}
-
 
 /*********************************************
 		Resets viewpoint after resize event
 **********************************************/
-static int resizeWindow( int width, int height )
+int App::resizeWindow( int width, int height )
 {
 	// Height / width ration 
 	GLfloat ratio;
@@ -137,31 +82,6 @@ static int resizeWindow( int width, int height )
 }
 
 
-/*********************************************
-		Called on key-down
-**********************************************/
-void App::handleKeyEvent( SDL_keysym *keysym , int type )
-{
-	switch ( keysym->sym )
-	{
-	case SDLK_ESCAPE:
-		//ESC key was pressed 
-		utilShutdown( 0 );
-		break;
-	case SDLK_F1:
-		//Toggle fullscreen
-		SDL_WM_ToggleFullScreen( surface );
-		break;
-		
-	default:
-		break;
-	}
-		
-	keySetState(keysym->sym, type == SDL_KEYDOWN);		
-	onKeyEvent(keysym->unicode, type);		
-	
-	return;
-}
 
 
 /*********************************************
@@ -272,61 +192,6 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	LOG("Made a %d/%d window @ %d bpp\n", sizeX, sizeY, bpp );
 	
 	return true;
-}
-
-/*********************************************
-		SDL event loop
-**********************************************/
-void App::utilEventLoop(){
-
-    while ( !done ){
-	   
-	    while ( SDL_PollEvent( &event ) ){
-	    
-	    	processGUIEvent(event);
-	    
-		    switch( event.type ){
-						      
-			case SDL_VIDEORESIZE:
-			    //handle resize event
-			    surface = SDL_SetVideoMode( event.resize.w, event.resize.h, 16, videoFlags );
-			    if ( !surface ){
-				    fprintf( stderr, "Could not get a surface after resize: %s\n", SDL_GetError( ) );
-				    utilShutdown( 1 );
-				}
-			    resizeWindow( event.resize.w, event.resize.h );
-			    break;
-			
-			case SDL_QUIT:
-			    /* handle quit requests */
-			    done = true;
-			    break;
-			
-			case SDL_MOUSEBUTTONDOWN:
-				//onMouseEvent(event.button.button, EVENT_MOUSE_DOWN);
-				//mUIRoot.event(EVENT_MOUSE_DOWN, event.button.button, iMouseX, iMouseY);
-				beginDrag();
-				break;	
-				
-			case SDL_MOUSEBUTTONUP:
-				//onMouseEvent(event.button.button, EVENT_MOUSE_UP);
-				//mUIRoot.event(EVENT_MOUSE_UP, event.button.button, iMouseX, iMouseY);
-				//mUIRoot.event(EVENT_MOUSE_CLICK, event.button.button, iMouseX, iMouseY);
-				endDrag();
-				break;	
-			
-			default:
-			    break;
-			}
-		}
-
-	    /* draw the scene */
-	    if ( isActive && !done){
-			renderMain();
-			updateMain();
-		}
-	}
-	
 }
 
 

@@ -114,6 +114,44 @@ int App::init(App *a, int argc, char **argv){
 	return 0;
 }
 
+/*********************************************
+		Exits the program, cleanup
+**********************************************/
+void App::utilShutdown( int returnCode )
+{
+	LOG("Shutting down with returnCode %d\n", returnCode);
+	
+	//Terminate the network connection
+	closeSocket();
+    
+	LOG("Shutting down PS (of type %d)\n", mParticleSystem->getType());
+		   
+	//Shut down the particle system
+	if(mParticleSystem){
+		mParticleSystem->shutdown();
+		delete mParticleSystem;
+	}
+	
+	LOG("Freeing textures\n");
+		   
+	//Free textures
+	texShutdown();
+	
+	//Clean up some other components
+	mFlowMgr->shutdown();
+	delete mFlowMgr;
+	
+	LOG("All done, about to quit!\n");
+	
+	done = true;    
+	
+    SDL_Quit( );   
+    exit( returnCode );    
+    
+    //todo: more cleanup here?    
+
+}
+
 
 /*********************************************
 				Entry

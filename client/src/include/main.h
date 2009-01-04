@@ -46,11 +46,14 @@ class App{
 
 	//gl_util.cpp
 	bool done;
+	SDL_Surface *surface; //used for the screen
+	int videoFlags;
+	
 	bool utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen);
-	void utilEventLoop();
 	void utilBeginRender();
 	void utilEndRender();
 	void calculateMousePoint();
+	int resizeWindow(int h, int w);
 	
 	
 	//Render.cpp
@@ -68,13 +71,13 @@ class App{
 	void keyInit();
 	void keySetState(int code, bool pressed);
 	bool keyDown(int code);
-	void onKeyEvent(int code, int eventType);
 	bool mouseDown(int button){return bMouse[button];}
 	void onMouseEvent(int code, int eventType);
 	void handleKeyEvent( SDL_keysym *keysym , int type );
 
 	//Update.cpp
 	void updateMain();
+	void utilEventLoop();
 	
 	//Font.cpp
 	void initFont();
@@ -107,9 +110,10 @@ class App{
 	//gui.cpp	
 	void initGUI();
 	void makeProtocolWindow();
+	void makeBottomButtons();
 	void addProtocolEntry(string name, Color col, int index);
 	void renderGUI();
-	void processGUIEvent(SDL_Event e);
+	bool processGUIEvent(SDL_Event e);
 
 			
 /*********************************************

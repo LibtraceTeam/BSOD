@@ -1,61 +1,40 @@
+//Main CEGUI header. For some annoying reason we need to include it here
 #include "CEGUI.h"
 
+//App header now
 #include "main.h"
 
+//If we include this above main.h, then GLEW gets confused as gl.h is pulled in 
+//before glew.h. What a mess...
 #include "RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+
+//These are apparently not included (properly) by CEGUI.h
 #include "CEGUIDefaultResourceProvider.h"
 #include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
+//Only for this file...
 using namespace CEGUI;
 
 
+/*********************************************
+	CEGUI components**********************************************/
 OpenGLRenderer*mGUI = NULL;
 DefaultWindow *root = NULL;
 WindowManager *winMgr = NULL;
 FrameWindow *mProtoWindow = NULL;
 
-void handle_mouse_down(Uint8 button)
-{
-switch ( button )
-	{
-	// handle real mouse buttons
-	case SDL_BUTTON_LEFT:
-		CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::LeftButton);
-		break;
-	case SDL_BUTTON_MIDDLE:
-		CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::MiddleButton);
-		break;
-	case SDL_BUTTON_RIGHT:
-		CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::RightButton);
-		break;
-	
-	// handle the mouse wheel
-	case SDL_BUTTON_WHEELDOWN:
-		CEGUI::System::getSingleton().injectMouseWheelChange( -1 );
-		break;
-	case SDL_BUTTON_WHEELUP:
-		CEGUI::System::getSingleton().injectMouseWheelChange( +1 );
-		break;
-	}
-}
+//Globals. Stolen from:
+//http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_SDL_and_OpenGL
+bool handle_mouse_down(Uint8 button);
+bool handle_mouse_up(Uint8 button);
 
-void handle_mouse_up(Uint8 button)
-{
-switch ( button )
-	{
-	case SDL_BUTTON_LEFT:
-		CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::LeftButton);
-		break;
-	case SDL_BUTTON_MIDDLE:
-		CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::MiddleButton);
-		break;
-	case SDL_BUTTON_RIGHT:
-		CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::RightButton);
-		break;
-	}
-}
 
-void App::processGUIEvent(SDL_Event e){
+/*********************************************
+	Called by the SDL event loop to pass
+	events off to CEGUI**********************************************/
+bool App::processGUIEvent(SDL_Event e){
+
+	bool handled = false;
 	    
     switch( e.type ){
 				      
@@ -65,20 +44,14 @@ void App::processGUIEvent(SDL_Event e){
 										e.motion.x,e.motion.y );
 		break;
 
-		// mouse down handler
 	case SDL_MOUSEBUTTONDOWN:
-		// let a special function handle the mouse button down event
-		handle_mouse_down(e.button.button);
+		handled = handle_mouse_down(e.button.button);
 		break;
 
-		// mouse up handler
 	case SDL_MOUSEBUTTONUP:
-		// let a special function handle the mouse button up event
-		handle_mouse_up(e.button.button);
+		handled = handle_mouse_up(e.button.button);
 		break;
-
-
-		// key down
+		
 	case SDL_KEYDOWN:
 		// to tell CEGUI that a key was pressed, we inject the scancode.
 		CEGUI::System::getSingleton().injectKeyDown(e.key.keysym.scancode);
@@ -90,18 +63,19 @@ void App::processGUIEvent(SDL_Event e){
 		}
 		break;
 
-		// key up
 	case SDL_KEYUP:
 		// like before we inject the scancode directly.
 		CEGUI::System::getSingleton().injectKeyUp(e.key.keysym.scancode);
 		break;
 	}
+	
+	return handled;
 }
 
 
 
 /*********************************************
-				CEGUI**********************************************/
+		CEGUI setup - create the UI**********************************************/
 void App::initGUI(){
 
 	//Set some SDL stuff to make the GUI work nicely
@@ -151,38 +125,20 @@ void App::initGUI(){
     root = (DefaultWindow*)winMgr->createWindow("DefaultWindow", "Root");
     System::getSingleton().setGUISheet(root); 
     		
-	//Create the buttons down the bottom of the screen
-	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button1"));
-    root->addChildWindow(btn);
-    btn->setText("Servers");
-    btn->setPosition(UVector2(cegui_reldim(0.01f), cegui_reldim( 0.95f)));
-    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
-    btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
-    btn->setAlwaysOnTop(true);	
-    
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button2"));
-    root->addChildWindow(btn);
-    btn->setText("Protocols");
-    btn->setPosition(UVector2(cegui_reldim(0.12f), cegui_reldim( 0.95f)));
-    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
-    btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
-    btn->setAlwaysOnTop(true);	
-    
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button3"));
-    root->addChildWindow(btn);
-    btn->setText("Options");
-    btn->setPosition(UVector2(cegui_reldim(0.23f), cegui_reldim( 0.95f)));
-    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
-    btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
-    btn->setAlwaysOnTop(true);	
+    		
+    		
+   	//Create the main menu buttons
+   	makeBottomButtons();
 		
+	//Create the protcol toggle window
 	makeProtocolWindow();
 
 }
 
+
+
+/*********************************************
+  Adds a named checkbox to the protocol wnd**********************************************/
 void App::addProtocolEntry(string name, Color col, int index){
 	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "TextWindow/CB" + toString(index));
 	mProtoWindow->addChildWindow(cb);
@@ -201,6 +157,41 @@ void App::addProtocolEntry(string name, Color col, int index){
 	//cb->subscribeEvent(Checkbox::EventCheckStateChanged, &formatChangedHandler);
 }
 
+
+/*********************************************
+	  Make the buttons down the bottom
+	  of the screen.**********************************************/
+void App::makeBottomButtons(){
+ 		
+	//Create the buttons down the bottom of the screen
+	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button1"));
+    root->addChildWindow(btn);
+    btn->setText("Servers");
+    btn->setPosition(UVector2(cegui_reldim(0.01f), cegui_reldim( 0.95f)));
+    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
+    btn->setAlpha(0.9f);
+    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+     
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button2"));
+    root->addChildWindow(btn);
+    btn->setText("Protocols");
+    btn->setPosition(UVector2(cegui_reldim(0.12f), cegui_reldim( 0.95f)));
+    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
+    btn->setAlpha(0.9f);
+    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button3"));
+    root->addChildWindow(btn);
+    btn->setText("Options");
+    btn->setPosition(UVector2(cegui_reldim(0.23f), cegui_reldim( 0.95f)));
+    btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
+    btn->setAlpha(0.9f);
+    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+}
+
+
+/*********************************************
+	Creates the protocol toggle window**********************************************/
 void App::makeProtocolWindow(){
 	          
     mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "Demo Window");
@@ -236,6 +227,63 @@ void App::makeProtocolWindow(){
 }
 
 
+/*********************************************
+	Called as part of render2D**********************************************/
 void App::renderGUI(){
 	CEGUI::System::getSingleton().renderGUI();
+}
+
+
+
+
+
+
+
+
+/*********************************************
+	SDL mouse event translation stuff**********************************************/
+bool handle_mouse_down(Uint8 button)
+{
+	bool ret = false;
+switch ( button )
+	{
+	// handle real mouse buttons
+	case SDL_BUTTON_LEFT:
+		ret = CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::LeftButton);
+		break;
+	case SDL_BUTTON_MIDDLE:
+		ret = CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::MiddleButton);
+		break;
+	case SDL_BUTTON_RIGHT:
+		ret = CEGUI::System::getSingleton().injectMouseButtonDown(CEGUI::RightButton);
+		break;
+	
+	// handle the mouse wheel
+	case SDL_BUTTON_WHEELDOWN:
+		ret = CEGUI::System::getSingleton().injectMouseWheelChange( -1 );
+		break;
+	case SDL_BUTTON_WHEELUP:
+		ret = CEGUI::System::getSingleton().injectMouseWheelChange( +1 );
+		break;
+	}
+	return ret;
+}
+
+bool handle_mouse_up(Uint8 button)
+{
+	bool ret = false; 
+switch ( button )
+	{
+	case SDL_BUTTON_LEFT:
+		ret = CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::LeftButton);
+		break;
+	case SDL_BUTTON_MIDDLE:
+		ret = CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::MiddleButton);
+		break;
+	case SDL_BUTTON_RIGHT:
+		ret = CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::RightButton);
+		break;
+	}
+	
+	return ret;
 }

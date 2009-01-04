@@ -52,6 +52,64 @@ void App::updateMain(){
 
 
 /*********************************************
+		SDL event loop
+**********************************************/
+void App::utilEventLoop(){
+
+	SDL_Event event;
+
+    while ( !done ){
+	   
+	    while ( SDL_PollEvent( &event ) ){
+	    
+	    	//Hand the event off to the GUI first. If the GUI handles it, it's
+	    	//done. 
+	    	if(processGUIEvent(event)){
+	    		continue;
+	    	}
+	    
+		    switch( event.type ){
+						      
+			case SDL_VIDEORESIZE:
+			    //handle resize event
+			    surface = SDL_SetVideoMode( event.resize.w, event.resize.h, 16, videoFlags );
+			    if ( !surface ){
+				    fprintf( stderr, "Could not get a surface after resize: %s\n", SDL_GetError( ) );
+				    utilShutdown( 1 );
+				}
+			    resizeWindow( event.resize.w, event.resize.h );
+			    break;
+			
+			case SDL_QUIT:
+			    /* handle quit requests */
+			    done = true;
+			    break;
+			
+			case SDL_MOUSEBUTTONDOWN:
+				onMouseEvent(event.button.button, SDL_MOUSEBUTTONDOWN); 
+				beginDrag();
+				break;	
+				
+			case SDL_MOUSEBUTTONUP:
+				onMouseEvent(event.button.button, SDL_MOUSEBUTTONUP); 
+				endDrag();
+				break;	
+			
+			default:
+			    break;
+			}
+		}
+
+	    /* draw the scene */
+	    if (!done){
+			renderMain();
+			updateMain();
+		}
+	}
+	
+}
+
+/*********************************************
 		Camera rotate
 **********************************************/
 void App::beginDrag(){

@@ -1,8 +1,7 @@
 #include "main.h"
 
 App *App::mSingleton = NULL;
-
-extern int ParticleUpdateWrapper(void *unused);
+int returnCode = 0;
 
 /*********************************************
 		Application init
@@ -95,13 +94,7 @@ int App::init(App *a, int argc, char **argv){
 				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
-	
-	//GUI
-	//if(!initGUI()){
-	//	ERR("Couldn't start up the gui!\n");
-	//	utilShutdown(1);
-	//}
-		
+			
 	//At this point, all the setup should be done
 	LOG("Loaded, about to go to eventLoop\n");	
 
@@ -117,9 +110,9 @@ int App::init(App *a, int argc, char **argv){
 /*********************************************
 		Exits the program, cleanup
 **********************************************/
-void App::utilShutdown( int returnCode )
+void App::utilShutdown( int r )
 {
-	LOG("Shutting down with returnCode %d\n", returnCode);
+	LOG("Shutting down with returnCode %d\n", r);
 	
 	//Terminate the network connection
 	closeSocket();
@@ -141,15 +134,14 @@ void App::utilShutdown( int returnCode )
 	mFlowMgr->shutdown();
 	delete mFlowMgr;
 	
-	LOG("All done, about to quit!\n");
-	
+	//This will ensure we break out of the eventloop
 	done = true;    
 	
+	//Shut down SDL
     SDL_Quit( );   
-    exit( returnCode );    
     
-    //todo: more cleanup here?    
-
+    //So main() knows what to return
+    returnCode = r;
 }
 
 
@@ -159,10 +151,10 @@ void App::utilShutdown( int returnCode )
 int main( int argc, char **argv )
 {		
 	App *a = new App();
-	int r = a->init(a, argc, argv);	
+	a->init(a, argc, argv);	
 	delete a;
 	
 	printf("Goodbye\n");
-	
-	return r;
+		
+	return returnCode;
 }

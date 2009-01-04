@@ -17,6 +17,7 @@
 #include "vector.h"
 #include "misc.h"
 #include "texture.h"
+#include "shader.h"
 #include "ps_interface.h"
 #include "ps_classic.h"
 #include "ps_shaders.h"
@@ -41,7 +42,10 @@ class App{
 	int iFPS;
 	int iFrameCounter;
 	int iLastFrameTicks;
+	
+	//Timers for various bits of logic
 	float fNextParticleUpdate;
+	float fNextFlowUpdate;
 	
 
 	//gl_util.cpp
@@ -168,6 +172,7 @@ public:
 	float fLookX, fLookY, fLookZ;
 	float fMouseX, fMouseY, fMouseZ;
 	Vector2 dragStart;
+	Vector2 dragVel;
 	bool bDrag;
 			
 	//Stats

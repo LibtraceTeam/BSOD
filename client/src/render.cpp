@@ -16,7 +16,7 @@ void App::calcFps(){
 		iFrameCounter = 0;	
 	
 		fTimeScale = 1.0f / (float)iFPS;
-		LOG("%d fps\n", iFPS);
+		//LOG("%d fps\n", iFPS);
 	}
 	
 }

@@ -4,8 +4,6 @@
  This is a vertex-shader based particle system. TODO: Rip this apart!
 *******************************************************************************/
 
-#ifdef ENABLE_PS_SHADERS
-
 /*********************************************
  A particle system that uses vertex+pixel
  shaders to move most of the work onto the GPU
@@ -13,13 +11,9 @@
 class PSShaders : public IParticleSystem{
 
 	int iNumActive;
-#ifndef CLUSTERGL_COMPAT
-	CGcontext	cgContext;		
-	CGprogram	cgProgram;		
-	CGprofile	cgVertexProfile;	
-	CGparameter	position, color, modelViewMatrix, time;
-#endif	
 	float fTime;
+	
+	Shader mShader;
 public:
 
 	bool init();	
@@ -37,4 +31,3 @@ public:
 	void delColor(Color c){}
 };
 
-#endif

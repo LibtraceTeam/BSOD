@@ -125,13 +125,13 @@ void App::initGUI(){
     root = (DefaultWindow*)winMgr->createWindow("DefaultWindow", "Root");
     System::getSingleton().setGUISheet(root); 
     		
-    		
+    mProtoWindow = NULL;
     		
    	//Create the main menu buttons
    	makeBottomButtons();
 		
 	//Create the protcol toggle window
-	makeProtocolWindow();
+	//makeProtocolWindow();
 
 }
 
@@ -140,6 +140,11 @@ void App::initGUI(){
 /*********************************************
   Adds a named checkbox to the protocol wnd**********************************************/
 void App::addProtocolEntry(string name, Color col, int index){
+
+	if(!mProtoWindow){
+		return;
+	}
+
 	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "TextWindow/CB" + toString(index));
 	mProtoWindow->addChildWindow(cb);
 	
@@ -194,7 +199,7 @@ void App::makeBottomButtons(){
 	Creates the protocol toggle window**********************************************/
 void App::makeProtocolWindow(){
 	          
-    mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "Demo Window");
+    mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndProtocol");
     root->addChildWindow(mProtoWindow);
     
     mProtoWindow->setAlpha(0.95f);

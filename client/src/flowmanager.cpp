@@ -36,7 +36,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 
 	//hack! We should only set this if the camera has moved...
 	bNeedProject = true; 
-		
+	
 	//Update all visable flows
 	for(int i=0;i<(int)mViewFlows.size();i++){
 
@@ -48,17 +48,15 @@ void FlowManager::update(float currentTime, float timeDelta){
 		//	continue;
 		//}
 				
-		if(mViewFlows[i]->shade > 0.0f){
-			mViewFlows[i]->shade -= timeDelta * 0.1f;
+		mViewFlows[i]->shade -= timeDelta * 0.1f;
+		
+		if(mViewFlows[i]->shade < 0.0f){
+			mViewFlows[i]->hide = true;
 			
-			if(mViewFlows[i]->shade < 0.0f){
-				mViewFlows[i]->hide = true;
-				
-				//Remove it from viewflows
-				mViewFlows[i] = mViewFlows[mViewFlows.size() - 1];
-				mViewFlows.pop_back();
-			}
-		}
+			//Remove it from viewflows
+			mViewFlows[i] = mViewFlows[mViewFlows.size() - 1];
+			mViewFlows.pop_back();
+		}		
 			
 	}
 		

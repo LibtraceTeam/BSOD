@@ -18,22 +18,44 @@ void App::updateMain(){
 	}
 	
 	float fCamSpeed = fTimeScale * 4.0f;
+	float fDragScale = 0.05f;
 	
+	//If we're actively dragging with the mouse
 	if(bDrag){
-	
+		
+		//Figure out the drag vectors and stuff
 		Vector2 drag = Vector2(iMouseX, iMouseY);
-		Vector2 diff = dragStart - drag;
-		
-		if(mouseDown(1)){//left
-			fRot[1] -= diff.x / 10.0f;
-			fRot[0] -= diff.y / 10.0f;		
-		}
-		else if(mouseDown(2)){//middle
-			fZoom += diff.y / 10.0f;
+		Vector2 diff = (dragStart - drag) * fDragScale;
+				
+		//Left mouse button means we modify the rotation
+		if(mouseDown(1)){
+			fRot[1] -= diff.x;
+			fRot[0] -= diff.y;
 		}
 		
+		//Middle mouse means we modify the zoom
+		else if(mouseDown(2)){
+			fZoom += diff.y;
+		}
+		
+		//Right button means we reset rotation and such
+		//NOTE: I did have this as 'both left and right at once', which seemed
+		//to make more sense, but it doesn't work great on systems that map this
+		//to middle-mouse
+		else if(mouseDown(3)){
+			for(int i=0;i<3;i++){
+				fRot[i] = 0.0f;
+			}
+			fRot[0] = 20;
+			fZoom = 0.0f;
+		}
+				
 		dragStart = Vector2(iMouseX, iMouseY);
+		dragVel = diff;
 		
+	}else{
+		fRot[1] -= dragVel.x;
+		fRot[0] -= dragVel.y;
 	}
 	
 
@@ -42,11 +64,17 @@ void App::updateMain(){
 	}
 	
 	fNextParticleUpdate -= fTimeScale;
+	fNextFlowUpdate -= fTimeScale;
 	
 	if(fNextParticleUpdate <= 0.0f){
 		mParticleSystem->update();		
 		mFlowMgr->update(0.0f, fTimeScale);
 		fNextParticleUpdate = PARTICLE_FPS;
+	}
+	
+	if(fNextFlowUpdate <= 0.0f){
+		mFlowMgr->update(0.0f, fTimeScale);
+		fNextFlowUpdate = PARTICLE_FPS * 5;	
 	}
 }
 

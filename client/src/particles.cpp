@@ -3,8 +3,8 @@
 #define PSINIT(a, b, c) mParticleSystem = new a; \
 						if(mParticleSystem->init()){ \
 								iParticleMethod = b; \
-								LOG("%s (%d)\n", c, b);\
-								return; \
+								LOG("Selected %s (%d)\n", c, b);\
+								return true; \
 						} else{ \
 							delete mParticleSystem;\
 						}
@@ -13,13 +13,13 @@
 /*********************************************
 		Start up the particle system
 **********************************************/
-void App::initParticleSystem(){
+bool App::initParticleSystem(){
 
-	LOG("ParticleSystemType %d\n", iParticleMethod);
+	//LOG("ParticleSystemType %d\n", iParticleMethod);
 	
 	//0 == autodetect
 	if(iParticleMethod == PARTICLE_SYSTEM_UNSPECIFIED){
-		LOG("Attempting to autodetect the best particle method...");
+		LOG("Attempting to autodetect the best particle method...\n");
 
 		PSINIT(PSShaders, PARTICLE_SYSTEM_SHADERS, "Shaders");
 		PSINIT(PSSprites, PARTICLE_SYSTEM_POINTSPRITES, "PointSprites");
@@ -28,7 +28,7 @@ void App::initParticleSystem(){
 		//We shouldn't get here...
 		if(iParticleMethod == PARTICLE_SYSTEM_UNSPECIFIED){
 			LOG("Couldn't find any rendering method that works. Bailing out\n");
-			utilShutdown(0);
+			return false;
 		}
 	}
 	
@@ -39,12 +39,14 @@ void App::initParticleSystem(){
 	else if(iParticleMethod == PARTICLE_SYSTEM_SHADERS)			mParticleSystem = new PSShaders;
 	else{
 		LOG("Bad particle method %d (must be 0-3)\n", iParticleMethod);
-		utilShutdown(0);
+		return false;
 	}
 		
 	if(!mParticleSystem->init()){
 		LOG("Couldn't start particle system, try another method!\n");
-		utilShutdown(1);
+		return false;
 	}
+	
+	return true;
 }
 

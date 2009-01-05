@@ -108,7 +108,7 @@ void Shader::bindResource(const char *name, float *data, int count){
 	if(count == 3){
 		//Log::debug("location=%d, %f %f %f\n", location, data[0], data[1], data[2]);
 	}
-	
+		
 	//hacky!
 	//Is this really the best the GL API has to offer :|?
 	if(count == 1)		glUniform1f(location, data[0]);

@@ -88,7 +88,7 @@ class App{
 	
 	//particles.cpp
 	IParticleSystem *mParticleSystem;	
-	void initParticleSystem();	
+	bool initParticleSystem();	
 	int iParticleMethod;
 		
 	//main.cpp

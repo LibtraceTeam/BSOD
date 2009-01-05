@@ -148,10 +148,13 @@ bool App::texInit(){
 	//preload any common textures here
 	mTextures.clear();
 	
-	texLoad("wm.png", 0);
-	texLoad("ticked.png", 0);
-	texLoad("unticked.png", 0);
-	texLoad("particle.bmp", 0);
+	string initialTextures[] = {"wm.png", "ticked.png", "unticked.png", "particle.bmp"};
+	
+	for(int i=0;i<4;i++){
+		if(!texLoad(initialTextures[i], 0)){
+			return false;
+		}
+	}
 		
 	LOG("Finished loading initial textures!\n");
 	

@@ -1,8 +1,9 @@
 /*******************************************************************************
 							BSOD2 Client - ps_shaders.h
 							
- This is a vertex-shader based particle system. TODO: Rip this apart!
+ This is a vertex-shader based particle system. It uses VBOs to store the data
 *******************************************************************************/
+
 
 /*********************************************
  A particle system that uses vertex+pixel
@@ -13,7 +14,10 @@ class PSShaders : public IParticleSystem{
 	int iNumActive;
 	float fTime;
 	
+	uint32_t iVBO;
+	
 	Shader mShader;
+	
 public:
 
 	bool init();	

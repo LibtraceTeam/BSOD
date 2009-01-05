@@ -9,6 +9,7 @@ int returnCode = 0;
 int App::init(App *a, int argc, char **argv){
 
 	mSingleton = a;
+	mFlowMgr = NULL;
 
 	//Banner
 	LOG("\n");
@@ -53,14 +54,16 @@ int App::init(App *a, int argc, char **argv){
 	//Make the window	
 	if(!utilCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SCREEN_FULLSCREEN)){
 		ERR("Couldn't make window!\n");
-		utilShutdown(1);
+		return 1;
 	}
 
 	//Input
 	keyInit();
 		
 	//Texturing
-	texInit();
+	if(!texInit()){
+		return 1;
+	}
 	
 	//font
 	initFont();
@@ -72,7 +75,9 @@ int App::init(App *a, int argc, char **argv){
 	iTime = 0;
 	
 	//Particle system
-	initParticleSystem();
+	if(!initParticleSystem()){
+		return 1;
+	}
 			
 	//Rotataion
 	for(int i=0;i<3;i++){
@@ -131,8 +136,10 @@ void App::utilShutdown( int r )
 	texShutdown();
 	
 	//Clean up some other components
-	mFlowMgr->shutdown();
-	delete mFlowMgr;
+	if(mFlowMgr){
+		mFlowMgr->shutdown();
+		delete mFlowMgr;
+	}
 	
 	//This will ensure we break out of the eventloop
 	done = true;    

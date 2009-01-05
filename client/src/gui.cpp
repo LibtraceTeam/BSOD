@@ -131,7 +131,7 @@ void App::initGUI(){
    	makeBottomButtons();
 		
 	//Create the protcol toggle window
-	//makeProtocolWindow();
+	makeProtocolWindow();
 
 }
 

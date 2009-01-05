@@ -86,8 +86,8 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 star
 	Flow *f = NULL;
 	
 	if(end.x < 0){
-		speed = -10; //hack! this means it will go the other way	
-		f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), speed, size);
+		//Note the -speed
+		f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), -speed, size);
 	}else{
 		f = addFlow(flowID, Vector2(end.y, end.z), Vector2(start.y, start.z), speed, size);
 	}
@@ -202,12 +202,13 @@ void FlowManager::delAll(){
 	
 	//Delete everything in the free list
 	while(!mFreeFlows.empty()){
-
+	
 		Flow *f = mFreeFlows.top();
 		mFreeFlows.pop();	
-		delete f;
-	
+			
 	}
+	
+	LOG("2\n");
 	
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
 #ifdef USE_TR1

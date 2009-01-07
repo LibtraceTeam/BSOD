@@ -64,11 +64,17 @@ void PSSprites::renderAll(){
 			bad++;
 			continue; 
 		}
-		
+				
 		Particle *first = (*list)[0];
 		
 		//Get the color and set it
 		Color c = mColorLookup[itr->first];
+		
+		//Make sure this color is shown, and skip it if not
+		if(mColorShown[c.sum()] == false){
+			continue;
+		}
+		
 		glColor3f(c.r, c.g, c.b);
 				
 		//glVertexPointer(3, GL_FLOAT, sizeof(Particle), &first->x);
@@ -354,6 +360,7 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float lif
 		mColorMap[c] = new vector<Particle *>();
 		mList = mColorMap[c];
 		mColorLookup[c] = col;
+		mColorShown[c] = true; //Show by default
 	}
 	
 	//Add to the list
@@ -390,9 +397,9 @@ void PSClassic::del(float col, int i){
 /*********************************************	Remove a bunch of particles
 **********************************************/
 void PSClassic::delAll(){
-	
+	LOG("delAll stub called\n");
 }
 
-void PSClassic::delColor(Color c){
-	
+void PSClassic::showColor(Color c, bool bShow){
+	mColorShown[c.sum()] = bShow;
 }

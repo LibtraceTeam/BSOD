@@ -218,3 +218,7 @@ void PSShaders::shutdown(){
 	glDeleteBuffers(1, &iVBO);
 }
 
+
+void PSShaders::showColor(Color c, bool b){
+
+}

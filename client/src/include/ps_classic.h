@@ -36,10 +36,10 @@ protected:
 	Particle mParticles[MAX_PARTICLES];	
 	stack<Particle *> mFree; 
 	
-	//Active particles	
-	//We map the color->sum() to the list
-	map<float, vector<Particle *> *> mColorMap;
+	//Various maps. You can never have enough maps. 
+	map<float, vector<Particle *> *> mColorMap; //We map the color to the list
 	map<float, Color> mColorLookup; //We also store the mapping of sum->col
+	map<float, bool> mColorShown; //And finally a mapping of shown->color. 
 
 	void del(float col, int i); //delete a specific particle	
 	
@@ -53,15 +53,13 @@ public:
 	virtual void render();	
 	virtual int getType(){return PARTICLE_SYSTEM_CLASSIC;}
 		
-	//Particle system operations
+	//Common particle system operations
 	void add(Vector3 pos, Vector3 speed, Color col, float size, float life);
+	void showColor(Color c, bool bShow);	
+	int getActive(){return iNumActive;}	
 	void update();		
-	void shutdown();	
-	
-	int getActive(){return iNumActive;}
-	
-	void delAll();
-	void delColor(Color c);		
+	void shutdown();		
+	void delAll();	
 };
 
 

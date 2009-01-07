@@ -1,14 +1,10 @@
-//Main CEGUI header. For some annoying reason we need to include it here
-#include "CEGUI.h"
-
-//App header now
 #include "main.h"
 
-//If we include this above main.h, then GLEW gets confused as gl.h is pulled in 
-//before glew.h. What a mess...
+//There are some nasty issues with this file pulling in gl.h and conflicting
+//with glew.h, so we have it #included here instead of in libs.h
 #include "RendererModules/OpenGLGUIRenderer/openglrenderer.h"
 
-//These are apparently not included (properly) by CEGUI.h
+//These are alo apparently not included (properly) by CEGUI.h
 #include "CEGUIDefaultResourceProvider.h"
 #include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
@@ -28,11 +24,16 @@ FrameWindow *mProtoWindow = NULL;
 bool handle_mouse_down(Uint8 button);
 bool handle_mouse_up(Uint8 button);
 
+float fGUITimeout = GUI_HIDE_DELAY;
+
 
 /*********************************************
 	Called by the SDL event loop to pass
 	events off to CEGUI**********************************************/
 bool App::processGUIEvent(SDL_Event e){
+
+	//Whenever any even happens, make sure the GUI is shown
+	fGUITimeout = GUI_HIDE_DELAY;
 
 	bool handled = false;
 	    
@@ -68,11 +69,109 @@ bool App::processGUIEvent(SDL_Event e){
 		CEGUI::System::getSingleton().injectKeyUp(e.key.keysym.scancode);
 		break;
 	}
-	
+			
 	return handled;
 }
 
+/*********************************************
+	Called when we click a menu toggle**********************************************/
+bool App::onMenuButtonClicked(const EventArgs &args){
+	
+	//Get the control that sent this event
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	String senderID = we->window->getName();
+	FrameWindow *target = NULL;
+	
+	//From that we can figure out which window we want to toggle
+	if(senderID == "btnServers") target = NULL;
+	else if(senderID == "btnProtocols") target = mProtoWindow;
+	else if(senderID == "btnOptions") target = NULL;
+	
+	//Toggle the window if we found it. TODO: We could do fancy fades with 
+	//setAlpha() and such...
+	if(target){
+		if(target->isVisible()){
+			target->hide();
+		}else{
+			target->show();
+		}
+	}else{
+		LOG("Bad target from button '%s' in onMenuButtonClicked\n", 
+			senderID.c_str());	
+	}
+	return true;
+}
 
+
+/*********************************************
+	Called when we click a protocol toggle**********************************************/
+bool App::onProtocolClicked(const EventArgs &args){
+	//Get the control that sent this event
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	String senderID = we->window->getName();
+	Checkbox *cb = (Checkbox *)we->window;
+		
+	//Kinda nasty: The name of the checkbox is the protocol ID it's associated 
+	//with. Perhaps this should be made less hacky. 
+	int id = stringTo<int>(senderID.c_str());
+	
+	//LOG("Protocol ID %d %s\n", id, cb->isSelected() ? "on":"off");
+	
+	//Make sure we have a valid flow descriptor ID
+	if(getFD(id)){
+		//Toggling bShown makes sure that no new particles of this type get
+		//created.
+		getFD(id)->bShown = cb->isSelected();
+		ps()->showColor(getFD(id)->mColor, cb->isSelected());
+	}
+	
+	return true;	
+}
+
+/*********************************************
+	Called when we click a protocol button**********************************************/
+bool App::onProtocolButtonClicked(const EventArgs &args){
+	
+	//Get the object that sent this event
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	String senderID = we->window->getName();
+	
+	bool show = false;
+	
+	if(senderID == "btnShowAll"){
+		show = true;
+	}else if(senderID == "btnHideAll"){
+		show = false;
+	}else{	
+		//Rogue button?
+		return true;
+	}
+	
+	//Set all the protocol checkboxes
+	for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
+	
+		//Make sure this one is valid
+		if(!getFD(i)) continue;		
+	
+		Checkbox *cb = (Checkbox *)winMgr->getWindow(toString(i));
+				
+		//Toggle the checkbox
+		cb->setSelected(show);
+		
+		//And set the internal state too
+		getFD(i)->bShown = show;
+	}
+		
+	return true;
+}
+
+/*********************************************
+	Called when we click a close button**********************************************/
+bool App::onWndClose(const CEGUI::EventArgs &args){
+	//Get the object that sent this event
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	we->window->hide();
+}
 
 /*********************************************
 		CEGUI setup - create the UI**********************************************/
@@ -88,7 +187,8 @@ void App::initGUI(){
 	new CEGUI::System( mGUI );
 	
 	// initialise the required dirs for the DefaultResourceProvider
-	CEGUI::DefaultResourceProvider* rp = (CEGUI::DefaultResourceProvider *)CEGUI::System::getSingleton().getResourceProvider();
+	CEGUI::DefaultResourceProvider* rp = (CEGUI::DefaultResourceProvider *)
+							CEGUI::System::getSingleton().getResourceProvider();
 
 	//Set the resource groups. This maps a name of a resource group to a type
     CEGUI::Imageset::setDefaultResourceGroup("imagesets");
@@ -99,17 +199,15 @@ void App::initGUI(){
     CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
 
 	//Tell the resource provider where things are
-	rp->setResourceGroupDirectory("schemes", "./data/gui/schemes/");
-	rp->setResourceGroupDirectory("imagesets", "./data/gui/imagesets/");
-	rp->setResourceGroupDirectory("fonts", "./data/gui/fonts/");
-	rp->setResourceGroupDirectory("layouts", "./data/gui/layouts/");
+	rp->setResourceGroupDirectory("schemes", 	"./data/gui/schemes/");
+	rp->setResourceGroupDirectory("imagesets", 	"./data/gui/imagesets/");
+	rp->setResourceGroupDirectory("fonts", 		"./data/gui/fonts/");
+	rp->setResourceGroupDirectory("layouts", 	"./data/gui/layouts/");
 	rp->setResourceGroupDirectory("looknfeels", "./data/gui/looknfeel/");
-	rp->setResourceGroupDirectory("lua_scripts", "./data/gui/lua_scripts/");
-
-	// This is only needed if you are using Xerces and need to
-	// specify the schemas location
-	rp->setResourceGroupDirectory("schemas", "./data/gui/XMLRefSchema/");
-	CEGUI::XercesParser::setSchemaDefaultResourceGroup("schemas");
+	rp->setResourceGroupDirectory("lua_scripts","./data/gui/lua_scripts/");
+	rp->setResourceGroupDirectory("schemas", 	"./data/gui/XMLRefSchema/");
+	
+	//CEGUI::XercesParser::setSchemaDefaultResourceGroup("schemas");
 	
 	//Load Arial to make sure we have at least one font
 	if(!CEGUI::FontManager::getSingleton().isFontPresent( "arial" ) )
@@ -128,7 +226,7 @@ void App::initGUI(){
     mProtoWindow = NULL;
     		
    	//Create the main menu buttons
-   	makeBottomButtons();
+   	makeMenuButtons();
 		
 	//Create the protcol toggle window
 	makeProtocolWindow();
@@ -145,7 +243,7 @@ void App::addProtocolEntry(string name, Color col, int index){
 		return;
 	}
 
-	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "TextWindow/CB" + toString(index));
+	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", toString(index));
 	mProtoWindow->addChildWindow(cb);
 	
 	float ypos = (index / 2) * 0.08f;
@@ -158,40 +256,41 @@ void App::addProtocolEntry(string name, Color col, int index){
 	cb->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.05f)));
 	cb->setText(name.c_str());
 	cb->setProperty("NormalTextColour", col.toString()); 
+	cb->setSelected(true);
 	
-	//cb->subscribeEvent(Checkbox::EventCheckStateChanged, &formatChangedHandler);
+	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
+						Event::Subscriber(&App::onProtocolClicked, this) );
 }
 
 
 /*********************************************
 	  Make the buttons down the bottom
 	  of the screen.**********************************************/
-void App::makeBottomButtons(){
+void App::makeMenuButtons(){
  		
-	//Create the buttons down the bottom of the screen
-	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button1"));
+	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnServers"));
     root->addChildWindow(btn);
     btn->setText("Servers");
     btn->setPosition(UVector2(cegui_reldim(0.01f), cegui_reldim( 0.95f)));
     btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
     btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
      
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button2"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnProtocols"));
     root->addChildWindow(btn);
     btn->setText("Protocols");
     btn->setPosition(UVector2(cegui_reldim(0.12f), cegui_reldim( 0.95f)));
     btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
     btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
     
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "Button3"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnOptions"));
     root->addChildWindow(btn);
     btn->setText("Options");
     btn->setPosition(UVector2(cegui_reldim(0.23f), cegui_reldim( 0.95f)));
     btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
     btn->setAlpha(0.9f);
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
 }
 
 
@@ -202,7 +301,6 @@ void App::makeProtocolWindow(){
     mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndProtocol");
     root->addChildWindow(mProtoWindow);
     
-    mProtoWindow->setAlpha(0.95f);
     mProtoWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.25f)));
     mProtoWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.5f)));  
     mProtoWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
@@ -214,28 +312,36 @@ void App::makeProtocolWindow(){
 	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
    	//}
    	
-   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "HideAll"));
+   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnHideAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Hide All");
     btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onProtocolButtonClicked, this));
     btn->setAlwaysOnTop(true);	
     
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "ShowAll"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnShowAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Show All");
     btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
-    //btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&Demo4Sample::handleQuit, this));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onProtocolButtonClicked, this));
     btn->setAlwaysOnTop(true);	
+    
+    mProtoWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
+    mProtoWindow->setAlpha(0.85f);
+    mProtoWindow->setSizingEnabled(false);
+    mProtoWindow->hide();
 }
 
 
 /*********************************************
 	Called as part of render2D**********************************************/
 void App::renderGUI(){
-	CEGUI::System::getSingleton().renderGUI();
+	if(fGUITimeout > 0.0f){
+		CEGUI::System::getSingleton().renderGUI();
+		fGUITimeout -= fTimeScale;
+	}
 }
 
 
@@ -250,7 +356,7 @@ void App::renderGUI(){
 bool handle_mouse_down(Uint8 button)
 {
 	bool ret = false;
-switch ( button )
+	switch ( button )
 	{
 	// handle real mouse buttons
 	case SDL_BUTTON_LEFT:
@@ -277,7 +383,7 @@ switch ( button )
 bool handle_mouse_up(Uint8 button)
 {
 	bool ret = false; 
-switch ( button )
+	switch ( button )
 	{
 	case SDL_BUTTON_LEFT:
 		ret = CEGUI::System::getSingleton().injectMouseButtonUp(CEGUI::LeftButton);

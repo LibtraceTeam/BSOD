@@ -46,7 +46,7 @@ class App{
 	//Timers for various bits of logic
 	float fNextParticleUpdate;
 	float fNextFlowUpdate;
-	
+		
 
 	//gl_util.cpp
 	bool done;
@@ -114,11 +114,16 @@ class App{
 	//gui.cpp	
 	void initGUI();
 	void makeProtocolWindow();
-	void makeBottomButtons();
+	void makeMenuButtons();
 	void addProtocolEntry(string name, Color col, int index);
 	void renderGUI();
 	bool processGUIEvent(SDL_Event e);
-
+	
+	//GUI callback handlers
+	bool onMenuButtonClicked(const CEGUI::EventArgs&);
+	bool onProtocolClicked(const CEGUI::EventArgs&);
+	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
+	bool onWndClose(const CEGUI::EventArgs&);
 			
 /*********************************************
 				Public

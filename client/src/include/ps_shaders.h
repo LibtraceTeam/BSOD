@@ -10,28 +10,22 @@
  shaders to move most of the work onto the GPU
 **********************************************/
 class PSShaders : public IParticleSystem{
-
 	int iNumActive;
-	float fTime;
-	
-	uint32_t iVBO;
-	
+	float fTime;	
+	uint32_t iVBO;	
 	Shader mShader;
 	
 public:
-
 	bool init();	
 		
-	//Particle system operations
+	//Common particle system operations
 	void add(Vector3 pos, Vector3 speed, Color col, float size, float life);
+	int getType(){return PARTICLE_SYSTEM_SHADERS;}	
+	void showColor(Color c, bool bShow);	
+	int getActive(){return iNumActive;}		
 	void update();		
 	void shutdown();
 	void render();		
-	
-	int getActive(){return iNumActive;}		
-	int getType(){return PARTICLE_SYSTEM_SHADERS;}	
-	
-	void delAll(){}
-	void delColor(Color c){}
+	void delAll(){}	
 };
 

@@ -112,12 +112,7 @@ bool App::openSocket(){
     LOG("Connected to server\n");
     
     mDataBuf.clear();
-    
-    //default to showing all
-   // for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
-   // 	mFlowDescriptors[i] = NULL;
-   // }
-    
+        
     bConnected = true;
     
     return true;
@@ -273,7 +268,7 @@ void App::updateSocket(){
 		//Delete all
 		else if(type == FLOW_ALL_REMOVE){
 		
-			//mCurrentModule->delAll();
+			mFlowMgr->delAll();
 			
 		}
 		

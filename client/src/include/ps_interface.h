@@ -33,8 +33,8 @@ public:
 	//Clear everything
 	virtual void delAll()=0;
 	
-	//Delete particles with a specific colour
-	virtual void delColor(Color c)=0;
+	//Toggle showing particles with a specific colour
+	virtual void showColor(Color c, bool bShow)=0;
 	
 	//stats
 	virtual int getActive(){return 0;}

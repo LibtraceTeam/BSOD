@@ -12,16 +12,6 @@
 #define MAX_PARTICLES 1000000 //global cap of 1m particles for particle systems
 							  //that have a limit
 
-#define OPTION_RESET_ROTATION 0
-#define OPTION_ROTATE_X 1
-#define OPTION_ROTATE_Y 2
-#define OPTION_ROTATE_Z 3
-
-//#define ENABLE_PS_SHADERS
-
-//gui
-#define WINDOW_TITLE_HEIGHT 24
-
 //screen width, height, and bit depth
 //These used to be numbers, in order to keep
 //compatibility, they changed to point to the vars in App 
@@ -34,14 +24,12 @@
 	#define PI 3.14159265
 #endif
 
-
-//Pos defines
-#define MAX_FLOWS 1024
 #define SLAB_SIZE 40
+
+#define GUI_HIDE_DELAY 5.0f
 
 //Toggles between std::map and unordered_map
 #define USE_TR1
-
 
 #define CAMERA_SPEED 0.5f
 

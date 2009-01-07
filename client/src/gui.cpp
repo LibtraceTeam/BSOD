@@ -69,6 +69,11 @@ bool App::processGUIEvent(SDL_Event e){
 		// like before we inject the scancode directly.
 		CEGUI::System::getSingleton().injectKeyUp(e.key.keysym.scancode);
 		break;
+		
+	case SDL_VIDEORESIZE:
+		mGUI->grabTextures();
+		break;
+		
 	}
 			
 	return handled;
@@ -270,6 +275,11 @@ void App::initGUI(){
 	//And the server window
 	makeServerWindow();
 
+}
+
+void App::resizeGUI(int x, int y){
+	mGUI->restoreTextures();
+    mGUI->setDisplaySize(CEGUI::Size(x, y));
 }
 
 

@@ -106,6 +106,7 @@ void App::utilEventLoop(){
 				    utilShutdown( 1 );
 				}
 			    resizeWindow( event.resize.w, event.resize.h );
+			    resizeGUI( event.resize.w, event.resize.h );
 			    break;
 			
 			case SDL_QUIT:

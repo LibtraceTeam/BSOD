@@ -119,6 +119,7 @@ class App{
 	void addProtocolEntry(string name, Color col, int index);
 	void renderGUI();
 	bool processGUIEvent(SDL_Event e);
+	void resizeGUI(int x, int y);
 	
 	//GUI callback handlers
 	bool onMenuButtonClicked(const CEGUI::EventArgs&);

@@ -115,6 +115,7 @@ class App{
 	void initGUI();
 	void makeProtocolWindow();
 	void makeMenuButtons();
+	void makeServerWindow();
 	void addProtocolEntry(string name, Color col, int index);
 	void renderGUI();
 	bool processGUIEvent(SDL_Event e);
@@ -124,6 +125,8 @@ class App{
 	bool onProtocolClicked(const CEGUI::EventArgs&);
 	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
 	bool onWndClose(const CEGUI::EventArgs&);
+	bool onServerButtonClicked(const CEGUI::EventArgs&);
+	bool onServerListClicked(const CEGUI::EventArgs&);
 			
 /*********************************************
 				Public

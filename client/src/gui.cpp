@@ -18,6 +18,7 @@ OpenGLRenderer*mGUI = NULL;
 DefaultWindow *root = NULL;
 WindowManager *winMgr = NULL;
 FrameWindow *mProtoWindow = NULL;
+FrameWindow *mServerWindow = NULL;
 
 //Globals. Stolen from:
 //http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_SDL_and_OpenGL
@@ -83,7 +84,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 	FrameWindow *target = NULL;
 	
 	//From that we can figure out which window we want to toggle
-	if(senderID == "btnServers") target = NULL;
+	if(senderID == "btnServers") target = mServerWindow;
 	else if(senderID == "btnProtocols") target = mProtoWindow;
 	else if(senderID == "btnOptions") target = NULL;
 	
@@ -94,6 +95,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 			target->hide();
 		}else{
 			target->show();
+			target->moveToFront();
 		}
 	}else{
 		LOG("Bad target from button '%s' in onMenuButtonClicked\n", 
@@ -166,11 +168,45 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 }
 
 /*********************************************
+	Called when we click a server button**********************************************/
+bool App::onServerButtonClicked(const EventArgs &args){
+	
+	//Get the object that sent this event
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	String senderID = we->window->getName();
+	
+	bool show = false;
+	
+	if(senderID == "btnShowAll"){
+		show = true;
+	}else if(senderID == "btnHideAll"){
+		show = false;
+	}else{	
+		//Rogue button?
+		return true;
+	}
+	
+	return true;
+}
+
+bool App::onServerListClicked(const EventArgs &args){
+
+	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
+	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
+	
+	eb->setText(lb->getFirstSelectedItem()->getText());
+		
+	return true;
+}
+
+/*********************************************
 	Called when we click a close button**********************************************/
 bool App::onWndClose(const CEGUI::EventArgs &args){
 	//Get the object that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	we->window->hide();
+	
+	return true;
 }
 
 /*********************************************
@@ -230,6 +266,9 @@ void App::initGUI(){
 		
 	//Create the protcol toggle window
 	makeProtocolWindow();
+	
+	//And the server window
+	makeServerWindow();
 
 }
 
@@ -332,6 +371,82 @@ void App::makeProtocolWindow(){
     mProtoWindow->setAlpha(0.85f);
     mProtoWindow->setSizingEnabled(false);
     mProtoWindow->hide();
+}
+
+void App::makeServerWindow(){
+	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpace/FrameWindow", "wndServer");
+    root->addChildWindow(mServerWindow);
+    
+    mServerWindow->setPosition(UVector2(cegui_reldim(0.22f), cegui_reldim( 0.3f)));
+    mServerWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.5f)));  
+    mServerWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
+    mServerWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
+
+    mServerWindow->setText("Servers");
+    
+    //for(int i=0;i<10;i++){   
+	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
+   	//}
+   	
+   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnRefresh"));
+    mServerWindow->addChildWindow(btn);
+    btn->setText("Refresh List");
+    btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.88f)));
+    btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onServerButtonClicked, this));
+    btn->setAlwaysOnTop(true);	
+    
+    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnConnect"));
+    mServerWindow->addChildWindow(btn);
+    btn->setText("Connect");
+    btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.88f)));
+    btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onServerButtonClicked, this));
+    btn->setAlwaysOnTop(true);	
+    
+    
+   	Listbox* lb = (Listbox *)(winMgr->createWindow("SleekSpace/Listbox", "lbServers"));
+   	mServerWindow->addChildWindow(lb);
+   	lb->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.28f)));
+    lb->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.45f)));
+   
+    lb->addItem(new ListboxTextItem("paul-desktop:12345 (10.1.60.177:12345)"));
+    lb->addItem(new ListboxTextItem("paul-laptop:12345 (10.1.60.123:12345)"));
+    lb->addItem(new ListboxTextItem("localhost:12345 (127.0.0.1:12345)"));
+        
+    lb->subscribeEvent(Listbox::EventSelectionChanged, Event::Subscriber(&App::onServerListClicked, this));
+    
+    
+    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtServerInfo");
+    mServerWindow->addChildWindow(text);
+	text->setText("Currently connected to 'paul-desktop:12345'. \
+					Select a different server from the list below or specify \
+					a custom address manually.");
+					
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.08f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
+	text->setAlwaysOnTop(true);	
+	text->setProperty("HorzFormatting", "WordWrapLeftAligned"); // LeftAligned, RightAligned, HorzCentred
+				// HorzJustified, WordWrapLeftAligned, WordWrapRightAligned, WordWrapCentred, WordWrapJustified
+				
+				
+				
+				
+	Editbox* edit = (Editbox *)winMgr->createWindow("SleekSpace/Editbox", "txtCustomServer");
+    mServerWindow->addChildWindow(edit);
+	edit->setText("");
+					
+	edit->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.75f)));
+	edit->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.1f)));
+	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
+	edit->setAlwaysOnTop(true);	
+	
+    
+    mServerWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
+    mServerWindow->setAlpha(0.85f);
+    mServerWindow->setSizingEnabled(false);
+    mServerWindow->hide();
 }
 
 

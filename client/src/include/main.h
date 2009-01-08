@@ -128,6 +128,7 @@ class App{
 	bool onWndClose(const CEGUI::EventArgs&);
 	bool onServerButtonClicked(const CEGUI::EventArgs&);
 	bool onServerListClicked(const CEGUI::EventArgs&);
+	bool onMouseCursorChanged(const CEGUI::EventArgs&);
 			
 /*********************************************
 				Public

@@ -3,6 +3,8 @@
 App *App::mSingleton = NULL;
 int returnCode = 0;
 
+float fParticleFPS = 0.025;
+
 /*********************************************
 		Application init
 **********************************************/
@@ -70,9 +72,8 @@ int App::init(App *a, int argc, char **argv){
 		
 	//Time etc
 	iFPS = 0;
-	fTimeScale = iFPS / 1000;	
+	fTimeScale = 1.0f/60.0f;	
 	fZoom = 0.0f;
-	iTime = 0;
 	
 	//Particle system
 	if(!initParticleSystem()){

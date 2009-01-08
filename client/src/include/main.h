@@ -29,83 +29,98 @@
 class App{
 
 /*********************************************
-				Private
+		Private member variables
 **********************************************/
 	
 	//Mouse (2D)
-	int iMouseX, iMouseY;
 	bool bMouse[8];
-	float fRot[3];
+	int iMouseX, iMouseY;
+	
+	//Rotation
 	float fZoom;
+	float fRot[3];
 
 	//FPS counter
 	int iFPS;
 	int iFrameCounter;
-	int iLastFrameTicks;
+	int iLastFrameTicks;	
+	
+	//main.cpp
+	static App *mSingleton;
 	
 	//Timers for various bits of logic
-	float fNextParticleUpdate;
-	float fNextFlowUpdate;
-		
+	float fNextFlowUpdate;		
 
 	//gl_util.cpp
 	bool done;
-	SDL_Surface *surface; //used for the screen
 	int videoFlags;
+	SDL_Surface *surface;
+		
+	//particles.cpp
+	int iParticleMethod;
+	IParticleSystem *mParticleSystem;	
+		
+	//Camera (update.cpp)
+	float fCameraX, fCameraY, fCameraZ;
+	float fLookX, fLookY, fLookZ;
+	float fMouseX, fMouseY, fMouseZ;
+	Vector2 dragStart;
+	Vector2 dragVel;
+	bool bDrag;	
+		
+	//flowmanager.cpp
+	FlowManager *mFlowMgr;
 	
-	bool utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen);
-	void utilBeginRender();
+	//Flow descriptors. 
+	map<byte, FlowDescriptor *> mFlowDescriptors;
+	
+	//socket.cpp
+	bool bConnected;
+		
+/*********************************************
+		Private member functions
+**********************************************/
+
+	//gl_util.cpp
 	void utilEndRender();
+	void utilBeginRender();
 	void calculateMousePoint();
-	int resizeWindow(int h, int w);
+	int resizeWindow(int h, int w);	
+	bool utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen);
 	
-	
-	//Render.cpp
-	void renderMain();
-	void render2D();
+	//render.cpp
 	void calcFps();
+	void render2D();
+	void renderMain();
 	void drawStatusBar();
 	
-	//Texture.cpp
+	//texture.cpp
 	bool texInit();
 	void texShutdown();	
 	void texRegenerate(Texture *t, byte *buffer, int width, int height);
 
 	//Keys
 	void keyInit();
-	void keySetState(int code, bool pressed);
 	bool keyDown(int code);
-	bool mouseDown(int button){return bMouse[button];}
+	void keySetState(int code, bool pressed);
 	void onMouseEvent(int code, int eventType);
+	bool mouseDown(int button){return bMouse[button];}	
 	void handleKeyEvent( SDL_keysym *keysym , int type );
 
-	//Update.cpp
+	//update.cpp
 	void updateMain();
 	void utilEventLoop();
 	
-	//Font.cpp
-	void initFont();
-	
 	//particles.cpp
-	IParticleSystem *mParticleSystem;	
 	bool initParticleSystem();	
-	int iParticleMethod;
-		
-	//main.cpp
-	static App *mSingleton;
-		
-	//socket.cpp
-	TCPsocket mClientSocket;
-	SDLNet_SocketSet mSocketSet;
-	vector<byte> mDataBuf;
-	bool bSkipFlow;
-	bool bSkipPacket;
-	bool bConnected;
-	unsigned int iTime;
 	
+	//font.cpp
+	void initFont();
+					
+	//socket.cpp
 	bool openSocket();
-	void updateSocket();
 	void closeSocket();
+	void updateSocket();
 	bool isConnected(){return bConnected;}
 		
 	//config.cpp
@@ -113,22 +128,26 @@ class App{
 	
 	//gui.cpp	
 	void initGUI();
-	void makeProtocolWindow();
+	void renderGUI();
 	void makeMenuButtons();
 	void makeServerWindow();
-	void addProtocolEntry(string name, Color col, int index);
-	void renderGUI();
-	bool processGUIEvent(SDL_Event e);
+	void makeProtocolWindow();
 	void resizeGUI(int x, int y);
+	bool processGUIEvent(SDL_Event e);
+	void addProtocolEntry(string name, Color col, int index);
 	
 	//GUI callback handlers
-	bool onMenuButtonClicked(const CEGUI::EventArgs&);
-	bool onProtocolClicked(const CEGUI::EventArgs&);
-	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
 	bool onWndClose(const CEGUI::EventArgs&);
-	bool onServerButtonClicked(const CEGUI::EventArgs&);
+	bool onProtocolClicked(const CEGUI::EventArgs&);
+	bool onMenuButtonClicked(const CEGUI::EventArgs&);
 	bool onServerListClicked(const CEGUI::EventArgs&);
 	bool onMouseCursorChanged(const CEGUI::EventArgs&);
+	bool onServerButtonClicked(const CEGUI::EventArgs&);
+	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
+	
+	//Flow descriptors
+	void addFlowDescriptor(byte id, Color c, string name);
+	FlowDescriptor *getFD(byte i){return mFlowDescriptors[i];}
 			
 /*********************************************
 				Public
@@ -148,27 +167,29 @@ public:
 	void writeTextCentered(int x, int y, const char *fmt, ...);
 
 	//misc.cpp
-	int randInt(int low, int high);
 	float randFloat();
+	int randInt(int low, int high);
 	float randFloat(float low, float high);
 	
 	//gl_util.cpp
 	void utilCube(float x, float y, float z);
 	void utilPlane(float x, float y, float z);
+	Vector2 utilProject(float x, float y, float z);
+	
+	//Update.cpp
 	void utilShutdown(int returnCode);
 	void notifyShutdown(){done = true;}
-	Vector2 utilProject(float x, float y, float z);
 
 	//Camera movement
+	void endDrag();
+	void beginDrag();
 	void camMove(float x, float y, float z);
 	void camLookAt(float x, float y, float z);
 	void camSetPos(float x, float y, float z);
-	void beginDrag();
-	void endDrag();
 	
 	//texture.cpp
-	Texture *texLoad(string name, int flags);
 	Texture *texGet(string name);
+	Texture *texLoad(string name, int flags);
 	Texture *texGenerate(string name, byte *buffer, int width, int height);
 	
 	//particle management
@@ -176,25 +197,9 @@ public:
 	
 	//Mouse
 	Vector2 getMouse(){return Vector2(iMouseX, iMouseY);}
-			
-	//Camera
-	float fCameraX, fCameraY, fCameraZ;
-	float fLookX, fLookY, fLookZ;
-	float fMouseX, fMouseY, fMouseZ;
-	Vector2 dragStart;
-	Vector2 dragVel;
-	bool bDrag;
-			
+						
 	//Stats
 	int getFPS(){return iFPS;}
-	
-	//This contains most of the flow placement logic
-	FlowManager *mFlowMgr;
-	
-	//Flow descriptors. TOOD: clean up
-	map<byte, FlowDescriptor *> mFlowDescriptors;
-	FlowDescriptor *getFD(byte i){return mFlowDescriptors[i];}
-	void addFlowDescriptor(byte id, Color c, string name);
 	
 	
 /*********************************************
@@ -236,6 +241,7 @@ extern int splitString(const std::string &input, const std::string &delimiter,
 
 //Time scaler is global so everything can get it
 extern float fTimeScale;
+extern float fParticleFPS;
 
 template<typename T> T stringTo(const std::string& s) {
   std::istringstream iss(s);

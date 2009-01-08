@@ -7,7 +7,7 @@
 
 #define DEFAULT_PORT 54567
 #define CONFIG_FILE "bsod2.cfg"
-#define PARTICLE_FPS 0.025 //40fps (0.3333 = 30fps)
+#define PARTICLE_FPS fParticleFPS //hack!
 #define MAX_FLOW_DESCRIPTORS 64
 #define MAX_PARTICLES 1000000 //global cap of 1m particles for particle systems
 							  //that have a limit

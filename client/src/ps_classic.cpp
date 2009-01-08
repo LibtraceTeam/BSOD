@@ -215,9 +215,9 @@ void PSClassic::update(){
 			}
 								
 			//Move the particle
-			p->x += p->vx;
-			p->y += p->vy;
-			p->z += p->vz;
+			p->x += p->vx * PARTICLE_FPS;
+			p->y += p->vy * PARTICLE_FPS;
+			p->z += p->vz * PARTICLE_FPS;
 			p->life -= PARTICLE_FPS;
 		
 			
@@ -334,9 +334,9 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float lif
 	p->z = pos.z;
 	
 	//Velocity
-	p->vx = speed.x * (float)PARTICLE_FPS;
-	p->vy = speed.y * (float)PARTICLE_FPS;
-	p->vz = speed.z * (float)PARTICLE_FPS;
+	p->vx = speed.x;// * (float)PARTICLE_FPS;
+	p->vy = speed.y;// * (float)PARTICLE_FPS;
+	p->vz = speed.z;// * (float)PARTICLE_FPS;
 		
 	//Color
 	p->r = col.r;

@@ -16,6 +16,20 @@ float htonf( float x )
 
 
 /*********************************************
+	Socket connection globals
+**********************************************/
+TCPsocket mClientSocket;
+SDLNet_SocketSet mSocketSet;
+vector<byte> mDataBuf;
+
+bool bSkipFlow = false;
+bool bSkipPacket = false;
+bool bConnected = false;
+unsigned int iTime = 0;
+	
+
+
+/*********************************************
 	Packet structures
 **********************************************/
 enum PacketTypes {

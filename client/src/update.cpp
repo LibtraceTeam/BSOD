@@ -31,6 +31,8 @@ void App::updateMain(){
 		if(mouseDown(1)){
 			fRot[1] -= diff.x;
 			fRot[0] -= diff.y;
+			
+			SDL_Delay(50);
 		}
 		
 		//Middle mouse means we modify the zoom
@@ -63,15 +65,19 @@ void App::updateMain(){
 		updateSocket();
 	}
 	
+	/*
 	fNextParticleUpdate -= fTimeScale;
-	fNextFlowUpdate -= fTimeScale;
-	
 	if(fNextParticleUpdate <= 0.0f){
 		mParticleSystem->update();		
-		mFlowMgr->update(0.0f, fTimeScale);
+		mFlowMgr->update(0.0f, PARTICLE_FPS);
 		fNextParticleUpdate = PARTICLE_FPS;
 	}
+	*/
 	
+	mParticleSystem->update();		
+	mFlowMgr->update(0.0f, PARTICLE_FPS);
+	
+	fNextFlowUpdate -= fTimeScale;
 	if(fNextFlowUpdate <= 0.0f){
 		mFlowMgr->update(0.0f, fTimeScale);
 		fNextFlowUpdate = PARTICLE_FPS * 5;	
@@ -131,8 +137,14 @@ void App::utilEventLoop(){
 
 	    /* draw the scene */
 	    if (!done){
+	    	uint32_t startTime = SDL_GetTicks();
 			renderMain();
 			updateMain();
+			uint32_t endTime = SDL_GetTicks();
+			
+			uint32_t diff = endTime - startTime;
+			fTimeScale = (float)diff / 1000.0f;
+			fParticleFPS = fTimeScale;
 		}
 	}
 	

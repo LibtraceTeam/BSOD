@@ -138,6 +138,8 @@ void App::writeText(int x, int y, const char *fmt, ...){
 	
 	glTranslatef(x, y, 0);
 	glScalef(0.5f, 0.5f, 0.5f);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
 	
 	unsigned int len = strlen(message);
 
@@ -147,7 +149,7 @@ void App::writeText(int x, int y, const char *fmt, ...){
 	}
 	
 	glPopMatrix();
-	
+		
 }
 
 

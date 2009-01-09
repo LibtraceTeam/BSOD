@@ -19,6 +19,7 @@ public:
 	float r,g,b,a; //color
 	float vx, vy, vz; //speed to move per second
 	float size;	
+	float timestamp; //Used by shaders - the current time at creation 
 	
 	unsigned int index; //index into the parent particle array
 };
@@ -48,16 +49,17 @@ protected:
 	
 public:
 
-	//overridden by PSSprites
+	//overridden by PSSprites and PSShaders
 	virtual bool init();
 	virtual void render();	
+	virtual void update();	
 	virtual int getType(){return PARTICLE_SYSTEM_CLASSIC;}
-		
-	//Common particle system operations
-	void add(Vector3 pos, Vector3 speed, Color col, float size, float life);
+	virtual void add(Vector3 pos, Vector3 speed, Color col, 
+						float size, float life);
+						
+	//Other common particle system operations
 	void showColor(Color c, bool bShow);	
-	int getActive(){return iNumActive;}	
-	void update();		
+	int getActive(){return iNumActive;}		
 	void shutdown();		
 	void delAll();	
 };
@@ -67,8 +69,6 @@ public:
 		A point-sprite particle system
 **********************************************/
 class PSSprites : public PSClassic{
-
-	void renderAll();
 public:
 	bool init();
 	void render();

@@ -41,10 +41,11 @@ void App::renderMain(){
 	glRotatef(fRot[0], 1, 0, 0);
 	glRotatef(fRot[1], 0, 1, 0);
 	glRotatef(fRot[2], 0, 0, 1);
-			
+				
+	mFlowMgr->render();	
+		
 	calculateMousePoint();
 	
-	mFlowMgr->render();	
 	mParticleSystem->render();
 								
 	utilEndRender();
@@ -84,6 +85,8 @@ void App::render2D(){
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	
 	drawStatusBar();
+	
+	mFlowMgr->render2d();
 	
 	//Render the GUI
 	renderGUI();	

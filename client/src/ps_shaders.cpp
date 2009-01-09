@@ -1,29 +1,7 @@
 #include "main.h"
 
-GLfloat vertices[] = 
-{
-	0.0f, -0.8f, 0.0f,
-	-0.8f, 0.8f, 0.0f,
-	0.8f, 0.8f, 0.0f
-};
-
-GLubyte colors[] = 
-{
-	255, 0, 0,
-	0, 255, 0,
-	0, 0, 255
-};
-
-
-#define MAX_SIZE 15.0f
-
-
-//CPU-side records of particle data
-//TODO: We should be smarter about how we cache and upload this!
-Vector3 mPos[MAX_PARTICLES];
-Vector3 mNormals[MAX_PARTICLES];
-
-#define BUFFER_OFFSET(i) (void*)(0 + (i))
+#define MAX_SIZE 10.0f
+#define SHADER_FPS (1.0f / 5.0f) //5fps
 
 /*********************************************
  Start up the PS/VS extensions, load the shader
@@ -36,45 +14,8 @@ bool PSShaders::init(){
 		return false;
 	}
 	
-	//We also use VBOs. Probably if we have shaders we have VBOs, but better
-	//safe than sorry
-	if(!GLEW_ARB_vertex_buffer_object){
-		LOG("No GL_ARB_vbo\n");
-		return false;
-	}
-	
-	iNumActive = 0;
-	
-	LOG("%d\n", sizeof(Vector3));
-	
-	for(int i=0;i<MAX_PARTICLES;i++){
-		mPos[i] = Vector3(0,0,0);
-		mNormals[i] = Vector3(1,0,0);
-	}
-
-
-	//Set up the VBO first
-	//glEnableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
-	
-	//Generate the VBO object
-	glGenBuffers( 1, &iVBO );
-	glBindBuffer( GL_ARRAY_BUFFER, iVBO );
-	
-	//And allocated its memory
-	glBufferData( GL_ARRAY_BUFFER,					
-					sizeof(mPos) + sizeof(mNormals),
-					NULL,									
-					GL_DYNAMIC_DRAW );
-		
-	//Send a bunch of 0's across
-	glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, 0, sizeof(mPos), &mPos[0].x);
-	glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, sizeof(mPos), sizeof(mNormals), &mNormals[0].x);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//Done!
-						
-
+	fTime = 0.0f;
+	fUpdateTimer = 0.0f;
 
 	//Now set up the shader
 	string vs = "";
@@ -92,44 +33,98 @@ bool PSShaders::init(){
 	//if(!mShader.addFragment(fs)) return false;
 	
 	if(!mShader.compile()) return false;
-	
-	
-	
-	
-	//And finally, set up point sprites
-	if (!glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite")){
-		ERR("No point sprite support!\n");
-	  	return false;
-	}
+	        mDisplayList = glGenLists(1);
 
-	float maxSize = 0.0f;
-	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
-
-	if( maxSize > MAX_SIZE * App::S()->fParticleSizeScale)
-		maxSize = MAX_SIZE * App::S()->fParticleSizeScale;
-			
-	glPointSize( maxSize );
-	glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
-	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
-	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
-	glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
-	glEnable( GL_POINT_SPRITE_ARB );
-
-
-
-	
+	mDisplayList = glGenLists(1);
+		
 	//If we got this far, it's all good.
 	
 	LOG("Set up PSShaders!\n");
 	
-	return true;
+	return PSSprites::init();
+}
+
+
+
+void PSShaders::update(){
+
+	fTime += fTimeScale;
+	fUpdateTimer += fTimeScale;
+	
+	if(fUpdateTimer < SHADER_FPS){
+		return;
+	}
+			
+	map<float, vector<Particle *> *>::const_iterator itr;
+	
+	for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){	
+		vector<Particle *> *list = itr->second;	
+		
+		for(int i=0;i<(int)list->size();i++){			
+			Particle *p = (*list)[i];			
+			
+			if(!p){
+				continue;
+			}
+			
+			if(!p->active){
+				continue;
+			}	
+		
+				
+			//if(!p->active){
+			//	continue;
+			//}
+		
+			if(p->life < 0){
+				del(itr->first, i);
+				i--;
+				continue;
+			}
+								
+			//Move the particle
+			//p->x += p->vx * fUpdateTimer;
+			//p->y += p->vy * fUpdateTimer;
+			//p->z += p->vz * fUpdateTimer;
+			p->life -= fUpdateTimer;
+		
+			/*
+			if(p->life < 0.5f)
+				p->a = (p->life * 2.0f);		
+			else if(p->a < 1.0f)
+				p->a += (fUpdateTimer * 2.0f);
+			*/
+			
+			//TODO: More particle logic here?
+		}
+	}
+	
+	fUpdateTimer = 0.0f;
+	
 }
 
 void PSShaders::render(){
 
-	if(iNumActive == 0){
-		return;
+
+	//Apply the shader
+	mShader.bind();
+		
+	//Set up the shader
+	mShader.bindResource("fTime", &fTime, 1);
+
+	fRenderTimer -= fTimeScale;
+	if(fRenderTimer < -(SHADER_FPS / 2.0f)){
+		glNewList(mDisplayList, GL_COMPILE);
+		renderAll();
+		glEndList();
+		fRenderTimer = (SHADER_FPS / 2.0f);
 	}
+	glCallList(mDisplayList);
+	
+	mShader.unbind();
+}
+
+void PSShaders::renderAll(){
 	
 	//Get the texture first
 	Texture *tex = App::S()->texGet("particle.bmp");
@@ -147,78 +142,138 @@ void PSShaders::render(){
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
 	glEnable(GL_BLEND);							
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-	glColor3f(1,1,1);		
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
 		
 	float scale = (1.0f/(float)iNumActive) * 150000;	
 	scale *= App::S()->fParticleSizeScale;	
 	if(scale < 1.0f){ scale = 1.0f; }
-			
+					
 	//Set a default size here
 	glPointSize(scale); 	
+				
+	//And begin drawing
+	glBegin( GL_POINTS );
 	
+	map<float, vector<Particle *> *>::const_iterator itr;
 	
-	
-	
-	
-	mShader.bind();
-	
-	float params[3] = {fTime, fTime, 0.0f};
-	
-	mShader.bindResource("fTime", params, 3);
-	glBindBufferARB( GL_ARRAY_BUFFER, iVBO );
-	
-	glVertexPointer( 3, GL_FLOAT, 0, 0 );
-	glNormalPointer( GL_FLOAT, 0, (void *)sizeof(mPos) );	
-	
-	glDrawArrays( GL_POINTS, 0, iNumActive );
-	
-	glBindBuffer( GL_ARRAY_BUFFER, 0);
-	
-	mShader.unbind();
-	
-	
-	glDisable(GL_BLEND);	
-	glDepthMask(GL_TRUE);
-	
-}	
-	
-	
-void PSShaders::add(Vector3 pos, Vector3 speed, Color col, float size, float life){
-	
-	if(iNumActive >= MAX_PARTICLES){
-		return;
+	//Iterate over all the different colors
+	for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){	
+		
+		//The list of particles for this color
+		vector<Particle *> *list = itr->second;	
+		
+		//Make sure we've got at least one particle
+		if(list->size() == 0) {
+			bad++;
+			continue; 
+		}
+				
+		Particle *first = (*list)[0];
+		
+		//Get the color and set it
+		Color c = mColorLookup[itr->first];
+		
+		//Make sure this color is shown, and skip it if not
+		if(mColorShown[c.sum()] == false){
+			continue;
+		}
+		
+		glColor3f(c.r, c.g, c.b);
+				
+		//Go through the entire list			
+		for(int i=0;i<(int)list->size();i++){			
+			Particle *p = (*list)[i];		
+			glNormal3f(p->vx, p->vy, p->vz);
+			glTexCoord2f(p->timestamp, 0.0f);
+			glVertex3f(p->x, p->y, p->z);
+			count++;
+		}	
+		
 	}
 	
-	mPos[iNumActive] = pos;
-	mNormals[iNumActive] = Vector3(0,1,0); //speed.normalized();
+	//Finish drawing	
+	glEnd();		
 	
-	iNumActive++;
-}
-
-
-void PSShaders::update(){
+	//And clean up
+	glDisable(GL_BLEND);	
+	glDepthMask(GL_TRUE);
+	//glDisableClientState(GL_VERTEX_ARRAY);
 	
-	fTime += PARTICLE_FPS * 10.0f;
-	
-	//LOG("%f\n", fTime);
-	
-	//LOG("Update!\n");
-
-	glBindBuffer( GL_ARRAY_BUFFER, iVBO );
-					
-	glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, 0, sizeof(Vector3) * iNumActive, &mPos[0].x);							
-	
-	glBindBuffer( GL_ARRAY_BUFFER, 0);
-	
-
+	iNumActive = count;
+			
 }
 
 void PSShaders::shutdown(){
-	glDeleteBuffers(1, &iVBO);
+	
+	PSSprites::shutdown();
 }
 
 
-void PSShaders::showColor(Color c, bool b){
+void PSShaders::add(Vector3 pos, Vector3 speed, Color col, float size, float life){
 
+	//First make sure we have capacity
+	if(mFree.empty()){
+		return;
+	}
+	
+	//And sanity check to make sure it's valid
+	Particle *p = mFree.top();
+	
+	if(!p){
+		return;
+	}
+	
+	//Take it off the list
+	mFree.pop();
+			
+	//Apply some jitter
+	float jitter = App::S()->randFloat(0, 1.0f);
+	pos = pos + speed * jitter;
+		
+	p->life = life - jitter;
+	p->timestamp = fTime;
+	
+	//Position
+	p->x = pos.x;
+	p->y = pos.y;
+	p->z = pos.z;
+	
+	//Velocity
+	p->vx = speed.x;
+	p->vy = speed.y;
+	p->vz = speed.z;
+		
+	//Color
+	p->r = col.r;
+	p->g = col.g;
+	p->b = col.b;
+	
+	//Nasty nasty hack. 
+	if(getType() != PARTICLE_SYSTEM_CLASSIC){
+		p->size = size * App::S()->fParticleSizeScale * 3.0f;
+	}else{
+		p->size = size * App::S()->fParticleSizeScale * 0.05f;
+	}
+	
+	//Get the list associated with this color. We batch this way so we don't
+	//need to switch colors when rendering
+	float c = col.sum();
+	vector<Particle *> *mList = mColorMap[c];
+	
+	//If the list doesn't exist, create it
+	if(!mList){
+		mColorMap[c] = new vector<Particle *>();
+		mList = mColorMap[c];
+		mColorLookup[c] = col;
+		mColorShown[c] = true; //Show by default
+	}
+	
+	//Add to the list
+	mList->push_back(p);
+				
+	//And mark it as active
+	p->active = true;
+		
+	//done!
+	return;
 }

@@ -32,7 +32,7 @@ void App::updateMain(){
 			fRot[1] -= diff.x;
 			fRot[0] -= diff.y;
 			
-			SDL_Delay(50);
+			//SDL_Delay(50);
 		}
 		
 		//Middle mouse means we modify the zoom
@@ -121,8 +121,15 @@ void App::utilEventLoop(){
 			    break;
 			
 			case SDL_MOUSEBUTTONDOWN:
+				
+				if(mFlowMgr->onClick(event.button.button, 
+									fMouseX, fMouseY, fMouseZ)){
+					break;
+				}			
+				
 				onMouseEvent(event.button.button, SDL_MOUSEBUTTONDOWN); 
 				beginDrag();
+												
 				break;	
 				
 			case SDL_MOUSEBUTTONUP:

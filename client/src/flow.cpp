@@ -15,7 +15,7 @@ int Flow::collide(float pX, float pY, float pZ){
 	
 	float d = 0.05f; //max dist that is judged as a collision
 	//note that this isn't sqrt'd...
-	
+		
 	if(p.fastDistTo(left) < d){
 		return 1;
 	}else if(p.fastDistTo(right) < d){

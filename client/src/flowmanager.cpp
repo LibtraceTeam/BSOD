@@ -18,7 +18,8 @@ bool FlowManager::init(){
 	
 	mViewFlows.clear();
 	
-	fPlaneDistance = ((float)App::S()->iScreenX / (float)App::S()->iScreenY) * 30.0f;
+	fPlaneDistance = ((float)App::S()->iScreenX / 
+						(float)App::S()->iScreenY) * 30.0f;
 
 	mDisplayList = glGenLists(1);
 	
@@ -30,7 +31,8 @@ bool FlowManager::init(){
 **********************************************/
 void FlowManager::update(float currentTime, float timeDelta){
 
-	fPlaneDistance = ((float)App::S()->iScreenX / (float)App::S()->iScreenY) * 30.0f;
+	fPlaneDistance = ((float)App::S()->iScreenX / 
+						(float)App::S()->iScreenY) * 30.0f;
 	
 	fTimeScale = timeDelta;
 
@@ -409,7 +411,7 @@ int DnsLeft(void *data){
 	Flow *f = (Flow *)data;		
 	const char *left = SDLNet_ResolveIP(&f->mSrc);		
 	if(left){	f->leftText[2] = string( left );	}
-	else{	f->leftText[2] = "Couldn't resolve";	}	
+	else{	f->leftText[2] = "";	}	
 	//LOG("Resoved left: %s\n", f->leftText[2].c_str());	
 	return left ? true : false;
 }
@@ -419,7 +421,7 @@ int DnsRight(void *data){
 	Flow *f = (Flow *)data;		
 	const char *right = SDLNet_ResolveIP(&f->mDst);		
 	if(right){	f->rightText[2] = string( right );	}
-	else{	f->rightText[2] = "Couldn't resolve";	}	
+	else{	f->rightText[2] = "";	}	
 	//LOG("Resoved right: %s\n", f->rightText[2].c_str());	
 	return right ? true : false;
 }
@@ -430,7 +432,7 @@ int DnsRight(void *data){
 bool FlowManager::onClick(int button, float x, float y, float z){
 	float planeX = z;
 	float planeY = y;
-	
+		
 	//Go through all the flows that have 'dots' on either side
 	for(int i=0;i<(int)mActiveFlows.size();i++){
 	
@@ -446,7 +448,7 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 		//Check if we clicked on this flow
 		//TODO: We should keep checking, and select the *closest*. This picks the *first* hit
 		int c = f->collide(x,y,z);
-		
+				
 		if(c == 0){
 			continue;
 		}
@@ -471,12 +473,12 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 		
 		//Spawn two (short-lived) threads to resolve DNS if necessary
 		if(f->leftText[2] == ""){
-			f->leftText[2] = "(Resolving)";
+			f->leftText[2] = " "; //hack!
 			mDnsThreadLeft = SDL_CreateThread(DnsLeft, f);
 		}
 		
 		if(f->rightText[2] == ""){
-			f->rightText[2] = "(Resolving)";
+			f->rightText[2] = " ";
 			mDnsThreadRight = SDL_CreateThread(DnsRight, f);
 		}
 		

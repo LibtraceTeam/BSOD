@@ -8,13 +8,13 @@ struct ParticleSort{
     }
 };
 
-#define MAX_SIZE 15.0f
+#define MAX_SIZE 10.0f
 
 
 /*******************************************************************************
 							PointSprites
 *******************************************************************************/
-void PSSprites::renderAll(){
+void PSSprites::render(){
 	
 	//Get the texture first
 	Texture *tex = App::S()->texGet("particle.bmp");
@@ -47,6 +47,7 @@ void PSSprites::renderAll(){
 	glPointSize(scale); 	
 	
 	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
 	
 	//And begin drawing
 	glBegin( GL_POINTS );
@@ -81,17 +82,21 @@ void PSSprites::renderAll(){
 		//glDrawArrays(GL_POINTS, 0, (int)list->size());
 					
 		//Go through the entire list	
+		
 		for(int i=0;i<(int)list->size();i++){			
 			Particle *p = (*list)[i];		
-							
+			
+			/*				
 			if(!p->active){
 				bad++;
 				continue;
-			}				
+			}	
+			*/			
 			
 			glVertex3f(p->x, p->y, p->z);
 			count++;
 		}	
+		
 	}
 	
 	//Finish drawing	
@@ -100,22 +105,9 @@ void PSSprites::renderAll(){
 	//And clean up
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	//glDisableClientState(GL_VERTEX_ARRAY);
 	
 	iNumActive = count;
-			
-}
-
-void PSSprites::render(){
-	
-	if(bNeedRecompile){	
-		glNewList(mDisplayList,GL_COMPILE);
-		renderAll();	
-		glEndList();	
-		bNeedRecompile = false;			
-	}	
-	glCallList(mDisplayList);		
-
 }
 
 bool PSSprites::init(){
@@ -230,14 +222,6 @@ void PSClassic::update(){
 		}
 	}
 	
-	
-	//Sort by color if needed
-	//LOG("%d\n", iLastColorChanges);
-	//if(iLastColorChanges > 100){
-	//	sort(mActive.begin(), mActive.end(), ParticleSort() ); 
-	//}
-	
-	bNeedRecompile = true;
 }
 
 /*********************************************

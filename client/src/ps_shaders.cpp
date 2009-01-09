@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define SHADER_FPS (1.0f / 5.0f) //5fps
+#define SHADER_FPS (1.0f / 10.0f) //5fps
 
 /*********************************************
  Start up the PS/VS extensions, load the shader
@@ -70,12 +70,7 @@ void PSShaders::update(){
 			if(!p->active){
 				continue;
 			}	
-		
 				
-			//if(!p->active){
-			//	continue;
-			//}
-		
 			if(p->life < 0){
 				del(itr->first, i);
 				i--;
@@ -83,18 +78,7 @@ void PSShaders::update(){
 			}
 								
 			//Move the particle
-			//p->x += p->vx * fUpdateTimer;
-			//p->y += p->vy * fUpdateTimer;
-			//p->z += p->vz * fUpdateTimer;
 			p->life -= fUpdateTimer;
-		
-			/*
-			if(p->life < 0.5f)
-				p->a = (p->life * 2.0f);		
-			else if(p->a < 1.0f)
-				p->a += (fUpdateTimer * 2.0f);
-			*/
-			
 			//TODO: More particle logic here?
 		}
 	}
@@ -229,8 +213,11 @@ void PSShaders::add(Vector3 pos, Vector3 speed, Color col, float size, float lif
 	//Apply some jitter
 	float jitter = App::S()->randFloat(0, 1.0f);
 	pos = pos + speed * jitter;
+	
+	//life -= (PARTICLE_FPS * 100); //hack!
+	life = life - jitter;
 		
-	p->life = life - jitter;
+	p->life = life;//life - jitter;
 	p->timestamp = fTime;
 	
 	//Position

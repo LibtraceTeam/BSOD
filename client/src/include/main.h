@@ -31,110 +31,115 @@ class App{
 /*********************************************
 		Private member variables
 **********************************************/
-	
+		
+	//main.cpp
+	static App *mSingleton;		//Used so the flow manager can get at App stuff
+		
 	//Mouse (2D)
-	bool bMouse[8];
-	int iMouseX, iMouseY;
+	bool bMouse[8];				//Whether a mouse button is held down
+	int iMouseX, iMouseY;		//Screen-space coordinates of the cursor
 	
 	//Rotation
-	float fZoom;
-	float fRot[3];
+	float fZoom;				//Zoom amount on (0,0,0)
+	float fRot[3];				//Rotation around (1,0,0), (0,1,0) and (0,0,1)
 
 	//FPS counter
-	int iFPS;
-	int iFrameCounter;
-	int iLastFrameTicks;	
-	
-	//main.cpp
-	static App *mSingleton;
+	int iFPS;					//Current frames per second
+	int iFrameCounter;			
+	int iLastFrameTicks;		//Records the SDL_Time() at last frame
 	
 	//Timers for various bits of logic
-	float fNextFlowUpdate;		
-
+	float fNextFlowUpdate;		//How long is left until the flow manager
+								//update() is invoked. 
 	//gl_util.cpp
-	bool done;
-	int videoFlags;
-	SDL_Surface *surface;
+	bool done;					//Whether the app is running. 
+	int videoFlags;				//SDL window flags
+	SDL_Surface *surface;		//SDL rendering surface
 		
 	//particles.cpp
-	int iParticleMethod;
-	IParticleSystem *mParticleSystem;	
+	int iParticleMethod;		//The type of particle system we need
+	IParticleSystem *mParticleSystem; //Pointer to the PS we're using
 		
 	//Camera (update.cpp)
-	float fCameraX, fCameraY, fCameraZ;
-	float fLookX, fLookY, fLookZ;
-	float fMouseX, fMouseY, fMouseZ;
-	Vector2 dragStart;
-	Vector2 dragVel;
-	bool bDrag;	
+	float fCameraX, fCameraY, fCameraZ;	//Position of the camera in 3D space
+	float fLookX, fLookY, fLookZ;		//View target of the camera in 3D space
+	float fMouseX, fMouseY, fMouseZ;	//Where the mouse is pointing in 3D
+	Vector2 dragStart;			//Screen-space point where a mouse drag started
+	Vector2 dragVel;			//The rotation velocity given by a drag
+	bool bDrag;					//Whether the user is dragging
 		
 	//flowmanager.cpp
-	FlowManager *mFlowMgr;
+	FlowManager *mFlowMgr;		//Controls the placement of flows, rendering of
+								//the two textured planes, rendering of the end
+								//points and selection of flows
 	
-	//Flow descriptors. 
+	//Flow descriptors. 	
 	map<byte, FlowDescriptor *> mFlowDescriptors;
 	
 	//socket.cpp
-	bool bConnected;
+	bool bConnected;			//Whether we're connected to a server or not
 		
 /*********************************************
 		Private member functions
 **********************************************/
 
 	//gl_util.cpp
-	void utilEndRender();
-	void utilBeginRender();
-	void calculateMousePoint();
-	int resizeWindow(int h, int w);	
+	void utilEndRender();		//Concludes a frame
+	void utilBeginRender();		//Begins a frame
+	void calculateMousePoint();	//Uses glUnProject to update the 3D mouse state
+	int resizeWindow(int h, int w);	//Resizes the GL context
 	bool utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen);
 	
 	//render.cpp
-	void calcFps();
-	void render2D();
-	void renderMain();
-	void drawStatusBar();
+	void calcFps();				//Calculates the frames per second and related
+	void render2D();			//Renders the 2D elements 
+	void renderMain();			//Primary rendering method
+	void drawStatusBar();		//Renders the FPS meter and other status things
 	
 	//texture.cpp
-	bool texInit();
-	void texShutdown();	
-	void texRegenerate(Texture *t, byte *buffer, int width, int height);
+	bool texInit();				//Starts up the texture system, loads base texs
+	void texShutdown();			//Disposes all textures
 
 	//Keys
-	void keyInit();
-	bool keyDown(int code);
-	void keySetState(int code, bool pressed);
-	void onMouseEvent(int code, int eventType);
-	bool mouseDown(int button){return bMouse[button];}	
-	void handleKeyEvent( SDL_keysym *keysym , int type );
+	void keyInit();				//Sets up the keyboard input system
+	bool keyDown(int code);		//Returns if a key is being held down
+	void keySetState(int code, bool pressed);	//Invoked by the event handler
+	void onMouseEvent(int code, int eventType);	//Invoked by the event handler
+	bool mouseDown(int button){return bMouse[button];}	//Like keyDown
+	void handleKeyEvent( SDL_keysym *keysym , int type ); 
 
 	//update.cpp
-	void updateMain();
-	void utilEventLoop();
+	void updateMain();			//Primary logic update
+	void utilEventLoop();		//Main loop. Will not return till termination
 	
 	//particles.cpp
-	bool initParticleSystem();	
+	bool initParticleSystem();	//Picks the best particle system and inits it
 	
 	//font.cpp
-	void initFont();
+	void initFont();			//Uses libfreetype2 to load a .ttf
 					
 	//socket.cpp
-	bool openSocket();
-	void closeSocket();
-	void updateSocket();
+	bool openSocket();			//Connects to the server
+	void closeSocket();			//Disconnects from the server
+	void updateSocket();		//Reads data from the server
 	bool isConnected(){return bConnected;}
 		
 	//config.cpp
-	bool loadConfig();
+	bool loadConfig();			//Loads bsod2.cfg using libconfuse
 	
 	//gui.cpp	
-	void initGUI();
-	void renderGUI();
-	void makeMenuButtons();
+	void initGUI();				//Sets up CEGUI and makes the BSOD GUI
+	void renderGUI();			//Renders the GUI to the 2D screen
+	void makeMenuButtons();		
 	void makeServerWindow();
 	void makeProtocolWindow();
-	void resizeGUI(int x, int y);
-	bool processGUIEvent(SDL_Event e);
-	void addProtocolEntry(string name, Color col, int index);
+	void resizeGUI(int x, int y); //Invoked by the event handler
+	bool processGUIEvent(SDL_Event e); 	//Passes an event to the GUI. If it
+										//returns true, then the GUI is assumed
+										//to have handled, and it's not 
+										//processed further
+	void addProtocolEntry(string name, Color col, int index); //Adds an entry
+										//to the protocol window
 	
 	//GUI callback handlers
 	bool onWndClose(const CEGUI::EventArgs&);
@@ -160,40 +165,39 @@ public:
 	static void setS(App *s){mSingleton = s;}
 
 	//Initial setup
-	int init(App *a, int argc, char **argv);
+	int init(App *a, int argc, char **argv);	//Application entry
 
-	//font.cpp	
-	void writeText(int x, int y, const char *fmt, ...);
-	void writeTextCentered(int x, int y, const char *fmt, ...);
+	//font.cpp - legacy 2D GUI stuff
+	void writeText(int x, int y, const char *fmt, ...);	//Writes freetype2 text
+	void writeTextCentered(int x, int y, const char *fmt, ...); //Centered text
 
 	//misc.cpp
-	float randFloat();
-	int randInt(int low, int high);
-	float randFloat(float low, float high);
+	float randFloat(); //Return a float between 0.0-1.0
+	int randInt(int low, int high);	//Return random integer
+	float randFloat(float low, float high);	//Return a float between two nums
 	
 	//gl_util.cpp
-	void utilCube(float x, float y, float z);
-	void utilPlane(float x, float y, float z);
-	Vector2 utilProject(float x, float y, float z);
+	void utilCube(float x, float y, float z); //Render a 3D cube of size xyz
+	void utilPlane(float x, float y, float z); //Render a planet of size x/z
+	Vector2 utilProject(float x, float y, float z); //Wrapper for gluUnproject
 	
 	//Update.cpp
-	void utilShutdown(int returnCode);
-	void notifyShutdown(){done = true;}
+	void utilShutdown(int returnCode); //Called automatically on exit
+	void notifyShutdown(){done = true;}	//Start the shutdown process
 
-	//Camera movement
-	void endDrag();
-	void beginDrag();
-	void camMove(float x, float y, float z);
-	void camLookAt(float x, float y, float z);
-	void camSetPos(float x, float y, float z);
+	//Camera
+	void endDrag(); //Called when the rotation drag starts
+	void beginDrag(); //Called when the rotation drag ends
+	void camMove(float x, float y, float z); //Offset the camera position
+	void camLookAt(float x, float y, float z); //Set the camera focus
+	void camSetPos(float x, float y, float z); //Set the camera position
 	
 	//texture.cpp
-	Texture *texGet(string name);
-	Texture *texLoad(string name, int flags);
-	Texture *texGenerate(string name, byte *buffer, int width, int height);
+	Texture *texGet(string name); //Return a loaded texture by name
+	Texture *texLoad(string name, int flags); //Load a texture from disk
 	
 	//particle management
-	IParticleSystem *ps(){return mParticleSystem;}
+	IParticleSystem *ps(){return mParticleSystem;} 
 	
 	//Mouse
 	Vector2 getMouse(){return Vector2(iMouseX, iMouseY);}
@@ -207,21 +211,21 @@ public:
 **********************************************/
 	
 	//Screen resolution
-	int iScreenX;
-	int iScreenY;
-	bool bFullscreen;
+	int iScreenX;				//Horizontal screen resolution
+	int iScreenY;				//Vertical screen resolution
+	bool bFullscreen;			//Whether the window is fullscreened 
 	
 	//server
-	string mServerAddr;
-	int iServerPort;
+	string mServerAddr;			//The current server we're connected to
+	int iServerPort;			//The port that server uses
 	
 	//rendering
-	float fParticleSizeScale;
-	float fParticleSpeedScale;
+	float fParticleSizeScale;	//Global scaling factor applied to size
+	float fParticleSpeedScale;	//Global scaling factor applied to speed
 	
 	//Skip
-	int iDropPacketThresh;
-	int iDropFlowThresh;
+	int iDropPacketThresh; //The FPS that we start to discard packets below
+	int iDropFlowThresh; //The FPS that we start to discard flows below
 		
 };
 

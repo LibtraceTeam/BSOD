@@ -86,6 +86,7 @@ Texture *App::texLoad(string name, int flags){
 /*********************************************
 	Generates a texture from a buffer
 **********************************************/
+/*
 Texture *App::texGenerate(string name, byte *buffer, int width, int height){
 
 	Texture *tex = genTexObj();
@@ -109,10 +110,12 @@ Texture *App::texGenerate(string name, byte *buffer, int width, int height){
 		
 	return tex; 
 }
+*/
 
 /*********************************************
 	Generates a texture from a buffer
 **********************************************/
+/*
 void App::texRegenerate(Texture *t, byte *buffer, int width, int height){
 	GLuint i;
 	
@@ -124,9 +127,9 @@ void App::texRegenerate(Texture *t, byte *buffer, int width, int height){
 	glBindTexture(GL_TEXTURE_2D, i);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
-	t->iGLID = i;
-	
+	t->iGLID = i;	
 }
+*/
 
 /*********************************************
 		Starts up the texture sys

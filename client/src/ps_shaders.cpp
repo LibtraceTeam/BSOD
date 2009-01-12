@@ -130,7 +130,7 @@ void PSShaders::renderAll(){
 		
 	float scale = (1.0f/(float)iNumActive) * 150000;	
 	scale *= App::S()->fParticleSizeScale;	
-	if(scale < 1.0f){ scale = 1.0f; }
+	if(scale < 5.0f){ scale = 5.0f; }
 					
 	//Set a default size here
 	glPointSize(scale); 	
@@ -188,6 +188,9 @@ void PSShaders::renderAll(){
 }
 
 void PSShaders::shutdown(){
+	
+	mShader.dispose();
+	glDeleteLists(mDisplayList, 1);
 	
 	PSSprites::shutdown();
 }

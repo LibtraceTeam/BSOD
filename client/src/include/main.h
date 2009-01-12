@@ -131,6 +131,7 @@ class App{
 	void initGUI();				//Sets up CEGUI and makes the BSOD GUI
 	void renderGUI();			//Renders the GUI to the 2D screen
 	void makeMenuButtons();		
+	void makeOptionWindow();
 	void makeServerWindow();
 	void makeProtocolWindow();
 	void resizeGUI(int x, int y); //Invoked by the event handler
@@ -146,6 +147,7 @@ class App{
 	bool onProtocolClicked(const CEGUI::EventArgs&);
 	bool onMenuButtonClicked(const CEGUI::EventArgs&);
 	bool onServerListClicked(const CEGUI::EventArgs&);
+	bool onOptionSliderMoved(const CEGUI::EventArgs&);
 	bool onMouseCursorChanged(const CEGUI::EventArgs&);
 	bool onServerButtonClicked(const CEGUI::EventArgs&);
 	bool onProtocolButtonClicked(const CEGUI::EventArgs&);

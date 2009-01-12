@@ -19,6 +19,7 @@ DefaultWindow *root = NULL;
 WindowManager *winMgr = NULL;
 FrameWindow *mProtoWindow = NULL;
 FrameWindow *mServerWindow = NULL;
+FrameWindow *mOptionWindow = NULL;
 
 //Globals. Stolen from:
 //http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_SDL_and_OpenGL
@@ -96,7 +97,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 	//From that we can figure out which window we want to toggle
 	if(senderID == "btnServers") target = mServerWindow;
 	else if(senderID == "btnProtocols") target = mProtoWindow;
-	else if(senderID == "btnOptions") target = NULL;
+	else if(senderID == "btnOptions") target = mOptionWindow;
 	
 	//Toggle the window if we found it. TODO: We could do fancy fades with 
 	//setAlpha() and such...
@@ -231,6 +232,23 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	}
 }
 
+bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	Slider *slide = (Slider *)we->window;
+	
+	float val = (slide->getCurrentValue() * 10.0f);
+	
+	if(we->window->getName() == "slideSpeed"){	
+		fParticleSpeedScale = val;
+		DefaultWindow *text = (DefaultWindow *)winMgr->getWindow("txtSpeedInfo");
+		text->setText("Particle Speed: " + toString(val));
+	}else{
+		fParticleSizeScale = val;
+		DefaultWindow *text = (DefaultWindow *)winMgr->getWindow("txtSizeInfo");
+		text->setText("Particle Size: " + toString(val));
+	}
+}
+
 /*********************************************
 		CEGUI setup - create the UI**********************************************/
 void App::initGUI(){
@@ -291,13 +309,11 @@ void App::initGUI(){
 	
 	//And the server window
 	makeServerWindow();
-		
-	//Set the mouse cursor
-	//CEGUI::System::getSingleton().setDefaultMouseCursor((CEGUI::utf8*)"SleekSpace", (CEGUI::utf8*)"MouseArrow");
-	//CEGUI::MouseCursor::getSingleton().setImage(CEGUI::System::getSingleton().getDefaultMouseCursor()); 
 	
-
-
+	//And finally the options window
+	makeOptionWindow();
+		
+	//Set the mouse cursor event.
 	CEGUI::MouseCursor::getSingleton().subscribeEvent(
 						MouseCursor::EventImageChanged, 
 						Event::Subscriber(&App::onMouseCursorChanged, this) );
@@ -483,6 +499,61 @@ void App::makeServerWindow(){
     mServerWindow->setAlpha(0.85f);
     mServerWindow->setSizingEnabled(false);
     mServerWindow->hide();
+}
+
+void App::makeOptionWindow(){
+          
+    mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndOption");
+    root->addChildWindow(mOptionWindow);
+    
+    mOptionWindow->setPosition(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.45f)));
+    mOptionWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.35f)));  
+    mOptionWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
+    mOptionWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
+    mOptionWindow->setText("Options");    
+    mOptionWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
+    mOptionWindow->setAlpha(0.85f);
+    mOptionWindow->setSizingEnabled(false);
+    mOptionWindow->hide();
+    
+      
+    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSpeedInfo");
+    mOptionWindow->addChildWindow(text);
+	text->setText("Particle Speed: 1.0");	
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.15f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+    
+    Slider *slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSpeed"));
+    mOptionWindow->addChildWindow(slide);
+    slide->setText("Connect");
+    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.3f)));
+    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.15f)));
+    slide->setAlwaysOnTop(true);	
+	slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
+	slide->setCurrentValue(fParticleSpeedScale / 10.0f);
+
+    text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSizeInfo");
+    mOptionWindow->addChildWindow(text);
+	text->setText("Particle Size: 1.0");	
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.5f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+    
+    slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSize"));
+    mOptionWindow->addChildWindow(slide);
+    slide->setText("Size");
+    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.65f)));
+    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.15f)));
+    slide->setAlwaysOnTop(true);	
+    slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
+    slide->setCurrentValue(fParticleSizeScale / 10.0f);
+ 
+	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
+    mOptionWindow->addChildWindow(text);
+	text->setText("Version: 1.234");	
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.8f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+    
+    
 }
 
 

@@ -38,13 +38,22 @@ void PSSprites::render(){
 	
 	
 	float scale = (1.0f/(float)iNumActive) * 150000;	
+	if(scale < 5.0f){ scale = 5.0f; }
+	else if(scale > MAX_SIZE * App::S()->fParticleSizeScale){	
+		scale = MAX_SIZE * App::S()->fParticleSizeScale;
+	}
+	
 	scale *= App::S()->fParticleSizeScale;	
-	if(scale < 1.0f){ scale = 1.0f; }
 		
-		
+	
+
+	float maxSize = 0.0f;
+	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
 		
 	//Set a default size here
 	glPointSize(scale); 	
+	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
+	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
 	
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glDisableClientState(GL_COLOR_ARRAY);
@@ -120,12 +129,12 @@ bool PSSprites::init(){
 	float maxSize = 0.0f;
 	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
 
-	if( maxSize > MAX_SIZE * App::S()->fParticleSizeScale)
-		maxSize = MAX_SIZE * App::S()->fParticleSizeScale;
+	//if( maxSize > MAX_SIZE * App::S()->fParticleSizeScale)
+	//	maxSize = MAX_SIZE * App::S()->fParticleSizeScale;
 			
 	glPointSize( maxSize );
 	glPointParameterfARB( GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f );
-	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f * App::S()->fParticleSizeScale );
+	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, 1.0f );
 	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, maxSize );
 	glTexEnvf( GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE );
 	glEnable( GL_POINT_SPRITE_ARB );
@@ -178,6 +187,8 @@ void PSClassic::shutdown(){
 	Move particles, expire as necessary
 **********************************************/
 void PSClassic::update(){
+	
+	float speedScale = App::S()->fParticleSpeedScale * PARTICLE_FPS;
 
 	map<float, vector<Particle *> *>::const_iterator itr;
 	
@@ -195,11 +206,6 @@ void PSClassic::update(){
 				continue;
 			}	
 		
-				
-			//if(!p->active){
-			//	continue;
-			//}
-		
 			if(p->life < 0){
 				del(itr->first, i);
 				i--;
@@ -207,17 +213,11 @@ void PSClassic::update(){
 			}
 								
 			//Move the particle
-			p->x += p->vx * PARTICLE_FPS;
-			p->y += p->vy * PARTICLE_FPS;
-			p->z += p->vz * PARTICLE_FPS;
-			p->life -= PARTICLE_FPS;
-		
-			
-			if(p->life < 0.5f)
-				p->a = (p->life * 2.0f);		
-			else if(p->a < 1.0f)
-				p->a += (PARTICLE_FPS * 2.0f);
-				
+			p->x += p->vx * speedScale;
+			p->y += p->vy * speedScale;
+			p->z += p->vz * speedScale;
+			p->life -= speedScale;	
+							
 			//TODO: More particle logic here?
 		}
 	}

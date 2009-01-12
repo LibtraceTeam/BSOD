@@ -273,7 +273,7 @@ void App::updateSocket(){
 			
 		
 			
-			mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));	
+			mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));
 			
 			iTime = ntohl(pkt->ts);			
 		}

@@ -65,7 +65,7 @@ void App::drawStatusBar(){
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
 	//Text
-	writeText(10, 7, "%d fps", iFPS);	
+	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
 
 	if(fTimeScale == infinity || fTimeScale == 0.0f){
 		writeText(5, 25, "(waiting)");	   

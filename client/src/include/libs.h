@@ -4,7 +4,7 @@
  This file includes all the common standard libraries that the client uses. It's
  nice to have them all in one place
  
- You'll need: SDL, DevIL, SDL_ttf, libconfuse, SDL_net
+ You'll need: SDL, DevIL, SDL_ttf, libconfuse, SDL_net, CEGUI
 *******************************************************************************/
 
 

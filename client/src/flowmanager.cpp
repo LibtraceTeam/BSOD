@@ -79,7 +79,7 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 star
 	ip2.s_addr = dst.host;
 		
 	//How many seconds it takes to go from one side to the other
-	//This will be scaled per-particle based on the RTT
+	//This will be scaled per-particle based on the RTT and global scaling
 	float speed = 10.0f;
 		
 	//Size of the particle

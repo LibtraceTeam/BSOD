@@ -234,7 +234,7 @@ void PSClassic::render(){
 	float scale = setSizeScale();
 			
 	map<float, ParticleCollection *>::const_iterator itr;
-	
+		
 	//Go through each of the particle collections
 	for(itr = mParticleCollections.begin(); 
 		itr != mParticleCollections.end(); ++itr){	
@@ -273,9 +273,12 @@ void PSClassic::render(){
 				glTexCoord2f(1,0); glVertex3f(x+s, y-s, z); // Bottom Right
 				glTexCoord2f(0,0); glVertex3f(x-s, y-s, z); // Bottom Left
 			glEnd();
+
+				
 		}
 		
 	}	
+	
 
 	//And clean up
 	glDisable(GL_BLEND);	

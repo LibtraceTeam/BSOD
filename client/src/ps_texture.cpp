@@ -1,5 +1,9 @@
 #include "main.h"
 
+
+/*********************************************
+		  Set up the framebuffer
+**********************************************/
 bool PSTexture::init(){
 
 	LOG("Starting PSTexture!\n");
@@ -69,6 +73,10 @@ bool PSTexture::init(){
 	return PSSprites::init();
 }
 
+
+/*********************************************
+ 	Render the particles to the texture 
+**********************************************/
 void PSTexture::render(){
 
 	//Set up the render target
@@ -102,12 +110,17 @@ void PSTexture::render(){
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
 
+
+/*********************************************
+ 	Our internal particle rendering
+**********************************************/
 void PSTexture::renderAll(){
 
 	//Set GL state	
 	glDisable( GL_POINT_SPRITE_ARB );
 	glPointSize(2.0f);
-	glBegin(GL_POINTS);	
+	//glBegin(GL_POINTS);	
+	float scale = setSizeScale() * 0.25f;
 			
 	map<float, ParticleCollection *>::const_iterator itr;
 	
@@ -132,6 +145,8 @@ void PSTexture::renderAll(){
 		}
 		
 		collection->mColor.bind();
+		glPointSize(collection->fSize * scale);
+		glBegin(GL_POINTS);
 		
 		//Set the state for this collection
 		count += list->size(); //Count the number of particles
@@ -142,14 +157,20 @@ void PSTexture::renderAll(){
 			Particle *p = (*list)[i];		
 			glVertex3f(p->x, p->y, p->z);
 		}	
+		
+		glEnd();
 	
 	}	
 
-	glEnd();
+	//glEnd();
 	
 	iNumActive = count;
 }
 
+
+/*********************************************
+ 	Render the texture to the screen 
+**********************************************/
 void PSTexture::render2D(){
 	//OK. Now we need to draw a plane with the texture on, 
 	//covering the entire screen. We draw it several times with additive
@@ -179,6 +200,10 @@ void PSTexture::render2D(){
 	
 }
 
+
+/*********************************************
+	Cleanups
+**********************************************/
 void PSTexture::shutdown(){
 	glDeleteFramebuffersEXT(1, &fbo);
 	glDeleteTextures(1, &img);

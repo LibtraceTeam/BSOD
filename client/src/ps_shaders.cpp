@@ -110,14 +110,7 @@ void PSShaders::render(){
 
 void PSShaders::renderAll(){
 	
-	//Get the texture first
-	Texture *tex = App::S()->texGet("particle.bmp");
-	if(!tex){
-		LOG("Bad texture in PSSprites!\n");
-		return;
-	}else{
-		tex->bind();		
-	}
+	mTexture->bind();
 	
 	int count = 0;
 	int bad = 0;

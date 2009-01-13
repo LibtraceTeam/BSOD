@@ -7,14 +7,7 @@
 *******************************************************************************/
 void PSSprites::render(){
 	
-	//Get the texture first
-	Texture *tex = App::S()->texGet("particle.bmp");
-	if(!tex){
-		LOG("Bad texture in PSSprites!\n");
-		return;
-	}else{
-		tex->bind();		
-	}
+	mTexture->bind();
 	
 	int count = 0;
 	int bad = 0;
@@ -139,10 +132,14 @@ bool PSClassic::init(){
 	iNumActive = 0;
 	
 	bNeedRecompile = true;
-
 	mDisplayList = glGenLists(1);
-				
-	return true; //We assume we can always do this!
+	
+	mTexture = App::S()->texGet("particle.bmp");	
+	if(!mTexture){
+		return false;
+	}
+					
+	return true;
 }
 
 void PSClassic::shutdown(){
@@ -196,61 +193,77 @@ void PSClassic::update(){
 **********************************************/
 void PSClassic::render(){
 
-/*
-	if(bNeedRecompile){
+	mTexture->bind();
 	
-		glNewList(mDisplayList,GL_COMPILE);
+	int count = 0;
+	int bad = 0;
+	
+	//Set GL state
+	glEnable(GL_TEXTURE_2D);		
+	glDepthMask(GL_FALSE);		
+	glEnable(GL_BLEND);							
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
+	
+	//Scaling	
+	float scale = setSizeScale();
 			
-		glEnable(GL_TEXTURE_2D);		
-		App::S()->texGet("particle.bmp")->bind();		
-		glDepthMask(GL_FALSE);		
-		//glDisable(GL_DEPTH_TEST);		
-		glEnable(GL_BLEND);							
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE);	
+	map<float, ParticleCollection *>::const_iterator itr;
 	
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);			
-		glHint(GL_POINT_SMOOTH_HINT,GL_NICEST);		
-	
-		map<Color, vector<Particle *> *>::const_iterator itr;
+	//Go through each of the particle collections
+	for(itr = mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){	
+			
+		ParticleCollection *collection = itr->second;			
+		vector<Particle *> *list = &collection->mParticles;
 		
-		for(itr = mColorMap.begin(); itr != mColorMap.end(); ++itr){
-		
-			vector<Particle *> *list = itr->second;
-		
-			for(int i=0;i<list->size();i++){
-		
-				Particle *p = mActive[i];
-		
-				//if(!p->active){
-				//	continue;
-				//}
-					
-				glColor4f(p->r, p->g, p->b, p->a);
-		
-				float s = p->size;		
-				float x = p->x;
-				float y = p->y; 
-				float z = p->z;
-		
-				glBegin(GL_TRIANGLE_STRIP);	
-					glTexCoord2d(1,1); glVertex3f(x+s, y+s, z); // Top Right
-					glTexCoord2d(0,1); glVertex3f(x-s, y+s, z); // Top Left
-					glTexCoord2d(1,0); glVertex3f(x+s, y-s, z); // Bottom Right
-					glTexCoord2d(0,0); glVertex3f(x-s, y-s, z); // Bottom Left
-				glEnd();
+		//Make sure we've got at least one particle
+		if(list->size() == 0) {
+			continue; 
 		}
-	
-		glEnd();
-		glDisable(GL_BLEND);	
-		glDepthMask(GL_TRUE);
-		//glEnable(GL_DEPTH_TEST);
 		
-		glEndList();	
-		bNeedRecompile = false;			
-	}
+		//Set the state for this collection
+		float s = collection->fSize / 4.0f;
+		collection->mColor.bind();
+		
+		bad++; //Count the number of state changes
+		count += list->size(); //Count the number of particles
+		
+		for(int i=0;i<(int)list->size();i++){			
+			Particle *p = (*list)[i];	
+				
+			float x = p->x;
+			float y = p->y; 
+			float z = p->z;
+
+			glBegin(GL_TRIANGLE_STRIP);	
+				glTexCoord2f(1,1); glVertex3f(x+s, y+s, z); // Top Right
+				glTexCoord2f(0,1); glVertex3f(x-s, y+s, z); // Top Left
+				glTexCoord2f(1,0); glVertex3f(x+s, y-s, z); // Bottom Right
+				glTexCoord2f(0,0); glVertex3f(x-s, y-s, z); // Bottom Left
+			glEnd();
+		}
+		
+	}	
+
+	//And clean up
+	glDisable(GL_BLEND);	
+	glDepthMask(GL_TRUE);
 	
-	glCallList(mDisplayList);
-*/
+	iNumActive = count;
+}
+
+
+/*********************************************
+ Figure out and set the dynamic scaling factor 
+**********************************************/
+float PSClassic::setSizeScale(){
+	float scale = (1.0f/(float)iNumActive) * 150000;	
+	if(scale < 5.0f){ scale = 5.0f; }
+	else if(scale > MAX_SIZE * App::S()->fParticleSizeScale){	
+		scale = MAX_SIZE * App::S()->fParticleSizeScale;
+	}	
+	scale *= App::S()->fParticleSizeScale;						
+	return scale;
 }
 
 /*********************************************

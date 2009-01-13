@@ -53,6 +53,8 @@ protected:
 	int iLastColorChanges;
 	float fTime;
 	
+	Texture *mTexture;
+	
 	//particle lists
 	Particle mParticles[MAX_PARTICLES];	
 	stack<Particle *> mFree; 
@@ -67,6 +69,7 @@ protected:
 	
 	//Other util
 	void del(ParticleCollection *col, int i);
+	virtual float setSizeScale();
 public:
 
 	//overridden by PSSprites and PSShaders

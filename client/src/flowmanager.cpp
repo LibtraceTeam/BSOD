@@ -207,8 +207,6 @@ void FlowManager::delAll(){
 			
 	}
 	
-	LOG("2\n");
-	
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
 #ifdef USE_TR1
 	for(std::tr1::unordered_map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){

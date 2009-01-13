@@ -130,7 +130,13 @@ void PSShaders::renderAll(){
 	for(itr = mParticleCollections.begin(); 
 		itr != mParticleCollections.end(); ++itr){	
 			
-		ParticleCollection *collection = itr->second;			
+		ParticleCollection *collection = itr->second;		
+		
+		//This may be hidden by colour or size
+		if(!collection->bShown){
+			continue;
+		}
+			
 		vector<Particle *> *list = &collection->mParticles;
 		
 		//Make sure we've got at least one particle

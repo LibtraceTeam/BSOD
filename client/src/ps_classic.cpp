@@ -27,7 +27,13 @@ void PSSprites::render(){
 	for(itr = mParticleCollections.begin(); 
 		itr != mParticleCollections.end(); ++itr){	
 			
-		ParticleCollection *collection = itr->second;			
+		ParticleCollection *collection = itr->second;		
+		
+		//This may be hidden by colour or size
+		if(!collection->bShown){
+			continue;
+		}
+			
 		vector<Particle *> *list = &collection->mParticles;
 		
 		//Make sure we've got at least one particle
@@ -213,7 +219,13 @@ void PSClassic::render(){
 	for(itr = mParticleCollections.begin(); 
 		itr != mParticleCollections.end(); ++itr){	
 			
-		ParticleCollection *collection = itr->second;			
+		ParticleCollection *collection = itr->second;	
+		
+		//This may be hidden by colour or size
+		if(!collection->bShown){
+			continue;
+		}
+				
 		vector<Particle *> *list = &collection->mParticles;
 		
 		//Make sure we've got at least one particle
@@ -374,9 +386,22 @@ void PSClassic::delAll(){
 	LOG("delAll stub called\n");
 }
 
+
+/*********************************************	Toggle showing a colour
+**********************************************/
 void PSClassic::showColor(Color c, bool bShow){
-	
+
+	map<float, ParticleCollection *>::const_iterator itr;
+	for(itr = mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){				
+		ParticleCollection *collection = itr->second;		
+		
+		if(ABS(collection->mColor.sum() - c.sum()) < 0.0001f){
+			collection->bShown = bShow;
+		}
+	}
 }
+
 
 
 

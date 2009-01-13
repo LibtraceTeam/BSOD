@@ -121,7 +121,7 @@ void App::utilEventLoop(){
 			    break;
 			
 			case SDL_MOUSEBUTTONDOWN:
-				
+								
 				if(mFlowMgr->onClick(event.button.button, 
 									fMouseX, fMouseY, fMouseZ)){
 					break;

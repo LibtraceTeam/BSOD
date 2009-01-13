@@ -68,6 +68,10 @@ public:
 		return string(buf);
 	}
 	
+	void bind(){
+		glColor3f(r,g,b);
+	}
+	
 	
 };
 

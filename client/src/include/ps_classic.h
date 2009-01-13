@@ -26,27 +26,47 @@ public:
 
 
 /*********************************************
+	Represents a group of particles that 
+	share common colours and size
+**********************************************/
+class ParticleCollection{
+public:
+	vector<Particle *> mParticles;
+	float fSize;
+	Color mColor;
+	bool bShown;
+	
+	//For sorting
+	float sum(){
+		return mColor.sum() + (fSize * 100000);
+	}	
+	void del(int i);
+};
+
+
+/*********************************************
 		A triangle-based particle system. 
 **********************************************/
 class PSClassic : public IParticleSystem{
 protected:
 	int iNumActive;
 	int iLastColorChanges;
+	float fTime;
 	
 	//particle lists
 	Particle mParticles[MAX_PARTICLES];	
 	stack<Particle *> mFree; 
 	
-	//Various maps. You can never have enough maps. 
-	map<float, vector<Particle *> *> mColorMap; //We map the color to the list
-	map<float, Color> mColorLookup; //We also store the mapping of sum->col
-	map<float, bool> mColorShown; //And finally a mapping of shown->color. 
-
-	void del(float col, int i); //delete a specific particle	
+	//The collection of renderable particles. 
+	map<float, ParticleCollection *> mParticleCollections;	
+	ParticleCollection *getCollection(Color col, float size);
 	
+	//Display list
 	GLuint mDisplayList;
 	bool bNeedRecompile;	
 	
+	//Other util
+	void del(ParticleCollection *col, int i);
 public:
 
 	//overridden by PSSprites and PSShaders
@@ -69,6 +89,9 @@ public:
 		A point-sprite particle system
 **********************************************/
 class PSSprites : public PSClassic{
+protected:
+	float setSizeScale();
+	float fMaxSize;
 public:
 	bool init();
 	void render();

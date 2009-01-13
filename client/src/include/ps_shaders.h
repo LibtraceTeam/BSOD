@@ -13,7 +13,6 @@ class PSShaders : public PSSprites{
 protected:
 			
 	Shader mShader;
-	float fTime;
 	float fUpdateTimer;
 	float fRenderTimer;
 	
@@ -23,9 +22,7 @@ protected:
 	
 public:
 	bool init();	
-	
-	void add(Vector3 pos, Vector3 speed, Color col, float size, float life);
-		
+			
 	//Common particle system operations	
 	void update();		
 	void shutdown();

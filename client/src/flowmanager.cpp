@@ -117,32 +117,29 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 	if(f && type){
 		
 		//Figure out size multiplier
-		//NOTE: We set base size to 1.0, so this is actually the *actual* size
-		float sizeMultiplier = (( (float)size) / 1400.0f);
+		//Note that we partition into small, medium and large packets. It makes
+		//it faster to render, as it minimizes state changes. Feel free to add
+		//more distinct sizes here though, it should deal. 
+		float sizeMultiplier = 1.0f;
 		
-		if(sizeMultiplier < 0.4f)	sizeMultiplier = 0.4f;
-		if(sizeMultiplier > 2.0f)	sizeMultiplier = 2.0f;
-
-		sizeMultiplier /= 5.0f; //yes, particles are *small*
+		if(size < 128) sizeMultiplier = 0.75f;
+		else if(size > 1400) sizeMultiplier = 1.25f;
 		
-		sizeMultiplier *= App::S()->fParticleSizeScale;
-				
 		//And speed multiplier
-		float speedMultiplier = (3.0f / rtt) * App::S()->fParticleSpeedScale;
-						
+		float speedMultiplier = (1.0f / rtt);
+								
 		//And add the particle
 		PSParams *p = &f->mParamsStart;
-		//if(rtt > 0)	p = &f->mParamsStart;
-		//else			p = &f->mParamsEnd;
 					
 		if(!p){
 			LOG("Bad params!\n");
 			return;
 		}
 		
-		
-				
-		App::S()->ps()->add(p->mPos, p->mVel, type->mColor, p->size, p->life);
+		//Add the particle		
+		App::S()->ps()->add(p->mPos, p->mVel * speedMultiplier, 
+							type->mColor, sizeMultiplier, 
+							p->life / speedMultiplier);
 		
 		f->mDescr = type;
 				

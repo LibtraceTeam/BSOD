@@ -10,6 +10,7 @@
 #define PARTICLE_SYSTEM_CLASSIC	 		1
 #define PARTICLE_SYSTEM_POINTSPRITES 	2
 #define PARTICLE_SYSTEM_SHADERS 		3
+#define PARTICLE_SYSTEM_TEXTURE			4
 
 /*********************************************
 		Particle system interface
@@ -25,6 +26,7 @@ public:
 	//Called automatically each frame
 	virtual void update()=0;
 	virtual void render()=0;
+	virtual void render2D(){}
 		
 	//Add a particle with these attributes
 	virtual void add(Vector3 pos, Vector3 speed, Color col, 

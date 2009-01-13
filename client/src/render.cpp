@@ -31,7 +31,22 @@ void App::renderMain(){
 
 	utilBeginRender();
 		
-	//position the GL camera
+	camLook();
+				
+	mFlowMgr->render();	
+		
+	calculateMousePoint();
+	
+	mParticleSystem->render();
+								
+	utilEndRender();
+}
+
+
+/*********************************************
+			Set the camera transform
+**********************************************/
+void App::camLook(){
 	gluLookAt(	fCameraX, 		fCameraY, 		fCameraZ, 
 				fLookX,			fLookY,			fLookZ, 
 				0, 				1, 				0			);
@@ -41,14 +56,6 @@ void App::renderMain(){
 	glRotatef(fRot[0], 1, 0, 0);
 	glRotatef(fRot[1], 0, 1, 0);
 	glRotatef(fRot[2], 0, 0, 1);
-				
-	mFlowMgr->render();	
-		
-	calculateMousePoint();
-	
-	mParticleSystem->render();
-								
-	utilEndRender();
 }
 
 
@@ -87,6 +94,8 @@ void App::render2D(){
 	drawStatusBar();
 	
 	mFlowMgr->render2d();
+	
+	ps()->render2D();
 	
 	//Render the GUI
 	renderGUI();	

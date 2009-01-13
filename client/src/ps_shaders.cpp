@@ -35,6 +35,9 @@ bool PSShaders::init(){
 	if(!mShader.compile()) return false;
 
 	mDisplayList = glGenLists(1);
+	
+	//This means we can set pointsize in the vertex shader
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 		
 	//If we got this far, it's all good.
 	
@@ -119,12 +122,15 @@ void PSShaders::renderAll(){
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
 	glEnable(GL_BLEND);							
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
-	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);	
+		
 	//Scaling	
 	float scale = setSizeScale();
 			
 	map<float, ParticleCollection *>::const_iterator itr;
+	
+	
+	glBegin(GL_POINTS);	
 	
 	//Go through each of the particle collections
 	for(itr = mParticleCollections.begin(); 
@@ -144,27 +150,26 @@ void PSShaders::renderAll(){
 			continue; 
 		}
 		
+		
 		//Set the state for this collection
-		glPointSize(collection->fSize * scale);
+		float thisSize = collection->fSize * scale;
 		collection->mColor.bind();
 		
 		bad++; //Count the number of state changes
 		count += list->size(); //Count the number of particles
-		
-		glBegin(GL_POINTS);
-		
+				
 		//Now render all the particles in this list	
 		//TODO: Use glDrawArrays!															
 		for(int i=0;i<(int)list->size();i++){			
 			Particle *p = (*list)[i];		
 			glNormal3f(p->vx, p->vy, p->vz);
-			glTexCoord2f(p->timestamp, 0.0f);
+			glTexCoord2f(p->timestamp, thisSize);
 			glVertex3f(p->x, p->y, p->z);
 		}		
-		
-		glEnd();
-		
+				
 	}	
+	
+	glEnd();
 
 	//And clean up
 	glDisable(GL_BLEND);	

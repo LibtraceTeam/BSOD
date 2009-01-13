@@ -12,8 +12,6 @@
 **********************************************/
 class Particle{
 public:
-	bool active; //if it's alive or not
-	
 	float x,y,z; //position in 3-space relative to the origin of the parent
 	float life; //how long left till it dies
 	float r,g,b,a; //color
@@ -22,6 +20,9 @@ public:
 	float timestamp; //Used by shaders - the current time at creation 
 	
 	unsigned int index; //index into the parent particle array
+	
+	bool active; //if it's alive or not
+	
 };
 
 

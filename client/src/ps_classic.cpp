@@ -1,6 +1,7 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
+//#define DISABLE_SIZE
 
 /*******************************************************************************
 							PointSprites
@@ -16,8 +17,14 @@ void PSSprites::render(){
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
 	glEnable(GL_BLEND);							
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 	
+	//glEnableClientState(GL_VERTEX_ARRAY);
+
+#ifdef DISABLE_SIZE
+	glPointSize(5.0f);
+	glBegin(GL_POINTS);	
+#endif
 	//Scaling	
 	float scale = setSizeScale();
 			
@@ -41,29 +48,42 @@ void PSSprites::render(){
 			continue; 
 		}
 		
-		//Set the state for this collection
-		glPointSize(collection->fSize * scale);
 		collection->mColor.bind();
+		
+		//Set the state for this collection
+#ifndef DISABLE_SIZE
+		glPointSize(collection->fSize * scale);
+		glBegin(GL_POINTS);
+#endif
 		
 		bad++; //Count the number of state changes
 		count += list->size(); //Count the number of particles
-		
-		glBegin(GL_POINTS);
-		
+				
 		//Now render all the particles in this list	
-		//TODO: Use glDrawArrays!															
+		//TODO: Use glDrawArrays!													
 		for(int i=0;i<(int)list->size();i++){			
 			Particle *p = (*list)[i];		
 			glVertex3f(p->x, p->y, p->z);
-		}	
-		
+		}
+				
+		//Particle *first = (*list)[0];
+		//glVertexPointer(3, GL_FLOAT, sizeof(Particle), &first->x);
+       	//glDrawArrays(GL_POINTS, 0, (int)list->size());
+
+#ifndef DISABLE_SIZE
 		glEnd();
+#endif
 		
 	}	
+
+#ifdef DISABLE_SIZE	
+	glEnd();
+#endif
 
 	//And clean up
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
+	//glDisableClientState(GL_VERTEX_ARRAY);
 	
 	iNumActive = count;
 }

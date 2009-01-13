@@ -21,6 +21,7 @@
 #include "ps_interface.h"
 #include "ps_classic.h"
 #include "ps_shaders.h"
+#include "ps_texture.h"
 #include "flowmanager.h"
 
 /*********************************************
@@ -193,6 +194,7 @@ public:
 	void camMove(float x, float y, float z); //Offset the camera position
 	void camLookAt(float x, float y, float z); //Set the camera focus
 	void camSetPos(float x, float y, float z); //Set the camera position
+	void camLook(); //Calls glulookat - part of rendering
 	
 	//texture.cpp
 	Texture *texGet(string name); //Return a loaded texture by name

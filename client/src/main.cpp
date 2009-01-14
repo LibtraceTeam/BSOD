@@ -61,6 +61,10 @@ int App::init(App *a, int argc, char **argv){
 
 	//Input
 	keyInit();
+	
+	for(int i=0;i<8;i++){
+		bMouse[i] = false;
+	}
 		
 	//Texturing
 	if(!texInit()){

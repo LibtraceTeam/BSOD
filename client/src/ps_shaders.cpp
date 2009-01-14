@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define SHADER_FPS (1.0f / 5.0f)
+#define SHADER_FPS (1.0f / 25.0f)
 
 /*********************************************
  Start up the PS/VS extensions, load the shader

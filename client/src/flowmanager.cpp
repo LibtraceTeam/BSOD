@@ -50,7 +50,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 		//	continue;
 		//}
 				
-		mViewFlows[i]->shade -= timeDelta * 0.1f;
+		mViewFlows[i]->shade -= timeDelta * 10;
 		
 		if(mViewFlows[i]->shade < 0.0f){
 			mViewFlows[i]->hide = true;
@@ -150,10 +150,10 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 		if(f->shade < 1.0f){
 		
 			if(f->shade <= 0.0f){
-				mViewFlows.push_back(f);
+				//mViewFlows.push_back(f);
 			}
 		
-			f->shade += 0.1f;
+			f->shade = 1.0f;
 		}
 						
 	}else{
@@ -267,7 +267,7 @@ void FlowManager::updateList(){
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glPointSize(3.0f);
-	
+		
 	
 	glBegin(GL_POINTS);	
 	
@@ -288,7 +288,11 @@ void FlowManager::updateList(){
 			continue;
 		}
 			
-		float shade = mViewFlows[i]->shade;	
+		float shade = 1.0f; //mViewFlows[i]->shade;	
+		
+		if(shade < 0.1f){
+			continue;
+		}
 					
 		glColor4f(d->mColor.r * shade, d->mColor.g * shade, d->mColor.b * shade, shade);			
 		
@@ -367,7 +371,7 @@ void FlowManager::render(){
 **********************************************/
 void FlowManager::render2d(){
 
-	//App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
+	App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
 	
 	if(mSelectedFlow){	
 		Vector2 v1 = mSelectedFlow->screenP1;

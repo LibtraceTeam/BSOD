@@ -19,6 +19,19 @@ void App::updateMain(){
 	
 	float fCamSpeed = fTimeScale * 4.0f;
 	float fDragScale = 0.05f;
+
+	//Right button means we reset rotation and such
+	//NOTE: I did have this as 'both left and right at once', which seemed
+	//to make more sense, but it doesn't work great on systems that map this
+	//to middle-mouse		
+	if(mouseDown(3)){
+		for(int i=0;i<3;i++){
+			fRot[i] = 0.0f;
+		}
+		fRot[0] = 20;
+		fZoom = 0.0f;
+		LOG("Reset!\n");
+	}
 	
 	//If we're actively dragging with the mouse
 	if(bDrag){
@@ -40,17 +53,6 @@ void App::updateMain(){
 			fZoom += diff.y;
 		}
 		
-		//Right button means we reset rotation and such
-		//NOTE: I did have this as 'both left and right at once', which seemed
-		//to make more sense, but it doesn't work great on systems that map this
-		//to middle-mouse
-		else if(mouseDown(3)){
-			for(int i=0;i<3;i++){
-				fRot[i] = 0.0f;
-			}
-			fRot[0] = 20;
-			fZoom = 0.0f;
-		}
 				
 		dragStart = Vector2(iMouseX, iMouseY);
 		dragVel = diff;

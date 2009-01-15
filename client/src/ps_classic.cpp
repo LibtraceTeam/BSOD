@@ -322,7 +322,7 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float lif
 	mFree.pop();
 			
 	//Apply some jitter
-	float jitter = App::S()->randFloat(0, 1.0f);
+	float jitter = 0.0f; //App::S()->randFloat(0, 1.0f);
 	pos = pos + speed * jitter;		
 	p->life = life - jitter;
 	
@@ -406,7 +406,18 @@ void PSClassic::del(ParticleCollection *col, int i){
 /*********************************************	Remove a bunch of particles
 **********************************************/
 void PSClassic::delAll(){
-	LOG("delAll stub called\n");
+
+	map<float, ParticleCollection *>::const_iterator itr;
+	for(itr = mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){				
+		ParticleCollection *collection = itr->second;		
+		
+		for(int i=0;i<collection->mParticles.size();i++){
+			del(collection, i);
+			i--;
+		}
+	}
+	
 }
 
 
@@ -432,8 +443,11 @@ void PSClassic::showColor(Color c, bool bShow){
 							ParticleCollection
 *******************************************************************************/
 void ParticleCollection::del(int i){
-	Particle *p = mParticles[i];	
-	mParticles[i] = mParticles[mParticles.size() - 1];
+	Particle *p = mParticles[i];
+	
+	if(mParticles.size() > 0)	
+		mParticles[i] = mParticles[mParticles.size() - 1];
+		
 	mParticles.pop_back();
 }
 

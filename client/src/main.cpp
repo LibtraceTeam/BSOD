@@ -28,7 +28,15 @@ int App::init(App *a, int argc, char **argv){
 	if(!loadConfig()){
 		LOG("Something went wrong with the config file, bailing out\n");
 		return 0;
-	}			
+	}	
+	
+					 	
+	//Start SDL
+	if(SDL_Init(0)==-1) {
+	    LOG("SDL_Init: %s\n", SDL_GetError());
+	    return 1;
+	}
+			
 	
 	//and SDL_net
 	if(SDLNet_Init()==-1) {
@@ -36,20 +44,17 @@ int App::init(App *a, int argc, char **argv){
 	    return 2;
 	}
 	
-	//Connect
+	//Set up the socket
+	initSocket();
+
+	//Connect	
 	if(mServerAddr != ""){
 		if(!openSocket()){
 			LOG("Something went wrong with the socket, bailing out\n");
 			return 0;
 		}
 	}else{
-		LOG("WARNING: No server specified - will generate phoney test data!\n");
-	}
-					 	
-	//Start SDL
-	if(SDL_Init(0)==-1) {
-	    LOG("SDL_Init: %s\n", SDL_GetError());
-	    return 1;
+		LOG("No server specified\n");
 	}
 	
 			
@@ -78,6 +83,7 @@ int App::init(App *a, int argc, char **argv){
 	iFPS = 0;
 	fTimeScale = 1.0f/60.0f;	
 	fZoom = 0.0f;
+	fGUITimeout = 0.0f;
 	
 	//Particle system
 	if(!initParticleSystem()){

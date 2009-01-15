@@ -33,4 +33,9 @@
 
 #define CAMERA_SPEED 0.5f
 
+//UDP ports
+#define UDP_SERVER_PORT 2080 //the port the server listens to broadcast on
+
+#define VERSION 0.1
+
 const float infinity = std::numeric_limits<float>::infinity();

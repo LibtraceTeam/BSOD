@@ -102,8 +102,8 @@ void PSTexture::render(){
 	
 	//Render with point sprites as normal
 	//renderAll();
-	//PSSprites::render();
-	PSClassic::render();
+	PSSprites::render();
+	//PSClassic::render();
 
 	//Now we have the texture. Unbind everything and go back to normal
 	glPopAttrib();

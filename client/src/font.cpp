@@ -173,10 +173,10 @@ void App::writeTextCentered(int x, int y, const char *fmt, ...){
 	for(int i=0;i<len;i++){
 		offset += charWidths[message[i]];
 	}	
-	offset /= 2;	
+	offset /= 4;	
 	
 	glScalef(0.5f, 0.5f, 0.5f);
-	glTranslatef(offset, 0, 0);	
+	glTranslatef(-offset, 0, 0);	
 
 	for(unsigned int i = 0; i < strlen(message); i++){
 	   glCallList(getList(message[i]));

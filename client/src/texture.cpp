@@ -151,13 +151,18 @@ bool App::texInit(){
 	//preload any common textures here
 	mTextures.clear();
 	
-	string initialTextures[] = {"wm.png", "ticked.png", "unticked.png", "particle.bmp"};
+	string initialTextures[] = {"wm.png", 
+								"ticked.png", 
+								"unticked.png", 
+								"particle.bmp"};
 	
 	for(int i=0;i<4;i++){
 		if(!texLoad(initialTextures[i], 0)){
 			return false;
 		}
 	}
+	
+	texLoad("banner.png", 0);
 		
 	LOG("Finished loading initial textures!\n");
 	

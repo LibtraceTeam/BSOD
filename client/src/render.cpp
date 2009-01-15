@@ -32,8 +32,9 @@ void App::renderMain(){
 	utilBeginRender();
 		
 	camLook();
-				
-	mFlowMgr->render();	
+			
+	if(isConnected())	
+		mFlowMgr->render();	
 		
 	calculateMousePoint();
 	
@@ -74,12 +75,10 @@ void App::drawStatusBar(){
 	//Text
 	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
 
-	if(fTimeScale == infinity || fTimeScale == 0.0f){
-		writeText(5, 25, "(waiting)");	   
-	}else{
-		//writeText(5, 25, "%f/%f/%f", fMouseX, fMouseY, fMouseZ);	   
-	}
-	
+	if(!isConnected() && fGUITimeout <= 0.0f){
+		writeTextCentered(iScreenX / 2, iScreenY - 50, "Press any key to display the GUI, \
+					then use the Servers button to connect to a server");
+	}	
 }
 
 
@@ -93,7 +92,10 @@ void App::render2D(){
 	
 	drawStatusBar();
 	
-	mFlowMgr->render2d();
+	if(isConnected()){
+		mFlowMgr->render2d();
+	}
+	
 	
 	ps()->render2D();
 	

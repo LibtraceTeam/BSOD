@@ -79,6 +79,9 @@ class App{
 	
 	//socket.cpp
 	bool bConnected;			//Whether we're connected to a server or not
+	
+	//gui.cpp
+	float fGUITimeout;
 		
 /*********************************************
 		Private member functions
@@ -112,6 +115,7 @@ class App{
 	//update.cpp
 	void updateMain();			//Primary logic update
 	void utilEventLoop();		//Main loop. Will not return till termination
+	void generateTestData();	//Create some useless particle effects
 	
 	//particles.cpp
 	bool initParticleSystem();	//Picks the best particle system and inits it
@@ -120,9 +124,13 @@ class App{
 	void initFont();			//Uses libfreetype2 to load a .ttf
 					
 	//socket.cpp
+	bool initSocket();
 	bool openSocket();			//Connects to the server
 	void closeSocket();			//Disconnects from the server
 	void updateSocket();		//Reads data from the server
+	void updateTCPSocket();		//Reads from our TCP connection
+	void updateUDPSocket();		//Ditto from our UDP socket
+	void sendDiscoveryPacket(); //Sends the UDP broadcast discovery packet
 	bool isConnected(){return bConnected;}
 		
 	//config.cpp
@@ -142,6 +150,8 @@ class App{
 										//processed further
 	void addProtocolEntry(string name, Color col, int index); //Adds an entry
 										//to the protocol window
+	void clearServerList();		//Called when we send a new discovery packet
+	void addServerListEntry(string name, string IP, string port);
 	
 	//GUI callback handlers
 	bool onWndClose(const CEGUI::EventArgs&);

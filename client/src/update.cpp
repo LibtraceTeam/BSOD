@@ -30,7 +30,6 @@ void App::updateMain(){
 		}
 		fRot[0] = 20;
 		fZoom = 0.0f;
-		LOG("Reset!\n");
 	}
 	
 	//If we're actively dragging with the mouse
@@ -63,18 +62,11 @@ void App::updateMain(){
 	}
 	
 
-	if(isConnected()){
-		updateSocket();
-	}
+	updateSocket();
 	
-	/*
-	fNextParticleUpdate -= fTimeScale;
-	if(fNextParticleUpdate <= 0.0f){
-		mParticleSystem->update();		
-		mFlowMgr->update(0.0f, PARTICLE_FPS);
-		fNextParticleUpdate = PARTICLE_FPS;
+	if(!isConnected()){
+		generateTestData();
 	}
-	*/
 	
 	mParticleSystem->update();		
 	mFlowMgr->update(0.0f, PARTICLE_FPS);
@@ -85,6 +77,62 @@ void App::updateMain(){
 		fNextFlowUpdate = PARTICLE_FPS * 5;	
 	}
 }
+
+/*********************************************
+	Generate particles that are shown
+	while not connected to a server
+**********************************************/
+float fTestTime = 0.0f;
+int iTestRow = 0;
+bool isRotating = false;
+
+void App::generateTestData(){
+	
+	fTestTime += fTimeScale;
+	
+	Texture *tex = texGet("banner.png");
+	byte *data = tex->mData;
+	
+	if(fTestTime > 0.02f){
+		fTestTime = 0.0f;
+		iTestRow++;
+		
+		if(iTestRow >= tex->iSizeX){
+			iTestRow = 0;
+			LOG("Ended\n");
+			isRotating = true;
+		}
+		
+		int x = iTestRow;
+		
+		//LOG("%d\n", x);
+		
+		for(int y=0;y<tex->iSizeY;y++){
+			
+			int index = (x * 4) + ((tex->iSizeY - y) * tex->iSizeX * 4);
+			
+			byte r = data[index + 0];
+			byte g = data[index + 1];
+			byte b = data[index + 2];
+			
+			//if(b == 255)
+				//LOG("%d/%d: %d/%d/%d\n", x, y, r, g, b);
+			
+			if(r > 0 || g > 0 || b > 0){
+				float v = 0.05f;
+				Vector3 vel = Vector3(-10, 0, 0) + Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v));
+				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v) + randFloat(-1,1));
+				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, Color(r,g,b), 1.0f, 15.0f);
+				//LOG("Added at %d/%d\n", x, y);
+			}
+			
+		}
+	}
+	
+	if(isRotating)
+		fRot[2] += fTimeScale * 10; //rotate
+	
+}	
 
 
 /*********************************************

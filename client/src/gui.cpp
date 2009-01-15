@@ -27,18 +27,28 @@ bool handle_mouse_down(Uint8 button);
 bool handle_mouse_up(Uint8 button);
 CEGUI::uint SDLKeyToCEGUIKey(SDLKey key);
 
-float fGUITimeout = GUI_HIDE_DELAY;
 
+
+
+/*********************************************
+	Server list stuff**********************************************/
+class ServerInfo{
+public:
+	string name;
+	string port;
+	string ip;
+};
+
+vector<ServerInfo> mServerInfo;
 
 /*********************************************
 	Called by the SDL event loop to pass
 	events off to CEGUI**********************************************/
 bool App::processGUIEvent(SDL_Event e){
 
-	//Whenever any even happens, make sure the GUI is shown
-	fGUITimeout = GUI_HIDE_DELAY;
-
+	
 	bool handled = false;
+	bool show = false;
 	CEGUI::uint kc = 0;
 	    
     switch( e.type ){
@@ -47,6 +57,7 @@ bool App::processGUIEvent(SDL_Event e){
 		// we inject the mouse position directly.
 		CEGUI::System::getSingleton().injectMousePosition(
 										e.motion.x,e.motion.y );
+		show = true;
 		break;
 
 	case SDL_MOUSEBUTTONDOWN:
@@ -67,6 +78,8 @@ bool App::processGUIEvent(SDL_Event e){
 		if (e.key.keysym.unicode != 0){
 			CEGUI::System::getSingleton().injectChar(e.key.keysym.unicode);
 		}
+		
+		show = true;
 				
 		break;
 
@@ -78,10 +91,16 @@ bool App::processGUIEvent(SDL_Event e){
 		
 	case SDL_VIDEORESIZE:
 		mGUI->grabTextures();
+		fGUITimeout = 0.0f; //We don't unhide for this
 		break;
 		
 	}
-			
+	
+	if(show || handled){
+		//Whenever any even happens, make sure the GUI is shown
+		fGUITimeout = GUI_HIDE_DELAY;
+	}
+				
 	return handled;
 }
 
@@ -107,6 +126,11 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 		}else{
 			target->show();
 			target->moveToFront();
+			
+			//hack!
+			if(target == mServerWindow){
+				sendDiscoveryPacket();
+			}
 		}
 	}else{
 		LOG("Bad target from button '%s' in onMenuButtonClicked\n", 
@@ -186,12 +210,43 @@ bool App::onServerButtonClicked(const EventArgs &args){
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	String senderID = we->window->getName();
 	
-	bool show = false;
-	
-	if(senderID == "btnShowAll"){
-		show = true;
-	}else if(senderID == "btnHideAll"){
-		show = false;
+	if(senderID == "btnRefresh"){
+		sendDiscoveryPacket();
+	}else if(senderID == "btnConnect"){
+		Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
+		
+		string text = toString(eb->getText());
+		
+		if(text.find(":") != string::npos){
+		
+			//Pull out the port and IP parts
+			vector<string> split;
+			splitString(text, ":", split);
+		
+			if(split.size() != 2){
+				LOG("Bad entry in txtCustomServer!\n");
+				return true;
+			}
+			
+			//Set the config options. TOOD: Probably should pass these to openSocket
+			mServerAddr = split[0];				
+			iServerPort = stringTo<int>(split[1]);	
+			
+			if(iServerPort <= 0){
+				LOG("Bad port!\n");
+				return true;
+			}			
+		}else{
+			mServerAddr = text;
+			iServerPort = DEFAULT_PORT;
+		}		
+		
+		if(openSocket()){
+			mServerWindow->hide();
+		}else{
+			//Messagebox
+		}
+		
 	}else{	
 		//Rogue button?
 		return true;
@@ -200,12 +255,23 @@ bool App::onServerButtonClicked(const EventArgs &args){
 	return true;
 }
 
+/*********************************************
+  Called when we click a server list entry**********************************************/
 bool App::onServerListClicked(const EventArgs &args){
 
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
 	
-	eb->setText(lb->getFirstSelectedItem()->getText());
+	int index = lb->getItemIndex(lb->getFirstSelectedItem());
+	
+	//Sanity check
+	if(index >= mServerInfo.size() || index < 0){
+		return true;
+	}
+	
+	ServerInfo *info = &mServerInfo[index];
+	
+	eb->setText(info->ip + ":" + info->port);
 		
 	return true;
 }
@@ -252,6 +318,8 @@ bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
 /*********************************************
 		CEGUI setup - create the UI**********************************************/
 void App::initGUI(){
+	
+	fGUITimeout = 0.0f; //Start hidden
 
 	//Set some SDL stuff to make the GUI work nicely
 	//SDL_ShowCursor(SDL_DISABLE);
@@ -351,6 +419,29 @@ void App::addProtocolEntry(string name, Color col, int index){
 	
 	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
 						Event::Subscriber(&App::onProtocolClicked, this) );
+}
+
+void App::addServerListEntry(string name, string IP, string port){
+
+	ServerInfo info;
+	info.name = name;
+	info.ip = IP;
+	info.port = port;
+
+	mServerInfo.push_back(info);
+
+	Listbox* lb = (Listbox *)winMgr->getWindow("lbServers");  	
+    lb->addItem(new ListboxTextItem(name));
+}
+
+void App::clearServerList(){
+	Listbox* lb = (Listbox *)winMgr->getWindow("lbServers");  
+	lb->resetList();
+	
+	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
+	eb->setText("");
+	
+	mServerInfo.clear();
 }
 
 
@@ -462,10 +553,6 @@ void App::makeServerWindow(){
    	lb->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.28f)));
     lb->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.45f)));
    
-    lb->addItem(new ListboxTextItem("paul-desktop:12345 (10.1.60.177:12345)"));
-    lb->addItem(new ListboxTextItem("paul-laptop:12345 (10.1.60.123:12345)"));
-    lb->addItem(new ListboxTextItem("localhost:12345 (127.0.0.1:12345)"));
-        
     lb->subscribeEvent(Listbox::EventSelectionChanged, Event::Subscriber(&App::onServerListClicked, this));
     
     
@@ -549,7 +636,7 @@ void App::makeOptionWindow(){
  
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
-	text->setText("Version: 1.234");	
+	text->setText("Version: " + toString(VERSION) + ", built " + __DATE__ + " at " + __TIME__);	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.8f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     

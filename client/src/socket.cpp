@@ -18,15 +18,18 @@ float htonf( float x )
 /*********************************************
 	Socket connection globals
 **********************************************/
-TCPsocket mClientSocket;
-SDLNet_SocketSet mSocketSet;
+TCPsocket mClientSocket = NULL;
+UDPsocket mUDPSocket = NULL;
+SDLNet_SocketSet mSocketSet = NULL;
 vector<byte> mDataBuf;
+UDPpacket *mUDPPacket = NULL;
 
 bool bSkipFlow = false;
 bool bSkipPacket = false;
 bool bConnected = false;
 unsigned int iTime = 0;
 	
+byte buffer[1024];
 
 
 /*********************************************
@@ -88,12 +91,65 @@ struct flow_descriptor_t {
 int packetSizes[] = {	sizeof(flow_update_t), sizeof(pack_update_t), 
 						sizeof(flow_remove_t), sizeof(kill_all_t),
 						sizeof(flow_descriptor_t) };
+					
+/*********************************************	Sets up the initial networking
+**********************************************/	
+bool App::initSocket(){
+	
+	mClientSocket = NULL;
+	
+	//Open UDP
+	mUDPSocket = SDLNet_UDP_Open(0);
+	
+	if(!mUDPSocket){
+        ERR("Unable to open UDP socket: %s\n", SDLNet_GetError());
+		return false;
+	}
+	
+	//Allocate memory for the UDP packet
+	if (!(mUDPPacket = SDLNet_AllocPacket(512)))
+	{
+		ERR("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+		return false;
+	}
+
+
+	//Set up socket set
+    mSocketSet = SDLNet_AllocSocketSet(16);
+    if(!mSocketSet){
+		ERR("%s\n", SDLNet_GetError());
+		return false;
+	}
+ 	
+ 	if(SDLNet_UDP_AddSocket(mSocketSet, mUDPSocket) == -1){
+    	ERR("%s\n", SDLNet_GetError());
+		return false;
+	}
+	
+	return true;
+}
 
 /*********************************************
 	Connect to a server
- Note: Code mostly stolen from old BSOD :)
 **********************************************/
 bool App::openSocket(){
+
+	//If we're switching between servers, kill all our particles
+	ps()->delAll();
+
+	if(mClientSocket){
+		//We're connected. Disconnect!
+		SDLNet_TCP_Close(mClientSocket);
+		bConnected = false;
+		
+		if(SDLNet_TCP_DelSocket(mSocketSet, mClientSocket) == -1){
+			ERR("%s\n", SDLNet_GetError());
+			return false;
+		}
+		
+		LOG("Disconected from server\n");
+		
+	}
 	
     IPaddress ip;
 
@@ -104,6 +160,7 @@ bool App::openSocket(){
 		return false;
 	}
 
+	//Open TCP
     mClientSocket = SDLNet_TCP_Open(&ip);
 
     if(!mClientSocket){
@@ -111,49 +168,129 @@ bool App::openSocket(){
                     mServerAddr.c_str(), SDLNet_GetError());
 		return false;
 	}
-
-    mSocketSet = SDLNet_AllocSocketSet(16);
-    if(!mSocketSet){
-		ERR("%s\n", SDLNet_GetError());
-		return false;
-	}
-
+	
     if(SDLNet_TCP_AddSocket(mSocketSet, mClientSocket) == -1){
     	ERR("%s\n", SDLNet_GetError());
 		return false;
 	}
-	
+   
     LOG("Connected to server\n");
     
     mDataBuf.clear();
         
+	fGUITimeout = 10.0f; //Make sure people see the UI
     bConnected = true;
-    
+      
     return true;
 }
+
+/*********************************************
+  Sends a UDP broadcast packet. 
+**********************************************/
+void App::sendDiscoveryPacket(){
+
+	//Remove old entries
+	clearServerList(); 
+		
+	//Note that we don't actually wait for a response here. That's handled below
+	//in updateSocket(). 
+	IPaddress srvadd;
 	
-byte buffer[1024];
+	mUDPPacket->address.host = INADDR_ANY;	//Destination is everyone
+	mUDPPacket->address.port = htons(UDP_SERVER_PORT);
+	
+	std::string data = toString(VERSION); //For lack of something better to send
+	
+	//Copy the data into the UDP packet
+	strcpy((char *)mUDPPacket->data, data.c_str());
+	mUDPPacket->len = data.size() + 1;
+	
+	//And send it off.
+	SDLNet_UDP_Send(mUDPSocket, -1, mUDPPacket); 
+	
+	//LOG("Sent discovery!\n");	
+}
+	
 	
 /*********************************************
   Read data from the network and process it
 **********************************************/
 void App::updateSocket(){
 
+	while(SDLNet_CheckSockets(mSocketSet, 0) > 0){
+			
+		if(SDLNet_SocketReady(mClientSocket)){
+			updateTCPSocket();
+		}
+		
+		if(SDLNet_SocketReady(mUDPSocket)){
+			updateUDPSocket();
+		}
+	}
+}
+	
+/*********************************************  Update the UDP broadcast socket
+**********************************************/
+void App::updateUDPSocket(){
+
+	int num = SDLNet_UDP_Recv(mUDPSocket, mUDPPacket);
+    if(num) {
+    	uint32_t ipaddr = 0;
+    	ipaddr=SDL_SwapBE32(mUDPPacket->address.host);
+    	
+    	string remoteIP = 	toString(ipaddr>>24) + "." + 
+    						toString((ipaddr>>16)&0xff) + "." + 
+    						toString((ipaddr>>8)&0xff) + "." + 
+    						toString(ipaddr&0xff);
+		
+		string remoteData = string((char *)mUDPPacket->data);    						
+   			
+		vector<string> split;
+		int n = splitString(remoteData, "|", split);
+		
+		if(n < 2){
+			ERR("Invalid UDP data: %d: '%s'\n", n, mUDPPacket->data);
+			return;
+		}
+		
+		//If we got sent a valid IP, override the one we got from the packet
+		if(split[0] != "0.0.0.0"){
+			remoteIP = split[0];
+		}
+		
+		string port = split[1];
+		
+		//Put the name back together
+		string name = "";
+		for(int i=2;i<(int)split.size();i++){
+			name += split[i];			
+			if(i != (int)split.size() - 1)	name += "|";
+		}
+		
+		//And add it to the GUI
+		
+		//LOG("Got remote server '%s': %s:%s\n", name.c_str(), remoteIP.c_str(), port.c_str());
+		
+		addServerListEntry(name, remoteIP, port);
+    }	
+}
+	
+/*********************************************  Update the TCP connection with the server
+**********************************************/
+void App::updateTCPSocket(){
+	
 	int readlen;
 	
-	while(SDLNet_CheckSockets(mSocketSet, 0) > 0){
+	while(SDLNet_SocketReady(mClientSocket)){
 		if((readlen = SDLNet_TCP_Recv(mClientSocket, buffer, 1024)) > 0){
 			int end = mDataBuf.size();
 			mDataBuf.resize( end + readlen );
-			memcpy(&mDataBuf[end], buffer, readlen);
-	
-			//LOG("Read %d bytes\n", readlen);
+			memcpy(&mDataBuf[end], buffer, readlen);	
 		}
 		
 		if(readlen == 0)
 			break;
 	}
-	
 	
 	if(mDataBuf.size() == 0){
 		return;
@@ -338,6 +475,9 @@ void App::addFlowDescriptor(byte id, Color c, string name){
 		Shutdown
 **********************************************/
 void App::closeSocket(){
+
+	SDLNet_FreePacket(mUDPPacket);
+
 	SDLNet_Quit();
 	
 	LOG("Shut down networking!\n");

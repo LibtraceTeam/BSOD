@@ -20,6 +20,7 @@ WindowManager *winMgr = NULL;
 FrameWindow *mProtoWindow = NULL;
 FrameWindow *mServerWindow = NULL;
 FrameWindow *mOptionWindow = NULL;
+FrameWindow *mMessageWindow = NULL;
 
 //Globals. Stolen from:
 //http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_SDL_and_OpenGL
@@ -117,6 +118,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 	if(senderID == "btnServers") target = mServerWindow;
 	else if(senderID == "btnProtocols") target = mProtoWindow;
 	else if(senderID == "btnOptions") target = mOptionWindow;
+	else if(senderID == "btnMessageOK") target = mMessageWindow;
 	
 	//Toggle the window if we found it. TODO: We could do fancy fades with 
 	//setAlpha() and such...
@@ -203,6 +205,21 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 }
 
 /*********************************************
+			Pops up a dialog box**********************************************/
+void App::messagebox(string text, string title){
+	
+	DefaultWindow* t = (DefaultWindow *)winMgr->getWindow("txtMessageBox");  	
+	t->setText(text);
+	
+	mMessageWindow->setText(title);
+		
+    mMessageWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.33f)));
+	mMessageWindow->show();
+	mMessageWindow->moveToFront();
+
+}
+
+/*********************************************
 	Called when we click a server button**********************************************/
 bool App::onServerButtonClicked(const EventArgs &args){
 	
@@ -244,7 +261,11 @@ bool App::onServerButtonClicked(const EventArgs &args){
 		if(openSocket()){
 			mServerWindow->hide();
 		}else{
-			//Messagebox
+			messagebox("Could not connect to server '" + 
+						mServerAddr + ":" + 
+						toString(iServerPort) + "'", 
+						"Connection Failed");
+						
 		}
 		
 	}else{	
@@ -380,6 +401,12 @@ void App::initGUI(){
 	
 	//And finally the options window
 	makeOptionWindow();
+	
+	//And the messagebox window
+	makeMessageWindow();
+    
+    
+		
 		
 	//Set the mouse cursor event.
 	CEGUI::MouseCursor::getSingleton().subscribeEvent(
@@ -453,7 +480,7 @@ void App::updateGUIConnectionStatus(){
 	DefaultWindow* text = (DefaultWindow *)winMgr->getWindow("txtServerInfo");  	
 
 	if(isConnected()){
-		text->setText("Currently connected to'" + mServerAddr + ":" + 
+		text->setText("Currently connected to '" + mServerAddr + ":" + 
 					  toString(iServerPort) + "'\n" + 
 					  "Select a different server from the list\
 					  below or specify a custom address manually.");
@@ -535,6 +562,40 @@ void App::makeProtocolWindow(){
     mProtoWindow->setAlpha(0.85f);
     mProtoWindow->setSizingEnabled(false);
     mProtoWindow->hide();
+}
+
+void App::makeMessageWindow(){
+	mMessageWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndMessage");
+    root->addChildWindow(mMessageWindow);
+    
+    mMessageWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.33f)));
+    mMessageWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.25f)));  
+    mMessageWindow->setText("Message");
+    	
+   	DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtMessageBox");
+    mMessageWindow->addChildWindow(text);
+	text->setText("This is an informational message. It is very long and annoying, and does nothing useful.");
+					
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.08f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.7f)));
+	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
+	text->setProperty("HorzFormatting", "WordWrapLeftAligned"); // LeftAligned, RightAligned, HorzCentred
+				// HorzJustified, WordWrapLeftAligned, WordWrapRightAligned, WordWrapCentred, WordWrapJustified
+				
+    
+    mMessageWindow->hide();	
+    
+    PushButton *btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnMessageOK"));
+    mMessageWindow->addChildWindow(btn);
+    btn->setText("OK");
+    btn->setPosition(UVector2(cegui_reldim(0.3f), cegui_reldim( 0.7f)));
+    btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.2f)));
+    btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
+    btn->setAlwaysOnTop(true);
+    
+    mMessageWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
+    mMessageWindow->setAlpha(0.85f);
+    mMessageWindow->setSizingEnabled(false);
 }
 
 void App::makeServerWindow(){

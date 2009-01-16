@@ -13,7 +13,7 @@ int Flow::collide(float pX, float pY, float pZ){
 	Vector3 left = Vector3(x,y,z);
 	Vector3 right = Vector3(x2,y2,z2);
 	
-	float d = 0.05f; //max dist that is judged as a collision
+	float d = 0.2f; //max dist that is judged as a collision
 	//note that this isn't sqrt'd...
 		
 	if(p.fastDistTo(left) < d){

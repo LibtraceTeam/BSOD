@@ -143,6 +143,7 @@ class App{
 	void makeOptionWindow();
 	void makeServerWindow();
 	void makeProtocolWindow();
+	void makeMessageWindow();
 	void resizeGUI(int x, int y); //Invoked by the event handler
 	bool processGUIEvent(SDL_Event e); 	//Passes an event to the GUI. If it
 										//returns true, then the GUI is assumed
@@ -152,6 +153,7 @@ class App{
 										//to the protocol window
 	void clearServerList();		//Called when we send a new discovery packet
 	void addServerListEntry(string name, string IP, string port);
+	void messagebox(string text, string title = "Message"); 
 	void updateGUIConnectionStatus();
 	
 	//GUI callback handlers

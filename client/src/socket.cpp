@@ -160,7 +160,7 @@ bool App::openSocket(){
     LOG("Connecting to '%s:%d'\n", mServerAddr.c_str(), iServerPort);
     
 	if(SDLNet_ResolveHost(&ip, (char *)mServerAddr.c_str(), iServerPort) == -1) {
-		ERR("Error: Unable to resolve host '%s'", mServerAddr.c_str());
+		ERR("Error: Unable to resolve host '%s'\n", mServerAddr.c_str());
 		return false;
 	}
 

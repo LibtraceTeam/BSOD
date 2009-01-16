@@ -205,7 +205,8 @@ void FlowManager::delAll(){
 	
 		Flow *f = mFreeFlows.top();
 		mFreeFlows.pop();	
-			
+		
+		delete f;
 	}
 	
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
@@ -475,6 +476,8 @@ void FlowManager::render2d(){
 void FlowManager::shutdown(){
 
 	delAll();
+	
+	glDeleteLists(mDisplayList, 1);
 
 	LOG("Shutdown\n");
 	

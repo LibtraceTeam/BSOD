@@ -136,6 +136,9 @@ bool App::openSocket(){
 
 	//If we're switching between servers, kill all our particles
 	ps()->delAll();
+	
+	//And flows
+	mFlowMgr->delAll();
 
 	if(mClientSocket){
 		//We're connected. Disconnect!
@@ -149,6 +152,7 @@ bool App::openSocket(){
 		
 		LOG("Disconected from server\n");
 		
+		updateGUIConnectionStatus();		
 	}
 	
     IPaddress ip;
@@ -180,6 +184,9 @@ bool App::openSocket(){
         
 	fGUITimeout = 10.0f; //Make sure people see the UI
     bConnected = true;
+    
+    //Set the 'connected to server' text
+    updateGUIConnectionStatus();
     
     //Set the original orientation and such
     resetCam();

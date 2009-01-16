@@ -444,6 +444,22 @@ void App::clearServerList(){
 	mServerInfo.clear();
 }
 
+void App::updateGUIConnectionStatus(){
+	DefaultWindow* text = (DefaultWindow *)winMgr->getWindow("txtServerInfo");  	
+
+	if(isConnected()){
+		text->setText("Currently connected to'" + mServerAddr + ":" + 
+					  toString(iServerPort) + "'\n" + 
+					  "Select a different server from the list\
+					  below or specify a custom address manually.");
+	}else{
+	
+		text->setText("Not currently connected to any server. \
+					Select a different server from the list below or specify \
+					a custom address manually.");
+	}
+}
+
 
 /*********************************************
 	  Make the buttons down the bottom
@@ -558,7 +574,7 @@ void App::makeServerWindow(){
     
     DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtServerInfo");
     mServerWindow->addChildWindow(text);
-	text->setText("Currently connected to 'paul-desktop:12345'. \
+	text->setText("Not currently connected to any server. \
 					Select a different server from the list below or specify \
 					a custom address manually.");
 					

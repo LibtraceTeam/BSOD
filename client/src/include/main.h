@@ -150,6 +150,7 @@ class App{
 										//to the protocol window
 	void clearServerList();		//Called when we send a new discovery packet
 	void addServerListEntry(string name, string IP, string port);
+	void updateGUIConnectionStatus();
 	
 	//GUI callback handlers
 	bool onWndClose(const CEGUI::EventArgs&);

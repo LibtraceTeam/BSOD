@@ -194,10 +194,13 @@ void App::sendDiscoveryPacket(){
 		
 	//Note that we don't actually wait for a response here. That's handled below
 	//in updateSocket(). 
-	IPaddress srvadd;
+	if(SDLNet_ResolveHost(&mUDPPacket->address, "255.255.255.255", UDP_SERVER_PORT) == -1) {
+		ERR("Error: Unable to resolve host '%s'", mServerAddr.c_str());
+		return;
+	}
 	
-	mUDPPacket->address.host = INADDR_ANY;	//Destination is everyone
-	mUDPPacket->address.port = htons(UDP_SERVER_PORT);
+	//mUDPPacket->address.host = INADDR_ANY;	//Destination is everyone
+	//mUDPPacket->address.port = htons(UDP_SERVER_PORT);
 	
 	std::string data = toString(VERSION); //For lack of something better to send
 	
@@ -243,11 +246,13 @@ void App::updateUDPSocket(){
     						toString((ipaddr>>8)&0xff) + "." + 
     						toString(ipaddr&0xff);
 		
-		string remoteData = string((char *)mUDPPacket->data);    						
+		string remoteData = string((char *)mUDPPacket->data);   
+		
+		memset(mUDPPacket->data, NULL, 512); 						
    			
 		vector<string> split;
 		int n = splitString(remoteData, "|", split);
-		
+				
 		if(n < 2){
 			ERR("Invalid UDP data: %d: '%s'\n", n, mUDPPacket->data);
 			return;

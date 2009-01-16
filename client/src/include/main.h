@@ -120,6 +120,7 @@ class App{
 	
 	//font.cpp
 	void initFont();			//Uses libfreetype2 to load a .ttf
+	void shutdownFont();
 					
 	//socket.cpp
 	bool initSocket();
@@ -137,6 +138,7 @@ class App{
 	//gui.cpp	
 	void initGUI();				//Sets up CEGUI and makes the BSOD GUI
 	void renderGUI();			//Renders the GUI to the 2D screen
+	void shutdownGUI();
 	void makeMenuButtons();		
 	void makeOptionWindow();
 	void makeServerWindow();

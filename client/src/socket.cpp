@@ -492,6 +492,11 @@ void App::addFlowDescriptor(byte id, Color c, string name){
 void App::closeSocket(){
 
 	SDLNet_FreePacket(mUDPPacket);
+	
+	SDLNet_UDP_Close(mUDPSocket);
+	SDLNet_TCP_Close(mClientSocket);
+
+	SDLNet_FreeSocketSet(mSocketSet);
 
 	SDLNet_Quit();
 	

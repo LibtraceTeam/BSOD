@@ -174,6 +174,19 @@ void PSClassic::shutdown(){
 		mFree.pop();
 	}
 	
+	delAll();
+	
+	
+	map<float, ParticleCollection *>::const_iterator itr;
+	
+	//Go through each of the particle collections
+	for(itr = mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){	
+			
+		ParticleCollection *collection = itr->second;	
+		delete collection;
+	}
+	
 	iNumActive = 0;
 }
 

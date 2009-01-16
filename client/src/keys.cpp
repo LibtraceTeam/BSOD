@@ -14,7 +14,7 @@ void App::handleKeyEvent( SDL_keysym *keysym , int type )
 	{
 	case SDLK_ESCAPE:
 		//ESC key was pressed 
-		utilShutdown( 0 );
+		notifyShutdown();
 		break;
 	case SDLK_F1:
 		//Toggle fullscreen

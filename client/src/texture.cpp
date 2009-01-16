@@ -179,11 +179,15 @@ void App::texShutdown(){
 		ILuint id = mTextures[i]->iDevilID;		
 		
 		ilDeleteImages(1, &id);
+		
+		glDeleteTextures(1, &mTextures[i]->iGLID);
 						
 		LOG("Freed '%s'\n", mTextures[i]->mFilename.c_str());
 			
 		delete mTextures[i];
 	}
+	
+	ilShutDown();
 }
 
 

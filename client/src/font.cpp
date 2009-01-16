@@ -116,6 +116,9 @@ void App::initFont(){
 	   SDL_FreeSurface(glyphCache[i]);
 	   
 	SDL_FreeSurface(destination); 
+	
+	TTF_CloseFont(font);  
+	
 	TTF_Quit();
 }
 
@@ -185,6 +188,17 @@ void App::writeTextCentered(int x, int y, const char *fmt, ...){
 	
 	glPopMatrix();
 	
+}
+
+void App::shutdownFont(){
+	for(int i = 0; i < MAX_ASCII; i++) {
+		glDeleteLists(chars[i], 1);
+	}
+	
+	glDeleteTextures(1, &textureId);
+	
+	delete [] chars;
+	delete [] charWidths;
 }
 
 

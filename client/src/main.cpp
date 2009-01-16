@@ -123,7 +123,7 @@ int App::init(App *a, int argc, char **argv){
 void App::utilShutdown( int r )
 {
 	LOG("Shutting down with returnCode %d\n", r);
-	
+		
 	//Terminate the network connection
 	closeSocket();
     
@@ -135,10 +135,13 @@ void App::utilShutdown( int r )
 		delete mParticleSystem;
 	}
 	
+	shutdownGUI();
+	
 	LOG("Freeing textures\n");
 		   
 	//Free textures
 	texShutdown();
+	shutdownFont();
 	
 	//Clean up some other components
 	if(mFlowMgr){
@@ -150,6 +153,7 @@ void App::utilShutdown( int r )
 	done = true;    
 	
 	//Shut down SDL
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit( );   
     
     //So main() knows what to return

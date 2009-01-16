@@ -387,6 +387,11 @@ void App::initGUI(){
 						Event::Subscriber(&App::onMouseCursorChanged, this) );
 }
 
+void App::shutdownGUI(){
+	delete CEGUI::System::getSingletonPtr (); 
+	delete mGUI;
+}
+
 void App::resizeGUI(int x, int y){
 	mGUI->restoreTextures();
     mGUI->setDisplaySize(CEGUI::Size(x, y));

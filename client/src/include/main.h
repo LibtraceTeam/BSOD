@@ -49,9 +49,6 @@ class App{
 	int iFrameCounter;			
 	int iLastFrameTicks;		//Records the SDL_Time() at last frame
 	
-	//Timers for various bits of logic
-	float fNextFlowUpdate;		//How long is left until the flow manager
-								//update() is invoked. 
 	//gl_util.cpp
 	bool done;					//Whether the app is running. 
 	int videoFlags;				//SDL window flags
@@ -113,6 +110,7 @@ class App{
 	void handleKeyEvent( SDL_keysym *keysym , int type ); 
 
 	//update.cpp
+	void resetCam();			//Set the default camera position and zoom
 	void updateMain();			//Primary logic update
 	void utilEventLoop();		//Main loop. Will not return till termination
 	void generateTestData();	//Create some useless particle effects

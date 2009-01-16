@@ -57,6 +57,7 @@ public:
 	int activeID; //the index into the activeFlows array
 	
 	bool hide;
+	bool isInView;
 	float shade;
 	
 	FlowDescriptor *mDescr;	
@@ -128,6 +129,7 @@ public:
 	//Rendering
 	void render();
 	void render2d();
+	void renderSelection(); //For stuff that has to be on top of the particles
 	
 	//Termination
 	void shutdown();

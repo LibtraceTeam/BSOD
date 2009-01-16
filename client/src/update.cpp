@@ -17,7 +17,7 @@ void App::updateMain(){
 		return;
 	}
 	
-	float fCamSpeed = fTimeScale * 4.0f;
+	float fCamSpeed = fTimeScale * 10.0f;
 	float fDragScale = 0.05f;
 
 	//Right button means we reset rotation and such
@@ -25,12 +25,19 @@ void App::updateMain(){
 	//to make more sense, but it doesn't work great on systems that map this
 	//to middle-mouse		
 	if(mouseDown(3)){
-		for(int i=0;i<3;i++){
-			fRot[i] = 0.0f;
-		}
-		fRot[0] = 20;
-		fZoom = 0.0f;
+		resetCam();
 	}
+	
+	//Keyboard rotation
+	if(keyDown(SDLK_RSHIFT) || keyDown(SDLK_LSHIFT)){
+		fCamSpeed *= 10;
+	}
+	
+	if(keyDown(SDLK_LEFT))	fRot[1] += fCamSpeed;
+	if(keyDown(SDLK_RIGHT))	fRot[1] -= fCamSpeed;
+	if(keyDown(SDLK_UP))	fRot[0] += fCamSpeed;
+	if(keyDown(SDLK_DOWN))	fRot[0] -= fCamSpeed;
+	
 	
 	//If we're actively dragging with the mouse
 	if(bDrag){
@@ -42,9 +49,7 @@ void App::updateMain(){
 		//Left mouse button means we modify the rotation
 		if(mouseDown(1)){
 			fRot[1] -= diff.x;
-			fRot[0] -= diff.y;
-			
-			//SDL_Delay(50);
+			fRot[0] -= diff.y;			
 		}
 		
 		//Middle mouse means we modify the zoom
@@ -55,6 +60,7 @@ void App::updateMain(){
 				
 		dragStart = Vector2(iMouseX, iMouseY);
 		dragVel = diff;
+		
 		
 	}else{
 		fRot[1] -= dragVel.x;
@@ -68,14 +74,20 @@ void App::updateMain(){
 		generateTestData();
 	}
 	
-	mParticleSystem->update();		
-	mFlowMgr->update(0.0f, PARTICLE_FPS);
-	
-	fNextFlowUpdate -= fTimeScale;
-	if(fNextFlowUpdate <= 0.0f){
-		mFlowMgr->update(0.0f, fTimeScale);
-		fNextFlowUpdate = PARTICLE_FPS * 5;	
+	mParticleSystem->update();	
+}
+
+/*********************************************
+	Reset cam orientation, zoom, rotation
+**********************************************/
+void App::resetCam(){
+	for(int i=0;i<3;i++){
+		fRot[i] = 0.0f;
 	}
+	fRot[0] = 20;
+	fZoom = 0.0f;
+	
+	endDrag();
 }
 
 /*********************************************
@@ -99,7 +111,6 @@ void App::generateTestData(){
 		
 		if(iTestRow >= tex->iSizeX){
 			iTestRow = 0;
-			LOG("Ended\n");
 			isRotating = true;
 		}
 		
@@ -186,6 +197,14 @@ void App::utilEventLoop(){
 				onMouseEvent(event.button.button, SDL_MOUSEBUTTONUP); 
 				endDrag();
 				break;	
+				
+			case SDL_KEYDOWN:
+				handleKeyEvent(&event.key.keysym, event.type);
+				break;
+			
+			case SDL_KEYUP:
+				handleKeyEvent(&event.key.keysym, event.type);
+				break;
 			
 			default:
 			    break;

@@ -39,6 +39,9 @@ void App::renderMain(){
 	calculateMousePoint();
 	
 	mParticleSystem->render();
+	
+	if(isConnected())	
+		mFlowMgr->renderSelection();	
 								
 	utilEndRender();
 }
@@ -76,7 +79,8 @@ void App::drawStatusBar(){
 	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
 
 	if(!isConnected() && fGUITimeout <= 0.0f){
-		writeTextCentered(iScreenX / 2, iScreenY - 50, "Press any key to display the GUI, \
+		writeTextCentered(iScreenX / 2, iScreenY - 50, 
+					"Press any key to display the GUI, \
 					then use the Servers button to connect to a server");
 	}	
 }

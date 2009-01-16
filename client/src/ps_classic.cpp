@@ -95,8 +95,8 @@ void PSSprites::render(){
 float PSSprites::setSizeScale(){
 	float scale = (1.0f/(float)iNumActive) * 150000;	
 	if(scale < 5.0f){ scale = 5.0f; }
-	else if(scale > MAX_SIZE * App::S()->fParticleSizeScale){	
-		scale = MAX_SIZE * App::S()->fParticleSizeScale;
+	else if(scale > MAX_SIZE){	
+		scale = MAX_SIZE;
 	}	
 	scale *= App::S()->fParticleSizeScale;	
 				

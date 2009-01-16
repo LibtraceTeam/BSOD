@@ -180,6 +180,9 @@ bool App::openSocket(){
         
 	fGUITimeout = 10.0f; //Make sure people see the UI
     bConnected = true;
+    
+    //Set the original orientation and such
+    resetCam();
       
     return true;
 }

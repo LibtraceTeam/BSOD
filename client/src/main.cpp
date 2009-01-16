@@ -89,21 +89,15 @@ int App::init(App *a, int argc, char **argv){
 	if(!initParticleSystem()){
 		return 1;
 	}
-			
-	//Rotataion
-	for(int i=0;i<3;i++){
-		fRot[i] = 0.0f;
-	}	
-	fRot[0] = 20;
-		
+				
 	//Flow manager
 	mFlowMgr = new FlowManager();
 	mFlowMgr->init();
 		
 	//Camera
-	camSetPos(0, 0, SLAB_SIZE);//22
-	camLookAt(0,0,0); //y= -2.5
-	endDrag();
+	camSetPos(0, 0, SLAB_SIZE);
+	camLookAt(0, 0, 0); 
+	resetCam();
 	
 	//gui
 	initGUI();

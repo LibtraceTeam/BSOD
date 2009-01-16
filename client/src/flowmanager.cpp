@@ -34,34 +34,25 @@ void FlowManager::update(float currentTime, float timeDelta){
 	fPlaneDistance = ((float)App::S()->iScreenX / 
 						(float)App::S()->iScreenY) * 30.0f;
 	
-	fTimeScale = timeDelta;
-
-	//hack! We should only set this if the camera has moved...
+	//hack! We should really only set this if the camera has moved...
 	bNeedProject = true; 
 	
 	//Update all visable flows
 	for(int i=0;i<(int)mViewFlows.size();i++){
-
-		if(!mViewFlows[i]){
-			continue;
-		}
-	
-		//if(mViewFlows[i]->hide){
-		//	continue;
-		//}
-				
-		mViewFlows[i]->shade -= timeDelta * 10;
+			
+		mViewFlows[i]->shade -= timeDelta;
 		
 		if(mViewFlows[i]->shade < 0.0f){
 			mViewFlows[i]->hide = true;
+			mViewFlows[i]->isInView = false;
 			
 			//Remove it from viewflows
 			mViewFlows[i] = mViewFlows[mViewFlows.size() - 1];
-			mViewFlows.pop_back();
+			mViewFlows.pop_back();			
 		}		
 			
 	}
-		
+			
 }
 
 
@@ -104,6 +95,9 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 star
 	f->mDst = dst;
 	f->mSrc = src;
 	
+	f->isInView = false;
+	f->shade = 0.0f;
+	
 	//All done!
 }
 
@@ -128,7 +122,7 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 		//And speed multiplier
 		float speedMultiplier = (1.0f / rtt);
 								
-		//And add the particle
+		//And add the particle. 
 		PSParams *p = &f->mParamsStart;
 					
 		if(!p){
@@ -146,15 +140,22 @@ void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *typ
 		//Unhide the system, it's had a packet
 		f->hide = false;
 		
-		//And fade it in
-		if(f->shade < 1.0f){
+		//And fade it in		
+		f->shade+= 0.5f;
 		
-			if(f->shade <= 0.0f){
-				//mViewFlows.push_back(f);
+		if(f->shade > 1.0f){
+		
+			if(!f->isInView){
+				f->isInView = true;
+				mViewFlows.push_back(f);
+				
+				//LOG("Added %d\n", flowID);
 			}
-		
+			
 			f->shade = 1.0f;
+			
 		}
+		
 						
 	}else{
 		//LOG("Bad flow ID %d\n", flowID);
@@ -289,11 +290,7 @@ void FlowManager::updateList(){
 		}
 			
 		float shade = 1.0f; //mViewFlows[i]->shade;	
-		
-		if(shade < 0.1f){
-			continue;
-		}
-					
+							
 		glColor4f(d->mColor.r * shade, d->mColor.g * shade, d->mColor.b * shade, shade);			
 		
 		glVertex3f(mViewFlows[i]->x, mViewFlows[i]->y, mViewFlows[i]->z);		
@@ -322,6 +319,8 @@ void FlowManager::render(){
 	fRenderTimer += fTimeScale;
 	
 	if(fRenderTimer > 1.5f){
+		update(0.0f, fRenderTimer); //Kinda nasty having it here, but it means
+									//that it's synced with the render properly
 		updateList(); //rerender
 		fRenderTimer = 0.0f;
 	}
@@ -331,6 +330,17 @@ void FlowManager::render(){
 
 		
 		
+	
+		
+}
+
+void FlowManager::renderSelection(){
+
+
+	glDisable(GL_BLEND);	
+	glDepthMask(GL_TRUE);
+	glDisable(GL_TEXTURE_2D);
+	
 	//Selected flow
 	if(mSelectedFlow){
 		FlowDescriptor *d = mSelectedFlow->mDescr;			
@@ -338,30 +348,39 @@ void FlowManager::render(){
 			return;
 		}
 		
-		glColor4f(d->mColor.r, d->mColor.g, d->mColor.b, 1.0f);
-	
+		glColor4f(0.25f, 0.25f, 0.25f,1.0f);
+		glLineWidth(6.0f);
+		
 		glBegin(GL_LINES);
-		glVertex3f(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
-		glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
+			glVertex3f(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
+			glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
 		glEnd();
+						
 		glPointSize(4.0f);
 		glBegin(GL_POINTS);		
-		glVertex3f(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
-		glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
+			glVertex3f(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
+			glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
 		glEnd();
 		
-		if(bNeedProject){
+		glColor4f(d->mColor.r, d->mColor.g, d->mColor.b, 1.0f);
+		glLineWidth(3.0f);
+	
+		glBegin(GL_LINES);
+			glVertex3f(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
+			glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
+		glEnd();
+		
+		//if(bNeedProject){
 			mSelectedFlow->screenP1 = App::S()->utilProject(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
 			mSelectedFlow->screenP2 = App::S()->utilProject(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
 			
-			bNeedProject = false;
-		}
+		//	bNeedProject = false;
+		//}
 		
 	}	
 		
-	glDisable(GL_BLEND);	
-	glDepthMask(GL_TRUE);
-		
+	//glDisable(GL_BLEND);	
+	//glDepthMask(GL_TRUE);
 }
 
 
@@ -371,26 +390,82 @@ void FlowManager::render(){
 **********************************************/
 void FlowManager::render2d(){
 
-	App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
+//	App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
+	
+	glDisable(GL_DEPTH_TEST);
 	
 	if(mSelectedFlow){	
 		Vector2 v1 = mSelectedFlow->screenP1;
 		Vector2 v2 = mSelectedFlow->screenP2;	
+				
+		float b = 5.0f;//border
+								
+		//Draw a background for them
+		float w = 250;
+		float h = 60;
+		glColor4f(0.0f, 0.0f, 0.0f, 0.85f);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_SUBTRACT);
 		
-		if(v1.x < 10){
-			v1.x = 10;
-		}
+		glBegin(GL_QUADS);
+			glVertex2f(v1.x - b, v1.y - b);
+			glVertex2f(v1.x + w, v1.y - b);
+			glVertex2f(v1.x + w, v1.y + h);
+			glVertex2f(v1.x - b, v1.y + h);
+		glEnd();
 		
-		if(v2.x > App::S()->iScreenX - 120){
-			v2.x = App::S()->iScreenX - 120;
-		}
+		glBegin(GL_QUADS);
+			glVertex2f(v2.x - b, v2.y - b);
+			glVertex2f(v2.x + w, v2.y - b);
+			glVertex2f(v2.x + w, v2.y + h);
+			glVertex2f(v2.x - b, v2.y + h);
+		glEnd();
 		
+		FlowDescriptor *d = mSelectedFlow->mDescr;			
+		glColor4f(d->mColor.r, d->mColor.g, d->mColor.b, 1.0f);
+		
+		glLineWidth(1.0f);
+		
+		glBegin(GL_LINES);
+			glVertex2f(v1.x - b, v1.y - b);
+			glVertex2f(v1.x + w, v1.y - b);
+			
+			glVertex2f(v1.x + w, v1.y - b);
+			glVertex2f(v1.x + w, v1.y + h);
+			
+			glVertex2f(v1.x + w, v1.y + h);
+			glVertex2f(v1.x - b, v1.y + h);
+			
+			glVertex2f(v1.x - b, v1.y + h);
+			glVertex2f(v1.x - b, v1.y - b);
+		glEnd();
+		
+		glBegin(GL_LINES);
+			glVertex2f(v2.x - b, v2.y - b);
+			glVertex2f(v2.x + w, v2.y - b);
+			
+			glVertex2f(v2.x + w, v2.y - b);
+			glVertex2f(v2.x + w, v2.y + h);
+			
+			glVertex2f(v2.x + w, v2.y + h);
+			glVertex2f(v2.x - b, v2.y + h);
+			
+			glVertex2f(v2.x - b, v2.y + h);
+			glVertex2f(v2.x - b, v2.y - b);
+		glEnd();
+		
+		glBlendEquation(GL_ADD);
+		glEnable(GL_TEXTURE_2D);
+		glColor4f(1,1,1,1);
 		
 		float y = 20;
 		for(int i=0;i<3;i++){
 			App::S()->writeText((int)v1.x, (int)(v1.y + (y * i)), "%s", mSelectedFlow->leftText[i].c_str());
 			App::S()->writeText((int)v2.x, (int)(v2.y + (y * i)), "%s", mSelectedFlow->rightText[i].c_str());
 		}
+		
+		
 	}
 }
 
@@ -429,18 +504,21 @@ int DnsRight(void *data){
 		 	Interaction
 **********************************************/
 bool FlowManager::onClick(int button, float x, float y, float z){
-	float planeX = z;
-	float planeY = y;
+	
+	//if(x > 50 || x < -50){
+		//We clicked on empty space, discard
+	//	return false;
+	//}
 		
 	//Go through all the flows that have 'dots' on either side
-	for(int i=0;i<(int)mActiveFlows.size();i++){
+	for(int i=0;i<(int)mViewFlows.size();i++){
 	
-		Flow *f = mActiveFlows[i];			
-		if(!mActiveFlows[i]){
+		Flow *f = mViewFlows[i];			
+		if(!mViewFlows[i]){
 			continue;
 		}
 		
-		if(mActiveFlows[i]->hide){
+		if(mViewFlows[i]->hide){
 			continue;
 		}
 		

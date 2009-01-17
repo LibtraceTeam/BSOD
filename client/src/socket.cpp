@@ -43,6 +43,8 @@ enum PacketTypes {
 					FLOW_DESCRIPTOR
 				};
 
+#pragma pack(push, 1);
+
 //Flow update packets
 struct flow_update_t {
 	unsigned char type; //0
@@ -54,7 +56,7 @@ struct flow_update_t {
 	float z2;
 	uint32_t id;
 	uint32_t ip1;
-	uint32_t ip2;} __attribute__((packed));
+	uint32_t ip2;} PACKED;
 
 
 //New packet packets
@@ -66,18 +68,18 @@ struct pack_update_t {
 	uint16_t size;
 	float speed; 
 	bool dark;
-} __attribute__((packed));
+} PACKED;
 
 //Expire flow packets
 struct flow_remove_t {
 	unsigned char type;//2
 	uint32_t id;
-} __attribute__((packed));
+} PACKED;
 
 //Kill all packets
 struct kill_all_t {
 	unsigned char type;//3
-} __attribute__((packed));
+} PACKED;
 
 //Type description
 struct flow_descriptor_t {
@@ -85,7 +87,10 @@ struct flow_descriptor_t {
 	unsigned char id;
 	uint8_t colour[3];
 	char name[256];
-} __attribute__((packed));
+} PACKED;
+
+
+#pragma pack(pop)
 
 //Size in bytes of each packet
 int packetSizes[] = {	sizeof(flow_update_t), sizeof(pack_update_t), 
@@ -125,6 +130,8 @@ bool App::initSocket(){
     	ERR("%s\n", SDLNet_GetError());
 		return false;
 	}
+
+	mDataBuf.clear();
 	
 	return true;
 }
@@ -135,10 +142,12 @@ bool App::initSocket(){
 bool App::openSocket(){
 
 	//If we're switching between servers, kill all our particles
-	ps()->delAll();
+	if(ps())
+		ps()->delAll();
 	
 	//And flows
-	mFlowMgr->delAll();
+	if(mFlowMgr)
+		mFlowMgr->delAll();
 
 	if(mClientSocket){
 		//We're connected. Disconnect!
@@ -212,11 +221,11 @@ void App::sendDiscoveryPacket(){
 	//mUDPPacket->address.host = INADDR_ANY;	//Destination is everyone
 	//mUDPPacket->address.port = htons(UDP_SERVER_PORT);
 	
-	std::string data = toString(VERSION); //For lack of something better to send
+	std::string data = toString(CLIENT_VERSION); //For lack of something better to send
 	
 	//Copy the data into the UDP packet
 	strcpy((char *)mUDPPacket->data, data.c_str());
-	mUDPPacket->len = data.size() + 1;
+	mUDPPacket->len = (int)data.size() + 1;
 	
 	//And send it off.
 	SDLNet_UDP_Send(mUDPSocket, -1, mUDPPacket); 
@@ -294,7 +303,7 @@ void App::updateUDPSocket(){
 **********************************************/
 void App::updateTCPSocket(){
 	
-	int readlen;
+	int readlen = 0;
 	
 	while(SDLNet_SocketReady(mClientSocket)){
 		if((readlen = SDLNet_TCP_Recv(mClientSocket, buffer, 1024)) > 0){
@@ -310,7 +319,7 @@ void App::updateTCPSocket(){
 	if(mDataBuf.size() == 0){
 		return;
 	}
-	//LOG("Got %d bytes\n", mDataBuf.size());
+	LOG("Got %d bytes\n", mDataBuf.size());
 	
 	//At this point we should have all the queued data from the server in mDataBuf
 	int index = 0;
@@ -327,10 +336,13 @@ void App::updateTCPSocket(){
 		}
 		
 		//Sanity check...
+		
 		if(type > 4){
 			LOG("Bad packet type %d\n", type);
-			utilShutdown(0);
+			notifyShutdown();
+			return;
 		}
+		
 		
 		//Make sure we have all the data
 		int thisSize = packetSizes[type];				
@@ -345,13 +357,16 @@ void App::updateTCPSocket(){
 		//New flow
 		if(type == FLOW_UPDATE){
 		
+			
 			if(getFPS() < iDropFlowThresh){
 				bSkipFlow = !bSkipFlow;
 				if(bSkipFlow){
 					index += thisSize;	
+					LOG("Discarded flow: %d\n", iFPS);
 					continue;
 				}
 			}
+			
 		
 			flow_update_t *pkt = (flow_update_t *)data;
 			
@@ -403,7 +418,7 @@ void App::updateTCPSocket(){
 				index += thisSize;	
 				continue;
 			}
-		
+		/*
 			if(getFPS() < iDropPacketThresh){
 				bSkipPacket = !bSkipPacket;
 				if(bSkipPacket){
@@ -411,7 +426,7 @@ void App::updateTCPSocket(){
 					continue;
 				}
 			}
-				
+			*/	
 			//if(pkt->packetType == 6)
 				//LOG("Packet: %d, %f\n", ntohs(pkt->size), ntohf(pkt->speed));
 

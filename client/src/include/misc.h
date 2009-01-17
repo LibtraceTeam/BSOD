@@ -54,9 +54,9 @@ public:
 	
 	//The same formatting that CEGUI uses
 	string toString(){
-		byte rb = r * 255;
-		byte gb = g * 255;
-		byte bb = b * 255;
+		byte rb = (byte)(r * 255);
+		byte gb = (byte)(g * 255);
+		byte bb = (byte)(b * 255);
 		
 		char buf[32];
 		sprintf(buf, "FF%s%X%s%X%s%X", 	rb < 0xF ? "0" : "", rb, 

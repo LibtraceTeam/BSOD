@@ -43,7 +43,7 @@ void App::updateMain(){
 	if(bDrag){
 		
 		//Figure out the drag vectors and stuff
-		Vector2 drag = Vector2(iMouseX, iMouseY);
+		Vector2 drag = getMouse();
 		Vector2 diff = (dragStart - drag) * fDragScale;
 				
 		//Left mouse button means we modify the rotation
@@ -58,7 +58,7 @@ void App::updateMain(){
 		}
 		
 				
-		dragStart = Vector2(iMouseX, iMouseY);
+		dragStart = getMouse();
 		dragVel = diff;
 		
 		
@@ -86,6 +86,8 @@ void App::resetCam(){
 	}
 	fRot[0] = 20;
 	fZoom = 0.0f;
+
+	dragVel = Vector2(0,0);
 	
 	endDrag();
 }
@@ -230,7 +232,7 @@ void App::utilEventLoop(){
 		Camera rotate
 **********************************************/
 void App::beginDrag(){
-	dragStart = Vector2(iMouseX, iMouseY);
+	dragStart = getMouse();
 	bDrag = true;
 }
 

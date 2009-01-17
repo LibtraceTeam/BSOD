@@ -217,7 +217,7 @@ public:
 	IParticleSystem *ps(){return mParticleSystem;} 
 	
 	//Mouse
-	Vector2 getMouse(){return Vector2(iMouseX, iMouseY);}
+	Vector2 getMouse(){return Vector2((float)iMouseX, (float)iMouseY);}
 						
 	//Stats
 	int getFPS(){return iFPS;}

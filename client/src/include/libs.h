@@ -41,12 +41,17 @@ using std::map;
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+//#include <dlfcn.h>
+
+#ifdef _WINDOWS
+#include <Winsock2.h>
+#include <time.h>
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <math.h>
-#include <dlfcn.h>
-
+#endif
 
 /*********************************************
 					C stdlib
@@ -59,19 +64,26 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
+
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glx.h>
+//#include <GL/glx.h>
 
 
 /*********************************************
 				SDL*
 **********************************************/
 #include <SDL/SDL.h>
+
+#ifdef _WINDOWS
+#include <SDL_ttf.h>
+#include <SDL_net.h>
+#else
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
-
+#endif
 

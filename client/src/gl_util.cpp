@@ -140,7 +140,12 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	videoFlags  = SDL_OPENGL;         
 	videoFlags |= SDL_GL_DOUBLEBUFFER;
 	videoFlags |= SDL_HWPALETTE;     
+
+	//Quick hack - our resizing doesn't work properly under windows.
+	//easier just to disable it
+#ifndef _WINDOWS
 	videoFlags |= SDL_RESIZABLE;     
+#endif
 
 	//This checks to see if surfaces can be stored in memory 
 	if ( videoInfo->hw_available )

@@ -23,6 +23,9 @@ int App::init(App *a, int argc, char **argv){
 	srand(time(0));
 	bConnected = false;
 	done = false;
+
+	mParticleSystem = NULL;
+	mFlowMgr = NULL;
 	
 	//Load the configuration
 	if(!loadConfig()){
@@ -47,17 +50,7 @@ int App::init(App *a, int argc, char **argv){
 	//Set up the socket
 	initSocket();
 
-	//Connect	
-	if(mServerAddr != ""){
-		if(!openSocket()){
-			LOG("Something went wrong with the socket, bailing out\n");
-			return 0;
-		}
-	}else{
-		LOG("No server specified\n");
-	}
 	
-			
 	//Make the window	
 	if(!utilCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SCREEN_FULLSCREEN)){
 		ERR("Couldn't make window!\n");
@@ -80,7 +73,7 @@ int App::init(App *a, int argc, char **argv){
 	initFont();
 		
 	//Time etc
-	iFPS = 0;
+	iFPS = 60;
 	fTimeScale = 1.0f/60.0f;	
 	fZoom = 0.0f;
 	fGUITimeout = 0.0f;
@@ -104,6 +97,18 @@ int App::init(App *a, int argc, char **argv){
 				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
+
+	//Connect	
+	if(mServerAddr != ""){
+		if(!openSocket()){
+			LOG("Something went wrong with the socket, bailing out\n");
+			return 0;
+		}
+	}else{
+		LOG("No server specified\n");
+	}
+	
+			
 			
 	//At this point, all the setup should be done
 	LOG("Loaded, about to go to eventLoop\n");	

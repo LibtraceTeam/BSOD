@@ -6,7 +6,7 @@
 
 //These are alo apparently not included (properly) by CEGUI.h
 #include "CEGUIDefaultResourceProvider.h"
-#include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
+//#include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
 //Only for this file...
 using namespace CEGUI;
@@ -317,6 +317,8 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	}else{
 		SDL_ShowCursor(SDL_ENABLE);
 	}
+
+	return true;
 }
 
 bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
@@ -334,6 +336,8 @@ bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
 		DefaultWindow *text = (DefaultWindow *)winMgr->getWindow("txtSizeInfo");
 		text->setText("Particle Size: " + toString(val));
 	}
+
+	return true;
 }
 
 /*********************************************
@@ -718,7 +722,7 @@ void App::makeOptionWindow(){
  
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
-	text->setText("Version: " + toString(VERSION) + ", built " + __DATE__ + " at " + __TIME__);	
+	text->setText("Version: " + toString(CLIENT_VERSION) + ", built " + __DATE__ + " at " + __TIME__);	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.8f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     

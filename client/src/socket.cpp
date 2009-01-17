@@ -43,7 +43,7 @@ enum PacketTypes {
 					FLOW_DESCRIPTOR
 				};
 
-#pragma pack(push, 1);
+#pragma pack(push, 1)
 
 //Flow update packets
 struct flow_update_t {
@@ -56,7 +56,7 @@ struct flow_update_t {
 	float z2;
 	uint32_t id;
 	uint32_t ip1;
-	uint32_t ip2;} PACKED;
+	uint32_t ip2;};
 
 
 //New packet packets
@@ -68,18 +68,18 @@ struct pack_update_t {
 	uint16_t size;
 	float speed; 
 	bool dark;
-} PACKED;
+};
 
 //Expire flow packets
 struct flow_remove_t {
 	unsigned char type;//2
 	uint32_t id;
-} PACKED;
+};
 
 //Kill all packets
 struct kill_all_t {
 	unsigned char type;//3
-} PACKED;
+};
 
 //Type description
 struct flow_descriptor_t {
@@ -87,7 +87,7 @@ struct flow_descriptor_t {
 	unsigned char id;
 	uint8_t colour[3];
 	char name[256];
-} PACKED;
+};
 
 
 #pragma pack(pop)
@@ -319,7 +319,7 @@ void App::updateTCPSocket(){
 	if(mDataBuf.size() == 0){
 		return;
 	}
-	LOG("Got %d bytes\n", mDataBuf.size());
+	//LOG("Got %d bytes\n", mDataBuf.size());
 	
 	//At this point we should have all the queued data from the server in mDataBuf
 	int index = 0;

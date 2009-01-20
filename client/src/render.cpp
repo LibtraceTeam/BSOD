@@ -15,7 +15,7 @@ void App::calcFps(){
 		iFPS = iFrameCounter;
 		iFrameCounter = 0;	
 	
-		mStatusString = "Current time: " + string(ctime(&iCurrentTime)) + "-";
+		mStatusString = "Current time: " + string(ctime(&iCurrentTime));
 		
 	}
 	

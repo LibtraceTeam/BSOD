@@ -40,7 +40,8 @@ enum PacketTypes {
 					PACKET_UPDATE,
 					FLOW_REMOVE,
 					FLOW_ALL_REMOVE,
-					FLOW_DESCRIPTOR
+					FLOW_DESCRIPTOR,
+					IMAGE_DATA
 				};
 
 #pragma pack(push, 1)
@@ -89,13 +90,19 @@ struct flow_descriptor_t {
 	char name[256];
 };
 
+//Image data 
+struct image_data_t {
+	unsigned char type; //5
+	unsigned char id; // 0 = left, 1 = right
+	uint32_t length; //the number of bytes following this packet of image data
+};
 
 #pragma pack(pop)
 
 //Size in bytes of each packet
 int packetSizes[] = {	sizeof(flow_update_t), sizeof(pack_update_t), 
 						sizeof(flow_remove_t), sizeof(kill_all_t),
-						sizeof(flow_descriptor_t) };
+						sizeof(flow_descriptor_t), sizeof(image_data_t) };
 					
 /*********************************************	Sets up the initial networking
 **********************************************/	
@@ -363,7 +370,7 @@ void App::updateTCPSocket(){
 		
 		//Sanity check...
 		
-		if(type > 4){
+		if(type > 5){
 			LOG("Bad packet type %d\n", type);
 			notifyShutdown();
 			return;
@@ -484,8 +491,30 @@ void App::updateTCPSocket(){
 			if(strcmp(pkt->name, "<NULL>") == 0){
 				//Ignore it!
 			}else{					
-				addFlowDescriptor(pkt->id, Color(pkt->colour[0], pkt->colour[1], pkt->colour[2]), string(pkt->name));
+				addFlowDescriptor(pkt->id, Color(pkt->colour[0], pkt->colour[1], 
+									pkt->colour[2]), string(pkt->name));
 			}
+		}
+		
+		else if(type == IMAGE_DATA){
+		
+			image_data_t *pkt = ( image_data_t *)data;
+			
+			//Kinda hacky - we break here as well if we don't have the whole
+			//image buffer. 
+			thisSize += pkt->length;
+			
+			if((int)mDataBuf.size() - index < thisSize){
+				//we don't have the whole packet...
+				break;
+			}
+		
+			LOG("Image data %d:%d!\n", pkt->id, pkt->length);
+			
+			byte *buf = data + sizeof(image_data_t);
+			
+			LOG("Image buf: %s\n", (char *)buf);
+			
 		}
 		
 		//Increment index to go past this packet

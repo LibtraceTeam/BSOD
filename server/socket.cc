@@ -121,9 +121,13 @@ struct flow_descriptor_t {
 } __attribute__((packed));
 
 int listen_socket;
+int udp_socket;
 fd_set read_fds;
 fd_set write_fds;
 
+/* For discovery replies */
+extern int port;
+extern char *server_name;
 
 /* Creates a new structure containing a file descriptor */
 struct client* create_fd(int fd)
@@ -215,6 +219,57 @@ int setup_listen_socket()
 	FD_SET(listen_socket, &read_fds);
 
 	return listen_socket;
+}
+
+
+//----------------------------------------------------------
+#define UDP_PORT 2080
+//#define DEST_ADDR "255.255.255.255" //broadcast addr
+
+int setup_udp_socket(){
+
+	int addr_len;
+    int broadcast=1;
+
+	if((udp_socket = socket(PF_INET, SOCK_DGRAM, 0)) == -1){
+		perror("socket");
+		exit(1);
+	}
+	if((setsockopt(udp_socket,SOL_SOCKET,SO_BROADCAST,
+					&broadcast,sizeof(broadcast))) == -1){
+		perror("setsockopt - SO_SOCKET ");
+		exit(1);
+	}
+	
+	struct sockaddr_in sendaddr;
+	struct sockaddr_in recvaddr;
+							
+	//Start at a base of UDP_PORT, increment until we find an open one
+	//This means we can run multiple servers on the same box without clashes 
+	for(int port = UDP_PORT;;port++){
+
+		sendaddr.sin_family = AF_INET;
+		sendaddr.sin_port = htons(port);
+		sendaddr.sin_addr.s_addr = INADDR_ANY;
+		memset(sendaddr.sin_zero,'\0', sizeof(sendaddr.sin_zero));
+
+		recvaddr.sin_family = AF_INET;
+		recvaddr.sin_port = htons(port);
+		recvaddr.sin_addr.s_addr = INADDR_ANY;
+		memset(recvaddr.sin_zero,'\0',sizeof(recvaddr.sin_zero));
+		
+		if(bind(udp_socket, (struct sockaddr*) &recvaddr, sizeof(recvaddr)) != -1){
+			printf("Bound to UDP multicast on port %d\n", port);
+			break;
+		}
+		
+		printf("UDP port %d is in use\n", port);		
+	}
+	
+	//Add the UDP socket to the socket set so we can select() on it
+	FD_SET(udp_socket, &read_fds);
+		
+	return udp_socket;
 }
 
 //-------------------------------------------------------------
@@ -330,7 +385,9 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 				    exit(1);
 		}
 	}
-
+	
+	
+	
 	/* For every client that can accept data, send it anything that it
 	 * has queued 
 	 */
@@ -371,6 +428,41 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 			// client.
 			send_colour_table(modptrs);	
 		}
+	}
+	
+	//Check for UDP
+	else if (FD_ISSET(udp_socket, &xread_fds)){
+			
+		struct sockaddr_in sendaddr;
+
+		sendaddr.sin_family = AF_INET;
+        sendaddr.sin_port = htons(UDP_PORT);
+        sendaddr.sin_addr.s_addr = INADDR_ANY;
+        memset(sendaddr.sin_zero,'\0', sizeof sendaddr.sin_zero);
+ 
+ 		int addr_len = sizeof(sendaddr);
+		int numbytes;
+		unsigned char buf[16];
+        if ((numbytes = recvfrom(udp_socket, buf, sizeof(buf), 0,
+              (struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1){
+       		perror("recvfrom");
+       	}
+       	buf[numbytes] = 0;
+       	
+       	Log(LOG_DAEMON|LOG_DEBUG,"UDP discovery from %s\n", 
+       								inet_ntoa(sendaddr.sin_addr));
+       	       
+       	//Send them a response 
+       	char response[256];
+       	sprintf(response, "%s|%d|%s", "0.0.0.0", port, server_name);
+		  
+		numbytes = sendto(udp_socket, response, strlen(response) , 0, 
+							(struct sockaddr *)&sendaddr, 
+							sizeof(sendaddr));
+		
+		Log(LOG_DAEMON|LOG_DEBUG,"Sent a reply: '%s'\n", response);
+       	
+       	
 	}
 
 	return ret;

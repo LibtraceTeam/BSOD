@@ -41,9 +41,9 @@
 #include "debug.h"
 #include "daemons.h"
 
-extern int daemonised;
+int daemonised = 0; //HACK!
 
-void Log(int priority, const char *fmt, ...)
+void Log(int priority, char *fmt, ...)
 {
         va_list ap;
         char buffer[513];

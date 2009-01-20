@@ -33,6 +33,7 @@
 #define _SOCKET_H
 #include <inttypes.h>
 int setup_listen_socket();
+int setup_udp_socket();
 int bind_tcp_socket(int listener, int port);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
 int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );

@@ -82,22 +82,15 @@ void RTTMap::Add( Flow *flow, unsigned long int time_stamp, double now )
 int RTTMap::Flush( double now )
 {
 	FlowMap::iterator i = m_flows->begin();
-	FlowMap::iterator inew;
 	int count = 0;
 
-	for( ; i != m_flows->end(); i=inew )
+	for( ; i != m_flows->end(); i++ )
 	{
-		inew=i;
-		++inew;
-
 		TraceMap &tmap = i->second;
 		TraceMap::iterator j = tmap.begin();
-		TraceMap::iterator jnew;
 
-		for( ; j != tmap.end(); j=jnew )
+		for( ; j != tmap.end(); j++ )
 		{
-			jnew=j;
-			++jnew;
 			if( (now - j->second) > 180 )
 			{
 				tmap.erase( j );

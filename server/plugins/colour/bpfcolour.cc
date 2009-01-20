@@ -2,6 +2,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <string.h>
 #include <vector>
 #include "bpfcolour.h"
 #include <libtrace.h>

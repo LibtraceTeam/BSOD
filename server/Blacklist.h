@@ -31,6 +31,7 @@
 #define BLACKLIST_H
 
 #include "string"
+#include <string.h>
 #include "stdio.h"
 #include "stdlib.h"
 #include "libtrace.h"

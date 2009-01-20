@@ -34,5 +34,5 @@
 #define _DEBUG_H_
 #include <syslog.h>
 
-void Log(int priority, const char *fmt, ...);
+void Log(int priority, char *fmt, ...);
 #endif // _DEBUG_H_

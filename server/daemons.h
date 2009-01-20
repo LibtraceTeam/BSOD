@@ -14,8 +14,8 @@ extern "C" {
 #endif
 
 
-void put_pid( const char *fname );
-void daemonise( const char *name, int ch ) ;
+void put_pid( char *fname );
+void daemonise( char *name, int ch ) ;
 
 extern int daemonised;
 

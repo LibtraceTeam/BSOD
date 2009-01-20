@@ -9,7 +9,7 @@ void App::utilBeginRender(){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	float ar = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+	float ar = (float)iScreenX / (float)iScreenY;
 
 	gluPerspective(70.0f,ar,0.5f,1000.0f);
 	
@@ -31,7 +31,7 @@ void App::utilEndRender(){
 
 	//Make it ortho
 	//(0,0) == top-left
-	glOrtho(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 1);
+	glOrtho(0, iScreenX, iScreenY, 0, 0, 1);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -75,8 +75,8 @@ int App::resizeWindow( int width, int height )
 	//Reset The View 
 	glLoadIdentity( );
 	
-	App::S()->iScreenX = width;
-	App::S()->iScreenY = height;	
+	iScreenX = width;
+	iScreenY = height;	
 
 	return true;
 }
@@ -314,7 +314,7 @@ Vector2 App::utilProject(float x, float y, float z){
 		model_view, projection, viewport,
 		&pX, &pY, &pZ);
 			
-	return Vector2(pX, SCREEN_HEIGHT - pY);
+	return Vector2(pX, iScreenY - pY);
 }
 
 /*********************************************

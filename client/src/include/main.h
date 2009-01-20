@@ -76,9 +76,15 @@ class App{
 	
 	//socket.cpp
 	bool bConnected;			//Whether we're connected to a server or not
-	
+	int iCurrentUDPPort;		//The current discovery port offset
+	time_t iCurrentTime;			//Current timestamp of the trace
+		
 	//gui.cpp
-	float fGUITimeout;
+	float fGUITimeout;			//Seconds until the GUI disappers. >0 = display
+	
+	//render.cpp
+	string mStatusString;			//timestamp + server name
+	
 		
 /*********************************************
 		Private member functions
@@ -127,11 +133,11 @@ class App{
 	bool openSocket();			//Connects to the server
 	void closeSocket();			//Disconnects from the server
 	void updateSocket();		//Reads data from the server
+	void beginDiscovery();		//Starts the UDP server discovery process
 	void updateTCPSocket();		//Reads from our TCP connection
 	void updateUDPSocket();		//Ditto from our UDP socket
-	void sendDiscoveryPacket(); //Sends the UDP broadcast discovery packet
-	bool isConnected(){return bConnected;}
-		
+	void sendDiscoveryPacket(int); //Sends the UDP broadcast discovery packet
+	
 	//config.cpp
 	bool loadConfig();			//Loads bsod2.cfg using libconfuse
 	
@@ -186,6 +192,7 @@ public:
 	//font.cpp - legacy 2D GUI stuff
 	void writeText(int x, int y, const char *fmt, ...);	//Writes freetype2 text
 	void writeTextCentered(int x, int y, const char *fmt, ...); //Centered text
+	float getTextWidth(const char *fmt, ...);
 
 	//misc.cpp
 	float randFloat(); //Return a float between 0.0-1.0
@@ -221,6 +228,9 @@ public:
 						
 	//Stats
 	int getFPS(){return iFPS;}
+	
+	//Socket.cpp
+	bool isConnected(){return bConnected;}
 	
 	
 /*********************************************

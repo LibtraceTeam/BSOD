@@ -142,12 +142,14 @@ bool App::initSocket(){
 bool App::openSocket(){
 
 	//If we're switching between servers, kill all our particles
-	if(ps())
+	if(ps()){
 		ps()->delAll();
+	}
 	
 	//And flows
-	if(mFlowMgr)
+	if(mFlowMgr){
 		mFlowMgr->delAll();
+	}
 
 	if(mClientSocket){
 		//We're connected. Disconnect!
@@ -204,24 +206,34 @@ bool App::openSocket(){
 }
 
 /*********************************************
-  Sends a UDP broadcast packet. 
+  Sends the initial discovery packets 
 **********************************************/
-void App::sendDiscoveryPacket(){
-
+void App::beginDiscovery(){
+		
 	//Remove old entries
 	clearServerList(); 
+	
+	iCurrentUDPPort = UDP_SERVER_PORT;
+	
+	for(int i=0;i<UDP_PORT_RANGE;i++){
+		sendDiscoveryPacket(iCurrentUDPPort++);
+	}
+
+}
+
+/*********************************************
+  Sends a UDP broadcast packet. 
+**********************************************/
+void App::sendDiscoveryPacket(int port){
 		
 	//Note that we don't actually wait for a response here. That's handled below
 	//in updateSocket(). 
-	if(SDLNet_ResolveHost(&mUDPPacket->address, "255.255.255.255", UDP_SERVER_PORT) == -1) {
+	if(SDLNet_ResolveHost(&mUDPPacket->address, "255.255.255.255", port) == -1) {
 		ERR("Error: Unable to resolve host '%s'", mServerAddr.c_str());
 		return;
 	}
-	
-	//mUDPPacket->address.host = INADDR_ANY;	//Destination is everyone
-	//mUDPPacket->address.port = htons(UDP_SERVER_PORT);
-	
-	std::string data = toString(CLIENT_VERSION); //For lack of something better to send
+		
+	std::string data = toString("bsod2"); //For lack of something better
 	
 	//Copy the data into the UDP packet
 	strcpy((char *)mUDPPacket->data, data.c_str());
@@ -230,7 +242,7 @@ void App::sendDiscoveryPacket(){
 	//And send it off.
 	SDLNet_UDP_Send(mUDPSocket, -1, mUDPPacket); 
 	
-	//LOG("Sent discovery!\n");	
+	//LOG("Sent discovery to port %d\n", port);	
 }
 	
 	
@@ -256,47 +268,61 @@ void App::updateSocket(){
 void App::updateUDPSocket(){
 
 	int num = SDLNet_UDP_Recv(mUDPSocket, mUDPPacket);
-    if(num) {
-    	uint32_t ipaddr = 0;
-    	ipaddr=SDL_SwapBE32(mUDPPacket->address.host);
-    	
-    	string remoteIP = 	toString(ipaddr>>24) + "." + 
-    						toString((ipaddr>>16)&0xff) + "." + 
-    						toString((ipaddr>>8)&0xff) + "." + 
-    						toString(ipaddr&0xff);
+	
+	if(!num){
+		return;
+	}
+	
+	
+	uint32_t ipaddr = 0;
+	ipaddr=SDL_SwapBE32(mUDPPacket->address.host);
+	
+	string remoteIP = 	toString(ipaddr>>24) + "." + 
+						toString((ipaddr>>16)&0xff) + "." + 
+						toString((ipaddr>>8)&0xff) + "." + 
+						toString(ipaddr&0xff);
+						
+	int replyPort =  ntohs(mUDPPacket->address.port);	
+	
+	string remoteData = string((char *)mUDPPacket->data);   
+	
+	memset(mUDPPacket->data, NULL, 512); 						
 		
-		string remoteData = string((char *)mUDPPacket->data);   
-		
-		memset(mUDPPacket->data, NULL, 512); 						
-   			
-		vector<string> split;
-		int n = splitString(remoteData, "|", split);
-				
-		if(n < 2){
-			ERR("Invalid UDP data: %d: '%s'\n", n, mUDPPacket->data);
-			return;
-		}
-		
-		//If we got sent a valid IP, override the one we got from the packet
-		if(split[0] != "0.0.0.0"){
-			remoteIP = split[0];
-		}
-		
-		string port = split[1];
-		
-		//Put the name back together
-		string name = "";
-		for(int i=2;i<(int)split.size();i++){
-			name += split[i];			
-			if(i != (int)split.size() - 1)	name += "|";
-		}
-		
-		//And add it to the GUI
-		
-		//LOG("Got remote server '%s': %s:%s\n", name.c_str(), remoteIP.c_str(), port.c_str());
-		
-		addServerListEntry(name, remoteIP, port);
-    }	
+	vector<string> split;
+	int n = splitString(remoteData, "|", split);
+			
+	if(n < 2){
+		ERR("Invalid UDP data: %d: '%s'\n", n, mUDPPacket->data);
+		return;
+	}
+	
+	//If we got sent a valid IP, override the one we got from the packet
+	if(split[0] != "0.0.0.0"){
+		remoteIP = split[0];
+	}
+	
+	string port = split[1];
+	
+	//Put the name back together
+	string name = "";
+	for(int i=2;i<(int)split.size();i++){
+		name += split[i];			
+		if(i != (int)split.size() - 1)	name += "|";
+	}
+	
+	//And add it to the GUI				
+	addServerListEntry(name, remoteIP, port);
+	
+	//Send out some more broadcasts. We want to make sure that we have sent 
+	//replyPort + 5. 
+	//LOG("Reply from port %d (%d, %d)\n", replyPort, 
+	//		replyPort + UDP_PORT_RANGE, iCurrentUDPPort);
+	//LOG("Got: %s\n", name.c_str());
+	
+	while(replyPort + UDP_PORT_RANGE > iCurrentUDPPort){
+		sendDiscoveryPacket(iCurrentUDPPort++);
+	}
+    
 }
 	
 /*********************************************  Update the TCP connection with the server
@@ -362,7 +388,7 @@ void App::updateTCPSocket(){
 				bSkipFlow = !bSkipFlow;
 				if(bSkipFlow){
 					index += thisSize;	
-					LOG("Discarded flow: %d\n", iFPS);
+					//LOG("Discarded flow: %d\n", iFPS);
 					continue;
 				}
 			}
@@ -418,7 +444,7 @@ void App::updateTCPSocket(){
 				index += thisSize;	
 				continue;
 			}
-		/*
+		
 			if(getFPS() < iDropPacketThresh){
 				bSkipPacket = !bSkipPacket;
 				if(bSkipPacket){
@@ -426,22 +452,18 @@ void App::updateTCPSocket(){
 					continue;
 				}
 			}
-			*/	
-			//if(pkt->packetType == 6)
-				//LOG("Packet: %d, %f\n", ntohs(pkt->size), ntohf(pkt->speed));
-
+				
 			uint16_t size = ntohs(pkt->size);
 			float rtt = ntohf(pkt->speed);
 
 			if(rtt < 0.0f){				
 				rtt = -rtt;
 			}
-		
 			
-		
+			iCurrentTime = ntohl(pkt->ts);		
 			
 			mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));
-			
+						
 			iTime = ntohl(pkt->ts);			
 		}
 		

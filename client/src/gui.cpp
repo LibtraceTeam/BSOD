@@ -131,7 +131,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 			
 			//hack!
 			if(target == mServerWindow){
-				sendDiscoveryPacket();
+				beginDiscovery();
 			}
 		}
 	}else{
@@ -228,7 +228,7 @@ bool App::onServerButtonClicked(const EventArgs &args){
 	String senderID = we->window->getName();
 	
 	if(senderID == "btnRefresh"){
-		sendDiscoveryPacket();
+		beginDiscovery();
 	}else if(senderID == "btnConnect"){
 		Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 		
@@ -606,8 +606,8 @@ void App::makeServerWindow(){
 	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpace/FrameWindow", "wndServer");
     root->addChildWindow(mServerWindow);
     
-    mServerWindow->setPosition(UVector2(cegui_reldim(0.22f), cegui_reldim( 0.3f)));
-    mServerWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.5f)));  
+    mServerWindow->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.3f)));
+    mServerWindow->setSize(UVector2(cegui_reldim(0.75f), cegui_reldim( 0.5f)));  
     mServerWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
     mServerWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
 

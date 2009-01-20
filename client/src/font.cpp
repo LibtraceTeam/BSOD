@@ -90,7 +90,7 @@ void App::initFont(){
 		float minY = charHeight / textureHeight * row;
 		float maxY = minY + charHeight / textureHeight;
 
-		charWidths[i] = advance;
+		charWidths[i] = (advance + 1) / 2;
 
 		glNewList(id, GL_COMPILE); 
 		glBegin(GL_QUADS);
@@ -155,6 +155,23 @@ void App::writeText(int x, int y, const char *fmt, ...){
 		
 }
 
+float App::getTextWidth(const char *fmt, ...){
+
+  	va_list args;
+    va_start(args, fmt);
+    vsnprintf(message, 512, fmt, args);
+    va_end(args);
+
+	int len = strlen(message);
+	int offset = 0;
+	
+	for(int i=0;i<len;i++){
+		if(message[i] - OFFSET >= 0)
+			offset += charWidths[message[i] - OFFSET];
+	}	
+		
+	return offset;	
+}
 
 void App::writeTextCentered(int x, int y, const char *fmt, ...){
 
@@ -164,22 +181,22 @@ void App::writeTextCentered(int x, int y, const char *fmt, ...){
     va_start(args, fmt);
     vsnprintf(message, 512, fmt, args);
     va_end(args);
-
-	glPushMatrix();
-
-	glTranslatef(x, y, 0);
 	
 	//center it
 	int len = strlen(message);
-	int offset = 0;
+	float offset = 0;
 	
 	for(int i=0;i<len;i++){
-		offset += charWidths[message[i]];
+		offset += charWidths[message[i] - OFFSET];
 	}	
-	offset /= 4;	
 	
+	offset /= 4;
+			
+	glPushMatrix();	
+	glTranslatef(x - offset, y, 0);
 	glScalef(0.5f, 0.5f, 0.5f);
-	glTranslatef(-offset, 0, 0);	
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
 
 	for(unsigned int i = 0; i < strlen(message); i++){
 	   glCallList(getList(message[i]));

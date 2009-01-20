@@ -12,7 +12,11 @@
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #define ABS(a)	   (((a) < 0) ? -(a) : (a))
 
+#ifndef PI
+	#define PI 3.14159265
+#endif
 
+const float infinity = std::numeric_limits<float>::infinity();
 
 
 

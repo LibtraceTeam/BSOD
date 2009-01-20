@@ -335,7 +335,13 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float lif
 	mFree.pop();
 			
 	//Apply some jitter
-	float jitter = 0.0f; //App::S()->randFloat(0, 1.0f);
+	float jitter = 0.0f;
+	
+	//Nasty hack! If we're in the title screen, jitter ruins it.
+	if(App::S()->isConnected()){
+		App::S()->randFloat(0, 1.0f);
+	}
+	
 	pos = pos + speed * jitter;		
 	p->life = life - jitter;
 	

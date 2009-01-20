@@ -28,6 +28,8 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
+#include <cctype>
+
 
 using std::string;
 using std::vector;

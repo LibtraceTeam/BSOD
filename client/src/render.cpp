@@ -15,8 +15,8 @@ void App::calcFps(){
 		iFPS = iFrameCounter;
 		iFrameCounter = 0;	
 	
-		//fTimeScale = 1.0f / (float)iFPS;
-		//LOG("%d fps\n", iFPS);
+		mStatusString = "Current time: " + string(ctime(&iCurrentTime)) + "-";
+		
 	}
 	
 }
@@ -77,12 +77,28 @@ void App::drawStatusBar(){
 	
 	//Text
 	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
+	
+	if(fGUITimeout <= 0.0f){
+		if(!isConnected()){
+			writeTextCentered(iScreenX / 2, iScreenY - 30, 
+						"Press any key to display the GUI, \
+						then use the Servers button to connect to a server");
+		}		
+	}else{
+	
+		if(isConnected()){
+	
+			float w = getTextWidth(mStatusString.c_str()) + 10;
+			writeText(iScreenX - w, iScreenY - 20, mStatusString.c_str());			
+						
+			string s = "Connected to " + mServerAddr + ":" + toString(iServerPort);
+			w = getTextWidth(s.c_str()) + 10;			
+			writeText(iScreenX - w, iScreenY - 40, s.c_str());	
+		
+		}
 
-	if(!isConnected() && fGUITimeout <= 0.0f){
-		writeTextCentered(iScreenX / 2, iScreenY - 50, 
-					"Press any key to display the GUI, \
-					then use the Servers button to connect to a server");
-	}	
+	}
+	
 }
 
 

@@ -88,7 +88,7 @@ void PSTexture::render(){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	float ar = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+	float ar = (float)App::S()->iScreenX / (float)App::S()->iScreenY;
 
 	gluPerspective(70.0f,ar,0.5f,1000.0f);
 	

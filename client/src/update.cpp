@@ -111,7 +111,7 @@ void App::generateTestData(){
 		fTestTime = 0.0f;
 		iTestRow++;
 		
-		if(iTestRow >= tex->iSizeX){
+		if(iTestRow >= tex->iSizeX - 5){
 			iTestRow = 0;
 			isRotating = true;
 		}
@@ -120,7 +120,7 @@ void App::generateTestData(){
 		
 		//LOG("%d\n", x);
 		
-		for(int y=0;y<tex->iSizeY;y++){
+		for(int y=0;y<tex->iSizeY - 1;y++){
 			
 			int index = (x * 4) + ((tex->iSizeY - y) * tex->iSizeX * 4);
 			

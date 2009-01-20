@@ -52,7 +52,7 @@ int App::init(App *a, int argc, char **argv){
 
 	
 	//Make the window	
-	if(!utilCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SCREEN_FULLSCREEN)){
+	if(!utilCreateWindow(iScreenX, iScreenY, 32, bFullscreen)){
 		ERR("Couldn't make window!\n");
 		return 1;
 	}

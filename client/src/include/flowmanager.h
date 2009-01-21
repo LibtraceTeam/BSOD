@@ -79,10 +79,6 @@ class FlowManager{
 	//Whether we need to do a glProject or not	
 	bool bNeedProject;
 
-	//Plane textures
-	Texture *mTex;
-	Texture *mEarthTex;
-
 	//List of flows
 	stack<Flow *> mFreeFlows; 
 	vector<Flow *> mActiveFlows;
@@ -97,6 +93,9 @@ class FlowManager{
 #else
 	map<int, Flow *> mFlowMap;
 #endif
+
+	//Fade on the left and right slabs
+	float fFade[2];
 
 	//Current flow
 	Flow *mSelectedFlow;

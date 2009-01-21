@@ -86,8 +86,10 @@ Texture *App::texLoad(string name, int flags){
 /*********************************************
 	Generates a texture from a buffer
 **********************************************/
-/*
-Texture *App::texGenerate(string name, byte *buffer, int width, int height){
+
+Texture *App::texGenerate(string name, byte *buffer, int buflen){
+	
+	LOG("Loading '%s' from buffer...", name.c_str());
 
 	Texture *tex = genTexObj();
 	
@@ -95,22 +97,29 @@ Texture *App::texGenerate(string name, byte *buffer, int width, int height){
 		ERR("Couldn't allocate a texture object!\n");
 		return NULL;
 	}
+		
+	ILuint devilID = makeImage();		
+	ilBindImage(devilID);
 	
+	tex->iDevilID = devilID;	
 	tex->mFilename = name;
 	
-	GLuint i;
-
-	glGenTextures(1, &i);
-	glBindTexture(GL_TEXTURE_2D, i);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	//Load the data	from the buf.
+	if(!ilLoadL(0, buffer, buflen)){
+		ERR("error!\n");
+		return NULL;
+	}
+					
+	tex->iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
+	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
-	tex->iGLID = i;
-		
-	return tex; 
+	tex->mData = ilGetData();
+	tex->iGLID = ilutGLBindTexImage(); //ilutGLBindMipmaps();
+	
+	LOG("(got id %d)\n", tex->iGLID);	    
+	
+	return tex;
 }
-*/
 
 /*********************************************
 	Generates a texture from a buffer
@@ -147,6 +156,8 @@ bool App::texInit(){
 	
 	ilInit();
 	ilutRenderer(ILUT_OPENGL);
+	
+	mLeftTex = mRightTex = NULL;
 	
 	//preload any common textures here
 	mTextures.clear();
@@ -190,6 +201,27 @@ void App::texShutdown(){
 	ilShutDown();
 }
 
+/*********************************************
+		Delete a specific texture
+**********************************************/
+void App::texDelete(Texture *tex){
+	ILuint id =tex->iDevilID;			
+	ilDeleteImages(1, &id);	
+	glDeleteTextures(1, &tex->iGLID);
+	
+	for(int i=0;i<mTextures.size();i++){
+		if(mTextures[i] == tex){
+			mTextures[i] = mTextures[mTextures.size() - 1];
+			mTextures.pop_back();
+			break;
+		}
+	}
+					
+	LOG("Freed '%s'\n", tex->mFilename.c_str());
+	
+	delete tex;
+}
+
 
 /*********************************************
 		Returns a texture by name
@@ -198,7 +230,7 @@ Texture *App::texGet(string name){
 
 	for(int i=0;i<(int)mTextures.size();i++){
 		Texture *t = mTextures[i];		
-		if(t->mFilename == name){
+		if(t && t->mFilename == name){
 			return t;
 		}
 	}

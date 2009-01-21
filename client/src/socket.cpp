@@ -168,6 +168,17 @@ bool App::openSocket(){
 			return false;
 		}
 		
+		//Clean up any textures we may have got
+		if(mLeftTex){
+			texDelete(mLeftTex);
+			mLeftTex = NULL;
+		}
+		
+		if(mRightTex){
+			texDelete(mRightTex);
+			mRightTex = NULL;
+		}
+		
 		LOG("Disconected from server\n");
 		
 		updateGUIConnectionStatus();		
@@ -368,8 +379,7 @@ void App::updateTCPSocket(){
 			continue; //protocol version, ignore it
 		}
 		
-		//Sanity check...
-		
+		//Sanity check...		
 		if(type > 5){
 			LOG("Bad packet type %d\n", type);
 			notifyShutdown();
@@ -508,13 +518,19 @@ void App::updateTCPSocket(){
 				//we don't have the whole packet...
 				break;
 			}
-		
-			LOG("Image data %d:%d!\n", pkt->id, pkt->length);
-			
+					
 			byte *buf = data + sizeof(image_data_t);
 			
-			LOG("Image buf: %s\n", (char *)buf);
-			
+			//Note that it will only update mLeft/mRight if they don't exist
+			//This is how we override them in the config file - if they were 
+			//specified in the .conf, then they'd be loaded by now
+			if(pkt->id == 0 && !mLeftTex){
+				mLeftTex = texGenerate("left", buf, pkt->length);
+			}else if(pkt->id == 1 && !mRightTex){
+				mRightTex = texGenerate("right", buf, pkt->length);
+			}else{
+				LOG("Don't know what to do with image ID %d\n", pkt->id);
+			}
 		}
 		
 		//Increment index to go past this packet

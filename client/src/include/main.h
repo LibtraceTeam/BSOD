@@ -219,6 +219,8 @@ public:
 	//texture.cpp
 	Texture *texGet(string name); //Return a loaded texture by name
 	Texture *texLoad(string name, int flags); //Load a texture from disk
+	Texture *texGenerate(string name, byte *buffer, int buflen);
+	void texDelete(Texture *tex);
 	
 	//particle management
 	IParticleSystem *ps(){return mParticleSystem;} 
@@ -254,6 +256,9 @@ public:
 	int iDropPacketThresh; //The FPS that we start to discard packets below
 	int iDropFlowThresh; //The FPS that we start to discard flows below
 		
+	//The textures for the left and right slabs
+	Texture *mLeftTex;
+	Texture *mRightTex;
 };
 
 

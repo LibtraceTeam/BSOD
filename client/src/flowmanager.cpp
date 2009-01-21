@@ -4,15 +4,7 @@
 		 	Entry
 **********************************************/
 bool FlowManager::init(){	
-	
-	mTex = App::S()->texLoad("waikato.png", 0);
-	mEarthTex = App::S()->texLoad("earth.png", 0);
-	
-	if(!mTex || !mEarthTex){
-		LOG("Couldn't get the texture!\n");
-		return false;
-	}
-		
+
 	mSelectedFlow = NULL;
 	bNeedProject = false;	
 	
@@ -210,6 +202,7 @@ void FlowManager::delAll(){
 	}
 	
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
+/*
 #ifdef USE_TR1
 	for(std::tr1::unordered_map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){
 		if(it->second)
@@ -221,6 +214,13 @@ void FlowManager::delAll(){
 			delete it->second;
 	}
 #endif
+*/
+
+	for(int i=0;i<(int)mActiveFlows.size();i++){
+		delete mActiveFlows[i];
+	}
+	
+	mFlowMap.clear();
 
 	mActiveFlows.clear();
 	mViewFlows.clear();
@@ -234,35 +234,6 @@ void FlowManager::delAll(){
 void FlowManager::updateList(){
 
 	glNewList(mDisplayList,GL_COMPILE);
-
-
-	glColor3f(1,1,1);
-	glEnable(GL_TEXTURE_2D);
-	
-	//Left slab	
-	mTex->bind();
-	
-	float d = fPlaneDistance / 2.0f;
-	
-	glPushMatrix();
-		glTranslatef(-d, 0, 0);
-		glRotatef(90, 0, 1, 0);
-		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
-	glPopMatrix();
-	
-	
-	
-	//Right slab
-	mEarthTex->bind();
-	
-	glPushMatrix();
-		glTranslatef(d, 0, 0);
-		glRotatef(270, 0, 1, 0);
-		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
-	glPopMatrix();
-	
-	
-
 	glDisable(GL_TEXTURE_2D);
 
 	glEnable(GL_BLEND);
@@ -325,6 +296,62 @@ void FlowManager::render(){
 		updateList(); //rerender
 		fRenderTimer = 0.0f;
 	}
+	
+	
+	glEnable(GL_TEXTURE_2D);
+	
+	//Left slab	
+	if(App::S()->mLeftTex){
+		App::S()->mLeftTex->bind();
+		
+		float f = MAX(fFade[0], 0.0f);
+		glColor3f(f,f,f);
+		
+		if(f < 1.0f){
+			fFade[0] += fTimeScale;
+		}
+		
+	}else{
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(0.1f, 0.1f, 0.1f);
+		fFade[1] = -1.0f;
+	}
+	
+	float d = fPlaneDistance / 2.0f;
+	
+	glPushMatrix();
+		glTranslatef(-d, 0, 0);
+		glRotatef(90, 0, 1, 0);
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
+	glPopMatrix();
+	
+	
+	
+	//Right slab
+	if(App::S()->mRightTex){
+		App::S()->mRightTex->bind();
+		
+		float f = MAX(fFade[1], 0.0f);
+		glColor3f(f,f,f);
+		
+		if(f < 1.0f){
+			fFade[1] += fTimeScale;
+		}
+		
+	}else{
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(0.1f, 0.1f, 0.1f);
+		fFade[1] = -1.0f;
+	}
+	
+	glPushMatrix();
+		glTranslatef(d, 0, 0);
+		glRotatef(270, 0, 1, 0);
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
+	glPopMatrix();
+	
+	
+	
 	
 	//Call the existing list
 	glCallList(mDisplayList);

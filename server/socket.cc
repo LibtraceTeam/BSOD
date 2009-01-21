@@ -120,6 +120,13 @@ struct flow_descriptor_t {
 	char name[256];
 } __attribute__((packed));
 
+// Image data header
+struct image_data_t {
+	unsigned char type;
+	unsigned char id; // 0 = left, 1 = right
+	uint32_t length; //the number of bytes following this packet of image data
+} __attribute__((packed));
+
 int listen_socket;
 int udp_socket;
 fd_set read_fds;
@@ -128,6 +135,9 @@ fd_set write_fds;
 /* For discovery replies */
 extern int port;
 extern char *server_name;
+
+/* For left and right images */
+extern char *left_image, *right_image;
 
 /* Creates a new structure containing a file descriptor */
 struct client* create_fd(int fd)
@@ -223,9 +233,6 @@ int setup_listen_socket()
 
 
 //----------------------------------------------------------
-#define UDP_PORT 2080
-//#define DEST_ADDR "255.255.255.255" //broadcast addr
-
 int setup_udp_socket(){
 
 	int addr_len;
@@ -427,6 +434,9 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 			// This could be done better by targeting only the new
 			// client.
 			send_colour_table(modptrs);	
+			
+			// Send the new client the left and right images
+			send_images(ret);
 		}
 	}
 	
@@ -621,4 +631,77 @@ int send_colour_table(struct modptrs_t *modptrs)
 	} while( !(fd.colour[0]==0 && fd.colour[1]==0 && fd.colour[2]==0) );
 
 	return( 0 );
+}
+
+char *read_file(char *name, int &size){
+
+	FILE *f = fopen(name, "rb");
+	
+	if(!f){
+		return NULL;
+	}
+	
+	fseek(f, 0, SEEK_END);
+	size = ftell(f);
+
+	char *buf = (char*)malloc(size);
+	fseek(f, 0, SEEK_SET);
+	fread(buf, 1, size, f);
+	fclose(f);
+	
+	return buf;
+}
+
+
+// Sends the left and right images (if set) to a client
+int send_images(struct client *c){
+	
+	struct image_data_t image;
+	
+	image.type = 0x5;
+		
+	char *buf = NULL;
+	int len = 0;
+	
+	if(left_image){
+	
+		buf = read_file(left_image, len);
+		
+		if(!buf){
+			printf("Left image '%s' is unreadable!\n", left_image);
+			exit(1);	
+		}
+		
+		image.id = 0; //left
+		image.length = len;
+	
+		enqueue_data(c, &image, sizeof(image));	
+		enqueue_data(c, buf, len);
+	
+		printf("Sent '%s' (%d bytes)\n", left_image, len);
+		
+		free(buf);
+	}
+	
+	if(right_image){
+	
+		buf = read_file(right_image, len);
+		
+		if(!buf){
+			printf("Right image '%s' is unreadable!\n", right_image);
+			exit(1);	
+		}
+		
+		image.id = 1; //right
+		image.length = len;
+	
+		enqueue_data(c, &image, sizeof(image));	
+		enqueue_data(c, buf, len);
+	
+		printf("Sent '%s' (%d bytes)\n", right_image, len);
+	
+		free(buf);
+	}
+
+	return 0;
 }

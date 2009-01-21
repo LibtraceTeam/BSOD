@@ -36,6 +36,8 @@
 #include <stdint.h>
 #include "libtrace.h"
 
+#define UDP_PORT 2080
+
 typedef enum {
 	DIR_UNKNOWN = -1,
 	DIR_OUTBOUND = 0,

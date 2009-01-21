@@ -45,5 +45,6 @@ int send_kill_flow(uint32_t id);
 void hax_fdmax(int fd);
 int send_kill_all();
 int send_colour_table(struct modptrs_t *modptrs);
+int send_images(struct client *c);
 
 #endif // _SOCKET_H

@@ -102,6 +102,8 @@ char *blacklistdir = 0;
 char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
 char *server_name = 0;
+char *left_image = 0;
+char *right_image = 0;
 
 int port = 32500;
 int loop = 0;
@@ -450,6 +452,8 @@ void fix_defaults() {
 	if (!server_name)
 		server_name=strdup(uri); //If no name is specified, use the data source
 	
+	//left_image and right_image can be NULL, it means the client will use the
+	//default images and provides compatibility for the old client if needed
 }
 
 void do_configuration(int argc, char **argv) {
@@ -480,6 +484,8 @@ void do_configuration(int argc, char **argv) {
 		{"rttest", TYPE_BOOL|TYPE_NULL, &enable_rttest},
 		{"sampling", TYPE_INT|TYPE_NULL, &sampling},
 		{"name", TYPE_STR|TYPE_NULL, &server_name},
+		{"left_image", TYPE_STR|TYPE_NULL, &left_image},
+		{"right_image", TYPE_STR|TYPE_NULL, &right_image},
 		{0,0,0}
 	};
 

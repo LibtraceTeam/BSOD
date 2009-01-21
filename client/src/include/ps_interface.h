@@ -1,8 +1,7 @@
 /*******************************************************************************
 							BSOD2 Client - ps_interface.h
 							
- This file specifices the interface that particle systems implement. Yay for
- abstraction :)
+ This file specifices the interface that particle systems implement. 
 *******************************************************************************/
 
 //Returned by IParticleSystem::getType()

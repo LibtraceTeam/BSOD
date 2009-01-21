@@ -48,6 +48,9 @@ bool PSShaders::init(){
 
 
 
+/*********************************************
+ Update the particles life, expire as necessary
+**********************************************/
 void PSShaders::update(){
 
 	fTime += fTimeScale * App::S()->fParticleSpeedScale;
@@ -90,6 +93,9 @@ void PSShaders::update(){
 	
 }
 
+/*********************************************
+	Render the display list as necessary
+**********************************************/
 void PSShaders::render(){
 
 
@@ -111,6 +117,10 @@ void PSShaders::render(){
 	mShader.unbind();
 }
 
+
+/*********************************************
+  Render points with the right normal + tex
+**********************************************/
 void PSShaders::renderAll(){
 	
 	mTexture->bind();
@@ -162,8 +172,15 @@ void PSShaders::renderAll(){
 		//TODO: Use glDrawArrays!															
 		for(int i=0;i<(int)list->size();i++){			
 			Particle *p = (*list)[i];		
+			
+			//Normal = velocity
 			glNormal3f(p->vx, p->vy, p->vz);
+			
+			//TexCoord.x = timestamp offset
+			//TexCoord.y = size 
 			glTexCoord2f(p->timestamp, thisSize);
+			
+			//Create the point
 			glVertex3f(p->x, p->y, p->z);
 		}		
 				
@@ -178,6 +195,10 @@ void PSShaders::renderAll(){
 	iNumActive = count;
 }
 
+
+/*********************************************
+	Kill the shader and the list
+**********************************************/
 void PSShaders::shutdown(){
 	
 	mShader.dispose();

@@ -1,8 +1,7 @@
 /*******************************************************************************
 							BSOD2 Client - vector.h
 							
- Defines some simple 2D/3D math objects. TODO: Probably want to name this 
- something that doesn't sound like it does a STL vector...
+ Defines some simple 2D/3D math objects that can perform various 3D operations
 *******************************************************************************/
 
 /*********************************************

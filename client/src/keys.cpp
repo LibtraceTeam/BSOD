@@ -1,9 +1,7 @@
 #include "main.h"
 
 #define MAX_KEYS 512
-
 bool keyArray[MAX_KEYS];
-
 
 /*********************************************
 		Called on key-down

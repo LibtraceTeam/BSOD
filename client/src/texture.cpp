@@ -122,25 +122,6 @@ Texture *App::texGenerate(string name, byte *buffer, int buflen){
 }
 
 /*********************************************
-	Generates a texture from a buffer
-**********************************************/
-/*
-void App::texRegenerate(Texture *t, byte *buffer, int width, int height){
-	GLuint i;
-	
-	i = t->iGLID;
-	
-	glDeleteTextures(1, &i);
-
-	glGenTextures(1, &i);
-	glBindTexture(GL_TEXTURE_2D, i);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-
-	t->iGLID = i;	
-}
-*/
-
-/*********************************************
 		Starts up the texture sys
 **********************************************/
 bool App::texInit(){

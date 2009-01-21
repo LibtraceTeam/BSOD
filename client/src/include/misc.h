@@ -67,8 +67,6 @@ public:
 										gb < 0xF ? "0" : "", gb, 
 										bb < 0xF ? "0" : "", bb);
 		
-		//printf("%s\n", buf);
-		
 		return string(buf);
 	}
 	

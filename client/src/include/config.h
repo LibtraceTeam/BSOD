@@ -10,7 +10,6 @@
 #define PARTICLE_FPS fParticleFPS //hack!
 #define MAX_FLOW_DESCRIPTORS 64
 #define MAX_PARTICLES 1000000 //global cap of 1m particles for particle systems
-							  //that have a limit
 #define SLAB_SIZE 40
 #define GUI_HIDE_DELAY 5.0f //seconds
 
@@ -27,5 +26,6 @@
 #define UDP_SERVER_PORT 2080 //the base port the server listens to broadcast on
 #define UDP_PORT_RANGE 5
 
+//Displayed in the options window
 #define CLIENT_VERSION 0.1
 

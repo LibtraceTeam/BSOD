@@ -18,6 +18,7 @@ bool App::initParticleSystem(){
 	//LOG("ParticleSystemType %d\n", iParticleMethod);
 	
 	//0 == autodetect
+	//TODO: This isn't particularly good. Improve me!
 	if(iParticleMethod == PARTICLE_SYSTEM_UNSPECIFIED){
 		LOG("Attempting to autodetect the best particle method...\n");
 
@@ -34,10 +35,14 @@ bool App::initParticleSystem(){
 	
 	
 	//Explicit override 
-	else if(iParticleMethod == PARTICLE_SYSTEM_CLASSIC)			mParticleSystem = new PSClassic;
-	else if(iParticleMethod == PARTICLE_SYSTEM_POINTSPRITES)	mParticleSystem = new PSSprites;
-	else if(iParticleMethod == PARTICLE_SYSTEM_SHADERS)			mParticleSystem = new PSShaders;
-	else if(iParticleMethod == PARTICLE_SYSTEM_TEXTURE)			mParticleSystem = new PSTexture;
+	else if(iParticleMethod == PARTICLE_SYSTEM_CLASSIC)			
+			mParticleSystem = new PSClassic;
+	else if(iParticleMethod == PARTICLE_SYSTEM_POINTSPRITES)	
+			mParticleSystem = new PSSprites;
+	else if(iParticleMethod == PARTICLE_SYSTEM_SHADERS)			
+			mParticleSystem = new PSShaders;
+	else if(iParticleMethod == PARTICLE_SYSTEM_TEXTURE)			
+			mParticleSystem = new PSTexture;
 	else{
 		LOG("Bad particle method %d (must be 0-3)\n", iParticleMethod);
 		return false;

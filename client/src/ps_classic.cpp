@@ -65,11 +65,7 @@ void PSSprites::render(){
 			Particle *p = (*list)[i];		
 			glVertex3f(p->x, p->y, p->z);
 		}
-				
-		//Particle *first = (*list)[0];
-		//glVertexPointer(3, GL_FLOAT, sizeof(Particle), &first->x);
-       	//glDrawArrays(GL_POINTS, 0, (int)list->size());
-
+		
 #ifndef DISABLE_SIZE
 		glEnd();
 #endif
@@ -317,7 +313,8 @@ float PSClassic::setSizeScale(){
 /*********************************************
 	Add a new particle with defaults
 **********************************************/
-void PSClassic::add(Vector3 pos, Vector3 speed, Color col, float size, float life){
+void PSClassic::add(Vector3 pos, Vector3 speed, Color col, 
+					float size, float life){
 
 	//First make sure we have capacity
 	if(mFree.empty()){

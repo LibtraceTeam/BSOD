@@ -111,7 +111,8 @@ class FlowManager{
 	void updateList();	
 	GLuint mDisplayList;
 	
-	void setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, float speed, float size, bool negative);
+	void setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, 
+					 float speed, float size, bool negative);
 	
 public:
 
@@ -120,7 +121,9 @@ public:
 	
 	//Logic
 	void update(float currentTime, float timeDelta);
-	void newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 start, Vector3 end);
+	void newFlow(int flowID, 
+				IPaddress src, IPaddress dst, 
+				Vector3 start, Vector3 end);
 	void newPacket(int flowID, int size, float rtt, FlowDescriptor *type);
 	void delFlow(int flowID);
 	void delAll();
@@ -135,10 +138,7 @@ public:
 	void shutdown();
 	
 	//Interaction
-	bool onClick(int button, float x, float y, float z);
-	
-	
+	bool onClick(int button, float x, float y, float z);	
 };
 
-uint32_t SuperFastHash (const char * data, int len);
 

@@ -2,7 +2,7 @@
 #include <stdarg.h>
 
 //This is pretty quick and nasty.
-//Basically I just copied a 'how to use SDL_TTF' from gamedev, but it seems to work OK
+//Basically I just copied a 'how to use SDL_TTF' from gamedev, but it works OK
 //http://www.gamedev.net/community/forums/topic.asp?topic_id=458211
 
 const int OFFSET = 32;
@@ -68,7 +68,8 @@ void App::initFont(){
 	/* create texture */
 	glGenTextures(1, &textureId);
 	glBindTexture(GL_TEXTURE_2D, textureId);   
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, (int)textureWidth, (int)textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, destination->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, (int)textureWidth, (int)textureHeight, 0, 
+					GL_RGBA, GL_UNSIGNED_BYTE, destination->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);      
 
@@ -83,7 +84,7 @@ void App::initFont(){
 		chars[i] = id;
 
 		int minx, maxx, miny, maxy, advance;
-		TTF_GlyphMetrics(font, i + OFFSET, &minx, &maxx, &miny, &maxy, &advance);
+		TTF_GlyphMetrics(font, i+OFFSET, &minx, &maxx, &miny, &maxy, &advance);
 
 		float minX = charWidth * col / textureWidth;
 		float maxX = (advance) / textureWidth + minX;

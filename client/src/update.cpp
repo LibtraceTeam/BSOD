@@ -118,8 +118,6 @@ void App::generateTestData(){
 		
 		int x = iTestRow;
 		
-		//LOG("%d\n", x);
-		
 		for(int y=1;y<tex->iSizeY - 1;y++){
 			
 			int index = (x * 4) + ((tex->iSizeY - y) * tex->iSizeX * 4);
@@ -127,17 +125,17 @@ void App::generateTestData(){
 			byte r = data[index + 0];
 			byte g = data[index + 1];
 			byte b = data[index + 2];
-			
-			//if(b == 255)
-				//LOG("%d/%d: %d/%d/%d\n", x, y, r, g, b);
-			
+						
 			if(r > 0 || g > 0 || b > 0){
 				float v = 0.05f;
-				Vector3 vel = Vector3(-10, 0, 0) + Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v));
-				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v) + randFloat(-1,1));
+				
+				Vector3 vel = Vector3(-10, 0, 0) + Vector3(randFloat(-v,v),
+								randFloat(-v,v),randFloat(-v,v));
+				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),
+								randFloat(-v,v) + randFloat(-1,1));
 	
-				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, Color(r,g,b), 1.0f, 15.0f);
-				//LOG("Added at %d/%d\n", x, y);
+				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, 
+							Color(r,g,b), 1.0f, 15.0f);
 			}
 			
 		}
@@ -170,18 +168,20 @@ void App::utilEventLoop(){
 						      
 			case SDL_VIDEORESIZE:
 			    //handle resize event
-			    surface = SDL_SetVideoMode( event.resize.w, event.resize.h, 16, videoFlags );
+			    surface = SDL_SetVideoMode( event.resize.w, event.resize.h, 
+			    							16, videoFlags );
 			    if ( !surface ){
-				    fprintf( stderr, "Could not get a surface after resize: %s\n", SDL_GetError( ) );
-				    utilShutdown( 1 );
+				    ERR( "Could not get a surface after resize: %s\n", 
+				    	SDL_GetError( ) );
+				    notfyShutdown();
 				}
 			    resizeWindow( event.resize.w, event.resize.h );
 			    resizeGUI( event.resize.w, event.resize.h );
 			    break;
 			
 			case SDL_QUIT:
-			    /* handle quit requests */
-			    done = true;
+			    //handle quit requests
+			    notifyShutdown();
 			    break;
 			
 			case SDL_MOUSEBUTTONDOWN:

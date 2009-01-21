@@ -192,6 +192,7 @@ float PSTexture::setSizeScale(){
  	Render the texture to the screen 
 **********************************************/
 void PSTexture::render2D(){
+
 	//OK. Now we need to draw a plane with the texture on, 
 	//covering the entire screen. We draw it several times with additive
 	//blending. This means it adds up to look better

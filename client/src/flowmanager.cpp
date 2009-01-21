@@ -51,7 +51,8 @@ void FlowManager::update(float currentTime, float timeDelta){
 /*********************************************
  Called when the parent program has a new flow
 **********************************************/
-void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 start, Vector3 end){
+void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, 
+						  Vector3 start, Vector3 end){
 
 	start = start * 2;
 	end = end * 2;
@@ -72,9 +73,11 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 star
 	
 	if(end.x < 0){
 		//Note the -speed
-		f = addFlow(flowID, Vector2(start.y, start.z), Vector2(end.y, end.z), -speed, size);
+		f = addFlow(flowID, Vector2(start.y, start.z), 
+					Vector2(end.y, end.z), -speed, size);
 	}else{
-		f = addFlow(flowID, Vector2(end.y, end.z), Vector2(start.y, start.z), speed, size);
+		f = addFlow(flowID, Vector2(end.y, end.z), 
+					Vector2(start.y, start.z), speed, size);
 	}
 		
 	//Make the flow object
@@ -96,7 +99,8 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, Vector3 star
 /*********************************************
 	Parent program has a new packet
 **********************************************/
-void FlowManager::newPacket(int flowID, int size, float rtt, FlowDescriptor *type){
+void FlowManager::newPacket(int flowID, int size, float rtt, 
+							FlowDescriptor *type){
 		
 	Flow *f = getFlowByID(flowID);
 	
@@ -204,12 +208,14 @@ void FlowManager::delAll(){
 	//delete everything in the map. This includes the contents of mActiveFlows and mViewFlows
 /*
 #ifdef USE_TR1
-	for(std::tr1::unordered_map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){
+	for(std::tr1::unordered_map<int, Flow *>::const_iterator it = 
+		mFlowMap.begin(); it != mFlowMap.end(); ++it){
 		if(it->second)
 			delete it->second;
 	}
 #else
-	for(map<int, Flow *>::const_iterator it = mFlowMap.begin(); it != mFlowMap.end(); ++it){
+	for(map<int, Flow *>::const_iterator it = mFlowMap.begin(); 
+		it != mFlowMap.end(); ++it){
 		if(it->second)
 			delete it->second;
 	}
@@ -233,51 +239,37 @@ void FlowManager::delAll(){
 **********************************************/
 void FlowManager::updateList(){
 
-	glNewList(mDisplayList,GL_COMPILE);
+	glNewList(mDisplayList,GL_COMPILE);	
 	glDisable(GL_TEXTURE_2D);
-
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glPointSize(3.0f);
 		
-	
-	glBegin(GL_POINTS);	
-	
-	
+	glBegin(GL_POINTS);		
 	for(int i=0;i<(int)mViewFlows.size();i++){
 	
-		if(!mViewFlows[i]){
-			continue;
-		}
-		
-		if(mViewFlows[i]->hide){
-			continue;
-		}
+		if(!mViewFlows[i]) continue;		
+		if(mViewFlows[i]->hide)	continue;
 		
 		FlowDescriptor *d = mViewFlows[i]->mDescr;	
 		
-		if(!d){
-			continue;
-		}
+		if(!d) continue;
 			
 		float shade = 1.0f; //mViewFlows[i]->shade;	
 							
-		glColor4f(d->mColor.r * shade, d->mColor.g * shade, d->mColor.b * shade, shade);			
+		glColor4f(	d->mColor.r * shade, 
+					d->mColor.g * shade, 
+					d->mColor.b * shade, 
+					shade	);			
 		
 		glVertex3f(mViewFlows[i]->x, mViewFlows[i]->y, mViewFlows[i]->z);		
-		glVertex3f(mViewFlows[i]->x2, mViewFlows[i]->y2, mViewFlows[i]->z2);	
-		
-		
+		glVertex3f(mViewFlows[i]->x2, mViewFlows[i]->y2, mViewFlows[i]->z2);			
 	}
-	glEnd();
-	
-		
-	glDisable(GL_BLEND);
-		
+	glEnd();	
+				
+	glDisable(GL_BLEND);		
 	glEndList();
-	
-
 }
 
 float fRenderTimer = 2.0f;
@@ -350,22 +342,16 @@ void FlowManager::render(){
 		glTranslatef(d, 0, 0);
 		glRotatef(270, 0, 1, 0);
 		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
-	glPopMatrix();
-	
-	
-	
+	glPopMatrix();	
 	
 	//Call the existing list
-	glCallList(mDisplayList);
-
-		
-		
-	
-		
+	glCallList(mDisplayList);		
 }
 
+/*********************************************
+ 	Renders the selected flow indicator
+**********************************************/
 void FlowManager::renderSelection(){
-
 
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
@@ -400,17 +386,9 @@ void FlowManager::renderSelection(){
 			glVertex3f(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
 		glEnd();
 		
-		//if(bNeedProject){
-			mSelectedFlow->screenP1 = App::S()->utilProject(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
-			mSelectedFlow->screenP2 = App::S()->utilProject(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);	
-			
-		//	bNeedProject = false;
-		//}
-		
-	}	
-		
-	//glDisable(GL_BLEND);	
-	//glDepthMask(GL_TRUE);
+		mSelectedFlow->screenP1 = App::S()->utilProject(mSelectedFlow->x, mSelectedFlow->y, mSelectedFlow->z);		
+		mSelectedFlow->screenP2 = App::S()->utilProject(mSelectedFlow->x2, mSelectedFlow->y2, mSelectedFlow->z2);		
+	}		
 }
 
 
@@ -420,8 +398,6 @@ void FlowManager::renderSelection(){
 **********************************************/
 void FlowManager::render2d(){
 
-//	App::S()->writeText(550, 7, "(%d flows, %d viewable)", mActiveFlows.size(), mViewFlows.size());
-	
 	glDisable(GL_DEPTH_TEST);
 	
 	if(mSelectedFlow){	
@@ -493,9 +469,7 @@ void FlowManager::render2d(){
 		for(int i=0;i<3;i++){
 			App::S()->writeText((int)v1.x, (int)(v1.y + (y * i)), "%s", mSelectedFlow->leftText[i].c_str());
 			App::S()->writeText((int)v2.x, (int)(v2.y + (y * i)), "%s", mSelectedFlow->rightText[i].c_str());
-		}
-		
-		
+		}		
 	}
 }
 
@@ -605,6 +579,3 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 	
 	return false;
 }
-
-
-

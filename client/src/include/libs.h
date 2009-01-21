@@ -44,7 +44,6 @@ using std::map;
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <dlfcn.h>
 
 #ifdef _WINDOWS
 #include <Winsock2.h>
@@ -55,10 +54,6 @@ using std::map;
 #include <arpa/inet.h>
 #endif
 
-/*********************************************
-					C stdlib
-**********************************************/
-
 //libconfuse
 #include <confuse.h>
 
@@ -66,13 +61,9 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
-
-
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-//#include <GL/glx.h>
-
 
 /*********************************************
 				SDL*

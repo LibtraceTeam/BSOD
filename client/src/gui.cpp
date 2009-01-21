@@ -42,6 +42,86 @@ public:
 
 vector<ServerInfo> mServerInfo;
 
+
+/*********************************************
+		CEGUI setup - create the UI**********************************************/
+void App::initGUI(){
+	
+	fGUITimeout = 0.0f; //Start hidden
+
+	//Set some SDL stuff to make the GUI work nicely
+	//SDL_ShowCursor(SDL_DISABLE);
+	SDL_EnableUNICODE(1);
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+
+	//Set up the GUI object
+	mGUI = new CEGUI::OpenGLRenderer( 0, iScreenX, iScreenY );
+	new CEGUI::System( mGUI );
+	
+	// initialise the required dirs for the DefaultResourceProvider
+	CEGUI::DefaultResourceProvider* rp = (CEGUI::DefaultResourceProvider *)
+							CEGUI::System::getSingleton().getResourceProvider();
+
+	//Set the resource groups. This maps a name of a resource group to a type
+    CEGUI::Imageset::setDefaultResourceGroup("imagesets");
+    CEGUI::Font::setDefaultResourceGroup("fonts");
+    CEGUI::Scheme::setDefaultResourceGroup("schemes");
+    CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
+    CEGUI::WindowManager::setDefaultResourceGroup("layouts");
+    CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
+
+	//Tell the resource provider where things are
+	rp->setResourceGroupDirectory("schemes", 	"./data/gui/schemes/");
+	rp->setResourceGroupDirectory("imagesets", 	"./data/gui/imagesets/");
+	rp->setResourceGroupDirectory("fonts", 		"./data/gui/fonts/");
+	rp->setResourceGroupDirectory("layouts", 	"./data/gui/layouts/");
+	rp->setResourceGroupDirectory("looknfeels", "./data/gui/looknfeel/");
+	rp->setResourceGroupDirectory("lua_scripts","./data/gui/lua_scripts/");
+	rp->setResourceGroupDirectory("schemas", 	"./data/gui/XMLRefSchema/");
+	
+	//CEGUI::XercesParser::setSchemaDefaultResourceGroup("schemas");
+	
+	//Load Arial to make sure we have at least one font
+	if(!CEGUI::FontManager::getSingleton().isFontPresent( "arial" ) )
+		CEGUI::FontManager::getSingleton().createFont( "arial.font" );
+
+	//Load in the themee file
+	CEGUI::SchemeManager::getSingleton().loadScheme( "SleekSpace.scheme" );
+	
+	// All windows and widgets are created via the WindowManager singleton.
+    winMgr = &WindowManager::getSingleton();   
+    
+    //Create the root window
+    root = (DefaultWindow*)winMgr->createWindow("DefaultWindow", "Root");
+    System::getSingleton().setGUISheet(root); 
+    		
+    mProtoWindow = NULL;
+    		
+   	//Create the main menu buttons
+   	makeMenuButtons();
+		
+	//Create the protcol toggle window
+	makeProtocolWindow();
+	
+	//And the server window
+	makeServerWindow();
+	
+	//And finally the options window
+	makeOptionWindow();
+	
+	//And the messagebox window
+	makeMessageWindow();
+    
+    
+		
+		
+	//Set the mouse cursor event.
+	CEGUI::MouseCursor::getSingleton().subscribeEvent(
+						MouseCursor::EventImageChanged, 
+						Event::Subscriber(&App::onMouseCursorChanged, this) );
+}
+
+
 /*********************************************
 	Called by the SDL event loop to pass
 	events off to CEGUI**********************************************/
@@ -74,8 +154,7 @@ bool App::processGUIEvent(SDL_Event e){
 		kc = SDLKeyToCEGUIKey(e.key.keysym.sym);
 		CEGUI::System::getSingleton().injectKeyDown(kc);
 
-		// as for the character it's a litte more complicated. we'll use for translated unicode value.
-		// this is described in more detail below.
+		// Use unicode value here if possible
 		if (e.key.keysym.unicode != 0){
 			CEGUI::System::getSingleton().injectChar(e.key.keysym.unicode);
 		}
@@ -213,7 +292,8 @@ void App::messagebox(string text, string title){
 	
 	mMessageWindow->setText(title);
 		
-    mMessageWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.33f)));
+    mMessageWindow->setPosition(UVector2(cegui_reldim(0.25f), 
+    							cegui_reldim( 0.33f)));
 	mMessageWindow->show();
 	mMessageWindow->moveToFront();
 
@@ -245,7 +325,7 @@ bool App::onServerButtonClicked(const EventArgs &args){
 				return true;
 			}
 			
-			//Set the config options. TOOD: Probably should pass these to openSocket
+			//Set the config options. Probably should pass these to openSocket
 			mServerAddr = split[0];				
 			iServerPort = stringTo<int>(split[1]);	
 			
@@ -279,13 +359,16 @@ bool App::onServerButtonClicked(const EventArgs &args){
 /*********************************************
   Called when we click a server list entry**********************************************/
 bool App::onServerListClicked(const EventArgs &args){
-
 	
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
+		
+	if(lb->getSelectedCount() <= 0){
+		return true;
+	}
 	
 	int index = lb->getItemIndex(lb->getFirstSelectedItem());
-	
+		
 	//Sanity check
 	if(index >= mServerInfo.size() || index < 0){
 		return true;
@@ -294,7 +377,6 @@ bool App::onServerListClicked(const EventArgs &args){
 	ServerInfo *info = &mServerInfo[index];
 	
 	eb->setText(info->ip + ":" + info->port);
-	
 		
 	return true;
 }
@@ -314,16 +396,13 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	//If CEGUI has changed to a valid image, hide the SDL cursor. This ensures
 	//that we do sensible things when we mouse over edit boxes and such, 
 	//otherwise we have duplicate cursors. 
-#ifndef _WINDOWS
+	/*
 	if(CEGUI::MouseCursor::getSingleton().getImage()){
 		SDL_ShowCursor(SDL_DISABLE);
 	}else{
 		SDL_ShowCursor(SDL_ENABLE);
 	}
-#else
-	//gah. Windows has issues if we're in fullscreen and do this.
-	//God only knows why. 
-#endif
+	*/
 	
 	return true;
 }
@@ -336,93 +415,17 @@ bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
 	
 	if(we->window->getName() == "slideSpeed"){	
 		fParticleSpeedScale = val;
-		DefaultWindow *text = (DefaultWindow *)winMgr->getWindow("txtSpeedInfo");
+		DefaultWindow *text = (DefaultWindow *)
+								winMgr->getWindow("txtSpeedInfo");
 		text->setText("Particle Speed: " + toString(val));
 	}else{
 		fParticleSizeScale = val;
-		DefaultWindow *text = (DefaultWindow *)winMgr->getWindow("txtSizeInfo");
+		DefaultWindow *text = (DefaultWindow *)
+								winMgr->getWindow("txtSizeInfo");
 		text->setText("Particle Size: " + toString(val));
 	}
 
 	return true;
-}
-
-/*********************************************
-		CEGUI setup - create the UI**********************************************/
-void App::initGUI(){
-	
-	fGUITimeout = 0.0f; //Start hidden
-
-	//Set some SDL stuff to make the GUI work nicely
-	//SDL_ShowCursor(SDL_DISABLE);
-	SDL_EnableUNICODE(1);
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
-	//Set up the GUI object
-	mGUI = new CEGUI::OpenGLRenderer( 0, iScreenX, iScreenY );
-	new CEGUI::System( mGUI );
-	
-	// initialise the required dirs for the DefaultResourceProvider
-	CEGUI::DefaultResourceProvider* rp = (CEGUI::DefaultResourceProvider *)
-							CEGUI::System::getSingleton().getResourceProvider();
-
-	//Set the resource groups. This maps a name of a resource group to a type
-    CEGUI::Imageset::setDefaultResourceGroup("imagesets");
-    CEGUI::Font::setDefaultResourceGroup("fonts");
-    CEGUI::Scheme::setDefaultResourceGroup("schemes");
-    CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
-    CEGUI::WindowManager::setDefaultResourceGroup("layouts");
-    CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
-
-	//Tell the resource provider where things are
-	rp->setResourceGroupDirectory("schemes", 	"./data/gui/schemes/");
-	rp->setResourceGroupDirectory("imagesets", 	"./data/gui/imagesets/");
-	rp->setResourceGroupDirectory("fonts", 		"./data/gui/fonts/");
-	rp->setResourceGroupDirectory("layouts", 	"./data/gui/layouts/");
-	rp->setResourceGroupDirectory("looknfeels", "./data/gui/looknfeel/");
-	rp->setResourceGroupDirectory("lua_scripts","./data/gui/lua_scripts/");
-	rp->setResourceGroupDirectory("schemas", 	"./data/gui/XMLRefSchema/");
-	
-	//CEGUI::XercesParser::setSchemaDefaultResourceGroup("schemas");
-	
-	//Load Arial to make sure we have at least one font
-	if(!CEGUI::FontManager::getSingleton().isFontPresent( "arial" ) )
-		CEGUI::FontManager::getSingleton().createFont( "arial.font" );
-
-	//Load in the themee file
-	CEGUI::SchemeManager::getSingleton().loadScheme( "SleekSpace.scheme" );
-	
-	// All windows and widgets are created via the WindowManager singleton.
-    winMgr = &WindowManager::getSingleton();   
-    
-    //Create the root window
-    root = (DefaultWindow*)winMgr->createWindow("DefaultWindow", "Root");
-    System::getSingleton().setGUISheet(root); 
-    		
-    mProtoWindow = NULL;
-    		
-   	//Create the main menu buttons
-   	makeMenuButtons();
-		
-	//Create the protcol toggle window
-	makeProtocolWindow();
-	
-	//And the server window
-	makeServerWindow();
-	
-	//And finally the options window
-	makeOptionWindow();
-	
-	//And the messagebox window
-	makeMessageWindow();
-    
-    
-		
-		
-	//Set the mouse cursor event.
-	CEGUI::MouseCursor::getSingleton().subscribeEvent(
-						MouseCursor::EventImageChanged, 
-						Event::Subscriber(&App::onMouseCursorChanged, this) );
 }
 
 void App::shutdownGUI(){
@@ -445,7 +448,8 @@ void App::addProtocolEntry(string name, Color col, int index){
 		return;
 	}
 
-	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", toString(index));
+	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", 
+													toString(index) );
 	mProtoWindow->addChildWindow(cb);
 	
 	float ypos = (index / 2) * 0.08f;
@@ -502,6 +506,33 @@ void App::updateGUIConnectionStatus(){
 					a custom address manually.");
 	}
 }
+
+
+
+
+/*********************************************
+	Called as part of render2D**********************************************/
+void App::renderGUI(){
+	if(fGUITimeout > 0.0f){
+		CEGUI::System::getSingleton().renderGUI();
+		fGUITimeout -= fTimeScale;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*********************************************
@@ -735,19 +766,6 @@ void App::makeOptionWindow(){
     
     
 }
-
-
-/*********************************************
-	Called as part of render2D**********************************************/
-void App::renderGUI(){
-	if(fGUITimeout > 0.0f){
-		CEGUI::System::getSingleton().renderGUI();
-		fGUITimeout -= fTimeScale;
-	}
-}
-
-
-
 
 
 

@@ -93,10 +93,12 @@ void App::drawStatusBar(){
 	
 		if(isConnected()){
 	
+			//Update the text at the bottom of the screen
 			float w = getTextWidth(mStatusString.c_str()) + 10;
 			writeText(iScreenX - w, iScreenY - 20, mStatusString.c_str());			
 						
-			string s = "Connected to " + mServerAddr + ":" + toString(iServerPort);
+			string s = "Connected to " + mServerAddr + 
+						":" + toString(iServerPort);						
 			w = getTextWidth(s.c_str()) + 10;			
 			writeText(iScreenX - w, iScreenY - 40, s.c_str());	
 		

@@ -189,7 +189,7 @@ bool App::openSocket(){
 
     LOG("Connecting to '%s:%d'\n", mServerAddr.c_str(), iServerPort);
     
-	if(SDLNet_ResolveHost(&ip, (char *)mServerAddr.c_str(), iServerPort) == -1) {
+	if(SDLNet_ResolveHost(&ip, (char *)mServerAddr.c_str(), iServerPort) == -1){
 		ERR("Error: Unable to resolve host '%s'\n", mServerAddr.c_str());
 		return false;
 	}
@@ -252,7 +252,7 @@ void App::sendDiscoveryPacket(int port){
 		
 	//Note that we don't actually wait for a response here. That's handled below
 	//in updateSocket(). 
-	if(SDLNet_ResolveHost(&mUDPPacket->address, "255.255.255.255", port) == -1) {
+	if(SDLNet_ResolveHost(&mUDPPacket->address, "255.255.255.255", port) == -1){
 		ERR("Error: Unable to resolve host '%s'", mServerAddr.c_str());
 		return;
 	}
@@ -371,7 +371,7 @@ void App::updateTCPSocket(){
 	}
 	//LOG("Got %d bytes\n", mDataBuf.size());
 	
-	//At this point we should have all the queued data from the server in mDataBuf
+	//At this point we should have all the queued data from the server
 	int index = 0;
 	
 	while(index < (int)mDataBuf.size()){
@@ -431,32 +431,25 @@ void App::updateTCPSocket(){
 			uint16_t proto = pkt->type;
 			
 			
-			Vector3 start = Vector3(ntohf(pkt->x1), ntohf(pkt->z1), ntohf(pkt->y1));
-			Vector3 end = Vector3(ntohf(pkt->x2), ntohf(pkt->z2), ntohf(pkt->y2));
+			Vector3 start = Vector3(ntohf(pkt->x1),
+									ntohf(pkt->z1), 
+									ntohf(pkt->y1));
+									
+			Vector3 end = Vector3(	ntohf(pkt->x2), 
+									ntohf(pkt->z2), 
+									ntohf(pkt->y2));
 			
 			start.x = -start.x;
 			end.x = -end.x;
 			
-			//LOG("%s: %f/%f/%f\n", inet_ntoa(ip1), start.x, start.y, start.z);
-			//LOG("%s: %f/%f/%f\n\n", inet_ntoa(ip2), end.x, end.y, end.z);
-			
 			mFlowMgr->newFlow(ntohl(pkt->id), src, dest, start, end);			
 		}
 		
-		
-		
 		//Expired flow
-		else if(type == FLOW_REMOVE){
-		
-			flow_remove_t *pkt = (flow_remove_t *)data;
-			
-			//LOG("Delete flow %u\n", ntohl(pkt->id));	
-			
-			mFlowMgr->delFlow(ntohl(pkt->id));		
-		
-		}
-		
-		
+		else if(type == FLOW_REMOVE){		
+			flow_remove_t *pkt = (flow_remove_t *)data;						
+			mFlowMgr->delFlow(ntohl(pkt->id));				
+		}	
 		
 		//New packet
 		else if(type == PACKET_UPDATE){
@@ -492,10 +485,8 @@ void App::updateTCPSocket(){
 		
 		
 		//Delete all
-		else if(type == FLOW_ALL_REMOVE){
-		
-			mFlowMgr->delAll();
-			
+		else if(type == FLOW_ALL_REMOVE){		
+			mFlowMgr->delAll();			
 		}
 		
 		
@@ -557,7 +548,6 @@ void App::addFlowDescriptor(byte id, Color c, string name){
             return; //we already have one!
     }
     
-
     FlowDescriptor *f = new FlowDescriptor;
     f->id = id;
     f->mColor = c;

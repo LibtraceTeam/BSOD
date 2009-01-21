@@ -22,7 +22,6 @@ public:
 	unsigned int index; //index into the parent particle array
 	
 	bool active; //if it's alive or not
-	
 };
 
 

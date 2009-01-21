@@ -156,6 +156,7 @@ bool App::openSocket(){
 	//And flows
 	if(mFlowMgr){
 		mFlowMgr->delAll();
+		mFlowMgr->notifyServerChange();
 	}
 
 	if(mClientSocket){
@@ -169,12 +170,12 @@ bool App::openSocket(){
 		}
 		
 		//Clean up any textures we may have got
-		if(mLeftTex){
+		if(mLeftTex && mLeftTexName == ""){
 			texDelete(mLeftTex);
 			mLeftTex = NULL;
 		}
 		
-		if(mRightTex){
+		if(mRightTex && mRightTexName == ""){
 			texDelete(mRightTex);
 			mRightTex = NULL;
 		}
@@ -520,13 +521,10 @@ void App::updateTCPSocket(){
 			}
 					
 			byte *buf = data + sizeof(image_data_t);
-			
-			//Note that it will only update mLeft/mRight if they don't exist
-			//This is how we override them in the config file - if they were 
-			//specified in the .conf, then they'd be loaded by now
-			if(pkt->id == 0 && !mLeftTex){
+						
+			if(pkt->id == 0 && mLeftTexName == ""){
 				mLeftTex = texGenerate("left", buf, pkt->length);
-			}else if(pkt->id == 1 && !mRightTex){
+			}else if(pkt->id == 1  && mRightTexName == ""){
 				mRightTex = texGenerate("right", buf, pkt->length);
 			}else{
 				LOG("Don't know what to do with image ID %d\n", pkt->id);

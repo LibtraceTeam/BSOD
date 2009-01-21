@@ -124,6 +124,7 @@ public:
 	void newPacket(int flowID, int size, float rtt, FlowDescriptor *type);
 	void delFlow(int flowID);
 	void delAll();
+	void notifyServerChange();
 	
 	//Rendering
 	void render();

@@ -6,6 +6,8 @@
 bool App::loadConfig(){
 	cfg_opt_t opts[] =	{
 		CFG_STR("Server", "", CFGF_NONE),
+		CFG_STR("LeftTex", "", CFGF_NONE),
+		CFG_STR("RightTex", "", CFGF_NONE),
 		CFG_INT("Port", 54567, CFGF_NONE),
 		CFG_INT("ResX", 1024, CFGF_NONE),
 		CFG_INT("ResY", 768, CFGF_NONE),
@@ -35,6 +37,8 @@ bool App::loadConfig(){
 	iParticleMethod = cfg_getint(cfg, "ParticleMethod");
 	iDropPacketThresh = cfg_getint(cfg, "DropPacketThresh");
 	iDropFlowThresh = cfg_getint(cfg, "DropFlowThresh");
+	mLeftTexName = string(cfg_getstr(cfg, "LeftTex"));
+	mRightTexName = string(cfg_getstr(cfg, "RightTex"));
 	
 	cfg_free(cfg);
 	

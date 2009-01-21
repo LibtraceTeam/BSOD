@@ -173,6 +173,20 @@ bool App::texInit(){
 		}
 	}
 	
+	if(mLeftTexName != ""){
+		mLeftTex = texLoad(mLeftTexName, 0);
+		if(!mLeftTex){
+			return false;
+		}
+	}
+	
+	if(mRightTexName != ""){
+		mRightTex = texLoad(mRightTexName, 0);
+		if(!mRightTex){
+			return false;
+		}
+	}
+	
 	texLoad("banner.png", 0);
 		
 	LOG("Finished loading initial textures!\n");

@@ -302,6 +302,7 @@ void FlowManager::render(){
 	
 	//Left slab	
 	if(App::S()->mLeftTex){
+		glEnable(GL_TEXTURE_2D);
 		App::S()->mLeftTex->bind();
 		
 		float f = MAX(fFade[0], 0.0f);
@@ -313,8 +314,8 @@ void FlowManager::render(){
 		
 	}else{
 		glDisable(GL_TEXTURE_2D);
-		glColor3f(0.1f, 0.1f, 0.1f);
-		fFade[1] = -1.0f;
+		glColor3f(0.0f, 0.0f, 0.0f);
+		fFade[0] = -1.0f;
 	}
 	
 	float d = fPlaneDistance / 2.0f;
@@ -329,6 +330,7 @@ void FlowManager::render(){
 	
 	//Right slab
 	if(App::S()->mRightTex){
+		glEnable(GL_TEXTURE_2D);
 		App::S()->mRightTex->bind();
 		
 		float f = MAX(fFade[1], 0.0f);
@@ -340,7 +342,7 @@ void FlowManager::render(){
 		
 	}else{
 		glDisable(GL_TEXTURE_2D);
-		glColor3f(0.1f, 0.1f, 0.1f);
+		glColor3f(0.0f, 0.0f, 0.0f);
 		fFade[1] = -1.0f;
 	}
 	
@@ -508,6 +510,12 @@ void FlowManager::shutdown(){
 
 	LOG("Shutdown\n");
 	
+}
+
+void FlowManager::notifyServerChange(){
+	for(int i=0;i<2;i++){
+		fFade[i] = -1.0f;
+	}
 }
 
 int DnsLeft(void *data){

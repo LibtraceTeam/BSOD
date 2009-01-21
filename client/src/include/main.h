@@ -259,6 +259,10 @@ public:
 	//The textures for the left and right slabs
 	Texture *mLeftTex;
 	Texture *mRightTex;
+	
+	//The client-side overrides for the left and right textures
+	string mLeftTexName;
+	string mRightTexName;
 };
 
 

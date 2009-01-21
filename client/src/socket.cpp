@@ -228,6 +228,11 @@ bool App::openSocket(){
   Sends the initial discovery packets 
 **********************************************/
 void App::beginDiscovery(){
+	
+	//Clear udp data
+	for(int i=0;i<512;i++){
+		mUDPPacket->data[i] = NULL;
+	}
 		
 	//Remove old entries
 	clearServerList(); 
@@ -304,9 +309,7 @@ void App::updateUDPSocket(){
 	int replyPort =  ntohs(mUDPPacket->address.port);	
 	
 	string remoteData = string((char *)mUDPPacket->data);   
-	
-	memset(mUDPPacket->data, NULL, 512); 						
-		
+			
 	vector<string> split;
 	int n = splitString(remoteData, "|", split);
 			
@@ -327,16 +330,18 @@ void App::updateUDPSocket(){
 	for(int i=2;i<(int)split.size();i++){
 		name += split[i];			
 		if(i != (int)split.size() - 1)	name += "|";
+
+		LOG("%d:%d\n", i, split[i].size());
 	}
+
+	LOG("Got: '%d'\n", name.size());
 	
 	//And add it to the GUI				
 	addServerListEntry(name, remoteIP, port);
 	
 	//Send out some more broadcasts. We want to make sure that we have sent 
-	//replyPort + 5. 
-	//LOG("Reply from port %d (%d, %d)\n", replyPort, 
-	//		replyPort + UDP_PORT_RANGE, iCurrentUDPPort);
-	//LOG("Got: %s\n", name.c_str());
+	//replyPort + 5. 	
+	
 	
 	while(replyPort + UDP_PORT_RANGE > iCurrentUDPPort){
 		sendDiscoveryPacket(iCurrentUDPPort++);

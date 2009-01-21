@@ -280,6 +280,7 @@ bool App::onServerButtonClicked(const EventArgs &args){
   Called when we click a server list entry**********************************************/
 bool App::onServerListClicked(const EventArgs &args){
 
+	
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
 	
@@ -293,6 +294,7 @@ bool App::onServerListClicked(const EventArgs &args){
 	ServerInfo *info = &mServerInfo[index];
 	
 	eb->setText(info->ip + ":" + info->port);
+	
 		
 	return true;
 }
@@ -312,12 +314,17 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	//If CEGUI has changed to a valid image, hide the SDL cursor. This ensures
 	//that we do sensible things when we mouse over edit boxes and such, 
 	//otherwise we have duplicate cursors. 
+#ifndef _WINDOWS
 	if(CEGUI::MouseCursor::getSingleton().getImage()){
 		SDL_ShowCursor(SDL_DISABLE);
 	}else{
 		SDL_ShowCursor(SDL_ENABLE);
 	}
-
+#else
+	//gah. Windows has issues if we're in fullscreen and do this.
+	//God only knows why. 
+#endif
+	
 	return true;
 }
 

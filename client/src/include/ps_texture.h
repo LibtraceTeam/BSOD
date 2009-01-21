@@ -12,6 +12,7 @@ class PSTexture : public PSSprites{
 	int height, width;
 	
 	void renderAll();
+	float setSizeScale();
 public:
 	bool init();
 	void render();

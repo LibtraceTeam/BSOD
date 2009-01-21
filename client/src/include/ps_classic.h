@@ -94,7 +94,7 @@ public:
 **********************************************/
 class PSSprites : public PSClassic{
 protected:
-	float setSizeScale();
+	virtual float setSizeScale();
 	float fMaxSize;
 public:
 	bool init();

@@ -25,11 +25,11 @@ int App::randInt(int low, int high){
 }
 
 float App::randFloat(){
-	return (float) rand() / (float) 0x7fffffff;
+	return randFloat(0,1);
 }
 
-float App::randFloat(float low, float high){
-	return (randFloat() * (high-low)) + low;
+float App::randFloat(float min, float max){
+	return min + (((float)rand()/(float)RAND_MAX) * (max - min));
 }
 
 static char message[512];

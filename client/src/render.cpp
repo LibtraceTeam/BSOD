@@ -15,7 +15,12 @@ void App::calcFps(){
 		iFPS = iFrameCounter;
 		iFrameCounter = 0;	
 	
-		mStatusString = "Current time: " + string(ctime(&iCurrentTime));
+		const char *t = ctime(&iCurrentTime);
+		if(t){
+			mStatusString = "Current time: " + string(t);
+		}else{
+			mStatusString = "";
+		}
 		
 	}
 	

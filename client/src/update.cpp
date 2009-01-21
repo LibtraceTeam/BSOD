@@ -135,6 +135,7 @@ void App::generateTestData(){
 				float v = 0.05f;
 				Vector3 vel = Vector3(-10, 0, 0) + Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v));
 				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),randFloat(-v,v) + randFloat(-1,1));
+	
 				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, Color(r,g,b), 1.0f, 15.0f);
 				//LOG("Added at %d/%d\n", x, y);
 			}

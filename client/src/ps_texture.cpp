@@ -1,6 +1,8 @@
 #include "main.h"
 
 
+#define MAX_SIZE 10.0f
+
 /*********************************************
 		  Set up the framebuffer
 **********************************************/
@@ -166,6 +168,24 @@ void PSTexture::renderAll(){
 	
 	iNumActive = count;
 }
+
+float PSTexture::setSizeScale(){
+	float scale = (1.0f/(float)iNumActive) * 150000;	
+	if(scale < 5.0f){ scale = 5.0f; }
+	else if(scale > MAX_SIZE){	
+		scale = MAX_SIZE;
+	}	
+	scale *= App::S()->fParticleSizeScale;	
+	scale *= 0.5f; //The render target is half the size
+				
+	//Set a default size here
+	glPointSize(scale); 	
+	glPointParameterfARB( GL_POINT_SIZE_MIN_ARB, App::S()->fParticleSizeScale );
+	glPointParameterfARB( GL_POINT_SIZE_MAX_ARB, fMaxSize );
+	
+	return scale;
+}
+
 
 
 /*********************************************

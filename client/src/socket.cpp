@@ -333,8 +333,6 @@ void App::updateUDPSocket(){
 
 		LOG("%d:%d\n", i, split[i].size());
 	}
-
-	LOG("Got: '%d'\n", name.size());
 	
 	//And add it to the GUI				
 	addServerListEntry(name, remoteIP, port);

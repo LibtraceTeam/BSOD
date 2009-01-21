@@ -173,7 +173,7 @@ void App::utilEventLoop(){
 			    if ( !surface ){
 				    ERR( "Could not get a surface after resize: %s\n", 
 				    	SDL_GetError( ) );
-				    notfyShutdown();
+				    notifyShutdown();
 				}
 			    resizeWindow( event.resize.w, event.resize.h );
 			    resizeGUI( event.resize.w, event.resize.h );

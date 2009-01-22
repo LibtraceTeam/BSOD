@@ -282,7 +282,7 @@ void FlowManager::render(){
 	//Update the point timer
 	fRenderTimer += fTimeScale;
 	
-	if(fRenderTimer > 1.5f){
+	if(fRenderTimer > 0.5f){
 		update(0.0f, fRenderTimer); //Kinda nasty having it here, but it means
 									//that it's synced with the render properly
 		updateList(); //rerender

@@ -107,7 +107,7 @@ void App::generateTestData(){
 	Texture *tex = texGet("banner.png");
 	byte *data = tex->mData;
 	
-	if(fTestTime > 0.02f){
+	if(fTestTime > 0.02f / fParticleSpeedScale){
 		fTestTime = 0.0f;
 		iTestRow++;
 		

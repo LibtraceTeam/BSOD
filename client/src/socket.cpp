@@ -521,7 +521,7 @@ void App::updateTCPSocket(){
 			}else if(pkt->id == 1  && mRightTexName == ""){
 				mRightTex = texGenerate("right", buf, pkt->length);
 			}else{
-				LOG("Don't know what to do with image ID %d\n", pkt->id);
+				LOG("Ignored image ID %d\n", pkt->id);
 			}
 		}
 		

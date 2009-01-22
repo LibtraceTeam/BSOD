@@ -68,13 +68,13 @@ public:
 	IPaddress mDst;
 };
 
-#define FLOW_TEX_SIZE 16
+#define FLOW_TEX_SIZE 256
 
 /*********************************************
 		 	Flow texture
 **********************************************/
 class FlowTexture{
-	byte data[FLOW_TEX_SIZE][FLOW_TEX_SIZE][3];
+	byte data[FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3];
 	
 	GLuint mTexture;
 	
@@ -83,8 +83,9 @@ class FlowTexture{
 	bool bIsValid;
 public:
 	void init();
-	void set(float x, float y);
+	void set(float x, float y, Color c);
 	void bind();
+	void regenerate();
 	void destroy();
 };
 
@@ -136,7 +137,8 @@ class FlowManager{
 					 
 		
 	//The various flow textures
-	FlowTexture mFlowTexture;
+	FlowTexture mLeftFlowTexture;
+	FlowTexture mRightFlowTexture;
 	
 public:
 

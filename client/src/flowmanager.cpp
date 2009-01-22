@@ -6,8 +6,8 @@
 bool FlowManager::init(){	
 
 
-	mFlowTexture.init();
-	
+	mLeftFlowTexture.init();
+	mRightFlowTexture.init();
 
 	mSelectedFlow = NULL;
 	bNeedProject = false;	
@@ -81,11 +81,13 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst,
 	if(end.x < 0){
 		//Note the -speed
 		f = addFlow(flowID, Vector2(start.y, start.z), 
-					Vector2(end.y, end.z), -speed, size);
+					Vector2(end.y, end.z), -speed, size);					
 	}else{
 		f = addFlow(flowID, Vector2(end.y, end.z), 
-					Vector2(start.y, start.z), speed, size);
+					Vector2(start.y, start.z), speed, size);				
 	}
+	
+	//Set the texture
 		
 	//Make the flow object
 	
@@ -139,25 +141,24 @@ void FlowManager::newPacket(int flowID, int size, float rtt,
 							p->life / speedMultiplier);
 		
 		f->mDescr = type;
-				
-		//Unhide the system, it's had a packet
-		f->hide = false;
+						
+		//Set the texture		
+		Color c = f->mDescr->mColor;
 		
-		//And fade it in		
-		f->shade+= 0.5f;
-		
-		if(f->shade > 1.0f){
-		
-			if(!f->isInView){
-				f->isInView = true;
-				mViewFlows.push_back(f);
-				
-				//LOG("Added %d\n", flowID);
-			}
+		//Set the texture colour if needed		
+		if(f->hide){
+			if(f->x < 0){
+				mLeftFlowTexture.set(-f->z, -f->y, c);	
+				mRightFlowTexture.set(f->z2, -f->y2, c);	
+			}else{
+				mLeftFlowTexture.set(-f->z2, -f->y2, c);	
+				mRightFlowTexture.set(f->z, -f->y, c);	
+			}	
 			
-			f->shade = 1.0f;
-			
+			//Unhide the system, it's had a packet
+			f->hide = false;			
 		}
+		
 		
 						
 	}else{
@@ -176,6 +177,16 @@ void FlowManager::delFlow(int flowID){
 		//LOG("Tried to delete non-existant flow %d\n", flowID);
 		return;
 	}
+	
+	//Clear the texture
+	if(f->x < 0){
+		mLeftFlowTexture.set(-f->z, -f->y, 		Color(0,0,0));	
+		mRightFlowTexture.set(f->z2, -f->y2, 	Color(0,0,0));	
+	}else{
+		mLeftFlowTexture.set(-f->z2, -f->y2, 	Color(0,0,0));	
+		mRightFlowTexture.set(f->z, -f->y, 		Color(0,0,0));	
+	}
+			
 		
 	mFlowMap.erase(flowID); //remove it from the map of flows we know about	
 	mFreeFlows.push(f);
@@ -240,7 +251,7 @@ void FlowManager::delAll(){
 	
 	mSelectedFlow = NULL;
 	
-	mFlowTexture.destroy();
+	mLeftFlowTexture.destroy();
 }
 	
 /*********************************************
@@ -294,10 +305,12 @@ void FlowManager::render(){
 	//Update the point timer
 	fRenderTimer += fTimeScale;
 	
-	if(fRenderTimer > 0.5f){
+	if(fRenderTimer > 1.0f){
 		update(0.0f, fRenderTimer); //Kinda nasty having it here, but it means
 									//that it's synced with the render properly
 		//updateList(); //rerender
+		mLeftFlowTexture.regenerate();
+		mRightFlowTexture.regenerate();
 		fRenderTimer = 0.0f;
 	}
 	
@@ -309,8 +322,7 @@ void FlowManager::render(){
 	if(App::S()->mLeftTex){
 			
 		glEnable(GL_TEXTURE_2D);
-		//App::S()->mLeftTex->bind();
-		mFlowTexture.bind();	
+		App::S()->mLeftTex->bind();
 				
 		float f = MAX(fFade[0], 0.0f);
 		glColor3f(f,f,f);
@@ -333,15 +345,15 @@ void FlowManager::render(){
 		glTranslatef(-d, 0, 0);
 		glRotatef(90, 0, 1, 0);
 		
-		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);		
-			
-		/*
-		mFlowTexture->bind();			
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);					
+		
+		mLeftFlowTexture.bind();			
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE,GL_ONE);
+		glColor4f(1,1,1,1);
 		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
 		glDisable(GL_BLEND);
-		*/
+		
 	glPopMatrix();
 	
 	
@@ -366,7 +378,14 @@ void FlowManager::render(){
 	glPushMatrix();
 		glTranslatef(d, 0, 0);
 		glRotatef(270, 0, 1, 0);
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);
+		
+		mRightFlowTexture.bind();			
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE,GL_ONE);
+		glColor4f(1,1,1,1);
 		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
+		glDisable(GL_BLEND);	
 	glPopMatrix();	
 	
 	//Call the existing list
@@ -614,20 +633,15 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 
 
 void FlowTexture::init(){
-
-	//for(int x=0;x<iSizeX;x++){
-	//	for(int y=0;y<iSizeY;y++){
-	//		setPx(x,y,Color(0,0,0));	
-	//	}
-	//}
-	
-	//setPx(1, 1, Color(1,0,0));
-	
-	glEnable(GL_TEXTURE_2D);
 	
 	bIsValid = false;
 	
-	bind();
+	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+
+	for(int i=0;i<len;i++){
+		data[i] = 1;
+	}
+	//regenerate();
 		
 	//LOG("Made texture %d!\n", mTexture);
 }
@@ -638,61 +652,77 @@ void FlowTexture::destroy(){
 
 void FlowTexture::setPx(int x, int y, Color c){
 	
-	int index = 0; //(x * 3) + (y * iSizeX * 3);
+	int index = ((y * FLOW_TEX_SIZE) + x) * 3;
 	
-	data[x][y][0] = 0; //c.r * 255;
-	data[x][y][1] = 0; //c.g * 255;
-	data[x][y][2] = 0; //c.b * 255;
+	data[index + 0] = (byte)(c.b * 255);
+	data[index + 1] = (byte)(c.g * 255);
+	data[index + 2] = (byte)(c.r * 255);
 	
-	//LOG("%d\n", index);
-	bIsValid = false;
-	
-	
+	//LOG("%d/%d\n", x, y);
 }
 
-void FlowTexture::bind(){
+void FlowTexture::regenerate(){
+
+	destroy();
 	
-	    
+	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+
+	//for(int i=0;i<len;i++){
+	//	data[i] = 1;
+	//}
+	
+	//data = new byte[len];
+	
+			
+	//glError();
+	
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &mTexture);	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mTexture);
+	
+	//glError();
+   
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+	
+	//glError();
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FLOW_TEX_SIZE, FLOW_TEX_SIZE, 0, GL_BGR, GL_UNSIGNED_BYTE, &data);
+	
+	//glError();
+
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, iSizeX, iSizeY, GL_RGB, GL_UNSIGNED_BYTE, data);
+   
+    bIsValid = true;
+    
+    LOG("**********Updated %d\n", mTexture);
+}
+
+void FlowTexture::bind(){	
+
 	//if(!bIsValid){
-		int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+	//	regenerate();
+	//}
+
+	glBindTexture(GL_TEXTURE_2D, mTexture);
+}
+
+void FlowTexture::set(float x, float y, Color c){
+
+	x += (SLAB_SIZE / 2);
+	y += (SLAB_SIZE / 2);
+
+	x = (x / SLAB_SIZE) * FLOW_TEX_SIZE;
+	y = (y / SLAB_SIZE) * FLOW_TEX_SIZE;
 	
-		//data = new byte[len];
-		data[5][5][0] = 255;
-		
-		glError();
-		
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &mTexture);	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mTexture);
-		
-		glError();
-	   
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-		
-		glError();
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FLOW_TEX_SIZE, FLOW_TEX_SIZE, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
-		
-		glError();
-
-        //gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, iSizeX, iSizeY, GL_RGB, GL_UNSIGNED_BYTE, data);
-       
-        bIsValid = true;
-        
-        LOG("**********Updated %d\n", mTexture);
-	/*
-	}else{	
-		glEnable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mTexture);
-		
-		//LOG("Bound %d\n", mTexture);
-   	}
-   	*/
-
+	if(x < 0 || x > FLOW_TEX_SIZE - 1 || y < 0 || y > FLOW_TEX_SIZE - 1){
+		LOG("%f/%f\n", x, y);
+		return;
+	}
+	
+	setPx((int)x, (int)y, c);
 }

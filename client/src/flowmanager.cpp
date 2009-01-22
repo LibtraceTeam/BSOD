@@ -5,6 +5,10 @@
 **********************************************/
 bool FlowManager::init(){	
 
+
+	mFlowTexture.init();
+	
+
 	mSelectedFlow = NULL;
 	bNeedProject = false;	
 	
@@ -235,6 +239,8 @@ void FlowManager::delAll(){
 	mViewFlows.clear();
 	
 	mSelectedFlow = NULL;
+	
+	mFlowTexture.destroy();
 }
 	
 /*********************************************
@@ -303,7 +309,8 @@ void FlowManager::render(){
 	if(App::S()->mLeftTex){
 			
 		glEnable(GL_TEXTURE_2D);
-		App::S()->mLeftTex->bind();
+		//App::S()->mLeftTex->bind();
+		mFlowTexture.bind();	
 				
 		float f = MAX(fFade[0], 0.0f);
 		glColor3f(f,f,f);
@@ -322,9 +329,19 @@ void FlowManager::render(){
 	float d = fPlaneDistance / 2.0f;
 	
 	glPushMatrix();
+
 		glTranslatef(-d, 0, 0);
 		glRotatef(90, 0, 1, 0);
+		
+		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);		
+			
+		/*
+		mFlowTexture->bind();			
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE,GL_ONE);
 		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
+		glDisable(GL_BLEND);
+		*/
 	glPopMatrix();
 	
 	
@@ -589,4 +606,93 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 	mSelectedFlow = NULL;
 	
 	return false;
+}
+
+
+
+
+
+
+void FlowTexture::init(){
+
+	//for(int x=0;x<iSizeX;x++){
+	//	for(int y=0;y<iSizeY;y++){
+	//		setPx(x,y,Color(0,0,0));	
+	//	}
+	//}
+	
+	//setPx(1, 1, Color(1,0,0));
+	
+	glEnable(GL_TEXTURE_2D);
+	
+	bIsValid = false;
+	
+	bind();
+		
+	//LOG("Made texture %d!\n", mTexture);
+}
+
+void FlowTexture::destroy(){
+	glDeleteTextures(1, &mTexture);
+}
+
+void FlowTexture::setPx(int x, int y, Color c){
+	
+	int index = 0; //(x * 3) + (y * iSizeX * 3);
+	
+	data[x][y][0] = 0; //c.r * 255;
+	data[x][y][1] = 0; //c.g * 255;
+	data[x][y][2] = 0; //c.b * 255;
+	
+	//LOG("%d\n", index);
+	bIsValid = false;
+	
+	
+}
+
+void FlowTexture::bind(){
+	
+	    
+	//if(!bIsValid){
+		int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+	
+		//data = new byte[len];
+		data[5][5][0] = 255;
+		
+		glError();
+		
+		glEnable(GL_TEXTURE_2D);
+		glGenTextures(1, &mTexture);	
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mTexture);
+		
+		glError();
+	   
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+		
+		glError();
+		
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FLOW_TEX_SIZE, FLOW_TEX_SIZE, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+		
+		glError();
+
+        //gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, iSizeX, iSizeY, GL_RGB, GL_UNSIGNED_BYTE, data);
+       
+        bIsValid = true;
+        
+        LOG("**********Updated %d\n", mTexture);
+	/*
+	}else{	
+		glEnable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mTexture);
+		
+		//LOG("Bound %d\n", mTexture);
+   	}
+   	*/
+
 }

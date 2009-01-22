@@ -68,6 +68,26 @@ public:
 	IPaddress mDst;
 };
 
+#define FLOW_TEX_SIZE 16
+
+/*********************************************
+		 	Flow texture
+**********************************************/
+class FlowTexture{
+	byte data[FLOW_TEX_SIZE][FLOW_TEX_SIZE][3];
+	
+	GLuint mTexture;
+	
+	void setPx(int x, int y, Color c);
+	
+	bool bIsValid;
+public:
+	void init();
+	void set(float x, float y);
+	void bind();
+	void destroy();
+};
+
 
 /*********************************************
 	Classic visualisation module
@@ -113,6 +133,10 @@ class FlowManager{
 	
 	void setupParams(Flow *f, PSParams *p, Vector2 p1, Vector2 p2, 
 					 float speed, float size, bool negative);
+					 
+		
+	//The various flow textures
+	FlowTexture mFlowTexture;
 	
 public:
 

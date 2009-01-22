@@ -69,6 +69,10 @@ int App::init(App *a, int argc, char **argv){
 		return 1;
 	}
 	
+	//Flow manager
+	mFlowMgr = new FlowManager();
+	mFlowMgr->init();
+	
 	//font
 	initFont();
 		
@@ -83,9 +87,6 @@ int App::init(App *a, int argc, char **argv){
 		return 1;
 	}
 				
-	//Flow manager
-	mFlowMgr = new FlowManager();
-	mFlowMgr->init();
 		
 	//Camera
 	camSetPos(0, 0, SLAB_SIZE);

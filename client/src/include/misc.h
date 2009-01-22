@@ -82,3 +82,11 @@ struct ColorSort{
 		return a->sum() > b->sum();
     }
 };
+
+#define glError() { \
+        GLenum err = glGetError(); \
+        while (err != GL_NO_ERROR) { \
+                fprintf(stderr, "glError: %s caught at %s:%u\n", (char *)gluErrorString(err), __FILE__, __LINE__); \
+                err = glGetError(); \
+        } \
+}

@@ -55,11 +55,11 @@ bool PSShaders::init(){
 void PSShaders::update(){
 
 	fTime += fTimeScale * App::S()->fParticleSpeedScale;
-	fUpdateTimer += fTimeScale;
+	//fUpdateTimer += fTimeScale;
 	
-	if(fUpdateTimer < SHADER_FPS){
-		return;
-	}
+	//if(fUpdateTimer < SHADER_FPS){
+	//	return;
+	//}
 	
 	if(mParticleCollections.size() == 0){
 		return;
@@ -74,7 +74,7 @@ void PSShaders::update(){
 		
 	updateCollection(mCurrentCollection->second);
 	
-	fUpdateTimer = 0.0f;
+	//fUpdateTimer = 0.0f;
 	
 }
 
@@ -99,12 +99,12 @@ void PSShaders::render(){
 	mShader.bindResource("fTime", &fTime, 1);
 	mShader.bindResource("fSlabOffset", &planeDist, 1);
 	
-	fRenderTimer -= fTimeScale;
-	if(fRenderTimer < -(SHADER_FPS / 2.0f)){		
+	//fRenderTimer -= fTimeScale;
+	//if(fRenderTimer < -(SHADER_FPS / 2.0f)){		
 		renderAll();
 		glEndList();
-		fRenderTimer = (SHADER_FPS / 2.0f);
-	}
+	//	fRenderTimer = (SHADER_FPS / 2.0f);
+	//}
 	
 	for(map<float, ParticleCollection *>::const_iterator itr = 
 		mParticleCollections.begin(); 
@@ -140,7 +140,7 @@ void PSShaders::updateCollection(ParticleCollection *collection){
 		}
 										
 		//Move the particle
-		p->life -= fUpdateTimer * 
+		p->life -= fTimeScale * 
 					App::S()->fParticleSpeedScale * 
 					mParticleCollections.size();	
 		
@@ -235,6 +235,16 @@ void PSShaders::shutdown(){
 	
 	mShader.dispose();
 	//glDeleteLists(mDisplayList, 1);
+	
+	for(map<float, ParticleCollection *>::const_iterator itr = 
+		mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){	
+		ParticleCollection *collection = itr->second;		
+		
+		if(collection->bShown){
+			glDeleteLists(collection->mList, 1);
+		}	
+	}
 	
 	PSSprites::shutdown();
 }

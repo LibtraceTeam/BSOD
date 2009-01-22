@@ -89,13 +89,16 @@ int RTTMap::Flush( double now )
 		TraceMap &tmap = i->second;
 		TraceMap::iterator j = tmap.begin();
 
-		for( ; j != tmap.end(); j++ )
+		while( j != tmap.end() )
 		{
+			TraceMap::iterator jnext = j;
+			++jnext;
 			if( (now - j->second) > 180 )
 			{
-				tmap.erase( j );
+				tmap.erase( j);
 				count++;
 			}
+			j=jnext;
 		}
 
 		if( tmap.size() < 1 )

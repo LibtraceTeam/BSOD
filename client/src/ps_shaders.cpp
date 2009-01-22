@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define SHADER_FPS (1.0f / 15.0f)
+#define SHADER_FPS (1.0f / 2.0f)
 
 /*********************************************
  Start up the PS/VS extensions, load the shader
@@ -88,6 +88,7 @@ void PSShaders::update(){
 		}
 	}
 	
+	//LOG("ShaderUpdate!\n");
 	
 	fUpdateTimer = 0.0f;
 	

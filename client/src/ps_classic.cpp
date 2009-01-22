@@ -221,6 +221,8 @@ void PSClassic::update(){
 		}
 	}
 	
+	//LOG("ClassicUpdate!\n");
+	
 }
 
 /*********************************************

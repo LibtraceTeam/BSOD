@@ -35,6 +35,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 	
 		
 	//Update all visable flows
+	/*
 	for(int i=0;i<(int)mViewFlows.size();i++){
 			
 		mViewFlows[i]->shade -= timeDelta;
@@ -49,7 +50,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 		}		
 			
 	}
-	
+	*/
 	
 			
 }
@@ -179,12 +180,13 @@ void FlowManager::delFlow(int flowID){
 	}
 	
 	//Clear the texture
+	Color blank = Color(0.01f, 0.01f, 0.01f);
 	if(f->x < 0){
-		mLeftFlowTexture.set(-f->z, -f->y, 		Color(0,0,0));	
-		mRightFlowTexture.set(f->z2, -f->y2, 	Color(0,0,0));	
+		mLeftFlowTexture.set(-f->z, -f->y, 		blank);	
+		mRightFlowTexture.set(f->z2, -f->y2, 	blank);	
 	}else{
-		mLeftFlowTexture.set(-f->z2, -f->y2, 	Color(0,0,0));	
-		mRightFlowTexture.set(f->z, -f->y, 		Color(0,0,0));	
+		mLeftFlowTexture.set(-f->z2, -f->y2, 	blank);	
+		mRightFlowTexture.set(f->z, -f->y, 		blank);	
 	}
 			
 		
@@ -251,12 +253,14 @@ void FlowManager::delAll(){
 	
 	mSelectedFlow = NULL;
 	
-	mLeftFlowTexture.destroy();
+	mLeftFlowTexture.clear();
+	mRightFlowTexture.clear();
 }
 	
 /*********************************************
 	Update the display list
 **********************************************/
+/*
 void FlowManager::updateList(){
 
 	glNewList(mDisplayList,GL_COMPILE);	
@@ -294,6 +298,7 @@ void FlowManager::updateList(){
 	glDisable(GL_BLEND);		
 	glEndList();
 }
+*/
 
 float fRenderTimer = 2.0f;
 	
@@ -444,8 +449,8 @@ void FlowManager::render2d(){
 
 	glDisable(GL_DEPTH_TEST);
 	
-	App::S()->writeText(10, 50, "%d/%d", 
-						mActiveFlows.size(), mViewFlows.size());
+	//App::S()->writeText(10, 50, "%d/%d", 
+	//					mActiveFlows.size(), mViewFlows.size());
 	
 	if(mSelectedFlow){	
 		Vector2 v1 = mSelectedFlow->screenP1;
@@ -636,14 +641,7 @@ void FlowTexture::init(){
 	
 	bIsValid = false;
 	
-	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
-
-	for(int i=0;i<len;i++){
-		data[i] = 1;
-	}
-	//regenerate();
-		
-	//LOG("Made texture %d!\n", mTexture);
+	clear();
 }
 
 void FlowTexture::destroy(){
@@ -657,8 +655,6 @@ void FlowTexture::setPx(int x, int y, Color c){
 	data[index + 0] = (byte)(c.b * 255);
 	data[index + 1] = (byte)(c.g * 255);
 	data[index + 2] = (byte)(c.r * 255);
-	
-	//LOG("%d/%d\n", x, y);
 }
 
 void FlowTexture::regenerate(){
@@ -667,13 +663,6 @@ void FlowTexture::regenerate(){
 	
 	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
 
-	//for(int i=0;i<len;i++){
-	//	data[i] = 1;
-	//}
-	
-	//data = new byte[len];
-	
-			
 	//glError();
 	
 	glEnable(GL_TEXTURE_2D);
@@ -699,7 +688,7 @@ void FlowTexture::regenerate(){
    
     bIsValid = true;
     
-    LOG("**********Updated %d\n", mTexture);
+    //LOG("**********Updated %d\n", mTexture);
 }
 
 void FlowTexture::bind(){	
@@ -725,4 +714,13 @@ void FlowTexture::set(float x, float y, Color c){
 	}
 	
 	setPx((int)x, (int)y, c);
+}
+
+void FlowTexture::clear(){
+
+	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+
+	for(int i=0;i<len;i++){
+		data[i] = 1;
+	}
 }

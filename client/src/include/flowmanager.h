@@ -87,6 +87,7 @@ public:
 	void bind();
 	void regenerate();
 	void destroy();
+	void clear();
 };
 
 

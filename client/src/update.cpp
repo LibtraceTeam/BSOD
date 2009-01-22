@@ -125,14 +125,18 @@ void App::generateTestData(){
 			byte r = data[index + 0];
 			byte g = data[index + 1];
 			byte b = data[index + 2];
+			
+			if(r > 0){
+				r = g = b = 255;
+			}
 						
 			if(r > 0 || g > 0 || b > 0){
 				float v = 0.05f;
 				
-				Vector3 vel = Vector3(-10, 0, 0) + Vector3(randFloat(-v,v),
-								randFloat(-v,v),randFloat(-v,v));
-				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),
-								randFloat(-v,v) + randFloat(-1,1));
+				Vector3 vel = Vector3(-10, 0, 0);// + Vector3(randFloat(-v,v),
+								//randFloat(-v,v),randFloat(-v,v));
+				Vector3 pos = Vector3(0,0,0); //Vector3(randFloat(-v,v),randFloat(-v,v),
+							//	randFloat(-v,v) + randFloat(-1,1));
 	
 				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, 
 							Color(r,g,b), 1.0f, 15.0f);

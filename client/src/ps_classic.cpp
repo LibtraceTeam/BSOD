@@ -392,6 +392,7 @@ ParticleCollection *PSClassic::getCollection(Color col, float size){
 	existing->fSize = size;
 	existing->mColor = col;
 	existing->bShown = true;
+	existing->mList = 0;
 	
 	mParticleCollections[val] = existing;
 	

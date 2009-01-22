@@ -13,9 +13,12 @@ protected:
 	Shader mShader;
 	float fUpdateTimer;
 	float fRenderTimer;
-	uint32_t mDisplayList;	
+	//uint32_t mDisplayList;	
 		
 	void renderAll();
+	
+	void updateCollection(ParticleCollection *collection);
+	
 public:
 	bool init();	
 			

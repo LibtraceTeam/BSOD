@@ -35,6 +35,7 @@ public:
 	float fSize;
 	Color mColor;
 	bool bShown;
+	uint32_t mList; 
 	
 	//For sorting
 	float sum(){

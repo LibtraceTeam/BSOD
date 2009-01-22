@@ -1,8 +1,10 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define SHADER_FPS (1.0f / 2.0f)
+#define SHADER_FPS (1.0f / 10.0f)
 
+map<float, ParticleCollection *>::const_iterator mCurrentCollection;
+	
 /*********************************************
  Start up the PS/VS extensions, load the shader
 **********************************************/
@@ -33,12 +35,11 @@ bool PSShaders::init(){
 	//if(!mShader.addFragment(fs)) return false;
 	
 	if(!mShader.compile()) return false;
-
-	mDisplayList = glGenLists(1);
 	
 	//This means we can set pointsize in the vertex shader
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 		
+	mCurrentCollection = mParticleCollections.begin();	
 	//If we got this far, it's all good.
 	
 	LOG("Set up PSShaders!\n");
@@ -60,35 +61,18 @@ void PSShaders::update(){
 		return;
 	}
 	
-	float speedScale = App::S()->fParticleSpeedScale * PARTICLE_FPS;
-
-	map<float, ParticleCollection *>::const_iterator itr;
-	
-	for(itr = mParticleCollections.begin(); 
-		itr != mParticleCollections.end(); ++itr){	
-			
-		ParticleCollection *collection = itr->second;			
-		vector<Particle *> *list = &collection->mParticles;
-		
-		for(int i=0;i<(int)list->size();i++){			
-			Particle *p = (*list)[i];			
-			
-			if(p->life < 0){
-				del(collection, i);
-				i--;
-				continue;
-			}
-											
-			//Move the particle
-			p->life -= fUpdateTimer * App::S()->fParticleSpeedScale;	
-			
-			//p->timestamp += fUpdateTimer;
-										
-			//TODO: More particle logic here?
-		}
+	if(mParticleCollections.size() == 0){
+		return;
 	}
 	
-	//LOG("ShaderUpdate!\n");
+	
+	if(mCurrentCollection == mParticleCollections.end()){
+		return;
+	}
+	
+	//float speedScale = App::S()->fParticleSpeedScale * PARTICLE_FPS;
+		
+	updateCollection(mCurrentCollection->second);
 	
 	fUpdateTimer = 0.0f;
 	
@@ -100,22 +84,67 @@ void PSShaders::update(){
 void PSShaders::render(){
 
 
+	if(mParticleCollections.size() == 0){
+		return;
+	}
+
 	//Apply the shader
 	mShader.bind();
-		
+	
+	mTexture->bind();
+			
 	//Set up the shader
 	mShader.bindResource("fTime", &fTime, 1);
 
 	fRenderTimer -= fTimeScale;
-	if(fRenderTimer < -(SHADER_FPS / 2.0f)){
-		glNewList(mDisplayList, GL_COMPILE);
+	if(fRenderTimer < -(SHADER_FPS / 2.0f)){		
 		renderAll();
 		glEndList();
 		fRenderTimer = (SHADER_FPS / 2.0f);
 	}
-	glCallList(mDisplayList);
+	
+	for(map<float, ParticleCollection *>::const_iterator itr = 
+		mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){	
+		ParticleCollection *collection = itr->second;		
+		
+		if(collection->bShown){
+			glCallList(collection->mList);
+		}	
+	}
 	
 	mShader.unbind();
+}
+
+/*********************************************
+  Update an individual collection
+**********************************************/
+void PSShaders::updateCollection(ParticleCollection *collection){
+
+	if(!collection){	
+		return;
+	}
+		
+	vector<Particle *> *list = &collection->mParticles;
+	
+	for(int i=0;i<(int)list->size();i++){			
+		Particle *p = (*list)[i];			
+		
+		if(p->life < 0){
+			del(collection, i);
+			i--;
+			continue;
+		}
+										
+		//Move the particle
+		p->life -= fUpdateTimer * 
+					App::S()->fParticleSpeedScale * 
+					mParticleCollections.size();	
+		
+		//p->timestamp += fUpdateTimer;
+									
+		//TODO: More particle logic here?
+	}
 }
 
 
@@ -123,8 +152,32 @@ void PSShaders::render(){
   Render points with the right normal + tex
 **********************************************/
 void PSShaders::renderAll(){
+
+
+	mCurrentCollection++;	
+	if(mCurrentCollection == mParticleCollections.end()){
+		mCurrentCollection = mParticleCollections.begin();
+	}
 	
-	mTexture->bind();
+	ParticleCollection *collection = mCurrentCollection->second;		
+	if(collection->mList == 0){
+		collection->mList = glGenLists(1);
+	}	
+	glNewList(collection->mList, GL_COMPILE);
+		
+	//This may be hidden by colour or size
+	if(!collection->bShown){
+		return;
+	}
+	
+	vector<Particle *> *list = &collection->mParticles;
+	
+	//Make sure we've got at least one particle
+	if(list->size() == 0) {
+		return; 
+	}
+	
+	//LOG("Rendered %d\n", collection->mList); 
 	
 	int count = 0;
 	int bad = 0;
@@ -136,56 +189,31 @@ void PSShaders::renderAll(){
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);	
 		
 	//Scaling	
-	float scale = setSizeScale();
-			
-	map<float, ParticleCollection *>::const_iterator itr;
+	float scale = setSizeScale();							
 	
+	glBegin(GL_POINTS);		
 	
-	glBegin(GL_POINTS);	
+	//Set the state for this collection
+	float thisSize = collection->fSize * scale;
+	collection->mColor.bind();
 	
-	//Go through each of the particle collections
-	for(itr = mParticleCollections.begin(); 
-		itr != mParticleCollections.end(); ++itr){	
-			
-		ParticleCollection *collection = itr->second;		
-		
-		//This may be hidden by colour or size
-		if(!collection->bShown){
-			continue;
-		}
-			
-		vector<Particle *> *list = &collection->mParticles;
-		
-		//Make sure we've got at least one particle
-		if(list->size() == 0) {
-			continue; 
-		}
-		
-		
-		//Set the state for this collection
-		float thisSize = collection->fSize * scale;
-		collection->mColor.bind();
-		
-		bad++; //Count the number of state changes
-		count += list->size(); //Count the number of particles
+	count += list->size(); //Count the number of particles
 				
-		//Now render all the particles in this list	
-		//TODO: Use glDrawArrays!															
-		for(int i=0;i<(int)list->size();i++){			
-			Particle *p = (*list)[i];		
-			
-			//Normal = velocity
-			glNormal3f(p->vx, p->vy, p->vz);
-			
-			//TexCoord.x = timestamp offset
-			//TexCoord.y = size 
-			glTexCoord2f(p->timestamp, thisSize);
-			
-			//Create the point
-			glVertex3f(p->x, p->y, p->z);
-		}		
-				
-	}	
+	//Now render all the particles in this list	
+	//TODO: Use glDrawArrays!															
+	for(int i=0;i<(int)list->size();i++){			
+		Particle *p = (*list)[i];		
+		
+		//Normal = velocity
+		glNormal3f(p->vx, p->vy, p->vz);
+		
+		//TexCoord.x = timestamp offset
+		//TexCoord.y = size 
+		glTexCoord2f(p->timestamp, thisSize);
+		
+		//Create the point
+		glVertex3f(p->x, p->y, p->z);
+	}					
 	
 	glEnd();
 
@@ -203,7 +231,7 @@ void PSShaders::renderAll(){
 void PSShaders::shutdown(){
 	
 	mShader.dispose();
-	glDeleteLists(mDisplayList, 1);
+	//glDeleteLists(mDisplayList, 1);
 	
 	PSSprites::shutdown();
 }

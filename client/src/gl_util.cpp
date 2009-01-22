@@ -269,13 +269,15 @@ void App::calculateMousePoint(){
 	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
 	glGetDoublev( GL_PROJECTION_MATRIX, projection );
 	glGetIntegerv( GL_VIEWPORT, viewport );
-
+	
 	winX = (float)x;
 	winY = (float)viewport[3] - (float)y; //GL inverts Y, so fix that
-	
+			
 	//Get the depth
 	glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 	
+	//LOG("%f\n", winZ);
+			
 	//Unproject. This gives us the 3D point that the mouse is hovered over
 	//Now we throw some maths at it and it will give us the intersection point 
 	gluUnProject( 	winX, winY, winZ, 

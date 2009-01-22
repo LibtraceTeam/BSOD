@@ -292,11 +292,13 @@ void FlowManager::render(){
 	
 	glEnable(GL_TEXTURE_2D);
 	
+			
 	//Left slab	
 	if(App::S()->mLeftTex){
+			
 		glEnable(GL_TEXTURE_2D);
 		App::S()->mLeftTex->bind();
-		
+				
 		float f = MAX(fFade[0], 0.0f);
 		glColor3f(f,f,f);
 		
@@ -310,6 +312,7 @@ void FlowManager::render(){
 		fFade[0] = -1.0f;
 	}
 	
+	
 	float d = fPlaneDistance / 2.0f;
 	
 	glPushMatrix();
@@ -317,7 +320,6 @@ void FlowManager::render(){
 		glRotatef(90, 0, 1, 0);
 		App::S()->utilPlane(SLAB_SIZE, SLAB_SIZE,0.1);	
 	glPopMatrix();
-	
 	
 	
 	//Right slab
@@ -412,7 +414,7 @@ void FlowManager::render2d(){
 		glColor4f(0.0f, 0.0f, 0.0f, 0.85f);
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		glBlendEquation(GL_SUBTRACT);
+		glBlendEquationEXT(GL_SUBTRACT);
 		
 		glBegin(GL_QUADS);
 			glVertex2f(v1.x - b, v1.y - b);
@@ -461,7 +463,7 @@ void FlowManager::render2d(){
 			glVertex2f(v2.x - b, v2.y - b);
 		glEnd();
 		
-		glBlendEquation(GL_ADD);
+		glBlendEquationEXT(GL_ADD);
 		glEnable(GL_TEXTURE_2D);
 		glColor4f(1,1,1,1);
 		

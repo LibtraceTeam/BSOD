@@ -37,17 +37,17 @@ void App::renderMain(){
 	utilBeginRender();
 		
 	camLook();
-			
-	if(isConnected())	
-		mFlowMgr->render();	
-		
-	calculateMousePoint();
 	
+	if(isConnected()){
+		mFlowMgr->render();	
+		calculateMousePoint();
+	}
+		
 	mParticleSystem->render();
 	
 	if(isConnected())	
 		mFlowMgr->renderSelection();	
-								
+				
 	utilEndRender();
 }
 
@@ -57,8 +57,8 @@ void App::renderMain(){
 **********************************************/
 void App::camLook(){
 	gluLookAt(	fCameraX, 		fCameraY, 		fCameraZ, 
-				fLookX,			fLookY,			fLookZ, 
-				0, 				1, 				0			);
+			fLookX,			fLookY,			fLookZ, 
+			0, 			1, 			0		);
 				
 	glTranslatef(0, 0, fZoom);
 				
@@ -81,6 +81,7 @@ void App::drawStatusBar(){
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
 	//Text
+	glColor4f(1,1,1,1);
 	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
 	
 	if(fGUITimeout <= 0.0f){

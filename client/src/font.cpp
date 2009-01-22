@@ -131,27 +131,31 @@ char message[512];
   
 void App::writeText(int x, int y, const char *fmt, ...){
 
+	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textureId);   
-
-  	va_list args;
-    va_start(args, fmt);
-    vsnprintf(message, 512, fmt, args);
-    va_end(args);
+	glEnable(GL_BLEND);
+	glColor4f(1,1,1,1);
+	
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(message, 512, fmt, args);
+	va_end(args);
 
 	glPushMatrix();
-	
-	glTranslatef(x, y, 0);
+	glLoadIdentity();
+
+	glTranslatef(x, y, 0.0);
 	glScalef(0.5f, 0.5f, 0.5f);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
 	
+	glBlendEquationEXT(GL_FUNC_ADD);
+
 	unsigned int len = strlen(message);
 
 	for(unsigned int i = 0; i < len; i++){
-	   glCallList(getList(message[i]));
-	   
+	   glCallList(getList(message[i]));	   
 	}
-	
+
 	glPopMatrix();
 		
 }
@@ -197,7 +201,8 @@ void App::writeTextCentered(int x, int y, const char *fmt, ...){
 	glTranslatef(x - offset, y, 0);
 	glScalef(0.5f, 0.5f, 0.5f);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
+	
+	glBlendEquationEXT(GL_FUNC_ADD);
 
 	for(unsigned int i = 0; i < strlen(message); i++){
 	   glCallList(getList(message[i]));

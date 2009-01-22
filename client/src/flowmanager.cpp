@@ -29,6 +29,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 	//hack! We should really only set this if the camera has moved...
 	bNeedProject = true; 
 	
+		
 	//Update all visable flows
 	for(int i=0;i<(int)mViewFlows.size();i++){
 			
@@ -44,6 +45,8 @@ void FlowManager::update(float currentTime, float timeDelta){
 		}		
 			
 	}
+	
+	
 			
 }
 
@@ -188,7 +191,7 @@ void FlowManager::delFlow(int flowID){
 	
 	//And resize the vector to remove this flow
 	mActiveFlows.pop_back();
-		
+			
 }
 
 /*********************************************
@@ -247,6 +250,8 @@ void FlowManager::updateList(){
 	glPointSize(3.0f);
 		
 	glBegin(GL_POINTS);		
+	
+	
 	for(int i=0;i<(int)mViewFlows.size();i++){
 	
 		if(!mViewFlows[i]) continue;		
@@ -266,6 +271,7 @@ void FlowManager::updateList(){
 		glVertex3f(mViewFlows[i]->x, mViewFlows[i]->y, mViewFlows[i]->z);		
 		glVertex3f(mViewFlows[i]->x2, mViewFlows[i]->y2, mViewFlows[i]->z2);			
 	}
+	
 	glEnd();	
 				
 	glDisable(GL_BLEND);		
@@ -285,7 +291,7 @@ void FlowManager::render(){
 	if(fRenderTimer > 0.5f){
 		update(0.0f, fRenderTimer); //Kinda nasty having it here, but it means
 									//that it's synced with the render properly
-		updateList(); //rerender
+		//updateList(); //rerender
 		fRenderTimer = 0.0f;
 	}
 	
@@ -347,7 +353,7 @@ void FlowManager::render(){
 	glPopMatrix();	
 	
 	//Call the existing list
-	glCallList(mDisplayList);		
+	//glCallList(mDisplayList);		
 }
 
 /*********************************************
@@ -401,6 +407,9 @@ void FlowManager::renderSelection(){
 void FlowManager::render2d(){
 
 	glDisable(GL_DEPTH_TEST);
+	
+	App::S()->writeText(10, 50, "%d/%d", 
+						mActiveFlows.size(), mViewFlows.size());
 	
 	if(mSelectedFlow){	
 		Vector2 v1 = mSelectedFlow->screenP1;
@@ -525,14 +534,14 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 	//}
 		
 	//Go through all the flows that have 'dots' on either side
-	for(int i=0;i<(int)mViewFlows.size();i++){
+	for(int i=0;i<(int)mActiveFlows.size();i++){
 	
-		Flow *f = mViewFlows[i];			
-		if(!mViewFlows[i]){
+		Flow *f = mActiveFlows[i];			
+		if(!mActiveFlows[i]){
 			continue;
 		}
 		
-		if(mViewFlows[i]->hide){
+		if(mActiveFlows[i]->hide){
 			continue;
 		}
 		

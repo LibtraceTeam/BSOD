@@ -126,9 +126,9 @@ void App::generateTestData(){
 			byte g = data[index + 1];
 			byte b = data[index + 2];
 			
-			//(r > 0){
-			//	r = g = b = 255;
-			//}
+			if(r > 0){
+				r = g = b = 255;
+			}
 						
 			if(r > 0 || g > 0 || b > 0){
 				float v = 0.05f;

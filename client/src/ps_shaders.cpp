@@ -99,13 +99,15 @@ void PSShaders::render(){
 	mShader.bindResource("fTime", &fTime, 1);
 	mShader.bindResource("fSlabOffset", &planeDist, 1);
 	
-	//fRenderTimer -= fTimeScale;
-	//if(fRenderTimer < -(SHADER_FPS / 2.0f)){		
-		renderAll();
-		glEndList();
-	//	fRenderTimer = (SHADER_FPS / 2.0f);
-	//}
+	//Render whichever we're up to
+	renderAll();
 	
+	//And end its list
+	glEndList();	
+	
+	iNumActive = 0;
+	
+	//Now go through and call all the various display lists
 	for(map<float, ParticleCollection *>::const_iterator itr = 
 		mParticleCollections.begin(); 
 		itr != mParticleCollections.end(); ++itr){	
@@ -113,6 +115,7 @@ void PSShaders::render(){
 		
 		if(collection->bShown){
 			glCallList(collection->mList);
+			iNumActive += collection->mParticles.size();
 		}	
 	}
 	
@@ -199,9 +202,7 @@ void PSShaders::renderAll(){
 	//Set the state for this collection
 	float thisSize = collection->fSize * scale;
 	collection->mColor.bind();
-	
-	count += list->size(); //Count the number of particles
-				
+					
 	//Now render all the particles in this list	
 	//TODO: Use glDrawArrays!															
 	for(int i=0;i<(int)list->size();i++){			
@@ -224,7 +225,6 @@ void PSShaders::renderAll(){
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
 	
-	iNumActive = count;
 }
 
 

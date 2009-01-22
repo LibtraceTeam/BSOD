@@ -65,12 +65,7 @@ class App{
 	Vector2 dragStart;			//Screen-space point where a mouse drag started
 	Vector2 dragVel;			//The rotation velocity given by a drag
 	bool bDrag;					//Whether the user is dragging
-		
-	//flowmanager.cpp
-	FlowManager *mFlowMgr;		//Controls the placement of flows, rendering of
-								//the two textured planes, rendering of the end
-								//points and selection of flows
-	
+			
 	//Flow descriptors. 	
 	map<byte, FlowDescriptor *> mFlowDescriptors;
 	
@@ -233,6 +228,11 @@ public:
 	
 	//Socket.cpp
 	bool isConnected(){return bConnected;}
+		
+	//flowmanager.cpp
+	FlowManager *mFlowMgr;		//Controls the placement of flows, rendering of
+								//the two textured planes, rendering of the end
+								//points and selection of flows
 	
 	
 /*********************************************

@@ -138,7 +138,9 @@ public:
 	void shutdown();
 	
 	//Interaction
-	bool onClick(int button, float x, float y, float z);	
+	bool onClick(int button, float x, float y, float z);
+	
+	float getPlaneDistance(){ return fPlaneDistance; }	
 };
 
 

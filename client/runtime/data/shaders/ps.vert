@@ -1,4 +1,5 @@
 uniform float fTime;
+uniform float fSlabOffset;
 
 void main()
 {	
@@ -12,7 +13,7 @@ void main()
 	
 	float xVal = gl_Vertex.x + offset.x;
 	
-	if(xVal < -20.0 || xVal > 20.0){
+	if(xVal < -fSlabOffset || xVal > fSlabOffset){
 		pointSize = 0.0;
 		offset.x = 99999.0;
 	}

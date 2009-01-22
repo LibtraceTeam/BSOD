@@ -94,7 +94,10 @@ void PSShaders::render(){
 	mTexture->bind();
 			
 	//Set up the shader
+	float planeDist = App::S()->mFlowMgr->getPlaneDistance();
+	
 	mShader.bindResource("fTime", &fTime, 1);
+	mShader.bindResource("fSlabOffset", &planeDist, 1);
 
 	fRenderTimer -= fTimeScale;
 	if(fRenderTimer < -(SHADER_FPS / 2.0f)){		

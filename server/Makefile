@@ -5,7 +5,7 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 # this is left here as people often have it installed in their home
 # directories for testing things rather than using the system one
 LIBTRACE ?= /usr/local
-INCLUDE =  -I. -I$(LIBTRACE)/include
+INCLUDE +=  -I. -I$(LIBTRACE)/include
 
 CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module

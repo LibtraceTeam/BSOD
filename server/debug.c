@@ -41,8 +41,6 @@
 #include "debug.h"
 #include "daemons.h"
 
-int daemonised = 0; //HACK!
-
 void Log(int priority, char *fmt, ...)
 {
         va_list ap;

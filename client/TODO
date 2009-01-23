@@ -1,7 +1,11 @@
+- If the server goes away unexpectedly, we should handle it gracefully
+- Darknet toggle
+- Auto rotate options
 - We can get smoother perfomance under ihug-style loads with the vertex shader 
 particle system by limiting to Nk particles per frame
-- Resizing the window goes badly on Windows (and is disabled currently)
-- Move to glDrawArrays throughout (need to change memory layout...)
+- Resizing the window goes badly on Windows (and is disabled currently). In fact it's a bit clunky everywhere tbh. 
+- Move to glDrawArrays throughout (need to change memory layout of particles...)
 - Auto benchmark to figure out the 'best' particle system backend
 - Change ps backends in real time
 - Better picking for the start/end points - 'best' hit rather than first
+- classic PS needs to do some form of billboarding to make the particles face the camera. We can probably apply the same transformation to all of them and not care about the slight distortion on the edges.

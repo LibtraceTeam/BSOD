@@ -749,13 +749,13 @@ void App::makeOptionWindow(){
     text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSizeInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Size: 1.0");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.5f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.4f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     
     slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSize"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Size");
-    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.65f)));
+    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.55f)));
     slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.15f)));
     slide->setAlwaysOnTop(true);	
     slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
@@ -763,9 +763,9 @@ void App::makeOptionWindow(){
  
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
-	text->setText("Version: " + toString(CLIENT_VERSION) + ", built " + __DATE__ + " at " + __TIME__);	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.8f)));
-	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+	text->setText("BSOD2 Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.7f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.3f)));
     
     
 }

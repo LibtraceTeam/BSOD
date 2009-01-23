@@ -121,5 +121,9 @@ void Shader::bindResource(const char *name, float *data, int count){
 }
 
 void Shader::dispose(){
-	//TODO
+	if(mFrag) glDeleteShader(mFrag);
+	if(mVert) glDeleteShader(mVert);
+	glDeleteProgram(mProgram); 
+	
+	LOG("Dispose\n");
 }

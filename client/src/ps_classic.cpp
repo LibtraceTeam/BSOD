@@ -338,7 +338,7 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col,
 	
 	//Nasty hack! If we're in the title screen, jitter ruins it.
 	if(App::S()->isConnected()){
-		App::S()->randFloat(0, 1.0f);
+		jitter = App::S()->randFloat(0, 1.0f);
 	}
 	
 	pos = pos + speed * jitter;		

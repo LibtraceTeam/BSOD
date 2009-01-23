@@ -22,7 +22,7 @@ bool App::initParticleSystem(){
 	if(iParticleMethod == PARTICLE_SYSTEM_UNSPECIFIED){
 		LOG("Attempting to autodetect the best particle method...\n");
 
-		//PSINIT(PSShaders, PARTICLE_SYSTEM_SHADERS, "Shaders");
+		PSINIT(PSShaders, PARTICLE_SYSTEM_SHADERS, "Shaders");
 		PSINIT(PSSprites, PARTICLE_SYSTEM_POINTSPRITES, "PointSprites");
 		PSINIT(PSClassic, PARTICLE_SYSTEM_CLASSIC, "Classic");
 		

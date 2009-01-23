@@ -5,7 +5,7 @@
  file options. 
 *******************************************************************************/
 
-#define DEFAULT_PORT 54567
+#define DEFAULT_PORT 34567
 #define CONFIG_FILE "bsod2.cfg"
 #define PARTICLE_FPS fParticleFPS //hack!
 #define MAX_FLOW_DESCRIPTORS 64

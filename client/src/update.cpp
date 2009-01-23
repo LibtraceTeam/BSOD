@@ -38,6 +38,7 @@ void App::updateMain(){
 	if(keyDown(SDLK_UP))	fRot[0] += fCamSpeed;
 	if(keyDown(SDLK_DOWN))	fRot[0] -= fCamSpeed;
 	
+	if(keyDown(SDLK_SPACE))	resetCam();
 	
 	//If we're actively dragging with the mouse
 	if(bDrag){
@@ -63,8 +64,8 @@ void App::updateMain(){
 		
 		
 	}else{
-		fRot[1] -= dragVel.x;
-		fRot[0] -= dragVel.y;
+		//fRot[1] -= dragVel.x;
+		//fRot[0] -= dragVel.y;
 	}
 	
 

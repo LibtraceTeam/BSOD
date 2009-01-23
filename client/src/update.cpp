@@ -59,7 +59,7 @@ void App::updateMain(){
 		
 				
 		dragStart = getMouse();
-		dragVel = diff;
+		dragVel = (diff / fTimeScale) / 50.0f;
 		
 		
 	}else{

@@ -84,10 +84,13 @@ int RTTMap::Flush( double now )
 	FlowMap::iterator i = m_flows->begin();
 	int count = 0;
 
-	for( ; i != m_flows->end(); i++ )
+	for( ; i != m_flows->end(); )
 	{
 		TraceMap &tmap = i->second;
+		FlowMap::iterator inext = i;
 		TraceMap::iterator j = tmap.begin();
+
+		++inext;
 
 		while( j != tmap.end() )
 		{
@@ -103,6 +106,8 @@ int RTTMap::Flush( double now )
 
 		if( tmap.size() < 1 )
 			m_flows->erase( i );
+
+		i = inext;
 	}
 
 	return( count );

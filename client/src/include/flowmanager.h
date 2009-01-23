@@ -57,7 +57,7 @@ public:
 	int activeID; //the index into the activeFlows array
 	
 	bool hide;
-	bool isInView;
+	bool hasSetTexture;
 	float shade;
 	
 	FlowDescriptor *mDescr;	
@@ -88,6 +88,7 @@ public:
 	void regenerate();
 	void destroy();
 	void clear();
+	void clearColor(Color c);
 };
 
 
@@ -155,6 +156,7 @@ public:
 	void delFlow(int flowID);
 	void delAll();
 	void notifyServerChange();
+	void showType(FlowDescriptor *type, bool show);
 	
 	//Rendering
 	void render();
@@ -168,6 +170,8 @@ public:
 	bool onClick(int button, float x, float y, float z);
 	
 	float getPlaneDistance(){ return fPlaneDistance; }	
+	
+	bool flowValid(int id){ return getFlowByID(id) != NULL; }
 };
 
 

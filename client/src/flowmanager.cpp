@@ -32,27 +32,7 @@ void FlowManager::update(float currentTime, float timeDelta){
 	
 	//hack! We should really only set this if the camera has moved...
 	bNeedProject = true; 
-	
 		
-	//Update all visable flows
-	/*
-	for(int i=0;i<(int)mViewFlows.size();i++){
-			
-		mViewFlows[i]->shade -= timeDelta;
-		
-		if(mViewFlows[i]->shade < 0.0f){
-			mViewFlows[i]->hide = true;
-			mViewFlows[i]->isInView = false;
-			
-			//Remove it from viewflows
-			mViewFlows[i] = mViewFlows[mViewFlows.size() - 1];
-			mViewFlows.pop_back();			
-		}		
-			
-	}
-	*/
-	
-			
 }
 
 
@@ -61,6 +41,9 @@ void FlowManager::update(float currentTime, float timeDelta){
 **********************************************/
 void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst, 
 						  Vector3 start, Vector3 end){
+						  
+						  
+	//LOG("Added %d\n", flowID);
 
 	start = start * 2;
 	end = end * 2;
@@ -88,8 +71,6 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst,
 					Vector2(start.y, start.z), speed, size);				
 	}
 	
-	//Set the texture
-		
 	//Make the flow object
 	
 	//clear text to start
@@ -99,9 +80,9 @@ void FlowManager::newFlow(int flowID, IPaddress src, IPaddress dst,
 	
 	f->mDst = dst;
 	f->mSrc = src;
-	
-	f->isInView = false;
+	f->hasSetTexture = false;
 	f->shade = 0.0f;
+	f->flowID = flowID;
 	
 	//All done!
 }
@@ -146,8 +127,10 @@ void FlowManager::newPacket(int flowID, int size, float rtt,
 		//Set the texture		
 		Color c = f->mDescr->mColor;
 		
+		f->hide = false;
+		
 		//Set the texture colour if needed		
-		if(f->hide){
+		if(!f->hasSetTexture){
 			if(f->x < 0){
 				mLeftFlowTexture.set(-f->z, -f->y, c);	
 				mRightFlowTexture.set(f->z2, -f->y2, c);	
@@ -156,8 +139,7 @@ void FlowManager::newPacket(int flowID, int size, float rtt,
 				mRightFlowTexture.set(f->z, -f->y, c);	
 			}	
 			
-			//Unhide the system, it's had a packet
-			f->hide = false;			
+			f->hasSetTexture = true;			
 		}
 		
 		
@@ -179,6 +161,9 @@ void FlowManager::delFlow(int flowID){
 		return;
 	}
 	
+	
+	//LOG("Removed %d\n", flowID);
+	
 	//Clear the texture
 	Color blank = Color(0.01f, 0.01f, 0.01f);
 	if(f->x < 0){
@@ -194,6 +179,7 @@ void FlowManager::delFlow(int flowID){
 	mFreeFlows.push(f);
 	
 	if(mSelectedFlow == f){
+	
 		mSelectedFlow = NULL;
 		
 		//Delete the DNS threads, in case we were trying to resolve still
@@ -209,6 +195,29 @@ void FlowManager::delFlow(int flowID){
 	//And resize the vector to remove this flow
 	mActiveFlows.pop_back();
 			
+}
+
+
+/*********************************************
+	Toggle the 'hide' state 
+**********************************************/
+void FlowManager::showType(FlowDescriptor *type, bool show){
+	for(int i=0;i<(int)mActiveFlows.size();i++){
+	
+		Flow *f = mActiveFlows[i];			
+		if(!mActiveFlows[i]){
+			continue;
+		}
+		
+		if(f->mDescr == type){
+			f->hide = !show;
+		}
+		
+		f->hasSetTexture = false;
+	}
+	
+	mLeftFlowTexture.clearColor(type->mColor);
+	mRightFlowTexture.clearColor(type->mColor);
 }
 
 /*********************************************
@@ -547,20 +556,41 @@ void FlowManager::notifyServerChange(){
 int DnsLeft(void *data){
 	//LOG("Resolving left\n");
 	Flow *f = (Flow *)data;		
-	const char *left = SDLNet_ResolveIP(&f->mSrc);		
+	int id = f->flowID;
+	
+	//LOG("Resolving with %d\n", id);
+	
+	const char *left = SDLNet_ResolveIP(&f->mSrc);
+	
+	if(!App::S()->mFlowMgr->flowValid(id)){
+		//LOG("Invalid flow %d, ignoring (%s)\n", id, left);	
+		return false;
+	}
+		
 	if(left){	f->leftText[2] = string( left );	}
 	else{	f->leftText[2] = "";	}	
-	//LOG("Resoved left: %s\n", f->leftText[2].c_str());	
+	//LOG("Resoved left: %s\n", left);	
 	return left ? true : false;
 }
 
 int DnsRight(void *data){
 	//LOG("Resolving right\n");
 	Flow *f = (Flow *)data;		
-	const char *right = SDLNet_ResolveIP(&f->mDst);		
+	int id = f->flowID;
+	
+	const char *right = SDLNet_ResolveIP(&f->mDst);
+		
+	
+	if(!App::S()->mFlowMgr->flowValid(id)){
+		//LOG("Invalid flow %d, ignoring (%s)\n", id, right);	
+		return false;
+	}
+		
+		
 	if(right){	f->rightText[2] = string( right );	}
 	else{	f->rightText[2] = "";	}	
-	//LOG("Resoved right: %s\n", f->rightText[2].c_str());	
+	
+	//LOG("Resoved right: %s\n", right);	
 	return right ? true : false;
 }
 
@@ -592,6 +622,12 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 				
 		if(c == 0){
 			continue;
+		}
+		
+		if(mSelectedFlow){
+			//We had already selected one!
+			//if(mDnsThreadLeft) SDL_KillThread(mDnsThreadLeft);
+			//if(mDnsThreadRight) SDL_KillThread(mDnsThreadRight);
 		}
 		
 		mSelectedFlow = f;	
@@ -637,6 +673,9 @@ bool FlowManager::onClick(int button, float x, float y, float z){
 
 
 
+/*********************************************
+   The side textures with start/end points
+**********************************************/
 void FlowTexture::init(){
 	
 	bIsValid = false;
@@ -709,7 +748,7 @@ void FlowTexture::set(float x, float y, Color c){
 	y = (y / SLAB_SIZE) * FLOW_TEX_SIZE;
 	
 	if(x < 0 || x > FLOW_TEX_SIZE - 1 || y < 0 || y > FLOW_TEX_SIZE - 1){
-		LOG("%f/%f\n", x, y);
+		//LOG("%f/%f\n", x, y);
 		return;
 	}
 	
@@ -723,4 +762,24 @@ void FlowTexture::clear(){
 	for(int i=0;i<len;i++){
 		data[i] = 1;
 	}
+}
+
+void FlowTexture::clearColor(Color c){
+	
+	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
+
+	byte r = (byte)(c.b * 255);
+	byte g = (byte)(c.g * 255);
+	byte b = (byte)(c.r * 255);
+	
+	for(int i=0;i<len;i+=3){
+		if(	data[i + 0] == r &&
+			data[i + 1] == g &&
+			data[i + 2] == b){
+				
+				data[i + 0] = 1;
+				data[i + 1] = 1;
+				data[i + 2] = 1;		
+		}
+	}		
 }

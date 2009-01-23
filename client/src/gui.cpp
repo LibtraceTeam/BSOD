@@ -278,6 +278,9 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 		
 		//And set the internal state too
 		getFD(i)->bShown = show;
+		
+		//Finally, set the flow manager toggle
+		mFlowMgr->showType(getFD(i), show);
 	}
 		
 	return true;

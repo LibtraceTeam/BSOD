@@ -42,6 +42,11 @@ Flow *FlowManager::getFreeFlow(){
 }
 
 Flow *FlowManager::getFlowByID(int id){
+
+	if(mFlowMap.find(id) == mFlowMap.end()){
+		return NULL;
+	}
+
 	return mFlowMap[id];
 }
 

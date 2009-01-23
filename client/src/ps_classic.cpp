@@ -265,7 +265,7 @@ void PSClassic::render(){
 		}
 		
 		//Set the state for this collection
-		float s = collection->fSize / 4.0f;
+		float s = collection->fSize * scale / 20.0f;
 		collection->mColor.bind();
 		
 		bad++; //Count the number of state changes

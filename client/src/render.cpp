@@ -82,16 +82,18 @@ void App::drawStatusBar(){
 	
 	//Text
 	glColor4f(1,1,1,1);
-	writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
 	
 	if(fGUITimeout <= 0.0f){
+		/*
 		if(!isConnected()){
 			writeTextCentered(iScreenX / 2, iScreenY - 30, 
 						"Press any key to display the GUI, \
 						then use the Servers button to connect to a server");
 		}		
+		*/
 	}else{
-	
+		writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
+		
 		if(isConnected()){
 	
 			//Update the text at the bottom of the screen

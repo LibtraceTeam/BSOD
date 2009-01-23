@@ -70,8 +70,13 @@ void App::updateMain(){
 
 	updateSocket();
 	
+	//Hack! The shader system doesn't really play nice with the banner, so
+	//we disable it here.
 	if(!isConnected()){
-		generateTestData();
+		if(ps()->getType() <= PARTICLE_SYSTEM_POINTSPRITES)
+			generateTestData();
+		else
+			fGUITimeout = 1.0f;
 	}
 	
 	mParticleSystem->update();	
@@ -126,7 +131,7 @@ void App::generateTestData(){
 			byte g = data[index + 1];
 			byte b = data[index + 2];
 			
-			if(r > 0){
+			if(r > 240 && g > 240 && b > 240){
 				r = g = b = 255;
 			}
 						

@@ -101,6 +101,6 @@ protected:
 public:
 	bool init();
 	void render();
-	int getType(){return PARTICLE_SYSTEM_POINTSPRITES;}
+	virtual int getType(){return PARTICLE_SYSTEM_POINTSPRITES;}
 };
 

@@ -26,5 +26,7 @@ public:
 	void update();		
 	void shutdown();
 	void render();		
+
+	int getType(){return PARTICLE_SYSTEM_SHADERS;}
 };
 

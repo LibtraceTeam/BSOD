@@ -180,8 +180,11 @@ float App::getTextWidth(const char *fmt, ...){
 
 void App::writeTextCentered(int x, int y, const char *fmt, ...){
 
+	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textureId);   
-
+	glEnable(GL_BLEND);
+	glColor4f(1,1,1,1);
+	
   	va_list args;
     va_start(args, fmt);
     vsnprintf(message, 512, fmt, args);

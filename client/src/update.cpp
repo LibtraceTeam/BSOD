@@ -57,14 +57,14 @@ void App::updateMain(){
 			fZoom += diff.y;
 		}
 		
-		dragVel = (dragStart - drag);
+		dragVel = diff;
 		dragStart = getMouse();
 		
 		
 		
 	}else{
-		fRot[1] -= dragVel.x * fTimeScale;
-		fRot[0] -= dragVel.y * fTimeScale;
+		fRot[1] -= dragVel.x;
+		fRot[0] -= dragVel.y;
 	}
 	
 

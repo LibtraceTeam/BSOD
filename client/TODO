@@ -1,7 +1,7 @@
-- Calculate FPS once/frame
-- Toggle stuff on server from client GUI
-- GUI list of servers on network, connect to any found + custom
-- Deal with D/Cs 
-- Verify!
-- Graph of data throughput
-- Turn back time
+- We can get smoother perfomance under ihug-style loads with the vertex shader 
+particle system by limiting to Nk particles per frame
+- Resizing the window goes badly on Windows (and is disabled currently)
+- Move to glDrawArrays throughout (need to change memory layout...)
+- Auto benchmark to figure out the 'best' particle system backend
+- Change ps backends in real time
+- Better picking for the start/end points - 'best' hit rather than first

@@ -309,6 +309,10 @@ void App::updateUDPSocket(){
 	int replyPort =  ntohs(mUDPPacket->address.port);	
 	
 	string remoteData = string((char *)mUDPPacket->data);   
+
+	for(int i=0;i<512;i++){
+		mUDPPacket->data[i] = NULL;
+	}
 			
 	vector<string> split;
 	int n = splitString(remoteData, "|", split);
@@ -331,8 +335,10 @@ void App::updateUDPSocket(){
 		name += split[i];			
 		if(i != (int)split.size() - 1)	name += "|";
 
-		LOG("%d:%d\n", i, split[i].size());
+		//LOG("%d:%d\n", i, split[i].size());
 	}
+
+	//LOG("Got %s\n", name.c_str());
 	
 	//And add it to the GUI				
 	addServerListEntry(name, remoteIP, port);

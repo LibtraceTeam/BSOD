@@ -167,6 +167,7 @@ class App{
 	bool onMouseCursorChanged(const CEGUI::EventArgs&);
 	bool onServerButtonClicked(const CEGUI::EventArgs&);
 	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
+	bool onDarknetCheckboxClicked(const CEGUI::EventArgs&);
 	
 	//Flow descriptors
 	void addFlowDescriptor(byte id, Color c, string name);
@@ -264,6 +265,10 @@ public:
 	//The client-side overrides for the left and right textures
 	string mLeftTexName;
 	string mRightTexName;
+	
+	//Darknet
+	bool bShowDarknet;
+	bool bShowNonDarknet;
 };
 
 

@@ -431,6 +431,21 @@ bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
 	return true;
 }
 
+bool App::onDarknetCheckboxClicked(const CEGUI::EventArgs &args){
+	WindowEventArgs *we = (WindowEventArgs *)&args;
+	Checkbox *cb = (Checkbox *)we->window;
+	
+	if(cb->getName() == "cbDarknet"){
+		bShowDarknet = cb->isSelected();
+	}
+	
+	else if(cb->getName() == "cbNonDarknet"){
+		bShowNonDarknet = cb->isSelected();
+	}
+	
+	return true;
+}
+
 void App::shutdownGUI(){
 	delete CEGUI::System::getSingletonPtr (); 
 	delete mGUI;
@@ -609,6 +624,9 @@ void App::makeProtocolWindow(){
     mProtoWindow->hide();
 }
 
+
+/*********************************************
+	Creates the message box window**********************************************/
 void App::makeMessageWindow(){
 	mMessageWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndMessage");
     root->addChildWindow(mMessageWindow);
@@ -643,6 +661,10 @@ void App::makeMessageWindow(){
     mMessageWindow->setSizingEnabled(false);
 }
 
+
+
+/*********************************************
+	Creates the server browser window**********************************************/
 void App::makeServerWindow(){
 	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpace/FrameWindow", "wndServer");
     root->addChildWindow(mServerWindow);
@@ -715,13 +737,17 @@ void App::makeServerWindow(){
     mServerWindow->hide();
 }
 
+
+
+/*********************************************
+	Creates the options window**********************************************/
 void App::makeOptionWindow(){
           
     mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndOption");
     root->addChildWindow(mOptionWindow);
     
     mOptionWindow->setPosition(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.45f)));
-    mOptionWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.35f)));  
+    mOptionWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.5f)));  
     mOptionWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
     mOptionWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
     mOptionWindow->setText("Options");    
@@ -734,14 +760,14 @@ void App::makeOptionWindow(){
     DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSpeedInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Speed: 1.0");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.15f)));
-	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.10f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.1f)));
     
     Slider *slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSpeed"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Connect");
-    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.3f)));
-    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.15f)));
+    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.17f)));
+    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.10f)));
     slide->setAlwaysOnTop(true);	
 	slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
 	slide->setCurrentValue(fParticleSpeedScale / 10.0f);
@@ -749,22 +775,53 @@ void App::makeOptionWindow(){
     text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSizeInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Size: 1.0");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.4f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.25f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     
     slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSize"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Size");
-    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.55f)));
-    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.15f)));
+    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.37f)));
+    slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.10f)));
     slide->setAlwaysOnTop(true);	
     slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
     slide->setCurrentValue(fParticleSizeScale / 10.0f);
+    
+    text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtDarkInfo");
+    mOptionWindow->addChildWindow(text);
+	text->setText("Darknet:");	
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.5f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.1f)));
+  
+  	
+  	
+	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "cbDarknet");
+	mOptionWindow->addChildWindow(cb);	
+	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.60f )));
+	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
+	cb->setText("Show Darknet traffic");
+	cb->setSelected(bShowDarknet);
+	
+	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
+						Event::Subscriber(&App::onDarknetCheckboxClicked, this) );
+						
+						
+	cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "cbNonDarknet" );
+	mOptionWindow->addChildWindow(cb);	
+	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.67f )));
+	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
+	cb->setText("Show Non-darknet traffic");
+	cb->setSelected(bShowNonDarknet);
+	
+	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
+						Event::Subscriber(&App::onDarknetCheckboxClicked, this) );
+  	
+  	
  
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
 	text->setText("BSOD2 Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.7f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.75f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.3f)));
     
     

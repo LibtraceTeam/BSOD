@@ -18,6 +18,8 @@ bool App::loadConfig(){
 		CFG_INT("DropPacketThresh", 60, CFGF_NONE),
 		CFG_INT("DropFlowThresh", 30, CFGF_NONE),
 		CFG_INT("Fullscreen", 0, CFGF_NONE),
+		CFG_INT("ShowDarknet", 1, CFGF_NONE),
+		CFG_INT("ShowNonDarknet", 1, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -39,6 +41,8 @@ bool App::loadConfig(){
 	iDropFlowThresh = cfg_getint(cfg, "DropFlowThresh");
 	mLeftTexName = string(cfg_getstr(cfg, "LeftTex"));
 	mRightTexName = string(cfg_getstr(cfg, "RightTex"));
+	bShowDarknet = cfg_getint(cfg, "ShowDarknet");
+	bShowNonDarknet = cfg_getint(cfg, "ShowNonDarknet");
 	
 	cfg_free(cfg);
 	

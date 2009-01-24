@@ -466,9 +466,14 @@ void App::updateTCPSocket(){
 				rtt = -rtt;
 			}
 			
-			iCurrentTime = ntohl(pkt->ts);		
+			iCurrentTime = ntohl(pkt->ts);	
 			
-			mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, getFD(pkt->packetType));
+			bool dark = pkt->dark;
+			
+			if(dark && bShowDarknet || !dark && bShowNonDarknet){			
+				mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, 
+									getFD(pkt->packetType));
+			}
 						
 			iTime = ntohl(pkt->ts);			
 		}
@@ -548,7 +553,13 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     
     addProtocolEntry(name, c, id);
 }
-                                
+                       
+                       
+
+/*********************************************
+ Disconnect from the current server (if any)
+ If notify is true, pop up a messagebox
+**********************************************/         
 void App::disconnect(bool notify){
 
 	bConnected = false;

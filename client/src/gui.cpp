@@ -516,7 +516,7 @@ void App::updateGUIConnectionStatus(){
 
 	if(isConnected()){
 		text->setText("Currently connected to '" + mServerAddr + ":" + 
-					  toString(iServerPort) + "'\n" + 
+					  toString(iServerPort) + "'. " + 
 					  "Select a different server from the list\
 					  below or specify a custom address manually.");
 	}else{
@@ -672,7 +672,7 @@ void App::makeServerWindow(){
     root->addChildWindow(mServerWindow);
     
     mServerWindow->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.3f)));
-    mServerWindow->setSize(UVector2(cegui_reldim(0.75f), cegui_reldim( 0.5f)));  
+    mServerWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.5f)));  
     mServerWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
     mServerWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
 
@@ -685,7 +685,7 @@ void App::makeServerWindow(){
    	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnRefresh"));
     mServerWindow->addChildWindow(btn);
     btn->setText("Refresh List");
-    btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.88f)));
+    btn->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onServerButtonClicked, this));
     btn->setAlwaysOnTop(true);	
@@ -693,7 +693,7 @@ void App::makeServerWindow(){
     btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnConnect"));
     mServerWindow->addChildWindow(btn);
     btn->setText("Connect");
-    btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.88f)));
+    btn->setPosition(UVector2(cegui_reldim(0.55f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onServerButtonClicked, this));
     btn->setAlwaysOnTop(true);	
@@ -701,8 +701,8 @@ void App::makeServerWindow(){
     
    	Listbox* lb = (Listbox *)(winMgr->createWindow("SleekSpace/Listbox", "lbServers"));
    	mServerWindow->addChildWindow(lb);
-   	lb->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.28f)));
-    lb->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.45f)));
+   	lb->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.28f)));
+    lb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.45f)));
    
     lb->subscribeEvent(Listbox::EventSelectionChanged, Event::Subscriber(&App::onServerListClicked, this));
     
@@ -722,13 +722,23 @@ void App::makeServerWindow(){
 				
 				
 				
+	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSelected");
+    mServerWindow->addChildWindow(text);
+	text->setText("Address: ");
+					
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.70f)));
+	text->setSize(UVector2(cegui_reldim(0.2f), cegui_reldim( 0.2f)));
+	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
+	text->setAlwaysOnTop(true);	
+			
+				
 				
 	Editbox* edit = (Editbox *)winMgr->createWindow("SleekSpace/Editbox", "txtCustomServer");
     mServerWindow->addChildWindow(edit);
 	edit->setText("");
 					
-	edit->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.75f)));
-	edit->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.1f)));
+	edit->setPosition(UVector2(cegui_reldim(0.2f), cegui_reldim( 0.75f)));
+	edit->setSize(UVector2(cegui_reldim(0.75f), cegui_reldim( 0.1f)));
 	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
 	edit->setAlwaysOnTop(true);	
 	

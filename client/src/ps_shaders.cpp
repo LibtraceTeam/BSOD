@@ -192,7 +192,8 @@ void PSShaders::renderAll(){
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
 	glEnable(GL_BLEND);							
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);	
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_ONE, GL_ONE);	
 		
 	//Scaling	
 	float scale = setSizeScale();							

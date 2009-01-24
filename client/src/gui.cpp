@@ -237,10 +237,12 @@ bool App::onProtocolClicked(const EventArgs &args){
 	
 	//Make sure we have a valid flow descriptor ID
 	if(getFD(id)){
-		//Toggling bShown makes sure that no new particles of this type get
-		//created.
+	
+		//This is annoying. Look how many hoops we have to jump through. 
+		//TODO: We should have a *single* showType() / hideType() or something
 		getFD(id)->bShown = cb->isSelected();
-		ps()->showColor(getFD(id)->mColor, cb->isSelected());
+		ps()->showColor(getFD(id)->mColor, cb->isSelected());		
+		mFlowMgr->showType(getFD(id), cb->isSelected());
 	}
 	
 	return true;	

@@ -216,8 +216,10 @@ void FlowManager::showType(FlowDescriptor *type, bool show){
 		f->hasSetTexture = false;
 	}
 	
-	mLeftFlowTexture.clearColor(type->mColor);
-	mRightFlowTexture.clearColor(type->mColor);
+	if(!show){
+		mLeftFlowTexture.clearColor(type->mColor);
+		mRightFlowTexture.clearColor(type->mColor);
+	}
 }
 
 /*********************************************
@@ -765,6 +767,8 @@ void FlowTexture::clear(){
 }
 
 void FlowTexture::clearColor(Color c){
+
+	//LOG("Cleared %f/%f/%f\n", c.r, c.g, c.b);
 	
 	int len = FLOW_TEX_SIZE * FLOW_TEX_SIZE * 3;
 

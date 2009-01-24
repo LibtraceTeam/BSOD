@@ -161,28 +161,7 @@ bool App::openSocket(){
 
 	if(mClientSocket){
 		//We're connected. Disconnect!
-		SDLNet_TCP_Close(mClientSocket);
-		bConnected = false;
-		
-		if(SDLNet_TCP_DelSocket(mSocketSet, mClientSocket) == -1){
-			ERR("%s\n", SDLNet_GetError());
-			return false;
-		}
-		
-		//Clean up any textures we may have got
-		if(mLeftTex && mLeftTexName == ""){
-			texDelete(mLeftTex);
-			mLeftTex = NULL;
-		}
-		
-		if(mRightTex && mRightTexName == ""){
-			texDelete(mRightTex);
-			mRightTex = NULL;
-		}
-		
-		LOG("Disconected from server\n");
-		
-		updateGUIConnectionStatus();		
+		disconnect(false);
 	}
 	
     IPaddress ip;
@@ -364,10 +343,17 @@ void App::updateTCPSocket(){
 			int end = mDataBuf.size();
 			mDataBuf.resize( end + readlen );
 			memcpy(&mDataBuf[end], buffer, readlen);	
+		}else{
+			LOG("Connection lost!\n");
+			disconnect(true);
+			return;
 		}
 		
-		if(readlen == 0)
-			break;
+		if(readlen == 0){
+			LOG("Connection lost!\n");
+			disconnect(true);
+			return;
+		}
 	}
 	
 	if(mDataBuf.size() == 0){
@@ -563,7 +549,45 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     addProtocolEntry(name, c, id);
 }
                                 
+void App::disconnect(bool notify){
 
+	bConnected = false;
+
+	if(mClientSocket){
+		SDLNet_TCP_Close(mClientSocket);
+	
+		if(SDLNet_TCP_DelSocket(mSocketSet, mClientSocket) == -1){
+			ERR("%s\n", SDLNet_GetError());
+			return;
+		}
+	}
+	
+	mClientSocket = NULL;
+	
+	//Clean up any textures we may have got
+	if(mLeftTex && mLeftTexName == ""){
+		texDelete(mLeftTex);
+		mLeftTex = NULL;
+	}
+	
+	if(mRightTex && mRightTexName == ""){
+		texDelete(mRightTex);
+		mRightTex = NULL;
+	}
+	
+	LOG("Disconected from server\n");
+	
+	ps()->delAll();
+	
+	updateGUIConnectionStatus();		
+		
+	if(notify){
+		messagebox("Disconnected from server " + 
+						mServerAddr + ":" + 
+						toString(iServerPort), 
+						"Disconnected");
+	}
+}
 
 /*********************************************
 		Shutdown

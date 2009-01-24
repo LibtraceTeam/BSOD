@@ -126,7 +126,8 @@ class App{
 	//socket.cpp
 	bool initSocket();
 	bool openSocket();			//Connects to the server
-	void closeSocket();			//Disconnects from the server
+	void disconnect(bool notify);//Disconnects from the server
+	void closeSocket();			//Shuts down the networking system
 	void updateSocket();		//Reads data from the server
 	void beginDiscovery();		//Starts the UDP server discovery process
 	void updateTCPSocket();		//Reads from our TCP connection

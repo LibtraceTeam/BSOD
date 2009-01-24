@@ -158,6 +158,8 @@ bool App::openSocket(){
 		mFlowMgr->delAll();
 		mFlowMgr->notifyServerChange();
 	}
+		
+	clearFlowDescriptors();
 
 	if(mClientSocket){
 		//We're connected. Disconnect!
@@ -540,7 +542,7 @@ void App::updateTCPSocket(){
 void App::addFlowDescriptor(byte id, Color c, string name){
 
     if(mFlowDescriptors[id]){
-            return; //we already have one!
+    	return; //we already have one!
     }
     
     FlowDescriptor *f = new FlowDescriptor;
@@ -551,7 +553,25 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     
     mFlowDescriptors[id] = f;
     
+    //Add this to the GUI
     addProtocolEntry(name, c, id);
+}
+
+void App::clearFlowDescriptors(){
+	
+	//Remove the GUI checkboxes
+	clearProtocolEntries();
+	
+	for(map<byte, FlowDescriptor *>::const_iterator it = 
+		mFlowDescriptors.begin(); 
+		it != mFlowDescriptors.end(); ++it){
+	
+		if(it->second){
+			delete it->second;
+		}
+	}
+	
+	mFlowDescriptors.clear();
 }
                        
                        
@@ -591,6 +611,8 @@ void App::disconnect(bool notify){
 	ps()->delAll();
 	
 	updateGUIConnectionStatus();		
+	
+	clearFlowDescriptors();
 		
 	if(notify){
 		messagebox("Disconnected from server " + 

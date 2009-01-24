@@ -469,23 +469,33 @@ void App::addProtocolEntry(string name, Color col, int index){
 	}
 
 	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", 
-													toString(index) );
-	mProtoWindow->addChildWindow(cb);
+													toString(index) );											
+	winMgr->getWindow("paneProto")->addChildWindow(cb);
 	
-	float ypos = (index / 2) * 0.08f;
-	float xpos = (index % 2) * 0.4f;
+	float ypos = (index / 2) * 0.1f;
+	float xpos = (index % 2) * 0.5f;
 	
 	ypos += 0.1;
 	xpos += 0.1;
 	
 	cb->setPosition(UVector2(cegui_reldim( xpos ), cegui_reldim( ypos )));
-	cb->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.05f)));
+	cb->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.075f)));
 	cb->setText(name.c_str());
 	cb->setProperty("NormalTextColour", col.toString()); 
 	cb->setSelected(true);
 	
 	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
 						Event::Subscriber(&App::onProtocolClicked, this) );
+}
+
+void App::clearProtocolEntries(){
+
+	for(int i=0;i<255;i++){		
+		if(winMgr->isWindowPresent(toString(i))){
+			winMgr->destroyWindow(toString(i));
+		}	
+	}
+
 }
 
 void App::addServerListEntry(string name, string IP, string port){
@@ -594,13 +604,18 @@ void App::makeProtocolWindow(){
     root->addChildWindow(mProtoWindow);
     
     mProtoWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.25f)));
-    mProtoWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.5f)));  
+    mProtoWindow->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.5f)));  
     mProtoWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
     mProtoWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
 
     mProtoWindow->setText("Protocols");
     
-    //for(int i=0;i<10;i++){   
+    ScrollablePane *pane = (ScrollablePane*)winMgr->createWindow("SleekSpace/ScrollablePane", "paneProto");
+    mProtoWindow->addChildWindow(pane);
+    pane->setPosition(UVector2(cegui_reldim(0.075f), cegui_reldim( 0.12f)));
+    pane->setSize(UVector2(cegui_reldim(0.87f), cegui_reldim( 0.75f)));  
+    
+    //for(int i=0;i<30;i++){   
 	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
    	//}
    	

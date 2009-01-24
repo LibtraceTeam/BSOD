@@ -153,6 +153,7 @@ class App{
 										//processed further
 	void addProtocolEntry(string name, Color col, int index); //Adds an entry
 										//to the protocol window
+	void clearProtocolEntries(); //Delete the GUI checkboxes
 	void clearServerList();		//Called when we send a new discovery packet
 	void addServerListEntry(string name, string IP, string port);
 	void messagebox(string text, string title = "Message"); 
@@ -172,6 +173,7 @@ class App{
 	//Flow descriptors
 	void addFlowDescriptor(byte id, Color c, string name);
 	FlowDescriptor *getFD(byte i){return mFlowDescriptors[i];}
+	void clearFlowDescriptors();
 			
 /*********************************************
 				Public

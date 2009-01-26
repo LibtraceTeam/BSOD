@@ -58,7 +58,7 @@
 #include <map>
 
 #include <libtrace.h>
-#include <libconfig.h>
+#include <confuse.h>
 
 #include "bsod_server.h"
 
@@ -449,8 +449,11 @@ void fix_defaults() {
 		macaddrfile=strdup("etc/mac_addrs");
 	if (!blacklistdir)
 		blacklistdir=strdup("blist/");
-	if (!server_name)
-		server_name=strdup(uri); //If no name is specified, use the data source
+	if (!server_name){
+		if(uri)	server_name=strdup(uri);
+		else server_name=strdup("Unnamed");
+	}
+		
 	
 	//left_image and right_image can be NULL, it means the client will use the
 	//default images and provides compatibility for the old client if needed
@@ -461,36 +464,37 @@ void do_configuration(int argc, char **argv) {
 
 	// void everything
 	set_defaults();
-
-	// initialise config parser
-	config_t main_config[] = {
-		{"pidfile", TYPE_STR|TYPE_NULL, &pidfile},
-		{"background", TYPE_INT|TYPE_NULL, &background},
-		{"basedir", TYPE_STR|TYPE_NULL, &basedir},
-		{"source", TYPE_STR|TYPE_NULL, &uri},
-		{"listenport", TYPE_INT|TYPE_NULL, &port},
-		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
-		{"colour_module",TYPE_STR|TYPE_NULL, &colourmod},
-		{"rpos_module",TYPE_STR|TYPE_NULL, &rightpos},
-		{"lpos_module",TYPE_STR|TYPE_NULL, &leftpos},
-		{"dir_module",TYPE_STR|TYPE_NULL, &dirmod},
-		{"loop",TYPE_INT|TYPE_NULL, &loop},
-		{"shownondata", TYPE_INT|TYPE_NULL, &shownondata},
-		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
-		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
-		{"macaddrfile", TYPE_STR|TYPE_NULL, &macaddrfile},
-		{"blacklistdir", TYPE_STR|TYPE_NULL, &blacklistdir},
-		{"darknet", TYPE_BOOL|TYPE_NULL, &enable_darknet},
-		{"rttest", TYPE_BOOL|TYPE_NULL, &enable_rttest},
-		{"sampling", TYPE_INT|TYPE_NULL, &sampling},
-		{"name", TYPE_STR|TYPE_NULL, &server_name},
-		{"left_image", TYPE_STR|TYPE_NULL, &left_image},
-		{"right_image", TYPE_STR|TYPE_NULL, &right_image},
-		{0,0,0}
-	};
-
-	// read cmdline opts
 	
+	cfg_opt_t opts[] =	{
+		CFG_STR("pidfile", "", CFGF_NONE),
+		CFG_INT("background", 0, CFGF_NONE),
+		CFG_STR("basedir", NULL, CFGF_NONE),
+		CFG_STR("source", NULL, CFGF_NONE),
+		CFG_INT("listenport", 34567, CFGF_NONE),
+		CFG_STR("filter", NULL, CFGF_NONE),
+		CFG_STR("colour_module", NULL, CFGF_NONE),
+		CFG_STR("rpos_module", NULL, CFGF_NONE),
+		CFG_STR("lpos_module", NULL, CFGF_NONE),
+		CFG_STR("dir_module", NULL, CFGF_NONE),
+		CFG_INT("loop", 0, CFGF_NONE),
+		CFG_INT("shownondata", 0, CFGF_NONE),
+		CFG_INT("showdata", 1, CFGF_NONE),
+		CFG_INT("showcontrol", 1, CFGF_NONE),
+		CFG_STR("macaddrfile", NULL, CFGF_NONE),
+		CFG_STR("blacklistdir", NULL, CFGF_NONE),
+		CFG_BOOL("darknet", cfg_false, CFGF_NONE),
+		CFG_BOOL("rttest", cfg_false, CFGF_NONE),
+		CFG_INT("sampling", 0, CFGF_NONE),
+		CFG_STR("name", NULL, CFGF_NONE),
+		CFG_STR("left_image", NULL, CFGF_NONE),
+		CFG_STR("right_image", NULL, CFGF_NONE),
+		CFG_END()
+	};
+	cfg_t *cfg;
+
+	cfg = cfg_init(opts, CFGF_NONE);
+	
+	// read cmdline opts
 	while( argv && (opt = getopt(argc, argv, "hbC:")) != -1)
 	{
 		switch(opt)
@@ -510,11 +514,38 @@ void do_configuration(int argc, char **argv) {
 
 	// parse configfile opts
 	if (configfile) {
-		if (parse_config(main_config,configfile)) {
+		
+		if(cfg_parse(cfg, configfile) == CFG_PARSE_ERROR){		
 			Log(LOG_DAEMON|LOG_ALERT,"Bad config file %s, giving up\n",
 					configfile);
 			exit(1);
 		}
+		
+		pidfile = cfg_getstr(cfg, "pidfile");
+		background = cfg_getint(cfg, "background");
+		basedir = cfg_getstr(cfg, "basedir");
+		uri = cfg_getstr(cfg, "source");
+		port = cfg_getint(cfg, "listenport");
+		filterstring = cfg_getstr(cfg, "filter");
+		colourmod = cfg_getstr(cfg, "colour_module");
+		rightpos = cfg_getstr(cfg, "rpos_module");
+		leftpos = cfg_getstr(cfg, "lpos_module");
+		dirmod = cfg_getstr(cfg, "dir_module");
+		loop = cfg_getint(cfg, "loop");
+		shownondata = cfg_getint(cfg, "shownondata");
+		showdata = cfg_getint(cfg, "showdata");
+		showcontrol = cfg_getint(cfg, "showcontrol");
+		macaddrfile = cfg_getstr(cfg, "macaddrfile");
+		blacklistdir = cfg_getstr(cfg, "blacklistdir");
+		enable_darknet = cfg_getbool(cfg, "darknet");
+		enable_rttest = cfg_getbool(cfg, "rttest");
+		sampling = cfg_getint(cfg, "sampling");
+		server_name = cfg_getstr(cfg, "name");
+		left_image = cfg_getstr(cfg, "left_image");
+		right_image = cfg_getstr(cfg, "right_image");
+		
+		printf("URI: %s\n", uri);
+		
 	}
 	// if any options were omitted from the config file,
 	// set them here

@@ -11,7 +11,7 @@ CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 # This should be fixed, but isn't.
 #LDLIBS =  -lm -lz -lpcap -ldl -lconfig -lfl -ltrace -lGeoIP
-LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace -lconfig
+LDLIBS =  -lm  -ldl -lconfig -lfl -ltrace -lconfuse
 LDFLAGS+= -L$(LIBTRACE)/lib -rdynamic 
 SUBDIR_LDFLAGS = -L$(LIBTRACE)/lib
 

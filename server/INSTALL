@@ -5,7 +5,7 @@ The bsod server requires:
 
 * libtrace (http://research.wand.net.nz/software/)
 * g++-3.0 or greater (known to work with 3.0, fails with 2.95)
-
+* libconfuse (package libconfuse-dev on debian)
 
 
 ----------------------------------

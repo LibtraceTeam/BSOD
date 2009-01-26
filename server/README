@@ -1,4 +1,4 @@
-bsod-server-1.2.1
+bsod-server-2.0.0
 
 ---------------------------------------------------------------------------
 Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
@@ -42,7 +42,7 @@ You can specify a different file by giving bsod server the command line
 option '-C /path/to/config/file'. Configuration options are pairs of the 
 form:
 
-<key> <value>
+<key> = <value>
 
 A value can be one of two types - string or integer. All strings are 
 enclosed in double quotes, while integers are simply a number.

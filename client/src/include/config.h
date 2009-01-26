@@ -27,5 +27,5 @@
 #define UDP_PORT_RANGE 5
 
 //Displayed in the options window
-#define CLIENT_VERSION 0.1
+#define CLIENT_VERSION "2.0.0"
 

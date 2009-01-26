@@ -847,7 +847,7 @@ void App::makeOptionWindow(){
  
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
-	text->setText("BSOD2 Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
+	text->setText("BSOD Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.75f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.3f)));
     

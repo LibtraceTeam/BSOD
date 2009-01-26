@@ -16,7 +16,6 @@ bool PSShaders::init(){
 		return false;
 	}
 	
-	fTime = 0.0f;
 	fUpdateTimer = 0.0f;
 
 	//Now set up the shader
@@ -118,6 +117,8 @@ void PSShaders::render(){
 			iNumActive += collection->mParticles.size();
 		}	
 	}
+	
+	//LOG("%f\n", fTime);
 	
 	mShader.unbind();
 }

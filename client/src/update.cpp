@@ -223,16 +223,28 @@ void App::utilEventLoop(){
 			    break;
 			}
 		}
-
-	    /* draw the scene */
+		
 	    if (!done){
+	    
+	    	//Do one frames worth of work and figure out the length of time
 	    	uint32_t startTime = SDL_GetTicks();
 			renderMain();
 			updateMain();
 			uint32_t endTime = SDL_GetTicks();
 			
+			//Figure out the scaling factor for FPS-independent movement
 			uint32_t diff = endTime - startTime;
-			fTimeScale = (float)diff / 1000.0f;
+			fTimeScale = (float)diff * fTimeScaleScale;
+			
+			//Every hour, do a cleanup
+			if(fCleanupTimer < 0.0f){
+				ps()->doPeriodicCleanup();				
+				fCleanupTimer = CLEANUP_TIMER;
+			}
+			
+			//Update our various timers
+			fCleanupTimer -= fTimeScale;
+			fUptime += fTimeScale;
 			fParticleFPS = fTimeScale;
 		}
 	}

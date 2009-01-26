@@ -98,6 +98,9 @@ int App::init(App *a, int argc, char **argv){
 				
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
+	fUptime = 0.0f;
+	fTimeScaleScale = 1.0f/1000.0f; //normal scaling
+	fCleanupTimer = CLEANUP_TIMER;
 
 	//Connect	
 	if(mServerAddr != ""){

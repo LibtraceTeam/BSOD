@@ -134,6 +134,7 @@ bool PSSprites::init(){
 bool PSClassic::init(){
 
 	iLastColorChanges = 0;
+	
 	fTime = 0.0f;
 
 	while(!mFree.empty()){
@@ -455,6 +456,27 @@ void PSClassic::showColor(Color c, bool bShow){
 			collection->bShown = bShow;
 		}
 	}
+}
+
+/*********************************************	Reset internal timestamps
+**********************************************/
+void PSClassic::doPeriodicCleanup(){
+	
+	map<float, ParticleCollection *>::const_iterator itr;
+	for(itr = mParticleCollections.begin(); 
+		itr != mParticleCollections.end(); ++itr){				
+		ParticleCollection *collection = itr->second;		
+		
+		for(int i=0;i<collection->mParticles.size();i++){
+			Particle *p = collection->mParticles[i];
+			
+			p->timestamp -= fTime;			
+		}
+	}
+	
+	fTime = 0.0f;
+	
+	//LOG("Cleanup!\n");
 }
 
 

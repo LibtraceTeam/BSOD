@@ -40,6 +40,9 @@ public:
 	//stats
 	virtual int getActive(){return 0;}
 	virtual int getType(){return PARTICLE_SYSTEM_UNSPECIFIED;}
+	
+	//Called every hour or so
+	virtual void doPeriodicCleanup(){}
 };
 
 

@@ -18,7 +18,15 @@ void App::handleKeyEvent( SDL_keysym *keysym , int type )
 		//Toggle fullscreen
 		SDL_WM_ToggleFullScreen( surface );
 		break;
+	/*
+	case SDLK_F2:
+		fTimeScaleScale = 1.0f/1000.0f;
+		break;
 		
+	case SDLK_F3:
+		fTimeScaleScale = 10.0f;
+		break;
+	*/
 	default:
 		break;
 	}

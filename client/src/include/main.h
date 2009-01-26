@@ -48,6 +48,9 @@ class App{
 	int iFPS;					//Current frames per second
 	int iFrameCounter;			
 	int iLastFrameTicks;		//Records the SDL_Time() at last frame
+	float fUptime;				//Seconds this has been going
+	float fCleanupTimer;		//How long till the particle system gets cleaned
+	float fTimeScaleScale;		//for scaling the timestep
 	
 	//gl_util.cpp
 	bool done;					//Whether the app is running. 

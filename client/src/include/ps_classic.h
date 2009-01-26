@@ -86,6 +86,7 @@ public:
 	int getActive(){return iNumActive;}		
 	void shutdown();		
 	void delAll();	
+	virtual void doPeriodicCleanup();
 
 	virtual ~PSClassic(){}
 };

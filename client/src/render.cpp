@@ -92,7 +92,8 @@ void App::drawStatusBar(){
 		}		
 		*/
 	}else{
-		writeText(10, 7, "%d fps, %d particles", iFPS, ps()->getActive());	
+		writeText(10, 7, "%d fps, %d particles, %0.1f uptime", 
+					iFPS, ps()->getActive(), fUptime);	
 		
 		if(isConnected()){
 	

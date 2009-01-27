@@ -136,6 +136,19 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 		return false;
 	}
 
+	//If the size is 0, detect the native res
+	if(sizeX <= 0.0f){
+		sizeX = videoInfo->current_w;
+	}
+
+	if(sizeY <= 0.0f){
+		sizeY = videoInfo->current_h;
+	}
+
+	if(bpp == 0){
+		bpp = videoInfo->vfmt->BitsPerPixel;
+	}
+
 	//the flags to pass to SDL_SetVideoMode
 	videoFlags  = SDL_OPENGL;         
 	videoFlags |= SDL_GL_DOUBLEBUFFER;

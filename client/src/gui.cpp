@@ -28,7 +28,7 @@ bool handle_mouse_down(Uint8 button);
 bool handle_mouse_up(Uint8 button);
 CEGUI::uint SDLKeyToCEGUIKey(SDLKey key);
 
-
+bool bGuiIsShown = false;
 
 
 /*********************************************
@@ -401,13 +401,13 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	//If CEGUI has changed to a valid image, hide the SDL cursor. This ensures
 	//that we do sensible things when we mouse over edit boxes and such, 
 	//otherwise we have duplicate cursors. 
-	/*
+#ifndef _WINDOWS
 	if(CEGUI::MouseCursor::getSingleton().getImage()){
 		SDL_ShowCursor(SDL_DISABLE);
 	}else{
 		SDL_ShowCursor(SDL_ENABLE);
 	}
-	*/
+#endif
 	
 	return true;
 }
@@ -544,8 +544,17 @@ void App::updateGUIConnectionStatus(){
 	Called as part of render2D**********************************************/
 void App::renderGUI(){
 	if(fGUITimeout > 0.0f){
+
+		if(!bGuiIsShown){
+			SDL_ShowCursor(SDL_ENABLE);
+			bGuiIsShown = true;
+		}
+
 		CEGUI::System::getSingleton().renderGUI();
 		fGUITimeout -= fTimeScale;
+	}else if(bGuiIsShown){
+		SDL_ShowCursor(SDL_DISABLE);
+		bGuiIsShown = false;
 	}
 }
 

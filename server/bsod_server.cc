@@ -488,6 +488,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_STR("name", NULL, CFGF_NONE),
 		CFG_STR("left_image", NULL, CFGF_NONE),
 		CFG_STR("right_image", NULL, CFGF_NONE),
+		CFG_INT("sendq", 10*1024*1024, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -543,6 +544,7 @@ void do_configuration(int argc, char **argv) {
 		server_name = cfg_getstr(cfg, "name");
 		left_image = cfg_getstr(cfg, "left_image");
 		right_image = cfg_getstr(cfg, "right_image");
+		max_sendq_size = cfg_getint(cfg, "sendq");
 		
 		printf("URI: %s\n", uri);
 		

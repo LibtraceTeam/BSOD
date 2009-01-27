@@ -47,4 +47,6 @@ int send_kill_all();
 int send_colour_table(struct modptrs_t *modptrs);
 int send_images(struct client *c);
 
+extern int max_sendq_size;
+
 #endif // _SOCKET_H

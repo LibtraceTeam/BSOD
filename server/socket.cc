@@ -59,6 +59,7 @@ float htonf(float x) {
 }
 
 extern int fd_max;
+int max_sendq_size = 10*1024*1024;
 
 struct client_buffer
 {
@@ -487,7 +488,7 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 	struct client_buffer sendq;
 	assert(buffer);
 	client->data_waiting+=size;
-	if (client->data_waiting>10*1024*1024) { // 10MB
+	if (client->data_waiting>max_sendq_size) { // 10MB
 		Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i for max sendq exceeded\n",client->fd);
 		remove_fd(client);
 		return;

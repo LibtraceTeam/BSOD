@@ -527,7 +527,7 @@ void App::updateGUIConnectionStatus(){
 	if(isConnected()){
 		text->setText("Currently connected to '" + mServerAddr + ":" + 
 					  toString(iServerPort) + "'. " + 
-					  "Select a different server from the list\
+					  "Select a server from the list\
 					  below or specify a custom address manually.");
 	}else{
 	
@@ -725,11 +725,11 @@ void App::makeServerWindow(){
     DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtServerInfo");
     mServerWindow->addChildWindow(text);
 	text->setText("Not currently connected to any server. \
-					Select a different server from the list below or specify \
+					Select a server from the list below or specify \
 					a custom address manually.");
 					
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.08f)));
-	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
+	text->setSize(UVector2(cegui_reldim(0.90f), cegui_reldim( 0.2f)));
 	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
 	text->setAlwaysOnTop(true);	
 	text->setProperty("HorzFormatting", "WordWrapLeftAligned"); // LeftAligned, RightAligned, HorzCentred

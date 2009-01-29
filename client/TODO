@@ -1,5 +1,9 @@
-- If the server goes away unexpectedly, we should handle it gracefully
-- Darknet toggle
+From NZNOG feedback:
+- Disable CEGUI log
+- Make server window more HCI-friendly
+- Internet master server style lookups for public servers
+
+Other random stuff:
 - Auto rotate options
 - We can get smoother perfomance under ihug-style loads with the vertex shader 
 particle system by limiting to Nk particles per frame

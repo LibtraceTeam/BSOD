@@ -1,5 +1,5 @@
 From NZNOG feedback:
-- Disable CEGUI log
+- Disable CEGUI log and catch the CEGUI exception. 
 - Make server window more HCI-friendly
 - Internet master server style lookups for public servers
 

@@ -339,8 +339,8 @@ void App::utilPlane(float x, float y, float z){
 		glNormal3f( 0.0f, 0.0f, 1.0f);	// Normal Pointing Towards Viewer
 		glTexCoord2f(0.0f, 0.0f); glVertex3f(-x, -y,  z);	// Point 1 (Front)
 		glTexCoord2f(1.0f, 0.0f); glVertex3f( x, -y,  z);	// Point 2 (Front)
-		glTexCoord2f(1.0f, -1.0f); glVertex3f( x,  y,  z);	// Point 3 (Front)
-		glTexCoord2f(0.0f, -1.0f); glVertex3f(-x,  y,  z);	// Point 4 (Front)		
+		glTexCoord2f(1.0f, 1.0f); glVertex3f( x,  y,  z);	// Point 3 (Front)
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-x,  y,  z);	// Point 4 (Front)		
 	glEnd(); // Done Drawing Quads
 
 	glDisable(GL_DEPTH_TEST);

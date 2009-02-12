@@ -1,114 +1,183 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9.00"
 	Name="windows"
 	ProjectGUID="{9B7B3F0E-AE4E-4707-932F-C5A678474A73}"
-	Keyword="Win32Proj">
+	RootNamespace="windows"
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\Programming\bsod2\src\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib glu32.lib sdl.lib sdlmain.lib devil.lib ilu.lib ilut.lib sdl_ttf.lib libconfuse.lib glew32.lib CEGUIBase.lib OpenGLGUIRenderer.lib sdl_net.lib ws2_32.lib"
 				OutputFile="../runtime/bsod2_debug.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/windows.pdb"
 				SubSystem="1"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				GlobalOptimizations="TRUE"
+				Optimization="3"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="C:\Programming\bsod2\src\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
+				UseLibraryDependencyInputs="false"
 				AdditionalDependencies="opengl32.lib glu32.lib sdl.lib sdlmain.lib devil.lib ilu.lib ilut.lib sdl_ttf.lib libconfuse.lib glew32.lib CEGUIBase.lib OpenGLGUIRenderer.lib sdl_net.lib ws2_32.lib"
 				OutputFile="../runtime/bsod2.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="TRUE"
+				GenerateManifest="true"
+				ManifestFile="$(TargetDir)\$(TargetFileName).intermediate.manifest"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+				EmbedManifest="false"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -117,110 +186,148 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath="..\src\config.cpp">
+				RelativePath="..\src\config.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\flow.cpp">
+				RelativePath="..\src\flow.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\flowmanager.cpp">
+				RelativePath="..\src\flowmanager.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\font.cpp">
+				RelativePath="..\src\font.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\gl_util.cpp">
+				RelativePath="..\src\gl_util.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\gui.cpp">
+				RelativePath="..\src\gui.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\keys.cpp">
+				RelativePath="..\src\keys.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\main.cpp">
+				RelativePath="..\src\main.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\misc.cpp">
+				RelativePath="..\src\misc.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\particles.cpp">
+				RelativePath="..\src\particles.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\ps_classic.cpp">
+				RelativePath="..\src\ps_classic.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\ps_shaders.cpp">
+				RelativePath="..\src\ps_shaders.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\ps_texture.cpp">
+				RelativePath="..\src\ps_texture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\render.cpp">
+				RelativePath="..\src\render.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\shaders.cpp">
+				RelativePath="..\src\shaders.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\socket.cpp">
+				RelativePath="..\src\socket.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\texture.cpp">
+				RelativePath="..\src\texture.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\update.cpp">
+				RelativePath="..\src\update.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\src\win32util.cpp">
+				RelativePath="..\src\win32util.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath="..\src\include\config.h">
+				RelativePath="..\src\include\config.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\flowmanager.h">
+				RelativePath="..\src\include\flowmanager.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\libs.h">
+				RelativePath="..\src\include\libs.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\main.h">
+				RelativePath="..\src\include\main.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\misc.h">
+				RelativePath="..\src\include\misc.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\ps_classic.h">
+				RelativePath="..\src\include\ps_classic.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\ps_interface.h">
+				RelativePath="..\src\include\ps_interface.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\ps_shaders.h">
+				RelativePath="..\src\include\ps_shaders.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\ps_texture.h">
+				RelativePath="..\src\include\ps_texture.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\shader.h">
+				RelativePath="..\src\include\shader.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\texture.h">
+				RelativePath="..\src\include\texture.h"
+				>
 			</File>
 			<File
-				RelativePath="..\src\include\vector.h">
+				RelativePath="..\src\include\vector.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath=".\resource.rc"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

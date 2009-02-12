@@ -1,3 +1,4 @@
+/*
 #ifdef _WINDOWS
 
 //From http://www.suacommunity.com/forum/tm.aspx?m=7904
@@ -28,3 +29,4 @@ extern "C" void _chkstk();
  }
 
 #endif
+ */

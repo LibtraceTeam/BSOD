@@ -57,7 +57,8 @@ struct flow_update_t {
 	float z2;
 	uint32_t id;
 	uint32_t ip1;
-	uint32_t ip2;};
+	uint32_t ip2;
+};
 
 
 //New packet packets
@@ -104,7 +105,8 @@ int packetSizes[] = {	sizeof(flow_update_t), sizeof(pack_update_t),
 						sizeof(flow_remove_t), sizeof(kill_all_t),
 						sizeof(flow_descriptor_t), sizeof(image_data_t) };
 					
-/*********************************************	Sets up the initial networking
+/*********************************************
+	Sets up the initial networking
 **********************************************/	
 bool App::initSocket(){
 	
@@ -268,7 +270,8 @@ void App::updateSocket(){
 	}
 }
 	
-/*********************************************  Update the UDP broadcast socket
+/*********************************************
+  Update the UDP broadcast socket
 **********************************************/
 void App::updateUDPSocket(){
 
@@ -334,7 +337,8 @@ void App::updateUDPSocket(){
     
 }
 	
-/*********************************************  Update the TCP connection with the server
+/*********************************************
+  Update the TCP connection with the server
 **********************************************/
 void App::updateTCPSocket(){
 	

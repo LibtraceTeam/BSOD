@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define SHADER_FPS (1.0f / 10.0f)
+#define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
 map<float, ParticleCollection *>::const_iterator mCurrentCollection;
 	
@@ -37,13 +37,26 @@ bool PSShaders::init(){
 	
 	//This means we can set pointsize in the vertex shader
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-		
-	mCurrentCollection = mParticleCollections.begin();	
-	//If we got this far, it's all good.
-	
+
+	mParticleCollections.clear();
+
+	//If we got this far, it's all good.	
 	LOG("Set up PSShaders!\n");
 	
-	return PSSprites::init();
+	//Now set up the lower levels
+	if(!PSSprites::init()){
+		return false;
+	}
+	
+	//Hack! We need to have at least one particle collection,
+	//so add a particle here. This only appeared to be a problem
+	//on W7. Oh well. 
+	add(Vector3(0,0,0), Vector3(0,0,0), Color(0,0,0), 1.0f, 100.0f);
+
+	//We can now make an iterator
+	mCurrentCollection = mParticleCollections.begin();	
+	
+	return true;
 }
 
 
@@ -54,27 +67,16 @@ bool PSShaders::init(){
 void PSShaders::update(){
 
 	fTime += fTimeScale * App::S()->fParticleSpeedScale;
-	//fUpdateTimer += fTimeScale;
-	
-	//if(fUpdateTimer < SHADER_FPS){
-	//	return;
-	//}
 	
 	if(mParticleCollections.size() == 0){
 		return;
 	}
-	
-	
+		
 	if(mCurrentCollection == mParticleCollections.end()){
 		return;
 	}
-	
-	//float speedScale = App::S()->fParticleSpeedScale * PARTICLE_FPS;
 		
-	updateCollection(mCurrentCollection->second);
-	
-	//fUpdateTimer = 0.0f;
-	
+	updateCollection(mCurrentCollection->second);	
 }
 
 /*********************************************
@@ -159,7 +161,6 @@ void PSShaders::updateCollection(ParticleCollection *collection){
   Render points with the right normal + tex
 **********************************************/
 void PSShaders::renderAll(){
-
 
 	mCurrentCollection++;	
 	if(mCurrentCollection == mParticleCollections.end()){

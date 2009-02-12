@@ -103,5 +103,7 @@ public:
 	bool init();
 	void render();
 	virtual int getType(){return PARTICLE_SYSTEM_POINTSPRITES;}
+
+	virtual ~PSSprites(){}
 };
 

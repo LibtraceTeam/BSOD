@@ -116,11 +116,16 @@ int splitString(const std::string &input, const std::string &delimiter,
     for( int i=0; i <= (int)positions.size(); ++i )
     {
         std::string s("");
+
+		int offset = 0;
+
         if( i == 0 ) 
         { 
             s = input.substr( i, positions[i] ); 
         }
-        int offset = positions[i-1] + sizeS2;
+		else{
+			offset = positions[i-1] + sizeS2;
+		}
         if( offset < isize )
         {
             if( i == (int)positions.size() )

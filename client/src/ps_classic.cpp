@@ -425,7 +425,8 @@ void PSClassic::del(ParticleCollection *col, int i){
 	mFree.push(p);	
 }
 
-/*********************************************	Remove a bunch of particles
+/*********************************************
+	Remove a bunch of particles
 **********************************************/
 void PSClassic::delAll(){
 
@@ -443,7 +444,8 @@ void PSClassic::delAll(){
 }
 
 
-/*********************************************	Toggle showing a colour
+/*********************************************
+	Toggle showing a colour
 **********************************************/
 void PSClassic::showColor(Color c, bool bShow){
 
@@ -458,7 +460,8 @@ void PSClassic::showColor(Color c, bool bShow){
 	}
 }
 
-/*********************************************	Reset internal timestamps
+/*********************************************
+	Reset internal timestamps
 **********************************************/
 void PSClassic::doPeriodicCleanup(){
 	

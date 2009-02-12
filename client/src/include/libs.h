@@ -68,12 +68,12 @@ using std::map;
 /*********************************************
 				SDL*
 **********************************************/
-#include <SDL/SDL.h>
-
 #ifdef _WINDOWS
+#include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_net.h>
 #else
+#include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>

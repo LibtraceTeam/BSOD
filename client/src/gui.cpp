@@ -29,6 +29,7 @@ bool handle_mouse_up(Uint8 button);
 CEGUI::uint SDLKeyToCEGUIKey(SDLKey key);
 
 bool bGuiIsShown = false;
+bool bGlobalGuiEnable = true; //Turn all GUI stuff on and off
 
 
 /*********************************************
@@ -46,6 +47,8 @@ vector<ServerInfo> mServerInfo;
 /*********************************************
 		CEGUI setup - create the UI**********************************************/
 void App::initGUI(){
+
+	if(!bGlobalGuiEnable) return;
 	
 	fGUITimeout = 0.0f; //Start hidden
 
@@ -127,6 +130,7 @@ void App::initGUI(){
 	events off to CEGUI**********************************************/
 bool App::processGUIEvent(SDL_Event e){
 
+	if(!bGlobalGuiEnable) return false;
 	
 	bool handled = false;
 	bool show = false;
@@ -187,6 +191,8 @@ bool App::processGUIEvent(SDL_Event e){
 /*********************************************
 	Called when we click a menu toggle**********************************************/
 bool App::onMenuButtonClicked(const EventArgs &args){
+
+	if(!bGlobalGuiEnable) return false;
 	
 	//Get the control that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
@@ -224,6 +230,9 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 /*********************************************
 	Called when we click a protocol toggle**********************************************/
 bool App::onProtocolClicked(const EventArgs &args){
+	
+	if(!bGlobalGuiEnable) return false;
+
 	//Get the control that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	String senderID = we->window->getName();
@@ -251,6 +260,8 @@ bool App::onProtocolClicked(const EventArgs &args){
 /*********************************************
 	Called when we click a protocol button**********************************************/
 bool App::onProtocolButtonClicked(const EventArgs &args){
+	
+	if(!bGlobalGuiEnable) return false;
 	
 	//Get the object that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
@@ -291,6 +302,8 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 /*********************************************
 			Pops up a dialog box**********************************************/
 void App::messagebox(string text, string title){
+
+	if(!bGlobalGuiEnable) return;
 	
 	DefaultWindow* t = (DefaultWindow *)winMgr->getWindow("txtMessageBox");  	
 	t->setText(text);
@@ -307,6 +320,8 @@ void App::messagebox(string text, string title){
 /*********************************************
 	Called when we click a server button**********************************************/
 bool App::onServerButtonClicked(const EventArgs &args){
+
+	if(!bGlobalGuiEnable) return false;
 	
 	//Get the object that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
@@ -365,6 +380,8 @@ bool App::onServerButtonClicked(const EventArgs &args){
   Called when we click a server list entry**********************************************/
 bool App::onServerListClicked(const EventArgs &args){
 	
+	if(!bGlobalGuiEnable) return false;
+	
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
 		
@@ -389,6 +406,9 @@ bool App::onServerListClicked(const EventArgs &args){
 /*********************************************
 	Called when we click a close button**********************************************/
 bool App::onWndClose(const CEGUI::EventArgs &args){
+	
+	if(!bGlobalGuiEnable) return false;
+
 	//Get the object that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	we->window->hide();
@@ -397,6 +417,8 @@ bool App::onWndClose(const CEGUI::EventArgs &args){
 }
 
 bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
+
+	if(!bGlobalGuiEnable) return false;
 
 	//If CEGUI has changed to a valid image, hide the SDL cursor. This ensures
 	//that we do sensible things when we mouse over edit boxes and such, 
@@ -413,6 +435,9 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 }
 
 bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
+	
+	if(!bGlobalGuiEnable) return false;
+
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	Slider *slide = (Slider *)we->window;
 	
@@ -434,6 +459,9 @@ bool App::onOptionSliderMoved(const CEGUI::EventArgs& args){
 }
 
 bool App::onDarknetCheckboxClicked(const CEGUI::EventArgs &args){
+
+	if(!bGlobalGuiEnable) return false;
+
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	Checkbox *cb = (Checkbox *)we->window;
 	
@@ -449,11 +477,17 @@ bool App::onDarknetCheckboxClicked(const CEGUI::EventArgs &args){
 }
 
 void App::shutdownGUI(){
+
+	if(!bGlobalGuiEnable) return;
+
 	delete CEGUI::System::getSingletonPtr (); 
 	delete mGUI;
 }
 
 void App::resizeGUI(int x, int y){
+
+	if(!bGlobalGuiEnable) return;
+
 	mGUI->restoreTextures();
     mGUI->setDisplaySize(CEGUI::Size(x, y));
 }
@@ -463,6 +497,8 @@ void App::resizeGUI(int x, int y){
 /*********************************************
   Adds a named checkbox to the protocol wnd**********************************************/
 void App::addProtocolEntry(string name, Color col, int index){
+
+	if(!bGlobalGuiEnable) return;
 
 	if(!mProtoWindow){
 		return;
@@ -490,6 +526,8 @@ void App::addProtocolEntry(string name, Color col, int index){
 
 void App::clearProtocolEntries(){
 
+	if(!bGlobalGuiEnable) return;
+
 	for(int i=0;i<255;i++){		
 		if(winMgr->isWindowPresent(toString(i))){
 			winMgr->destroyWindow(toString(i));
@@ -499,7 +537,9 @@ void App::clearProtocolEntries(){
 }
 
 void App::addServerListEntry(string name, string IP, string port){
-
+	
+	if(!bGlobalGuiEnable) return;
+	
 	ServerInfo info;
 	info.name = name;
 	info.ip = IP;
@@ -522,6 +562,9 @@ void App::clearServerList(){
 }
 
 void App::updateGUIConnectionStatus(){
+	
+	if(!bGlobalGuiEnable) return;
+	
 	DefaultWindow* text = (DefaultWindow *)winMgr->getWindow("txtServerInfo");  	
 
 	if(isConnected()){
@@ -543,6 +586,9 @@ void App::updateGUIConnectionStatus(){
 /*********************************************
 	Called as part of render2D**********************************************/
 void App::renderGUI(){
+	
+	if(!bGlobalGuiEnable) return;
+	
 	if(fGUITimeout > 0.0f){
 
 		if(!bGuiIsShown){

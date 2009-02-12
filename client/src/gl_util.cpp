@@ -198,6 +198,7 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 	
 	//Set up GLEW
+	
 	GLenum err = glewInit();
 	if (GLEW_OK != err){
 		ERR("Couldn't start GLEW: %s!\n", glewGetErrorString(err));

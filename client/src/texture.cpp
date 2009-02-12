@@ -69,8 +69,9 @@ Texture *App::texLoad(string name, int flags){
 	}
 	
 	//Windows and Linux don't agree on which way images should be pointing.
+	//Perry: grab a rusty spoon, and decapitate yourself, it's just easier.
 #ifndef _WINDOWS
-	//iluFlipImage();
+	iluFlipImage();
 #endif
 
 		
@@ -143,9 +144,6 @@ bool App::texInit(){
 	
 	ilInit();
 	ilutRenderer(ILUT_OPENGL);
-	
-	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
-	ilEnable(IL_ORIGIN_SET);
 	
 	mLeftTex = mRightTex = NULL;
 	

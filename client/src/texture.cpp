@@ -67,6 +67,10 @@ Texture *App::texLoad(string name, int flags){
 		ERR("error: %s!\n", path.c_str());
 		return NULL;
 	}
+
+	//Set a common origin
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	ilEnable(IL_ORIGIN_SET);
 		
 	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
 			

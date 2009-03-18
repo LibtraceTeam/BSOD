@@ -70,7 +70,7 @@ Texture *App::texLoad(string name, int flags){
 	
 	//Windows and Linux don't agree on which way images should be pointing.
 	//Perry: grab a rusty spoon, and decapitate yourself, it's just easier.
-#ifndef _WINDOWS
+#ifdef _WINDOWS
 	iluFlipImage();
 #endif
 

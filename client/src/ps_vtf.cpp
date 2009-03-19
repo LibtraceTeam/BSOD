@@ -6,9 +6,9 @@
 static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
 	
 /*********************************************
- Start up the PS/VS extensions, load the shader
+ 	Make sure we have VTF and shaders
 **********************************************/
-bool PSShaders::init(){
+bool PSVTF::init(){
 
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
@@ -16,6 +16,18 @@ bool PSShaders::init(){
 		return false;
 	}
 	
+	//And make sure we have at least one VTF texture unit
+	int num = 0;
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB, &num);
+	
+	LOG("We have %d VTF units!\n", num);
+	
+	if(num <= 0){
+		return false;
+	}
+	
+	
+		
 	fUpdateTimer = 0.0f;
 
 	//Now set up the shader
@@ -23,8 +35,8 @@ bool PSShaders::init(){
 	char line[256];	
 
 	//Load the shader text
-	std::ifstream vs_file("data/shaders/ps.vert");
-		
+	std::ifstream vs_file("data/shaders/ps_vtf.vert");
+	
 	if(vs_file.fail()){
 		return false;
 	}
@@ -46,7 +58,7 @@ bool PSShaders::init(){
 	mParticleCollections.clear();
 
 	//If we got this far, it's all good.	
-	LOG("Set up PSShaders!\n");
+	LOG("Set up PSVTF!\n");
 	
 	//Now set up the lower levels
 	if(!PSSprites::init()){
@@ -69,7 +81,7 @@ bool PSShaders::init(){
 /*********************************************
  Update the particles life, expire as necessary
 **********************************************/
-void PSShaders::update(){
+void PSVTF::update(){
 
 	fTime += fTimeScale * App::S()->fParticleSpeedScale;
 	
@@ -87,8 +99,7 @@ void PSShaders::update(){
 /*********************************************
 	Render the display list as necessary
 **********************************************/
-void PSShaders::render(){
-
+void PSVTF::render(){
 
 	if(mParticleCollections.size() == 0){
 		return;
@@ -104,13 +115,7 @@ void PSShaders::render(){
 	
 	mShader.bindResource("fTime", &fTime, 1);
 	mShader.bindResource("fSlabOffset", &planeDist, 1);
-	
-	//Render whichever we're up to
-	renderAll();
-	
-	//And end its list
-	glEndList();	
-	
+		
 	iNumActive = 0;
 	
 	//Now go through and call all the various display lists
@@ -133,7 +138,7 @@ void PSShaders::render(){
 /*********************************************
   Update an individual collection
 **********************************************/
-void PSShaders::updateCollection(ParticleCollection *collection){
+void PSVTF::updateCollection(ParticleCollection *collection){
 
 	if(!collection){	
 		return;
@@ -165,7 +170,7 @@ void PSShaders::updateCollection(ParticleCollection *collection){
 /*********************************************
   Render points with the right normal + tex
 **********************************************/
-void PSShaders::renderAll(){
+void PSVTF::renderAll(){
 
 	mCurrentCollection++;	
 	if(mCurrentCollection == mParticleCollections.end()){
@@ -239,7 +244,7 @@ void PSShaders::renderAll(){
 /*********************************************
 	Kill the shader and the list
 **********************************************/
-void PSShaders::shutdown(){
+void PSVTF::shutdown(){
 	
 	mShader.dispose();
 	//glDeleteLists(mDisplayList, 1);

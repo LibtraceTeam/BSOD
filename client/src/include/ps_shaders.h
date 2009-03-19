@@ -30,3 +30,30 @@ public:
 	int getType(){return PARTICLE_SYSTEM_SHADERS;}
 };
 
+/*********************************************
+ Another shader based particle system. This
+ uses VTF (Vertex Texture Fetch) to lower the
+ upload bottleneck. 
+**********************************************/
+class PSVTF : public PSSprites{
+protected:			
+	Shader mShader;
+	float fUpdateTimer;
+	float fRenderTimer;
+	//uint32_t mDisplayList;	
+		
+	void renderAll();
+	
+	void updateCollection(ParticleCollection *collection);
+	
+public:
+	bool init();	
+			
+	//Common particle system operations	
+	void update();		
+	void shutdown();
+	void render();		
+
+	int getType(){return PARTICLE_SYSTEM_VTF;}
+};
+

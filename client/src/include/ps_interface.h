@@ -10,6 +10,7 @@
 #define PARTICLE_SYSTEM_POINTSPRITES 	2
 #define PARTICLE_SYSTEM_SHADERS 		3
 #define PARTICLE_SYSTEM_TEXTURE			4
+#define PARTICLE_SYSTEM_VTF				5
 
 /*********************************************
 		Particle system interface

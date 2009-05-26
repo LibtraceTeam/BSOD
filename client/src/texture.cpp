@@ -2,8 +2,6 @@
 
 #define ILUT_USE_OPENGL
 
-#include <direct.h>
-
 //DevIL
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -49,8 +47,11 @@ static ILuint makeImage(){
 **********************************************/
 Texture *App::texLoad(string name, int flags){
 
+#ifdef _WINDOWS
 	string path = "data\\" + name;
-	//string cwd = string(getcwd(NULL, 0));
+#else
+	string path = "data/" + name;	
+#endif
 	
 	LOG("Loading '%s'...", path.c_str());
 

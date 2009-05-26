@@ -82,6 +82,9 @@ class App{
 	
 	//render.cpp
 	string mStatusString;			//timestamp + server name
+
+	//Texture flipping options
+	bool bTexFlip;
 	
 		
 /*********************************************

@@ -81,6 +81,12 @@ Texture *App::texLoad(string name, int flags){
 	iluFlipImage();
 #endif
 
+	//OK, so we've flipped it dependent on platform already. Now if
+	//necessary we flip *again*, to observe what the user wants. 
+	if(bTexFlip){
+		iluFlipImage();
+	}
+
 		
 	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
 			

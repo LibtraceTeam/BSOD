@@ -9,9 +9,9 @@ bool App::loadConfig(){
 		CFG_STR("LeftTex", "", CFGF_NONE),
 		CFG_STR("RightTex", "", CFGF_NONE),
 		CFG_INT("Port", 54567, CFGF_NONE),
-		CFG_INT("ResX", 1024, CFGF_NONE),
-		CFG_INT("ResY", 768, CFGF_NONE),
-		CFG_INT("Fullscreen", 0, CFGF_NONE),
+		CFG_INT("ResX", 0, CFGF_NONE),
+		CFG_INT("ResY", 0, CFGF_NONE),
+		CFG_INT("Fullscreen", 1, CFGF_NONE),
 		CFG_FLOAT("ParticleSizeScale", 1.0f, CFGF_NONE),
 		CFG_FLOAT("ParticleSpeedScale", 1.0f, CFGF_NONE),
 		CFG_INT("ParticleMethod", PARTICLE_SYSTEM_UNSPECIFIED, CFGF_NONE),
@@ -20,6 +20,7 @@ bool App::loadConfig(){
 		CFG_INT("Fullscreen", 0, CFGF_NONE),
 		CFG_INT("ShowDarknet", 1, CFGF_NONE),
 		CFG_INT("ShowNonDarknet", 1, CFGF_NONE),
+		CFG_INT("FlipTextures", 0, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -43,6 +44,7 @@ bool App::loadConfig(){
 	mRightTexName = string(cfg_getstr(cfg, "RightTex"));
 	bShowDarknet = cfg_getint(cfg, "ShowDarknet");
 	bShowNonDarknet = cfg_getint(cfg, "ShowNonDarknet");
+	bTexFlip = cfg_getint(cfg, "FlipTextures");
 	
 	cfg_free(cfg);
 	

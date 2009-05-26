@@ -129,6 +129,14 @@ Texture *App::texGenerate(string name, byte *buffer, int buflen){
 		ERR("error!\n");
 		return NULL;
 	}
+	
+#ifndef _WINDOWS
+	iluFlipImage();
+#endif
+	
+	if(bTexFlip){
+		iluFlipImage();
+	}
 					
 	tex->iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);

@@ -34,7 +34,8 @@ The binary will be created in the 'runtime' folder. Run it from that location.
 Windows build instructions: 
 ---------------------------
 
-A Visual Studio 2003 solution is in the 'windows' folder. 
+A Visual Studio 2008 solution is in the 'windows' folder. It may need adjusting
+to set paths for your computer. 
 
 
 

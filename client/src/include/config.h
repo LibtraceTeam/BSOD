@@ -27,7 +27,7 @@
 #define UDP_PORT_RANGE 5
 
 //Displayed in the options window
-#define CLIENT_VERSION "2.0.0"
+#define CLIENT_VERSION "2.0.1"
 
 //The time between particle system cleanups
 #define CLEANUP_TIMER (60.0f * 60.0f); //an hour

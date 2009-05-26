@@ -123,7 +123,7 @@ int splitString(const std::string &input, const std::string &delimiter,
         { 
             s = input.substr( i, positions[i] ); 
         }
-		else{
+		else if(i > 0){
 			offset = positions[i-1] + sizeS2;
 		}
         if( offset < isize )

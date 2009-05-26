@@ -2,6 +2,8 @@
 
 #define ILUT_USE_OPENGL
 
+#include <direct.h>
+
 //DevIL
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -47,7 +49,8 @@ static ILuint makeImage(){
 **********************************************/
 Texture *App::texLoad(string name, int flags){
 
-	string path = "data/" + name;	
+	string path = "data\\" + name;
+	//string cwd = string(getcwd(NULL, 0));
 	
 	LOG("Loading '%s'...", path.c_str());
 
@@ -66,15 +69,16 @@ Texture *App::texLoad(string name, int flags){
 	
 	//Load the data	
 	if(!ilLoadImage((char *)path.c_str())){
-		ERR("error: %s!\n", path.c_str());
+		int err = ilGetError();
+		ERR("error: %s, %d!\n", path.c_str(), err);
 		return NULL;
 	}
 	
 	//Windows and Linux don't agree on which way images should be pointing.
 	//Perry: grab a rusty spoon, and decapitate yourself, it's just easier.
-//#ifdef _WINDOWS
+#ifndef _WINDOWS
 	iluFlipImage();
-//#endif
+#endif
 
 		
 	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
@@ -152,12 +156,9 @@ bool App::texInit(){
 	//preload any common textures here
 	mTextures.clear();
 	
-	string initialTextures[] = {"wm.png", 
-								"ticked.png", 
-								"unticked.png", 
-								"particle.bmp"};
+	string initialTextures[] = {"particle.bmp"};
 	
-	for(int i=0;i<4;i++){
+	for(int i=0;i<1;i++){
 		if(!texLoad(initialTextures[i], 0)){
 			return false;
 		}

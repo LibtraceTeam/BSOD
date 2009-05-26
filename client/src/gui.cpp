@@ -13,7 +13,8 @@ using namespace CEGUI;
 
 
 /*********************************************
-	CEGUI components**********************************************/
+	CEGUI components
+**********************************************/
 OpenGLRenderer*mGUI = NULL;
 DefaultWindow *root = NULL;
 WindowManager *winMgr = NULL;
@@ -33,7 +34,8 @@ bool bGlobalGuiEnable = true; //Turn all GUI stuff on and off
 
 
 /*********************************************
-	Server list stuff**********************************************/
+	Server list stuff
+**********************************************/
 class ServerInfo{
 public:
 	string name;
@@ -45,7 +47,8 @@ vector<ServerInfo> mServerInfo;
 
 
 /*********************************************
-		CEGUI setup - create the UI**********************************************/
+		CEGUI setup - create the UI
+**********************************************/
 void App::initGUI(){
 
 	if(!bGlobalGuiEnable) return;
@@ -127,7 +130,8 @@ void App::initGUI(){
 
 /*********************************************
 	Called by the SDL event loop to pass
-	events off to CEGUI**********************************************/
+	events off to CEGUI
+**********************************************/
 bool App::processGUIEvent(SDL_Event e){
 
 	if(!bGlobalGuiEnable) return false;
@@ -189,7 +193,8 @@ bool App::processGUIEvent(SDL_Event e){
 }
 
 /*********************************************
-	Called when we click a menu toggle**********************************************/
+	Called when we click a menu toggle
+**********************************************/
 bool App::onMenuButtonClicked(const EventArgs &args){
 
 	if(!bGlobalGuiEnable) return false;
@@ -228,7 +233,8 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 
 
 /*********************************************
-	Called when we click a protocol toggle**********************************************/
+	Called when we click a protocol toggle
+**********************************************/
 bool App::onProtocolClicked(const EventArgs &args){
 	
 	if(!bGlobalGuiEnable) return false;
@@ -258,7 +264,8 @@ bool App::onProtocolClicked(const EventArgs &args){
 }
 
 /*********************************************
-	Called when we click a protocol button**********************************************/
+	Called when we click a protocol button
+**********************************************/
 bool App::onProtocolButtonClicked(const EventArgs &args){
 	
 	if(!bGlobalGuiEnable) return false;
@@ -300,7 +307,8 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 }
 
 /*********************************************
-			Pops up a dialog box**********************************************/
+			Pops up a dialog box
+**********************************************/
 void App::messagebox(string text, string title){
 
 	if(!bGlobalGuiEnable) return;
@@ -318,7 +326,8 @@ void App::messagebox(string text, string title){
 }
 
 /*********************************************
-	Called when we click a server button**********************************************/
+	Called when we click a server button
+**********************************************/
 bool App::onServerButtonClicked(const EventArgs &args){
 
 	if(!bGlobalGuiEnable) return false;
@@ -377,7 +386,8 @@ bool App::onServerButtonClicked(const EventArgs &args){
 }
 
 /*********************************************
-  Called when we click a server list entry**********************************************/
+  Called when we click a server list entry
+**********************************************/
 bool App::onServerListClicked(const EventArgs &args){
 	
 	if(!bGlobalGuiEnable) return false;
@@ -404,7 +414,8 @@ bool App::onServerListClicked(const EventArgs &args){
 }
 
 /*********************************************
-	Called when we click a close button**********************************************/
+	Called when we click a close button
+**********************************************/
 bool App::onWndClose(const CEGUI::EventArgs &args){
 	
 	if(!bGlobalGuiEnable) return false;
@@ -495,7 +506,8 @@ void App::resizeGUI(int x, int y){
 
 
 /*********************************************
-  Adds a named checkbox to the protocol wnd**********************************************/
+  Adds a named checkbox to the protocol wnd
+**********************************************/
 void App::addProtocolEntry(string name, Color col, int index){
 
 	if(!bGlobalGuiEnable) return;
@@ -584,7 +596,8 @@ void App::updateGUIConnectionStatus(){
 
 
 /*********************************************
-	Called as part of render2D**********************************************/
+	Called as part of render2D
+**********************************************/
 void App::renderGUI(){
 	
 	if(!bGlobalGuiEnable) return;
@@ -622,7 +635,8 @@ void App::renderGUI(){
 
 /*********************************************
 	  Make the buttons down the bottom
-	  of the screen.**********************************************/
+	  of the screen.
+**********************************************/
 void App::makeMenuButtons(){
  		
 	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnServers"));
@@ -652,7 +666,8 @@ void App::makeMenuButtons(){
 
 
 /*********************************************
-	Creates the protocol toggle window**********************************************/
+	Creates the protocol toggle window
+**********************************************/
 void App::makeProtocolWindow(){
 	          
     mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndProtocol");
@@ -698,7 +713,8 @@ void App::makeProtocolWindow(){
 
 
 /*********************************************
-	Creates the message box window**********************************************/
+	Creates the message box window
+**********************************************/
 void App::makeMessageWindow(){
 	mMessageWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndMessage");
     root->addChildWindow(mMessageWindow);
@@ -736,7 +752,8 @@ void App::makeMessageWindow(){
 
 
 /*********************************************
-	Creates the server browser window**********************************************/
+	Creates the server browser window
+**********************************************/
 void App::makeServerWindow(){
 	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpace/FrameWindow", "wndServer");
     root->addChildWindow(mServerWindow);
@@ -822,7 +839,8 @@ void App::makeServerWindow(){
 
 
 /*********************************************
-	Creates the options window**********************************************/
+	Creates the options window
+**********************************************/
 void App::makeOptionWindow(){
           
     mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndOption");
@@ -915,7 +933,8 @@ void App::makeOptionWindow(){
 
 /*********************************************
 	SDL mouse and key event translation stuff
-	Stolen from the CEGUI wiki**********************************************/
+	Stolen from the CEGUI wiki
+**********************************************/
 bool handle_mouse_down(Uint8 button)
 {
 	bool ret = false;

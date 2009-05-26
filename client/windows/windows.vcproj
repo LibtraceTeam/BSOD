@@ -122,7 +122,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="C:\Programming\bsod2\src\include"
+				AdditionalIncludeDirectories="&quot;C:\Users\paul\Documents\Visual Studio 2008\Projects\client\src\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -304,6 +304,10 @@
 			</File>
 			<File
 				RelativePath="..\src\include\ps_texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File

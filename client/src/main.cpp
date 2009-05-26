@@ -24,7 +24,7 @@ int App::init(App *a, int argc, char **argv){
 	bConnected = false;
 	done = false;
 	
-	iCurrentTime = 325325455;
+	iCurrentTime = 0;
 
 	mParticleSystem = NULL;
 	mFlowMgr = NULL;
@@ -96,8 +96,14 @@ int App::init(App *a, int argc, char **argv){
 	resetCam();
 	
 	//gui
-	initGUI();
-				
+	try{
+		initGUI();
+	}
+	catch(...) { 
+		ERR("Caught CEGUI exception, bailing out!\n");
+		return 0;
+	}
+			
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
 	fUptime = 0.0f;
@@ -143,7 +149,6 @@ void App::utilShutdown( int r )
 	//Shut down the particle system
 	if(mParticleSystem){
 		mParticleSystem->shutdown();
-		delete mParticleSystem;
 	}
 	
 	shutdownGUI();

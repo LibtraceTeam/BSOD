@@ -1,5 +1,7 @@
 #include "main.h"
 
+#define ILUT_USE_OPENGL
+
 //DevIL
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -70,9 +72,9 @@ Texture *App::texLoad(string name, int flags){
 	
 	//Windows and Linux don't agree on which way images should be pointing.
 	//Perry: grab a rusty spoon, and decapitate yourself, it's just easier.
-#ifdef _WINDOWS
+//#ifdef _WINDOWS
 	iluFlipImage();
-#endif
+//#endif
 
 		
 	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);

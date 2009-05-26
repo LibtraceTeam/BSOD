@@ -23,6 +23,8 @@ int App::init(App *a, int argc, char **argv){
 	srand(time(0));
 	bConnected = false;
 	done = false;
+	
+	iCurrentTime = 325325455;
 
 	mParticleSystem = NULL;
 	mFlowMgr = NULL;

@@ -158,7 +158,8 @@ bool PSClassic::init(){
 	bNeedRecompile = true;
 	mDisplayList = glGenLists(1);
 	
-	mTexture = App::S()->texGet("particle.bmp");	
+	mTexture = App::S()->mParticleTex;
+	
 	if(!mTexture){
 		return false;
 	}

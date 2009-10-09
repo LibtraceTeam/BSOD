@@ -8,6 +8,7 @@ bool App::loadConfig(){
 		CFG_STR("Server", "", CFGF_NONE),
 		CFG_STR("LeftTex", "", CFGF_NONE),
 		CFG_STR("RightTex", "", CFGF_NONE),
+		CFG_STR("ParticleTextureName", "particle.bmp", CFGF_NONE),
 		CFG_INT("Port", 54567, CFGF_NONE),
 		CFG_INT("ResX", 0, CFGF_NONE),
 		CFG_INT("ResY", 0, CFGF_NONE),
@@ -45,6 +46,7 @@ bool App::loadConfig(){
 	bShowDarknet = cfg_getint(cfg, "ShowDarknet");
 	bShowNonDarknet = cfg_getint(cfg, "ShowNonDarknet");
 	bTexFlip = cfg_getint(cfg, "FlipTextures");
+	mParticleTexName = string(cfg_getstr(cfg, "ParticleTextureName"));
 	
 	cfg_free(cfg);
 	

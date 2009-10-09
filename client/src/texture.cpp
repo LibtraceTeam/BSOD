@@ -171,6 +171,7 @@ bool App::texInit(){
 	//preload any common textures here
 	mTextures.clear();
 	
+	/*
 	string initialTextures[] = {"particle.bmp"};
 	
 	for(int i=0;i<1;i++){
@@ -178,6 +179,7 @@ bool App::texInit(){
 			return false;
 		}
 	}
+	*/
 	
 	if(mLeftTexName != ""){
 		mLeftTex = texLoad(mLeftTexName, 0);
@@ -191,6 +193,13 @@ bool App::texInit(){
 		if(!mRightTex){
 			return false;
 		}
+	}
+	
+	mParticleTex = texLoad(mParticleTexName, 0);
+	
+	if(!mParticleTex){
+		LOG("Couldn't load particle texture '%s'\n", mParticleTexName.c_str());
+		return false;
 	}
 	
 	texLoad("banner.png", 0);

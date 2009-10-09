@@ -266,13 +266,15 @@ public:
 	int iDropPacketThresh; //The FPS that we start to discard packets below
 	int iDropFlowThresh; //The FPS that we start to discard flows below
 		
-	//The textures for the left and right slabs
+	//The textures for various things
 	Texture *mLeftTex;
 	Texture *mRightTex;
+	Texture *mParticleTex;
 	
-	//The client-side overrides for the left and right textures
+	//The client-side overrides for the textures
 	string mLeftTexName;
 	string mRightTexName;
+	string mParticleTexName;
 	
 	//Darknet
 	bool bShowDarknet;

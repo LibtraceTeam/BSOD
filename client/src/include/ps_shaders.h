@@ -57,3 +57,15 @@ public:
 	int getType(){return PARTICLE_SYSTEM_VTF;}
 };
 
+
+/*********************************************
+ A particle system that does rotation to make
+ fish look nice. No, really. Blame phrogs.
+**********************************************/
+class PSDirectional : public PSShaders{
+public:
+	bool init();	
+		
+	int getType(){return PARTICLE_SYSTEM_DIRECTIONAL;}
+};
+

@@ -45,6 +45,8 @@ bool App::initParticleSystem(){
 			mParticleSystem = new PSTexture;
 	//else if(iParticleMethod == PARTICLE_SYSTEM_VTF)			
 	//		mParticleSystem = new PSVTF;
+	else if(iParticleMethod == PARTICLE_SYSTEM_DIRECTIONAL)			
+			mParticleSystem = new PSDirectional;
 	else{
 		LOG("Bad particle method %d (must be 0-5)\n", iParticleMethod);
 		return false;

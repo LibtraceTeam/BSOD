@@ -2,6 +2,7 @@
 
 Shader::Shader(){
 	mVert = mFrag = 0;
+	bIsCompiled = false;
 }
 
 bool Shader::addFragment(string text){
@@ -69,6 +70,7 @@ bool Shader::compile(){
 	}
 	
 	//Log::debug("Compiled shader!\n");
+	bIsCompiled = true;
 	
 	return true;		
 }

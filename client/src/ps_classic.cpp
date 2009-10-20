@@ -436,9 +436,8 @@ void PSClassic::delAll(){
 		itr != mParticleCollections.end(); ++itr){				
 		ParticleCollection *collection = itr->second;		
 		
-		for(int i=0;i<collection->mParticles.size();i++){
-			del(collection, i);
-			i--;
+		while(collection->mParticles.size() > 0){
+			del(collection, 0);
 		}
 	}
 	

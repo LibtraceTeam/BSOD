@@ -4,6 +4,26 @@
 #define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
 static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
+
+//util function
+string readfile(const char *filename){
+	string vs = "";
+	char line[256];	
+
+	//Load the shader text
+	std::ifstream vs_file(filename);
+	
+	if(vs_file.fail()){
+		LOG("Couldn't open file: '%s'\n", filename);
+		return "";
+	}
+
+	while(!vs_file.eof()){
+		vs_file.getline(line, 256);
+		vs += string(line) + "\n";
+	}
+	return vs;
+}
 	
 /*********************************************
  Start up the PS/VS extensions, load the shader
@@ -18,27 +38,20 @@ bool PSShaders::init(){
 	
 	fUpdateTimer = 0.0f;
 
-	//Now set up the shader
-	string vs = "";
-	char line[256];	
-
-	//Load the shader text
-	std::ifstream vs_file("data/shaders/ps.vert");
-		
-	if(vs_file.fail()){
-		return false;
-	}
+	//We can get here and have an already-compiled shader object if we have 
+	//been called by someone who extends us and has already loaded shaders
+	//ie: if we're a PSDirectional. In this case we don't want to wipe their
+	//shaders, that would be rude. 
+	if(!mShader.isCompiled()){	
 	
-	while(!vs_file.eof()){
-		vs_file.getline(line, 256);
-		vs += string(line) + "\n";
-	}
+		string vs = readfile("data/shaders/ps.vert");
 
-	//Set up the shader object
-	if(!mShader.addVertex(vs)) return false;
-	//if(!mShader.addFragment(fs)) return false;
+		//Set up the shader object
+		if(!mShader.addVertex(vs)) return false;
+		//if(!mShader.addFragment(fs)) return false;
 	
-	if(!mShader.compile()) return false;
+		if(!mShader.compile()) return false;
+	}
 	
 	//This means we can set pointsize in the vertex shader
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -201,6 +214,9 @@ void PSShaders::renderAll(){
 	glEnable(GL_BLEND);							
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glBlendFunc(GL_ONE, GL_ONE);	
+	
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 		
 	//Scaling	
 	float scale = setSizeScale();							
@@ -255,5 +271,36 @@ void PSShaders::shutdown(){
 	}
 	
 	PSSprites::shutdown();
+}
+
+
+
+/*********************************************
+	
+**********************************************/
+bool PSDirectional::init(){
+
+	//First make sure that we have shader support at all
+	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
+		LOG("No GL_ARB_*_program\n");
+		return false;
+	}
+	
+	fUpdateTimer = 0.0f;
+
+	//Now set up the shader if necessary
+	if(!mShader.isCompiled()){	
+		
+		string vs = readfile("data/shaders/directional.vert");
+		string fs = readfile("data/shaders/directional.frag");
+
+		//Set up the shader object
+		if(!mShader.addVertex(vs)) return false;
+		if(!mShader.addFragment(fs)) return false;
+	
+		if(!mShader.compile()) return false;	
+	}	
+	
+	return PSShaders::init();
 }
 

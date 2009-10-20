@@ -10,6 +10,8 @@ class Shader{
 	
 	string mFragText, mVertText;
 	
+	bool bIsCompiled;
+	
 public:
 	Shader();
 
@@ -25,5 +27,7 @@ public:
 	void bindResource(const char *name, float *data, int count);
 	
 	unsigned int getProgram(){return mProgram;}
+	
+	bool isCompiled(){return bIsCompiled;}
 };
 

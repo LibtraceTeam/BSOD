@@ -11,8 +11,12 @@ void App::utilBeginRender(){
 	
 	float ar = (float)iScreenX / (float)iScreenY;
 
+#ifdef ENABLE_CGL_COMPAT
+	glViewport( 0, 0, ( GLsizei )iScreenX, ( GLsizei )iScreenY );
+#else
 	gluPerspective(70.0f,ar,0.5f,1000.0f);
-	
+#endif
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
@@ -29,6 +33,7 @@ void App::utilEndRender(){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
+#ifndef ENABLE_CGL_COMPAT	
 	//Make it ortho
 	//(0,0) == top-left
 	glOrtho(0, iScreenX, iScreenY, 0, 0, 1);
@@ -39,6 +44,7 @@ void App::utilEndRender(){
 
 	//now in 2D mode
 	render2D();
+#endif
 			
 	SDL_GL_SwapBuffers( );
 }
@@ -67,7 +73,10 @@ int App::resizeWindow( int width, int height )
 	
 	//Set our perspective
 //	gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
+
+#ifndef ENABLE_CGL_COMPAT
 	gluPerspective(90.0f,ratio,1.0f,10000.0f);
+#endif
 
 	// Make sure we're chaning the model view and not the projection 
 	glMatrixMode( GL_MODELVIEW );

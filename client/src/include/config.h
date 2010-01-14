@@ -5,6 +5,7 @@
  file options. 
 *******************************************************************************/
 
+//#define ENABLE_CGL_COMPAT //for running under clustergl
 #define ENABLE_GUI //comment out to not require CEGUI
 #define DEFAULT_PORT 34567
 #define CONFIG_FILE "bsod2.cfg"

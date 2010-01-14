@@ -96,6 +96,7 @@ int App::init(App *a, int argc, char **argv){
 	resetCam();
 	
 	//gui
+#ifdef ENABLE_GUI
 	try{
 		initGUI();
 	}
@@ -103,6 +104,7 @@ int App::init(App *a, int argc, char **argv){
 		ERR("Caught CEGUI exception, bailing out!\n");
 		return 0;
 	}
+#endif
 			
 	//Current time
 	iLastFrameTicks = SDL_GetTicks();
@@ -151,7 +153,9 @@ void App::utilShutdown( int r )
 		mParticleSystem->shutdown();
 	}
 	
+#ifdef ENABLE_GUI
 	shutdownGUI();
+#endif
 	
 	LOG("Freeing textures\n");
 		   

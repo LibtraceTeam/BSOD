@@ -170,9 +170,11 @@ void App::utilEventLoop(){
 	    
 	    	//Hand the event off to the GUI first. If the GUI handles it, it's
 	    	//done. 
+#ifdef ENABLE_GUI
 	    	if(processGUIEvent(event)){
 	    		continue;
 	    	}
+#endif
 	    
 		    switch( event.type ){
 						      
@@ -186,7 +188,9 @@ void App::utilEventLoop(){
 				    notifyShutdown();
 				}
 			    resizeWindow( event.resize.w, event.resize.h );
+#ifdef ENABLE_GUI
 			    resizeGUI( event.resize.w, event.resize.h );
+#endif
 			    break;
 			
 			case SDL_QUIT:

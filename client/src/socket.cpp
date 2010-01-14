@@ -199,7 +199,9 @@ bool App::openSocket(){
     bConnected = true;
     
     //Set the 'connected to server' text
+#ifdef ENABLE_GUI
     updateGUIConnectionStatus();
+#endif
     
     //Set the original orientation and such
     resetCam();
@@ -214,11 +216,13 @@ void App::beginDiscovery(){
 	
 	//Clear udp data
 	for(int i=0;i<512;i++){
-		mUDPPacket->data[i] = NULL;
+		mUDPPacket->data[i] = 0;
 	}
-		
+
+#ifdef ENABLE_GUI
 	//Remove old entries
 	clearServerList(); 
+#endif
 	
 	iCurrentUDPPort = UDP_SERVER_PORT;
 	
@@ -295,7 +299,7 @@ void App::updateUDPSocket(){
 	string remoteData = string((char *)mUDPPacket->data);   
 
 	for(int i=0;i<512;i++){
-		mUDPPacket->data[i] = NULL;
+		mUDPPacket->data[i] = 0;
 	}
 			
 	vector<string> split;
@@ -325,7 +329,9 @@ void App::updateUDPSocket(){
 	//LOG("Got %s\n", name.c_str());
 	
 	//And add it to the GUI				
+#ifdef ENABLE_GUI
 	addServerListEntry(name, remoteIP, port);
+#endif
 	
 	//Send out some more broadcasts. We want to make sure that we have sent 
 	//replyPort + 5. 	
@@ -558,13 +564,17 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     mFlowDescriptors[id] = f;
     
     //Add this to the GUI
+#ifdef ENABLE_GUI
     addProtocolEntry(name, c, id);
+#endif
 }
 
 void App::clearFlowDescriptors(){
 	
 	//Remove the GUI checkboxes
+#ifdef ENABLE_GUI
 	clearProtocolEntries();
+#endif
 	
 	for(map<byte, FlowDescriptor *>::const_iterator it = 
 		mFlowDescriptors.begin(); 
@@ -614,8 +624,8 @@ void App::disconnect(bool notify){
 	
 	ps()->delAll();
 	
+#ifdef ENABLE_GUI
 	updateGUIConnectionStatus();		
-	
 	clearFlowDescriptors();
 		
 	if(notify){
@@ -624,6 +634,7 @@ void App::disconnect(bool notify){
 						toString(iServerPort), 
 						"Disconnected");
 	}
+#endif
 }
 
 /*********************************************

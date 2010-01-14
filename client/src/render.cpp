@@ -131,6 +131,9 @@ void App::render2D(){
 	ps()->render2D();
 	
 	//Render the GUI
+
+#ifdef ENABLE_GUI
 	renderGUI();	
+#endif
 			
 }

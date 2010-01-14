@@ -1,5 +1,7 @@
 #include "main.h"
 
+#ifdef ENABLE_GUI
+
 //There are some nasty issues with this file pulling in gl.h and conflicting
 //with glew.h, so we have it #included here instead of in libs.h
 #include "RendererModules/OpenGLGUIRenderer/openglrenderer.h"
@@ -1101,3 +1103,4 @@ bool handle_mouse_up(Uint8 button)
      return 0;
  }
 
+#endif

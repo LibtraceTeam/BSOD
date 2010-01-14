@@ -144,6 +144,7 @@ class App{
 	bool loadConfig();			//Loads bsod2.cfg using libconfuse
 	
 	//gui.cpp	
+#ifdef ENABLE_GUI
 	void initGUI();				//Sets up CEGUI and makes the BSOD GUI
 	void renderGUI();			//Renders the GUI to the 2D screen
 	void shutdownGUI();
@@ -175,6 +176,7 @@ class App{
 	bool onServerButtonClicked(const CEGUI::EventArgs&);
 	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
 	bool onDarknetCheckboxClicked(const CEGUI::EventArgs&);
+#endif
 	
 	//Flow descriptors
 	void addFlowDescriptor(byte id, Color c, string name);
@@ -289,6 +291,9 @@ public:
 **********************************************/
 
 //Logging funcs (misc.cpp)
+extern void openLog(string filename);
+extern void closeLog(string filename);
+
 extern void LOG(const char *fmt, ...);
 extern void ERR(const char *fmt, ...);
 extern void WARN(const char *fmt, ...);

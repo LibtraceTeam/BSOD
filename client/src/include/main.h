@@ -292,7 +292,7 @@ public:
 
 //Logging funcs (misc.cpp)
 extern void openLog(string filename);
-extern void closeLog(string filename);
+extern void closeLog();
 
 extern void LOG(const char *fmt, ...);
 extern void ERR(const char *fmt, ...);

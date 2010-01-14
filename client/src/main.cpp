@@ -10,6 +10,8 @@ float fParticleFPS = 0.025;
 **********************************************/
 int App::init(App *a, int argc, char **argv){
 
+	openLog("bsod.log");
+
 	mSingleton = a;
 	mFlowMgr = NULL;
 
@@ -171,6 +173,8 @@ void App::utilShutdown( int r )
 	
 	//This will ensure we break out of the eventloop
 	done = true;    
+	
+	closeLog();
 	
 	//Shut down SDL
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);

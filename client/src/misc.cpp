@@ -17,9 +17,6 @@ void Color::copy(Color *c){
 	b = c->b;
 }
 
-/*********************************************
-			Random numbers
-**********************************************/
 int App::randInt(int low, int high){
 	return rand() % (high-low) + low;
 }
@@ -34,6 +31,21 @@ float App::randFloat(float min, float max){
 
 static char message[512];
 
+
+/*********************************************
+			Logging system
+**********************************************/
+
+std::ofstream mLogFile;
+
+void openLog(string filename){
+	mLogFile.open(filename.c_str());
+}
+
+void closeLog(){
+	mLogFile.close();
+} 
+
 void LOG(const char *fmt, ...){
   	va_list args;
     va_start(args, fmt);
@@ -43,7 +55,9 @@ void LOG(const char *fmt, ...){
    // mConsole->write(CONSOLE_COLOR_NORMAL, message);
     
     printf("%s", message);
-
+    
+    mLogFile << message;
+	mLogFile.flush();
 }
 
 void ERR(const char *fmt, ...){
@@ -55,6 +69,9 @@ void ERR(const char *fmt, ...){
    // mConsole->write(CONSOLE_COLOR_ERR, message);
     
     printf("ERR: %s", message);
+    
+    mLogFile << "ERR: " << message;
+	mLogFile.flush();
 
 }
 
@@ -68,6 +85,8 @@ void WARN(const char *fmt, ...){
     
     printf("WARN: %s", message);
 
+    mLogFile << "WARN: " << message;
+	mLogFile.flush();
 }
 
 

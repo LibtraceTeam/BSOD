@@ -7,13 +7,14 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+#include "config.h"
+
 //Pull in standard libraries
 #include "libs.h"
 
 /*********************************************
 		 Internal headers
 **********************************************/
-#include "config.h"
 #include "vector.h"
 #include "misc.h"
 #include "texture.h"

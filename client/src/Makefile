@@ -13,7 +13,7 @@ OBJS := $(patsubst %.cpp, %.o, $(SOURCES))
 DEPS := $(wildcard include/*.h) 
 
 #compiler-type things
-CXXFLAGS=-Iinclude `pkg-config --cflags CEGUI` -O3 -W -Wextra -g -pg
+CXXFLAGS=-Iinclude `pkg-config --cflags CEGUI` -O3 -Wall
 LDFLAGS=-L../lib/ -lGL -lGLU `sdl-config --cflags --libs` -lIL -lILU -lILUT -lSDL_ttf -lSDL_net -lconfuse -lGLEW `pkg-config --libs CEGUI-OPENGL` -lCEGUIXercesParser
 #CGL libs
 #-lCg -lCgGL 

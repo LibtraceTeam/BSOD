@@ -35,7 +35,9 @@ public:
 	float fSize;
 	Color mColor;
 	bool bShown;
-	uint32_t mList; 
+	vector<uint32_t> mList; 
+	
+	int iNumActiveLists;
 	
 	//For sorting
 	float sum(){

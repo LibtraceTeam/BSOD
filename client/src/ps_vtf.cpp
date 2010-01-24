@@ -1,5 +1,7 @@
 #include "main.h"
 
+#ifdef ENABLE_VTF
+
 #define MAX_SIZE 10.0f
 #define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
@@ -262,3 +264,4 @@ void PSVTF::shutdown(){
 	PSSprites::shutdown();
 }
 
+#endif

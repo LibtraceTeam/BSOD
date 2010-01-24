@@ -482,7 +482,7 @@ void App::updateTCPSocket(){
 			
 			bool dark = pkt->dark;
 			
-			if(dark && bShowDarknet || !dark && bShowNonDarknet){			
+			if((dark && bShowDarknet) || (!dark && bShowNonDarknet)){			
 				mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, 
 									getFD(pkt->packetType));
 			}

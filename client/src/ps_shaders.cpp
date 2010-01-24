@@ -1,9 +1,12 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
+#define MAX_PARTICLES_PER_RENDER 128
 #define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
 static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
+static int iNumRendered = 0;
+static int iListIndex = 0;
 
 //util function
 string readfile(const char *filename){
@@ -93,8 +96,7 @@ void PSShaders::update(){
 	if(mCurrentCollection == mParticleCollections.end()){
 		return;
 	}
-		
-	updateCollection(mCurrentCollection->second);	
+			
 }
 
 /*********************************************
@@ -122,7 +124,7 @@ void PSShaders::render(){
 	renderAll();
 	
 	//And end its list
-	glEndList();	
+	//glEndList();	
 	
 	iNumActive = 0;
 	
@@ -133,7 +135,9 @@ void PSShaders::render(){
 		ParticleCollection *collection = itr->second;		
 		
 		if(collection->bShown){
-			glCallList(collection->mList);
+			for(int i=0;i<(int)collection->iNumActiveLists;i++){
+				glCallList(collection->mList[i]);
+			}
 			iNumActive += collection->mParticles.size();
 		}	
 	}
@@ -180,34 +184,55 @@ void PSShaders::updateCollection(ParticleCollection *collection){
 **********************************************/
 void PSShaders::renderAll(){
 
-	mCurrentCollection++;	
-	if(mCurrentCollection == mParticleCollections.end()){
-		mCurrentCollection = mParticleCollections.begin();
+	
+	ParticleCollection *collection = mCurrentCollection->second;	
+
+	if(iNumRendered >= (int)collection->mParticles.size()){
+	
+		collection->iNumActiveLists = iListIndex;		
+		
+		updateCollection(collection);
+	
+		mCurrentCollection++;	
+		if(mCurrentCollection == mParticleCollections.end()){
+			mCurrentCollection = mParticleCollections.begin();
+		}
+		
+		iListIndex = 0;
+		iNumRendered = 0;
 	}
 	
-	ParticleCollection *collection = mCurrentCollection->second;		
-	if(collection->mList == 0){
-		collection->mList = glGenLists(1);
-	}	
-	glNewList(collection->mList, GL_COMPILE);
-		
+	//in case we've moved on
+	collection = mCurrentCollection->second;	
+	
 	//This may be hidden by colour or size
 	if(!collection->bShown){
 		return;
-	}
-	
-	vector<Particle *> *list = &collection->mParticles;
+	}	
 	
 	//Make sure we've got at least one particle
-	if(list->size() == 0) {
+	if(collection->mParticles.size() == 0) {
 		return; 
 	}
 	
-	//LOG("Rendered %d\n", collection->mList); 
+	int iListID = 0;
+		
+	if(collection->mList.size() == iListIndex){
+		iListID = glGenLists(1);
+		collection->mList.push_back(iListID);
+		
+		//LOG("+%d\n", collection->mList.size());
+	}else{
+		iListID = collection->mList[iListIndex];
+		
+		//LOG("%d\n", collection->mList.size());
+	}
 	
-	int count = 0;
-	int bad = 0;
+	glNewList(iListID, GL_COMPILE);			
+	vector<Particle *> *list = &collection->mParticles;	
 	
+	//LOG("Rendered %d\n", iListID); 
+		
 	//Set GL state
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
@@ -228,8 +253,20 @@ void PSShaders::renderAll(){
 	collection->mColor.bind();
 					
 	//Now render all the particles in this list	
-	//TODO: Use glDrawArrays!															
-	for(int i=0;i<(int)list->size();i++){			
+	//TODO: Use glDrawArrays!	
+	
+	int startIndex = iNumRendered;
+	int endIndex = startIndex + MAX_PARTICLES_PER_RENDER;
+	
+	iNumRendered = endIndex;
+	
+	if(endIndex >= (int)list->size()){
+		endIndex = list->size();
+	}
+	
+	//LOG("Rendering from %d to %d\n", startIndex, endIndex);
+															
+	for(int i=startIndex;i<(int)endIndex;i++){			
 		Particle *p = (*list)[i];		
 		
 		//Normal = velocity
@@ -249,6 +286,10 @@ void PSShaders::renderAll(){
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
 	
+	glEndList();
+	
+	iListIndex++;
+	
 }
 
 
@@ -265,9 +306,8 @@ void PSShaders::shutdown(){
 		itr != mParticleCollections.end(); ++itr){	
 		ParticleCollection *collection = itr->second;		
 		
-		if(collection->bShown){
-			glDeleteLists(collection->mList, 1);
-		}	
+		for(int i=0;i<(int)collection->mList.size();i++)
+			glDeleteLists(collection->mList[i], 1);
 	}
 	
 	PSSprites::shutdown();

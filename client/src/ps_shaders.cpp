@@ -32,13 +32,13 @@ string readfile(const char *filename){
  Start up the PS/VS extensions, load the shader
 **********************************************/
 bool PSShaders::init(){
-
+/*
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-	
+*/	
 	fUpdateTimer = 0.0f;
 
 	//We can get here and have an already-compiled shader object if we have 
@@ -116,7 +116,9 @@ void PSShaders::render(){
 			
 	//Set up the shader
 	float planeDist = App::S()->mFlowMgr->getPlaneDistance() / 2;
-	
+
+	//LOG("%f, %f\n", fTime, planeDist);
+
 	mShader.bindResource("fTime", &fTime, 1);
 	mShader.bindResource("fSlabOffset", &planeDist, 1);
 	
@@ -135,12 +137,19 @@ void PSShaders::render(){
 		ParticleCollection *collection = itr->second;		
 		
 		if(collection->bShown){
+
+			int active = collection->iNumActiveLists;
+
+			//LOG("%d, %d\n", active, collection->mList.size());
+
 			for(int i=0;i<(int)collection->iNumActiveLists;i++){
 				glCallList(collection->mList[i]);
 			}
 			iNumActive += collection->mParticles.size();
 		}	
 	}
+
+	//LOG("ShaderRender!\n");
 	
 	//LOG("%f\n", fTime);
 	
@@ -290,6 +299,7 @@ void PSShaders::renderAll(){
 	
 	iListIndex++;
 	
+	//LOG("finished render\n");
 }
 
 
@@ -319,13 +329,13 @@ void PSShaders::shutdown(){
 	
 **********************************************/
 bool PSDirectional::init(){
-
+/*
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-	
+*/	
 	fUpdateTimer = 0.0f;
 
 	//Now set up the shader if necessary

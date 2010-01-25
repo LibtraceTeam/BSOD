@@ -9,11 +9,11 @@
 bool PSTexture::init(){
 
 	LOG("Starting PSTexture!\n");
-	
+	/*
 	if (!GLEW_EXT_framebuffer_object){
 		LOG("No GLEW_EXT_framebuffer_object\n");
 		return false;
-	}
+	}*/
 	
 	height = App::S()->iScreenY / 2;
 	width = App::S()->iScreenX / 2;

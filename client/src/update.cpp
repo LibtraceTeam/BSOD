@@ -27,6 +27,16 @@ void App::updateMain(){
 	if(mouseDown(3)){
 		resetCam();
 	}
+
+	//Rotation for the wall
+/*
+	float fRotateSpeed = fCamSpeed;
+	fRot[1] += fRotateSpeed;
+	fRot[2] += fRotateSpeed;
+	fRot[0] += fRotateSpeed;
+	fZoom = -5;
+*/	
+	//fZoom = -10;
 	
 	//Keyboard rotation
 	if(keyDown(SDLK_RSHIFT) || keyDown(SDLK_LSHIFT)){

@@ -11,13 +11,14 @@ static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
  	Make sure we have VTF and shaders
 **********************************************/
 bool PSVTF::init(){
-
+/*
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-	
+*/
+
 	//And make sure we have at least one VTF texture unit
 	int num = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB, &num);

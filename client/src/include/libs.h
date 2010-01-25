@@ -12,7 +12,7 @@
 					CEGUI
 **********************************************/
 #ifdef ENABLE_GUI
-#include "CEGUI.h"
+#include <CEGUI.h>
 #endif
 
 /*********************************************
@@ -63,7 +63,9 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
-#include <GL/glew.h>
+//#include <GL/glew.h>
+#define GL_GLEXT_PROTOTYPES
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 

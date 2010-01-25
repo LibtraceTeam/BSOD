@@ -93,7 +93,7 @@ int App::init(App *a, int argc, char **argv){
 				
 		
 	//Camera
-	camSetPos(0, 0, SLAB_SIZE);
+	camSetPos(0, -SLAB_SIZE/3, SLAB_SIZE);
 	camLookAt(0, 0, 0); 
 	resetCam();
 	

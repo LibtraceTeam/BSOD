@@ -102,6 +102,8 @@ void Shader::bindResource(const char *name, int id){
 void Shader::bindResource(const char *name, float *data, int count){
 	int location = glGetUniformLocationARB(mProgram, name);
 	
+	//LOG("Got location for %s: %d\n", name, location);
+
 	if(location == -1){
 		LOG("Error binding resource %s (size %d)\n", name, count);
 		return;
@@ -110,6 +112,8 @@ void Shader::bindResource(const char *name, float *data, int count){
 	if(count == 3){
 		//Log::debug("location=%d, %f %f %f\n", location, data[0], data[1], data[2]);
 	}
+
+	//LOG("About to call glUniform%df\n", count);
 		
 	//hacky!
 	//Is this really the best the GL API has to offer :|?
@@ -119,7 +123,9 @@ void Shader::bindResource(const char *name, float *data, int count){
 	else if(count == 4) glUniform4f(location, data[0], data[1], data[2], data[3]);
 	else{
 		LOG("Bad count %d in bindResource(%s)\n", count, name);
-	}		
+	}
+
+	//LOG("Called\n");
 }
 
 void Shader::dispose(){

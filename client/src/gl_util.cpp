@@ -6,16 +6,14 @@
 void App::utilBeginRender(){
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	
+	glViewport(0,0, iScreenX, iScreenY);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
 	float ar = (float)iScreenX / (float)iScreenY;
 
-#ifdef ENABLE_CGL_COMPAT
-	glViewport( 0, 0, ( GLsizei )iScreenX, ( GLsizei )iScreenY );
-#else
 	gluPerspective(70.0f,ar,0.5f,1000.0f);
-#endif
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -36,6 +34,7 @@ void App::utilEndRender(){
 #ifndef ENABLE_CGL_COMPAT	
 	//Make it ortho
 	//(0,0) == top-left
+
 	glOrtho(0, iScreenX, iScreenY, 0, 0, 1);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -74,9 +73,9 @@ int App::resizeWindow( int width, int height )
 	//Set our perspective
 //	gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
 
-#ifndef ENABLE_CGL_COMPAT
+//#ifndef ENABLE_CGL_COMPAT
 	gluPerspective(90.0f,ratio,1.0f,10000.0f);
-#endif
+//#endif
 
 	// Make sure we're chaning the model view and not the projection 
 	glMatrixMode( GL_MODELVIEW );
@@ -194,7 +193,7 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	// Verify there is a surface 
 	if ( !surface ){
 		LOG( "Video mode set failed: %s\n", SDL_GetError( ) );
-		return false;
+		//return false;
 	}
 
 	//Set the window caption
@@ -207,12 +206,13 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 	
 	//Set up GLEW
-	
+	/*
 	GLenum err = glewInit();
 	if (GLEW_OK != err){
 		ERR("Couldn't start GLEW: %s!\n", glewGetErrorString(err));
 		return false;
 	}
+	*/
 
 	//resize the initial window   
 	resizeWindow( sizeX, sizeY );

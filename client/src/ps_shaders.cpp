@@ -1,8 +1,8 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define MAX_PARTICLES_PER_RENDER 128
-#define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
+#define MAX_PARTICLES_PER_RENDER 1024
+#define SHADER_FPS (1.0f / 60.0f) //The rate at which we push to the GPU
 
 static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
 static int iNumRendered = 0;
@@ -142,7 +142,7 @@ void PSShaders::render(){
 
 			//LOG("%d, %d\n", active, collection->mList.size());
 
-			for(int i=0;i<(int)collection->iNumActiveLists;i++){
+			for(int i=0;i<active;i++){
 				glCallList(collection->mList[i]);
 			}
 			iNumActive += collection->mParticles.size();
@@ -225,8 +225,10 @@ void PSShaders::renderAll(){
 	}
 	
 	int iListID = 0;
+	
+	//LOG("*** %d, %d\n", iListIndex, collection->mList.size());
 		
-	if(collection->mList.size() == iListIndex){
+	if(iListIndex >= collection->mList.size()){
 		iListID = glGenLists(1);
 		collection->mList.push_back(iListID);
 		

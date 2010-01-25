@@ -15,7 +15,7 @@ bool FlowManager::init(){
 	mViewFlows.clear();
 	
 	fPlaneDistance = ((float)App::S()->iScreenX / 
-						(float)App::S()->iScreenY) * 30.0f;
+						(float)App::S()->iScreenY) * 40.0f;
 
 	mDisplayList = glGenLists(1);
 	
@@ -26,9 +26,10 @@ bool FlowManager::init(){
 		 	Update
 **********************************************/
 void FlowManager::update(float currentTime, float timeDelta){
-
+/*
 	fPlaneDistance = ((float)App::S()->iScreenX / 
 						(float)App::S()->iScreenY) * 30.0f;
+*/
 	
 	//hack! We should really only set this if the camera has moved...
 	bNeedProject = true; 
@@ -266,6 +267,9 @@ void FlowManager::delAll(){
 	
 	mLeftFlowTexture.clear();
 	mRightFlowTexture.clear();
+	
+	mLeftFlowTexture.regenerate();
+	mRightFlowTexture.regenerate();
 }
 	
 /*********************************************
@@ -311,7 +315,8 @@ void FlowManager::updateList(){
 }
 */
 
-float fRenderTimer = 2.0f;
+float fRenderTimer = 0.0f;
+bool isLeft = false;
 	
 /*********************************************
 		 	3D rendering
@@ -321,12 +326,18 @@ void FlowManager::render(){
 	//Update the point timer
 	fRenderTimer += fTimeScale;
 	
-	if(fRenderTimer > 1.0f){
+	if(fRenderTimer > 5.0f){
 		update(0.0f, fRenderTimer); //Kinda nasty having it here, but it means
 									//that it's synced with the render properly
 		//updateList(); //rerender
-		mLeftFlowTexture.regenerate();
-		mRightFlowTexture.regenerate();
+		
+		if(isLeft)
+			mLeftFlowTexture.regenerate();
+		else		
+			mRightFlowTexture.regenerate();
+		
+		isLeft = !isLeft;
+			
 		fRenderTimer = 0.0f;
 	}
 	

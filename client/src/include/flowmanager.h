@@ -68,7 +68,7 @@ public:
 	IPaddress mDst;
 };
 
-#define FLOW_TEX_SIZE 256
+#define FLOW_TEX_SIZE 512
 
 /*********************************************
 		 	Flow texture

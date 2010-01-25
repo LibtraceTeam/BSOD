@@ -1,12 +1,9 @@
 #include "main.h"
 
 #define MAX_SIZE 10.0f
-#define MAX_PARTICLES_PER_RENDER 1024
-#define SHADER_FPS (1.0f / 60.0f) //The rate at which we push to the GPU
+#define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
 static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
-static int iNumRendered = 0;
-static int iListIndex = 0;
 
 //util function
 string readfile(const char *filename){
@@ -32,13 +29,15 @@ string readfile(const char *filename){
  Start up the PS/VS extensions, load the shader
 **********************************************/
 bool PSShaders::init(){
-/*
+
 	//First make sure that we have shader support at all
+#ifndef ENABLE_CGL_COMPAT
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-*/	
+#endif
+	
 	fUpdateTimer = 0.0f;
 
 	//We can get here and have an already-compiled shader object if we have 
@@ -96,7 +95,8 @@ void PSShaders::update(){
 	if(mCurrentCollection == mParticleCollections.end()){
 		return;
 	}
-			
+		
+	updateCollection(mCurrentCollection->second);	
 }
 
 /*********************************************
@@ -116,9 +116,7 @@ void PSShaders::render(){
 			
 	//Set up the shader
 	float planeDist = App::S()->mFlowMgr->getPlaneDistance() / 2;
-
-	//LOG("%f, %f\n", fTime, planeDist);
-
+	
 	mShader.bindResource("fTime", &fTime, 1);
 	mShader.bindResource("fSlabOffset", &planeDist, 1);
 	
@@ -126,7 +124,7 @@ void PSShaders::render(){
 	renderAll();
 	
 	//And end its list
-	//glEndList();	
+	glEndList();	
 	
 	iNumActive = 0;
 	
@@ -137,19 +135,10 @@ void PSShaders::render(){
 		ParticleCollection *collection = itr->second;		
 		
 		if(collection->bShown){
-
-			int active = collection->iNumActiveLists;
-
-			//LOG("%d, %d\n", active, collection->mList.size());
-
-			for(int i=0;i<active;i++){
-				glCallList(collection->mList[i]);
-			}
+			glCallList(collection->mList);
 			iNumActive += collection->mParticles.size();
 		}	
 	}
-
-	//LOG("ShaderRender!\n");
 	
 	//LOG("%f\n", fTime);
 	
@@ -193,57 +182,34 @@ void PSShaders::updateCollection(ParticleCollection *collection){
 **********************************************/
 void PSShaders::renderAll(){
 
-	
-	ParticleCollection *collection = mCurrentCollection->second;	
-
-	if(iNumRendered >= (int)collection->mParticles.size()){
-	
-		collection->iNumActiveLists = iListIndex;		
-		
-		updateCollection(collection);
-	
-		mCurrentCollection++;	
-		if(mCurrentCollection == mParticleCollections.end()){
-			mCurrentCollection = mParticleCollections.begin();
-		}
-		
-		iListIndex = 0;
-		iNumRendered = 0;
+	mCurrentCollection++;	
+	if(mCurrentCollection == mParticleCollections.end()){
+		mCurrentCollection = mParticleCollections.begin();
 	}
 	
-	//in case we've moved on
-	collection = mCurrentCollection->second;	
-	
+	ParticleCollection *collection = mCurrentCollection->second;		
+	if(collection->mList == 0){
+		collection->mList = glGenLists(1);
+	}	
+	glNewList(collection->mList, GL_COMPILE);
+		
 	//This may be hidden by colour or size
 	if(!collection->bShown){
 		return;
-	}	
+	}
+	
+	vector<Particle *> *list = &collection->mParticles;
 	
 	//Make sure we've got at least one particle
-	if(collection->mParticles.size() == 0) {
+	if(list->size() == 0) {
 		return; 
 	}
 	
-	int iListID = 0;
+	LOG("Rendered %d (%d)\n", list->size(), mParticleCollections.size()); 
 	
-	//LOG("*** %d, %d\n", iListIndex, collection->mList.size());
-		
-	if(iListIndex >= collection->mList.size()){
-		iListID = glGenLists(1);
-		collection->mList.push_back(iListID);
-		
-		//LOG("+%d\n", collection->mList.size());
-	}else{
-		iListID = collection->mList[iListIndex];
-		
-		//LOG("%d\n", collection->mList.size());
-	}
+	int count = 0;
+	int bad = 0;
 	
-	glNewList(iListID, GL_COMPILE);			
-	vector<Particle *> *list = &collection->mParticles;	
-	
-	//LOG("Rendered %d\n", iListID); 
-		
 	//Set GL state
 	glEnable(GL_TEXTURE_2D);		
 	glDepthMask(GL_FALSE);		
@@ -264,20 +230,8 @@ void PSShaders::renderAll(){
 	collection->mColor.bind();
 					
 	//Now render all the particles in this list	
-	//TODO: Use glDrawArrays!	
-	
-	int startIndex = iNumRendered;
-	int endIndex = startIndex + MAX_PARTICLES_PER_RENDER;
-	
-	iNumRendered = endIndex;
-	
-	if(endIndex >= (int)list->size()){
-		endIndex = list->size();
-	}
-	
-	//LOG("Rendering from %d to %d\n", startIndex, endIndex);
-															
-	for(int i=startIndex;i<(int)endIndex;i++){			
+	//TODO: Use glDrawArrays!															
+	for(int i=0;i<(int)list->size();i++){			
 		Particle *p = (*list)[i];		
 		
 		//Normal = velocity
@@ -297,11 +251,6 @@ void PSShaders::renderAll(){
 	glDisable(GL_BLEND);	
 	glDepthMask(GL_TRUE);
 	
-	glEndList();
-	
-	iListIndex++;
-	
-	//LOG("finished render\n");
 }
 
 
@@ -318,8 +267,9 @@ void PSShaders::shutdown(){
 		itr != mParticleCollections.end(); ++itr){	
 		ParticleCollection *collection = itr->second;		
 		
-		for(int i=0;i<(int)collection->mList.size();i++)
-			glDeleteLists(collection->mList[i], 1);
+		if(collection->bShown){
+			glDeleteLists(collection->mList, 1);
+		}	
 	}
 	
 	PSSprites::shutdown();
@@ -331,13 +281,14 @@ void PSShaders::shutdown(){
 	
 **********************************************/
 bool PSDirectional::init(){
-/*
+#ifndef ENABLE_CGL_COMPAT
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-*/	
+#endif
+	
 	fUpdateTimer = 0.0f;
 
 	//Now set up the shader if necessary

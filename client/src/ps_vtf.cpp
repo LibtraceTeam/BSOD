@@ -1,7 +1,5 @@
 #include "main.h"
 
-#ifdef ENABLE_VTF
-
 #define MAX_SIZE 10.0f
 #define SHADER_FPS (1.0f / 10.0f) //The rate at which we push to the GPU
 
@@ -11,14 +9,15 @@ static map<float, ParticleCollection *>::const_iterator mCurrentCollection;
  	Make sure we have VTF and shaders
 **********************************************/
 bool PSVTF::init(){
-/*
+
+#ifndef ENABLE_CGL_COMPAT
 	//First make sure that we have shader support at all
 	if (!GLEW_ARB_vertex_program || !GLEW_ARB_fragment_program){
 		LOG("No GL_ARB_*_program\n");
 		return false;
 	}
-*/
-
+#endif
+	
 	//And make sure we have at least one VTF texture unit
 	int num = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB, &num);
@@ -265,4 +264,3 @@ void PSVTF::shutdown(){
 	PSSprites::shutdown();
 }
 
-#endif

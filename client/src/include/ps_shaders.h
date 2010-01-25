@@ -35,7 +35,6 @@ public:
  uses VTF (Vertex Texture Fetch) to lower the
  upload bottleneck. 
 **********************************************/
-#ifdef ENABLE_VTF
 class PSVTF : public PSSprites{
 protected:			
 	Shader mShader;
@@ -57,7 +56,7 @@ public:
 
 	int getType(){return PARTICLE_SYSTEM_VTF;}
 };
-#endif
+
 
 /*********************************************
  A particle system that does rotation to make

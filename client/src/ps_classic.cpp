@@ -384,20 +384,33 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col,
 	Set up a particle collection object
 **********************************************/
 ParticleCollection *PSClassic::getCollection(Color col, float size){
-	float val = col.sum() + (size * 100000.0f);
+
+	float val = 0;
+	ParticleCollection *existing = NULL;
+
+	for(int i=0;i<10000;i++){
 	
-	ParticleCollection *existing = mParticleCollections[val];
+		val = (col.sum() * 100000.0f) + (size * 100000.0f);
+		val += i;
+				
+		//LOG("Making collection %d (%f)\n", i, val);
 	
-	if(existing){
-		return existing;
+		existing = mParticleCollections[val];
+	
+		if(existing){
+			if(existing->mParticles.size() < 1024){
+				return existing;
+			}
+		}else{
+			break;
+		}
 	}
 	
 	existing = new ParticleCollection();
 	existing->fSize = size;
 	existing->mColor = col;
 	existing->bShown = true;
-	//existing->mList = 0;
-	existing->iNumActiveLists = 0;
+	existing->mList = 0;
 	
 	mParticleCollections[val] = existing;
 	

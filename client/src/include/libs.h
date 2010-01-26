@@ -63,8 +63,11 @@ using std::map;
 /*********************************************
 					OpenGL
 **********************************************/
-//#include <GL/glew.h>
-#define GL_GLEXT_PROTOTYPES
+#ifdef ENABLE_CGL_COMPAT
+	#define GL_GLEXT_PROTOTYPES
+#else
+	#include <GL/glew.h>
+#endif
 
 #include <GL/gl.h>
 #include <GL/glu.h>

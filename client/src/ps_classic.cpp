@@ -393,7 +393,7 @@ ParticleCollection *PSClassic::getCollection(Color col, float size){
 	int i=0;
 	while(true){
 		i++;
-		val = (col.sum() + size);
+		val = (col.sum() + size) * 10000;
 		val += (float)i;
 				
 		//LOG("Making collection %d (%f)\n", i, val);

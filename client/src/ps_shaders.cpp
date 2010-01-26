@@ -194,9 +194,9 @@ void PSShaders::renderAll(){
 	glNewList(collection->mList, GL_COMPILE);
 		
 	//This may be hidden by colour or size
-	if(!collection->bShown){
-		return;
-	}
+	//if(!collection->bShown){
+	//	return;
+	//}
 	
 	vector<Particle *> *list = &collection->mParticles;
 	
@@ -232,8 +232,13 @@ void PSShaders::renderAll(){
 	//Now render all the particles in this list	
 	//TODO: Use glDrawArrays!															
 	for(int i=0;i<(int)list->size();i++){			
-		Particle *p = (*list)[i];		
-		
+		Particle *p = (*list)[i];
+/*
+		if(!p->rendered){
+			p->timestamp = fTime;
+			p->rendered = true;
+		}
+*/		
 		//Normal = velocity
 		glNormal3f(p->vx, p->vy, p->vz);
 		

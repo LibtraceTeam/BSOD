@@ -342,7 +342,7 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col,
 	
 	//Nasty hack! If we're in the title screen, jitter ruins it.
 	if(App::S()->isConnected()){
-		jitter = App::S()->randFloat(0, 1.0f);
+		jitter = App::S()->randFloat(-2.5f, 0);
 	}
 	
 	pos = pos + speed * jitter;		
@@ -374,7 +374,8 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col,
 				
 	//And mark it as active
 	p->active = true;
-		
+	p->rendered = false;
+
 	//done!
 	return;
 }
@@ -388,10 +389,12 @@ ParticleCollection *PSClassic::getCollection(Color col, float size){
 	float val = 0;
 	ParticleCollection *existing = NULL;
 
-	for(int i=0;i<10000;i++){
-	
-		val = (col.sum() * 100000.0f) + (size * 100000.0f);
-		val += i;
+	//for(int i=0;i<10000;i++){
+	int i=0;
+	while(true){
+		i++;
+		val = (col.sum() + size);
+		val += (float)i;
 				
 		//LOG("Making collection %d (%f)\n", i, val);
 	
@@ -399,12 +402,22 @@ ParticleCollection *PSClassic::getCollection(Color col, float size){
 	
 		if(existing){
 			if(existing->mParticles.size() < 1024){
+				//LOG("Using collection %f\n", val);
+
+				float diff = col.sum() - existing->mColor.sum();
+
+				if(ABS(diff) > 0.00001f){
+					LOG("********* BAD DIFF\n");
+				}
+			
 				return existing;
 			}
 		}else{
 			break;
 		}
 	}
+
+	//LOG("Made new collection %f\n", val);
 	
 	existing = new ParticleCollection();
 	existing->fSize = size;
@@ -430,6 +443,7 @@ void PSClassic::del(ParticleCollection *col, int i){
 	
 	//And mark as inactive
 	p->active = false;
+	p->rendered = false;
 	
 	//Horrible hack - this means that if an active one gets rendered by
 	//glDrawArrays (that doesn't check for p->active), it'll be nowhere to be
@@ -493,7 +507,7 @@ void PSClassic::doPeriodicCleanup(){
 	
 	fTime = 0.0f;
 	
-	//LOG("Cleanup!\n");
+	LOG("Cleanup!\n");
 }
 
 

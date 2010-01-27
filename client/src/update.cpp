@@ -29,13 +29,18 @@ void App::updateMain(){
 	}
 
 	//Rotation for the wall
-/*
+	
+	float camTime = fUptime * 0.1f;
+
 	float fRotateSpeed = fCamSpeed;
 	fRot[1] += fRotateSpeed;
-	fRot[2] += fRotateSpeed;
-	fRot[0] += fRotateSpeed;
-	fZoom = -5;
-*/	
+	fRot[0] = (sinf(camTime) * 5);
+	fCameraY = cosf(camTime) * 5;
+	
+	fZoom = (sinf(camTime) * 15) + 27;
+		
+	//LOG("%f, %f\n", fRot[1], fZoom);
+	
 	//fZoom = -10;
 	
 	//Keyboard rotation

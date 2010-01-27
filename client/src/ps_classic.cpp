@@ -367,7 +367,7 @@ void PSClassic::add(Vector3 pos, Vector3 speed, Color col,
 	p->size = size;
 	
 	//Timestamp
-	p->timestamp = fTime;
+	p->timestamp = fTime + 1.0f;
 				
 	//Add to the collection of particles
 	getCollection(col, size)->mParticles.push_back(p);

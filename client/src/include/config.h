@@ -5,13 +5,13 @@
  file options. 
 *******************************************************************************/
 
-//#define ENABLE_CGL_COMPAT //for running under clustergl
+#define ENABLE_CGL_COMPAT //for running under clustergl
 //#define ENABLE_VTF //vertex texture fetch particle system. Doesn't compile :P
 //#define ENABLE_GUI //comment out to not require CEGUI
 #define DEFAULT_PORT 34567
 #define CONFIG_FILE "bsod2.cfg"
 #define PARTICLE_FPS fParticleFPS //hack!
-#define MAX_FLOW_DESCRIPTORS 64
+#define MAX_FLOW_DESCRIPTORS 1024
 #define MAX_PARTICLES 1000000 //global cap of 1m particles for particle systems
 #define SLAB_SIZE 40
 #define GUI_HIDE_DELAY 5.0f //seconds

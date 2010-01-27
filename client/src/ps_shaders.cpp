@@ -95,8 +95,17 @@ void PSShaders::update(){
 	if(mCurrentCollection == mParticleCollections.end()){
 		return;
 	}
-		
-	updateCollection(mCurrentCollection->second);	
+	
+
+	//updateCollection(mCurrentCollection->second);	
+
+	for(map<float, ParticleCollection *>::const_iterator itr =
+		        mParticleCollections.begin();
+				        itr != mParticleCollections.end(); ++itr){
+		        ParticleCollection *collection = itr->second;
+
+		updateCollection(collection);
+	}
 }
 
 /*********************************************
@@ -167,8 +176,8 @@ void PSShaders::updateCollection(ParticleCollection *collection){
 										
 		//Move the particle
 		p->life -= fTimeScale * 
-					App::S()->fParticleSpeedScale * 
-					mParticleCollections.size();	
+					App::S()->fParticleSpeedScale;
+					//* mParticleCollections.size();	
 		
 		//p->timestamp += fUpdateTimer;
 									
@@ -205,7 +214,9 @@ void PSShaders::renderAll(){
 		return; 
 	}
 	
-	LOG("Rendered %d (%d)\n", list->size(), mParticleCollections.size()); 
+	
+	if(list->size() > 1024)
+		LOG("Rendered %d (%d)\n", list->size(), mParticleCollections.size()); 
 	
 	int count = 0;
 	int bad = 0;

@@ -517,6 +517,7 @@ void PSClassic::doPeriodicCleanup(){
 							ParticleCollection
 *******************************************************************************/
 void ParticleCollection::del(int i){
+
 	Particle *p = mParticles[i];
 	
 	if(mParticles.size() > 0)	

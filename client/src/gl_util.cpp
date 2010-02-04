@@ -74,7 +74,7 @@ int App::resizeWindow( int width, int height )
 //	gluPerspective( 45.0f, ratio, 0.1f, 100.0f );
 
 //#ifndef ENABLE_CGL_COMPAT
-	gluPerspective(90.0f,ratio,1.0f,10000.0f);
+	gluPerspective(70.0f,ratio,1.0f,10000.0f);
 //#endif
 
 	// Make sure we're chaning the model view and not the projection 
@@ -206,13 +206,13 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	}
 	
 	//Set up GLEW
-	/*
+#ifndef ENABLE_CGL_COMPAT
 	GLenum err = glewInit();
 	if (GLEW_OK != err){
 		ERR("Couldn't start GLEW: %s!\n", glewGetErrorString(err));
 		return false;
 	}
-	*/
+#endif
 
 	//resize the initial window   
 	resizeWindow( sizeX, sizeY );

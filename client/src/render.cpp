@@ -135,5 +135,38 @@ void App::render2D(){
 #ifdef ENABLE_GUI
 	renderGUI();	
 #endif
-			
+
+#ifdef ENABLE_CGL_COMPAT
+
+	//Get rid of the system mouse cursor, it's useless
+	SDL_ShowCursor(SDL_DISABLE);
+
+	//render a mouse cursor on our end
+	int x = iMouseX;
+	int y = iMouseY;
+	int s = iScreenX / 32;
+		
+	Texture *tex = texGet("mouse.png");
+	
+	if(!tex){
+		LOG("No mouse cursor texture!\n");
+	}else{
+		tex->bind();
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glColor4f(1,1,1,0.0f);
+		
+		glBegin(GL_QUADS);
+			glTexCoord2f(0, 0); glVertex2f(x, y);
+			glTexCoord2f(1, 0); glVertex2f(x + s, y);
+			glTexCoord2f(1, 1); glVertex2f(x + s, y + s);
+			glTexCoord2f(0, 1); glVertex2f(x, y + s);
+		glEnd();
+		
+		glDisable(GL_BLEND);
+	}
+#endif
+	
+		
 }

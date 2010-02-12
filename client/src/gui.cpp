@@ -290,9 +290,11 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 	//Set all the protocol checkboxes
 	for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
 	
+		LOG("%d\n", i);
+	
 		//Make sure this one is valid
 		if(!getFD(i)) continue;		
-	
+			
 		Checkbox *cb = (Checkbox *)winMgr->getWindow(toString(i));
 				
 		//Toggle the checkbox
@@ -437,11 +439,13 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	//that we do sensible things when we mouse over edit boxes and such, 
 	//otherwise we have duplicate cursors. 
 #ifndef _WINDOWS
+#ifndef ENABLE_CGL_COMPAT
 	if(CEGUI::MouseCursor::getSingleton().getImage()){
 		SDL_ShowCursor(SDL_DISABLE);
 	}else{
 		SDL_ShowCursor(SDL_ENABLE);
 	}
+#endif
 #endif
 	
 	return true;

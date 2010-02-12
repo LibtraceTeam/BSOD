@@ -31,7 +31,6 @@ void App::utilEndRender(){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-#ifndef ENABLE_CGL_COMPAT	
 	//Make it ortho
 	//(0,0) == top-left
 
@@ -43,7 +42,6 @@ void App::utilEndRender(){
 
 	//now in 2D mode
 	render2D();
-#endif
 			
 	SDL_GL_SwapBuffers( );
 }

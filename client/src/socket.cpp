@@ -198,6 +198,8 @@ bool App::openSocket(){
 	fGUITimeout = 10.0f; //Make sure people see the UI
     bConnected = true;
     
+    mFlowDescriptors.clear();
+    
     //Set the 'connected to server' text
 #ifdef ENABLE_GUI
     updateGUIConnectionStatus();
@@ -430,8 +432,7 @@ void App::updateTCPSocket(){
 			
 			src.host = ip1.s_addr;
 			dest.host = ip2.s_addr;
-			uint16_t proto = pkt->type;
-			
+			//uint16_t proto = pkt->type;			
 			
 			Vector3 start = Vector3(ntohf(pkt->x1),
 									ntohf(pkt->z1), 
@@ -567,6 +568,8 @@ void App::addFlowDescriptor(byte id, Color c, string name){
 #ifdef ENABLE_GUI
     addProtocolEntry(name, c, id);
 #endif
+
+	//LOG("Added flow descriptor %d\n", id);
 }
 
 void App::clearFlowDescriptors(){

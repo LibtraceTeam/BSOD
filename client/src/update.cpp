@@ -29,7 +29,7 @@ void App::updateMain(){
 	}
 
 	//Rotation for the wall
-	
+	/*
 	float camTime = fUptime * 0.1f;
 
 	float fRotateSpeed = fCamSpeed;
@@ -38,6 +38,7 @@ void App::updateMain(){
 	fCameraY = cosf(camTime) * 5;
 	
 	fZoom = (sinf(camTime) * 15) + 27;
+	*/
 		
 	//LOG("%f, %f\n", fRot[1], fZoom);
 	

@@ -203,6 +203,11 @@ bool App::texInit(){
 	}
 	
 	texLoad("banner.png", 0);
+	
+#ifdef ENABLE_CGL_COMPAT
+	//under CGL we want a mouse cursor
+	texLoad("mouse.png", 0); 
+#endif
 		
 	LOG("Finished loading initial textures!\n");
 	

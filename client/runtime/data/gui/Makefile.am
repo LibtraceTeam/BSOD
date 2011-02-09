@@ -1,5 +1,11 @@
-nobase_dist_pkgdata_DATA = configs/CEGUIConfig.xsd \
-             fonts/Commonv2c.ttf \
+EXTRA_DIST = configs/CEGUIConfig.xsd \
+             fonts/arial.font \
+	     fonts/arial.ttf \
+	     fonts/bluehigh.ttf \
+	     fonts/bluehighway-10.font \
+	     fonts/bluehighway-12.font \
+	     fonts/bluehighway-8.font \
+	     fonts/Commonv2c.ttf \
              fonts/Commonwealth-10.font \
              fonts/DejaVuSans-10.font \
              fonts/DejaVuSans.ttf \
@@ -13,45 +19,9 @@ nobase_dist_pkgdata_DATA = configs/CEGUIConfig.xsd \
              fonts/common.txt \
              fonts/icon.txt \
              fonts/Legal.txt \
-             imagesets/DriveIcons.imageset \
-             imagesets/DriveIcons.png \
-             imagesets/FairChar.imageset \
-             imagesets/FairChar.tga \
-             imagesets/GPN-2000-001437.tga \
-             imagesets/Imageset.xsd \
-             imagesets/ReadMe.txt \
-             imagesets/TaharezLook.imageset \
-             imagesets/TaharezLook.tga \
-             imagesets/Vanilla.imageset \
-             imagesets/WindowsLook.imageset \
-             imagesets/WindowsLook.tga \
-             imagesets/vanilla.tga \
-             layouts/Console.wnd \
-             layouts/Demo7Windows.layout \
-             layouts/Demo8.layout \
-             layouts/DragDropDemo.layout \
-             layouts/FontDemo.layout \
-             layouts/GUILayout.xsd \
-             layouts/TabControlDemo.layout \
-             layouts/TabPage.layout \
-             layouts/TabPage1.layout \
-             layouts/TabPage2.layout \
-             layouts/TextDemo.layout \
-             layouts/TreeDemoTaharez.layout \
-             layouts/VanillaConsole.layout \
-             layouts/VanillaWindows.layout \
+             imagesets/sleekspace_bsod.imageset \
+             imagesets/sleekspace_bsod.png \
              looknfeel/Falagard.xsd \
-             looknfeel/TaharezLook.looknfeel \
-             looknfeel/Vanilla.looknfeel \
-             looknfeel/WindowsLook.looknfeel \
-             lua_scripts/IConsole.lua \
-             lua_scripts/InstancedInit.lua \
-             lua_scripts/demo8.lua \
-             schemes/Demo8.scheme \
+             looknfeel/sleekspace_bsod.looknfeel \
              schemes/GUIScheme.xsd \
-             schemes/TaharezLook.scheme \
-             schemes/TaharezLookWidgetAliases.scheme \
-             schemes/TaharezLookWidgets.scheme \
-             schemes/VanillaSkin.scheme \
-             schemes/WindowsLook.scheme \
-             schemes/WindowsLookWidgets.scheme
+	     schemes/SleekSpaceBSOD.scheme 

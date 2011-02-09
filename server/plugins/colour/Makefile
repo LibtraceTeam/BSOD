@@ -1,10 +1,11 @@
 CFLAGS=-g -Wall -W
 YFLAGS=-d -pcolour_
 LFLAGS=-Pcolour_
-CXXFLAGS=-g -fPIC -shared -Wall -W -pipe -pedantic
-LDLIBS=-lfl -ltrace
+CXXFLAGS=-g -fPIC -shared -Wall -W -pipe -pedantic 
+LDLIBS=-lfl -ltrace -lflowmanager -lprotoident
 LD=g++
-OBJS=bpfcolour.so colours.so sipcolour.so
+OBJS=bpfcolour.so colours.so sipcolour.so lpicolour.so
+LDFLAGS=-L/home/salcock/install/lib
 
 all: $(OBJS)
 

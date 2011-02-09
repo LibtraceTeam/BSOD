@@ -26,7 +26,7 @@ clean:
 	$<
 	
 %.so: %.o
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) \
 	-o $@ $^
 
 install:

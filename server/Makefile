@@ -4,14 +4,14 @@ CXXFLAGS = -ffast-math -O2 -Wall -Wimplicit -Wformat -pipe -g
 # change this to your libtrace path. 
 # this is left here as people often have it installed in their home
 # directories for testing things rather than using the system one
-LIBTRACE ?= /usr/local
+LIBTRACE ?= /home/salcock/install
 INCLUDE +=  -I. -I$(LIBTRACE)/include
 
 CXXFLAGS += $(INCLUDE)
 # GeoIP is required in the server for the GeoIP module
 # This should be fixed, but isn't.
 #LDLIBS =  -lm -lz -lpcap -ldl  -lfl -ltrace -lGeoIP
-LDLIBS =  -lm  -ldl  -lfl -ltrace -lconfuse
+LDLIBS =  -lm  -ldl  -lfl -ltrace -lconfuse -lflowmanager -lprotoident
 LDFLAGS+= -L$(LIBTRACE)/lib -rdynamic 
 SUBDIR_LDFLAGS = -L$(LIBTRACE)/lib
 
@@ -22,7 +22,7 @@ SUBDIR_LDFLAGS = -L$(LIBTRACE)/lib
 BINS = bsod_server
 OBJS = socket.o packets.o daemons.o debug.o RTTMap.o Blacklist.o 
 
-PREFIX?=/usr/local/bsod
+PREFIX?=/home/salcock/install/bsod
 
 BINDIR=$(PREFIX)/bin
 CONFDIR=$(PREFIX)/etc
@@ -43,7 +43,7 @@ bsod_server: $(OBJS) bsod_server.o
 
 
 plugins:
-	cd plugins; $(MAKE) "INCLUDE=$(INCLUDE)" "LDFLAGS=$(SUBDIR_LDFLAGS)"; cd ..
+	cd plugins; $(MAKE) "INCLUDE=$(INCLUDE)" "LDFLAGS=$(SUBDIR_LDFLAGS)" "LDLIBS=$(LDLIBS)" ; cd ..
 
 plugins-clean:
 	cd plugins; $(MAKE) clean; cd ..
@@ -54,7 +54,7 @@ install: all
 	mkdir -p $(LIBDIR)
 	mkdir -p $(BLISTDIR)
 
-	install -m 644 ./bsod_server.config $(CONFDIR)/bsod_server.conf.sample
+	install -m 644 ./bsod_server.conf $(CONFDIR)/bsod_server.conf.sample
 	install -m 644 ./mac_addrs $(CONFDIR)/mac_addrs.sample
 	install -s -m 755 ./bsod_server $(BINDIR)/bsod_server
 

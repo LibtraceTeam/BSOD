@@ -522,7 +522,7 @@ void App::addProtocolEntry(string name, Color col, int index){
 		return;
 	}
 
-	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", 
+	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpaceBSOD/Checkbox", 
 													toString(index) );											
 	winMgr->getWindow("paneProto")->addChildWindow(cb);
 	
@@ -645,7 +645,7 @@ void App::renderGUI(){
 **********************************************/
 void App::makeMenuButtons(){
  		
-	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnServers"));
+	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnServers"));
     root->addChildWindow(btn);
     btn->setText("Servers");
     btn->setPosition(UVector2(cegui_reldim(0.01f), cegui_reldim( 0.95f)));
@@ -653,7 +653,7 @@ void App::makeMenuButtons(){
     btn->setAlpha(0.9f);
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
      
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnProtocols"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnProtocols"));
     root->addChildWindow(btn);
     btn->setText("Protocols");
     btn->setPosition(UVector2(cegui_reldim(0.12f), cegui_reldim( 0.95f)));
@@ -661,7 +661,7 @@ void App::makeMenuButtons(){
     btn->setAlpha(0.9f);
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
     
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnOptions"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnOptions"));
     root->addChildWindow(btn);
     btn->setText("Options");
     btn->setPosition(UVector2(cegui_reldim(0.23f), cegui_reldim( 0.95f)));
@@ -676,7 +676,7 @@ void App::makeMenuButtons(){
 **********************************************/
 void App::makeProtocolWindow(){
 	          
-    mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndProtocol");
+    mProtoWindow = (FrameWindow*)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndProtocol");
     root->addChildWindow(mProtoWindow);
     
     mProtoWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.25f)));
@@ -686,7 +686,7 @@ void App::makeProtocolWindow(){
 
     mProtoWindow->setText("Protocols");
     
-    ScrollablePane *pane = (ScrollablePane*)winMgr->createWindow("SleekSpace/ScrollablePane", "paneProto");
+    ScrollablePane *pane = (ScrollablePane*)winMgr->createWindow("SleekSpaceBSOD/ScrollablePane", "paneProto");
     mProtoWindow->addChildWindow(pane);
     pane->setPosition(UVector2(cegui_reldim(0.075f), cegui_reldim( 0.12f)));
     pane->setSize(UVector2(cegui_reldim(0.87f), cegui_reldim( 0.75f)));  
@@ -695,7 +695,7 @@ void App::makeProtocolWindow(){
 	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
    	//}
    	
-   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnHideAll"));
+   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnHideAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Hide All");
     btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.88f)));
@@ -703,7 +703,7 @@ void App::makeProtocolWindow(){
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onProtocolButtonClicked, this));
     btn->setAlwaysOnTop(true);	
     
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnShowAll"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnShowAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Show All");
     btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.88f)));
@@ -722,14 +722,14 @@ void App::makeProtocolWindow(){
 	Creates the message box window
 **********************************************/
 void App::makeMessageWindow(){
-	mMessageWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndMessage");
+	mMessageWindow = (FrameWindow*)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndMessage");
     root->addChildWindow(mMessageWindow);
     
     mMessageWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.33f)));
     mMessageWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.25f)));  
     mMessageWindow->setText("Message");
     	
-   	DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtMessageBox");
+   	DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtMessageBox");
     mMessageWindow->addChildWindow(text);
 	text->setText("This is an informational message. It is very long and annoying, and does nothing useful.");
 					
@@ -742,7 +742,7 @@ void App::makeMessageWindow(){
     
     mMessageWindow->hide();	
     
-    PushButton *btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnMessageOK"));
+    PushButton *btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnMessageOK"));
     mMessageWindow->addChildWindow(btn);
     btn->setText("OK");
     btn->setPosition(UVector2(cegui_reldim(0.3f), cegui_reldim( 0.7f)));
@@ -761,7 +761,7 @@ void App::makeMessageWindow(){
 	Creates the server browser window
 **********************************************/
 void App::makeServerWindow(){
-	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpace/FrameWindow", "wndServer");
+	mServerWindow = (FrameWindow *)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndServer");
     root->addChildWindow(mServerWindow);
     
     mServerWindow->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.3f)));
@@ -775,7 +775,7 @@ void App::makeServerWindow(){
 	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
    	//}
    	
-   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnRefresh"));
+   	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnRefresh"));
     mServerWindow->addChildWindow(btn);
     btn->setText("Refresh List");
     btn->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.88f)));
@@ -783,7 +783,7 @@ void App::makeServerWindow(){
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onServerButtonClicked, this));
     btn->setAlwaysOnTop(true);	
     
-    btn = (PushButton *)(winMgr->createWindow("SleekSpace/Button", "btnConnect"));
+    btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnConnect"));
     mServerWindow->addChildWindow(btn);
     btn->setText("Connect");
     btn->setPosition(UVector2(cegui_reldim(0.55f), cegui_reldim( 0.88f)));
@@ -792,7 +792,7 @@ void App::makeServerWindow(){
     btn->setAlwaysOnTop(true);	
     
     
-   	Listbox* lb = (Listbox *)(winMgr->createWindow("SleekSpace/Listbox", "lbServers"));
+   	Listbox* lb = (Listbox *)(winMgr->createWindow("SleekSpaceBSOD/Listbox", "lbServers"));
    	mServerWindow->addChildWindow(lb);
    	lb->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.28f)));
     lb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.45f)));
@@ -800,7 +800,7 @@ void App::makeServerWindow(){
     lb->subscribeEvent(Listbox::EventSelectionChanged, Event::Subscriber(&App::onServerListClicked, this));
     
     
-    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtServerInfo");
+    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtServerInfo");
     mServerWindow->addChildWindow(text);
 	text->setText("Not currently connected to any server. \
 					Select a server from the list below or specify \
@@ -815,7 +815,7 @@ void App::makeServerWindow(){
 				
 				
 				
-	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSelected");
+	text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtSelected");
     mServerWindow->addChildWindow(text);
 	text->setText("Address: ");
 					
@@ -826,7 +826,7 @@ void App::makeServerWindow(){
 			
 				
 				
-	Editbox* edit = (Editbox *)winMgr->createWindow("SleekSpace/Editbox", "txtCustomServer");
+	Editbox* edit = (Editbox *)winMgr->createWindow("SleekSpaceBSOD/Editbox", "txtCustomServer");
     mServerWindow->addChildWindow(edit);
 	edit->setText("");
 					
@@ -849,7 +849,7 @@ void App::makeServerWindow(){
 **********************************************/
 void App::makeOptionWindow(){
           
-    mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpace/FrameWindow", "wndOption");
+    mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndOption");
     root->addChildWindow(mOptionWindow);
     
     mOptionWindow->setPosition(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.45f)));
@@ -863,13 +863,13 @@ void App::makeOptionWindow(){
     mOptionWindow->hide();
     
       
-    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSpeedInfo");
+    DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtSpeedInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Speed: 1.0");	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.10f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.1f)));
     
-    Slider *slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSpeed"));
+    Slider *slide = (Slider *)(winMgr->createWindow("SleekSpaceBSOD/Slider", "slideSpeed"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Connect");
     slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.17f)));
@@ -878,13 +878,13 @@ void App::makeOptionWindow(){
 	slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
 	slide->setCurrentValue(fParticleSpeedScale / 10.0f);
 
-    text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtSizeInfo");
+    text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtSizeInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Size: 1.0");	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.25f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     
-    slide = (Slider *)(winMgr->createWindow("SleekSpace/Slider", "slideSize"));
+    slide = (Slider *)(winMgr->createWindow("SleekSpaceBSOD/Slider", "slideSize"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Size");
     slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.37f)));
@@ -893,7 +893,7 @@ void App::makeOptionWindow(){
     slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
     slide->setCurrentValue(fParticleSizeScale / 10.0f);
     
-    text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtDarkInfo");
+    text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtDarkInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Darknet:");	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.5f)));
@@ -901,7 +901,7 @@ void App::makeOptionWindow(){
   
   	
   	
-	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "cbDarknet");
+	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpaceBSOD/Checkbox", "cbDarknet");
 	mOptionWindow->addChildWindow(cb);	
 	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.60f )));
 	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
@@ -912,7 +912,7 @@ void App::makeOptionWindow(){
 						Event::Subscriber(&App::onDarknetCheckboxClicked, this) );
 						
 						
-	cb = (Checkbox *)winMgr->createWindow("SleekSpace/Checkbox", "cbNonDarknet" );
+	cb = (Checkbox *)winMgr->createWindow("SleekSpaceBSOD/Checkbox", "cbNonDarknet" );
 	mOptionWindow->addChildWindow(cb);	
 	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.67f )));
 	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
@@ -924,7 +924,7 @@ void App::makeOptionWindow(){
   	
   	
  
-	text = (DefaultWindow *)winMgr->createWindow("SleekSpace/StaticText", "txtVersion");
+	text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
 	text->setText("BSOD Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
 	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.75f)));

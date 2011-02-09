@@ -94,7 +94,7 @@ void App::initGUI(){
 		CEGUI::FontManager::getSingleton().createFont( "arial.font" );
 
 	//Load in the themee file
-	CEGUI::SchemeManager::getSingleton().loadScheme( "SleekSpace.scheme" );
+	CEGUI::SchemeManager::getSingleton().loadScheme( "SleekSpaceBSOD.scheme" );
 	
 	// All windows and widgets are created via the WindowManager singleton.
     winMgr = &WindowManager::getSingleton();   
@@ -533,9 +533,9 @@ void App::addProtocolEntry(string name, Color col, int index){
 	xpos += 0.1;
 	
 	cb->setPosition(UVector2(cegui_reldim( xpos ), cegui_reldim( ypos )));
-	cb->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.075f)));
+	cb->setSize(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.075f)));
 	cb->setText(name.c_str());
-	cb->setProperty("NormalTextColour", col.toString()); 
+	cb->setProperty("SelectedTextColour", col.toString()); 
 	cb->setSelected(true);
 	
 	cb->subscribeEvent(Checkbox::EventCheckStateChanged, 
@@ -680,8 +680,8 @@ void App::makeProtocolWindow(){
     root->addChildWindow(mProtoWindow);
     
     mProtoWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.25f)));
-    mProtoWindow->setSize(UVector2(cegui_reldim(0.35f), cegui_reldim( 0.5f)));  
-    mProtoWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
+    mProtoWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.5f)));  
+    mProtoWindow->setMaxSize(UVector2(cegui_reldim(1.5f), cegui_reldim( 1.0f)));
     mProtoWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
 
     mProtoWindow->setText("Protocols");

@@ -562,7 +562,7 @@ void do_configuration(int argc, char **argv) {
  */
 static void parse_args(const char *line, char **driver, char **args)
 {
-	char *tok;
+	const char *tok;
 	tok = strchr(line,' ');
 	if (!tok) {
 		*driver = strdup(line);

@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* Colour module based on libprotoident */
 typedef enum counters {

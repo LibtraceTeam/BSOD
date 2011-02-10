@@ -116,7 +116,7 @@ int App::init(App *a, int argc, char **argv){
 
 	//Connect	
 	if(mServerAddr != ""){
-		if(!openSocket()){
+		if(!openSocket(true)){
 			LOG("Something went wrong with the socket, bailing out\n");
 			return 0;
 		}

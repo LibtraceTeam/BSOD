@@ -148,7 +148,7 @@ bool App::initSocket(){
 /*********************************************
 	Connect to a server
 **********************************************/
-bool App::openSocket(){
+bool App::openSocket(bool addList){
 
 	//If we're switching between servers, kill all our particles
 	if(ps()){
@@ -199,6 +199,11 @@ bool App::openSocket(){
     bConnected = true;
     
     mFlowDescriptors.clear();
+
+	if (addList) {
+		string ip_str = toString(ip.host & 0xff) + "." + toString((ip.host>>8)&0xff) + "." + toString((ip.host>>16)&0xff) + "." + toString((ip.host >> 24)&0xff);
+		addExplicitServerListEntry(mServerAddr, ip_str, toString(iServerPort));
+	}
     
     //Set the 'connected to server' text
 #ifdef ENABLE_GUI
@@ -332,7 +337,8 @@ void App::updateUDPSocket(){
 	
 	//And add it to the GUI				
 #ifdef ENABLE_GUI
-	addServerListEntry(name, remoteIP, port);
+	if (!inExplicitList(name, port))
+		addDiscServerListEntry(name, remoteIP, port);
 #endif
 	
 	//Send out some more broadcasts. We want to make sure that we have sent 
@@ -458,6 +464,7 @@ void App::updateTCPSocket(){
 		else if(type == PACKET_UPDATE){
 		
 			pack_update_t *pkt = ( pack_update_t *)data;
+			iCurrentTime = ntohl(pkt->ts);	
 			
 			if(!getFD(pkt->packetType)->bShown){
 				index += thisSize;	
@@ -479,7 +486,6 @@ void App::updateTCPSocket(){
 				rtt = -rtt;
 			}
 			
-			iCurrentTime = ntohl(pkt->ts);	
 			
 			bool dark = pkt->dark;
 			
@@ -632,7 +638,7 @@ void App::disconnect(bool notify){
 	clearFlowDescriptors();
 		
 	if(notify){
-		messagebox("Disconnected from server " + 
+		disconnectbox("Disconnected from server " + 
 						mServerAddr + ":" + 
 						toString(iServerPort), 
 						"Disconnected");

@@ -132,7 +132,7 @@ class App{
 					
 	//socket.cpp
 	bool initSocket();
-	bool openSocket();			//Connects to the server
+	bool openSocket(bool addList);			//Connects to the server
 	void disconnect(bool notify);//Disconnects from the server
 	void closeSocket();			//Shuts down the networking system
 	void updateSocket();		//Reads data from the server
@@ -140,6 +140,7 @@ class App{
 	void updateTCPSocket();		//Reads from our TCP connection
 	void updateUDPSocket();		//Ditto from our UDP socket
 	void sendDiscoveryPacket(int); //Sends the UDP broadcast discovery packet
+	bool inExplicitList(string name, string port);
 	
 	//config.cpp
 	bool loadConfig();			//Loads bsod2.cfg using libconfuse
@@ -154,6 +155,8 @@ class App{
 	void makeServerWindow();
 	void makeProtocolWindow();
 	void makeMessageWindow();
+	void makeDisconnectedWindow();
+	void renderServerList();
 	void resizeGUI(int x, int y); //Invoked by the event handler
 	bool processGUIEvent(SDL_Event e); 	//Passes an event to the GUI. If it
 										//returns true, then the GUI is assumed
@@ -163,8 +166,10 @@ class App{
 										//to the protocol window
 	void clearProtocolEntries(); //Delete the GUI checkboxes
 	void clearServerList();		//Called when we send a new discovery packet
-	void addServerListEntry(string name, string IP, string port);
+	void addExplicitServerListEntry(string name, string IP, string port);
+	void addDiscServerListEntry(string name, string IP, string port);
 	void messagebox(string text, string title = "Message"); 
+	void disconnectbox(string text, string title = "Disconnected");
 	void updateGUIConnectionStatus();
 	
 	//GUI callback handlers
@@ -177,6 +182,7 @@ class App{
 	bool onServerButtonClicked(const CEGUI::EventArgs&);
 	bool onProtocolButtonClicked(const CEGUI::EventArgs&);
 	bool onDarknetCheckboxClicked(const CEGUI::EventArgs&);
+	bool onReconnectButtonClicked(const CEGUI::EventArgs&);
 #endif
 	
 	//Flow descriptors

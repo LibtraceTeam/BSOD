@@ -24,6 +24,7 @@ FrameWindow *mProtoWindow = NULL;
 FrameWindow *mServerWindow = NULL;
 FrameWindow *mOptionWindow = NULL;
 FrameWindow *mMessageWindow = NULL;
+FrameWindow *mDisconnectWindow = NULL;
 
 //Globals. Stolen from:
 //http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_SDL_and_OpenGL
@@ -45,7 +46,8 @@ public:
 	string ip;
 };
 
-vector<ServerInfo> mServerInfo;
+vector<ServerInfo> mServerInfoExplicit;
+vector<ServerInfo> mServerInfoDisc;
 
 
 /*********************************************
@@ -119,7 +121,9 @@ void App::initGUI(){
 	
 	//And the messagebox window
 	makeMessageWindow();
-    
+   	
+	//And the disconnected window
+   	makeDisconnectedWindow(); 
     
 		
 		
@@ -211,6 +215,7 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 	else if(senderID == "btnProtocols") target = mProtoWindow;
 	else if(senderID == "btnOptions") target = mOptionWindow;
 	else if(senderID == "btnMessageOK") target = mMessageWindow;
+	else if(senderID == "btnReconnectCancel") target = mDisconnectWindow;
 	
 	//Toggle the window if we found it. TODO: We could do fancy fades with 
 	//setAlpha() and such...
@@ -221,8 +226,8 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 			target->show();
 			target->moveToFront();
 			
-			//hack!
 			if(target == mServerWindow){
+				renderServerList();
 				beginDiscovery();
 			}
 		}
@@ -290,8 +295,6 @@ bool App::onProtocolButtonClicked(const EventArgs &args){
 	//Set all the protocol checkboxes
 	for(int i=0;i<MAX_FLOW_DESCRIPTORS;i++){
 	
-		LOG("%d\n", i);
-	
 		//Make sure this one is valid
 		if(!getFD(i)) continue;		
 			
@@ -329,6 +332,62 @@ void App::messagebox(string text, string title){
 
 }
 
+void App::disconnectbox(string text, string title) {
+	if (!bGlobalGuiEnable) return;
+
+	DefaultWindow* t = (DefaultWindow *)winMgr->getWindow("txtDisconnectBox");  	
+	t->setText(text);
+	mDisconnectWindow->setText(title);
+	mDisconnectWindow->setPosition(UVector2(cegui_reldim(0.25f),
+			cegui_reldim( 0.33f)));
+	mDisconnectWindow->show();
+	mDisconnectWindow->moveToFront();
+}
+
+bool App::onReconnectButtonClicked(const EventArgs &args) {
+	if(!bGlobalGuiEnable) return false;
+
+	mDisconnectWindow->hide();
+
+	if (!openSocket(false)) {
+		/* If we failed to reconnect, pop the window back up */
+		mDisconnectWindow->show();	
+	}
+
+	return true;
+
+}
+
+bool App::inExplicitList(string name, string port) {
+
+	vector<ServerInfo>::iterator it;
+
+	for (it = mServerInfoExplicit.begin(); it != mServerInfoExplicit.end();
+			it ++) {
+		if (((*it).name == name || (*it).ip == name) 
+				&& (*it).port == port)
+			return true;
+	}
+
+	return false;
+}
+
+void App::renderServerList() {
+
+	vector<ServerInfo>::iterator it;
+	Listbox *lb = (Listbox *)winMgr->getWindow("lbServers");
+
+	lb->resetList();
+
+	for (it = mServerInfoExplicit.begin(); it != mServerInfoExplicit.end();
+			it ++) {
+
+		lb->addItem(new ListboxTextItem((*it).name));
+
+	}
+	
+}
+
 /*********************************************
 	Called when we click a server button
 **********************************************/
@@ -341,6 +400,7 @@ bool App::onServerButtonClicked(const EventArgs &args){
 	String senderID = we->window->getName();
 	
 	if(senderID == "btnRefresh"){
+		renderServerList();
 		beginDiscovery();
 	}else if(senderID == "btnConnect"){
 		Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
@@ -369,15 +429,20 @@ bool App::onServerButtonClicked(const EventArgs &args){
 		}else{
 			mServerAddr = text;
 			iServerPort = DEFAULT_PORT;
-		}		
+		}
 		
-		if(openSocket()){
+		bool toAdd = false;
+		if (!inExplicitList(mServerAddr, toString(iServerPort)))
+			toAdd = true;			
+		
+		if(openSocket(toAdd)){
 			mServerWindow->hide();
 		}else{
 			messagebox("Could not connect to server '" + 
 						mServerAddr + ":" + 
 						toString(iServerPort) + "'", 
 						"Connection Failed");
+
 						
 		}
 		
@@ -398,6 +463,7 @@ bool App::onServerListClicked(const EventArgs &args){
 	
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	Listbox *lb = (Listbox *)((WindowEventArgs *)&args)->window;
+	ServerInfo *info = NULL;
 		
 	if(lb->getSelectedCount() <= 0){
 		return true;
@@ -406,11 +472,15 @@ bool App::onServerListClicked(const EventArgs &args){
 	int index = lb->getItemIndex(lb->getFirstSelectedItem());
 		
 	//Sanity check
-	if(index >= mServerInfo.size() || index < 0){
+	if(index >= mServerInfoExplicit.size() + mServerInfoDisc.size() 
+				|| index < 0){
 		return true;
 	}
 	
-	ServerInfo *info = &mServerInfo[index];
+	if (index < mServerInfoExplicit.size())
+		info = &mServerInfoExplicit[index];
+	else
+		info = &mServerInfoDisc[index - mServerInfoExplicit.size()];
 	
 	eb->setText(info->ip + ":" + info->port);
 		
@@ -554,7 +624,20 @@ void App::clearProtocolEntries(){
 
 }
 
-void App::addServerListEntry(string name, string IP, string port){
+void App::addExplicitServerListEntry(string name, string IP, string port) {
+
+	if(!bGlobalGuiEnable) return;
+	
+	ServerInfo info;
+	info.name = name;
+	info.ip = IP;
+	info.port = port;
+
+	mServerInfoExplicit.push_back(info);
+
+}
+
+void App::addDiscServerListEntry(string name, string IP, string port){
 	
 	if(!bGlobalGuiEnable) return;
 	
@@ -563,10 +646,10 @@ void App::addServerListEntry(string name, string IP, string port){
 	info.ip = IP;
 	info.port = port;
 
-	mServerInfo.push_back(info);
+	mServerInfoDisc.push_back(info);
 
-	Listbox* lb = (Listbox *)winMgr->getWindow("lbServers");  	
-    lb->addItem(new ListboxTextItem(name));
+	//Listbox* lb = (Listbox *)winMgr->getWindow("lbServers");  	
+    	//lb->addItem(new ListboxTextItem(name));
 }
 
 void App::clearServerList(){
@@ -576,7 +659,8 @@ void App::clearServerList(){
 	Editbox *eb = (Editbox *)winMgr->getWindow("txtCustomServer");
 	eb->setText("");
 	
-	mServerInfo.clear();
+	mServerInfoDisc.clear();
+	renderServerList();
 }
 
 void App::updateGUIConnectionStatus(){
@@ -755,7 +839,41 @@ void App::makeMessageWindow(){
     mMessageWindow->setSizingEnabled(false);
 }
 
+void App::makeDisconnectedWindow() {
+	mDisconnectWindow = (FrameWindow *)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndDisconnect");
+	root->addChildWindow(mDisconnectWindow);
+	mDisconnectWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.33f)));
+	mDisconnectWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.25f)));
+	mDisconnectWindow->setText("Disconnected");
 
+	DefaultWindow *text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtDisconnectBox");
+	mDisconnectWindow->addChildWindow(text);
+	text->setText("This is a special window for handling server disconnections\n");
+	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.08f)));
+	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.7f)));
+	text->setProperty("HorzFormatting", "WordWrapLeftAligned");
+
+	mDisconnectWindow->hide();
+
+	PushButton *recbtn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnReconnect"));
+	mDisconnectWindow->addChildWindow(recbtn);
+	recbtn->setText("Reconnect");
+	recbtn->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.7f)));
+	recbtn->setSize(UVector2(cegui_reldim(0.3f), cegui_reldim( 0.2f)));
+	recbtn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onReconnectButtonClicked, this));
+	recbtn->setAlwaysOnTop(true);
+
+	PushButton *canbtn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnReconnectCancel"));
+	mDisconnectWindow->addChildWindow(canbtn);
+	canbtn->setText("Cancel");
+	canbtn->setPosition(UVector2(cegui_reldim(0.6f), cegui_reldim( 0.7f)));		canbtn->setSize(UVector2(cegui_reldim(0.3f), cegui_reldim( 0.2f)));
+	canbtn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
+	canbtn->setAlwaysOnTop(true);
+
+	mDisconnectWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
+	mDisconnectWindow->setAlpha(0.85f);
+	mDisconnectWindow->setSizingEnabled(false);
+}
 
 /*********************************************
 	Creates the server browser window

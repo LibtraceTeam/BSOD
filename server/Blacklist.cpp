@@ -27,7 +27,7 @@
  *
  */
 
-
+#include <errno.h>
 #include "Blacklist.h"
 #include "debug.h"
 
@@ -48,7 +48,10 @@ void blacklist::load(void)
 	while(!feof(f)) {
 		char buf[80];
 		in_addr_t addr;
-		fgets(buf,sizeof(buf),f);
+		if (fgets(buf,sizeof(buf),f) == NULL) {
+			Log(LOG_DAEMON | LOG_WARNING, "Error reading from blacklist file: %s\n", strerror(errno));
+			return;
+		}
 		if (strchr(buf,'\n')) {
 			*strchr(buf,'\n')='\0';
 		}

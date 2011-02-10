@@ -99,7 +99,7 @@ char *rightpos = 0;
 char *dirmod = 0;
 char *macaddrfile = 0;
 char *blacklistdir = 0;
-char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
+const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
 char *server_name = 0;
 char *left_image = 0;
@@ -466,29 +466,29 @@ void do_configuration(int argc, char **argv) {
 	set_defaults();
 	
 	cfg_opt_t opts[] =	{
-		CFG_STR("pidfile", "", CFGF_NONE),
-		CFG_INT("background", 0, CFGF_NONE),
-		CFG_STR("basedir", NULL, CFGF_NONE),
-		CFG_STR("source", NULL, CFGF_NONE),
-		CFG_INT("listenport", 34567, CFGF_NONE),
-		CFG_STR("filter", NULL, CFGF_NONE),
-		CFG_STR("colour_module", NULL, CFGF_NONE),
-		CFG_STR("rpos_module", NULL, CFGF_NONE),
-		CFG_STR("lpos_module", NULL, CFGF_NONE),
-		CFG_STR("dir_module", NULL, CFGF_NONE),
-		CFG_INT("loop", 0, CFGF_NONE),
-		CFG_INT("shownondata", 0, CFGF_NONE),
-		CFG_INT("showdata", 1, CFGF_NONE),
-		CFG_INT("showcontrol", 1, CFGF_NONE),
-		CFG_STR("macaddrfile", NULL, CFGF_NONE),
-		CFG_STR("blacklistdir", NULL, CFGF_NONE),
-		CFG_BOOL("darknet", cfg_false, CFGF_NONE),
-		CFG_BOOL("rttest", cfg_false, CFGF_NONE),
-		CFG_INT("sampling", 0, CFGF_NONE),
-		CFG_STR("name", NULL, CFGF_NONE),
-		CFG_STR("left_image", NULL, CFGF_NONE),
-		CFG_STR("right_image", NULL, CFGF_NONE),
-		CFG_INT("sendq", 10*1024*1024, CFGF_NONE),
+		CFG_STR((char *)"pidfile", (char *)"", CFGF_NONE),
+		CFG_INT((char *)"background", 0, CFGF_NONE),
+		CFG_STR((char *)"basedir", NULL, CFGF_NONE),
+		CFG_STR((char *)"source", NULL, CFGF_NONE),
+		CFG_INT((char *)"listenport", 34567, CFGF_NONE),
+		CFG_STR((char *)"filter", NULL, CFGF_NONE),
+		CFG_STR((char *)"colour_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"rpos_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"lpos_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"dir_module", NULL, CFGF_NONE),
+		CFG_INT((char *)"loop", 0, CFGF_NONE),
+		CFG_INT((char *)"shownondata", 0, CFGF_NONE),
+		CFG_INT((char *)"showdata", 1, CFGF_NONE),
+		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
+		CFG_STR((char *)"macaddrfile", NULL, CFGF_NONE),
+		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
+		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
+		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
+		CFG_INT((char *)"sampling", 0, CFGF_NONE),
+		CFG_STR((char *)"name", NULL, CFGF_NONE),
+		CFG_STR((char *)"left_image", NULL, CFGF_NONE),
+		CFG_STR((char *)"right_image", NULL, CFGF_NONE),
+		CFG_INT((char *)"sendq", 10*1024*1024, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;

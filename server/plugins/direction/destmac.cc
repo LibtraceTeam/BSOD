@@ -122,7 +122,7 @@ int mod_get_direction(struct libtrace_packet_t *packet)
 {
     struct ether_header *ethptr;
 
-    ethptr = (struct ether_header *)trace_get_link(packet);
+    ethptr = (struct ether_header *)trace_get_layer2(packet, NULL, NULL);
 
 
     /* Set direction bit based on upstream routers' MAC */

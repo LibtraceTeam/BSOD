@@ -23,7 +23,7 @@ int daemonised = 0;
 
 void put_pid( char *fname )
 {
-        char *defname = "WandProject";
+        const char *defname = "WandProject";
         char buf[512];
         int fd;
 
@@ -67,8 +67,13 @@ void daemonise(char *name, int ch)
                 default:
                         _exit(0);
         }
-	if (ch)
-        	chdir("/");
+	if (ch) {
+        	if (chdir("/") == -1) {
+			perror("chdir");
+			exit(1);
+		}
+	}
+
         umask(0133);
         close(0);
         close(1);

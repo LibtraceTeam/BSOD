@@ -421,7 +421,11 @@ struct client *check_clients(struct modptrs_t *modptrs, bool wait)
 		{
 			fcntl(newfd, F_SETFL, O_NONBLOCK);
 			FD_SET(newfd, &xread_fds);
-			write(newfd,&protocol_version,1);
+			if (write(newfd,&protocol_version,1) == -1) {
+				Log(LOG_DAEMON | LOG_DEBUG, "Error writing protocol version: %s\n", strerror(errno));
+				return ret;
+			}
+
 			ret=add_fd(newfd);
 			if (newfd > fd_max) 
 			{    
@@ -647,7 +651,12 @@ char *read_file(char *name, int &size){
 
 	char *buf = (char*)malloc(size);
 	fseek(f, 0, SEEK_SET);
-	fread(buf, 1, size, f);
+	if (fread(buf, 1, size, f) == -1) {
+		Log(LOG_DAEMON | LOG_DEBUG, "Failed to read from file: %s\n",
+				strerror(errno));
+		return NULL;
+	}
+
 	fclose(f);
 	
 	return buf;

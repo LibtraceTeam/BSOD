@@ -64,7 +64,7 @@ static uint8_t countercolours[][3] = {
 	{200,200,  5}, /* DNS		yellow	*/
 	{  5,150,  5}, /* P2P		green */
 	{250,120, 80}, /* P2P_UDP	coral */
-	{ 50,150, 50}, /* P2PTV		another icky green? */
+	{ 80, 80,  5}, /* P2PTV		olive */
 	{ 85, 30, 30}, /* Games		Icky green? */
 	{200,100,  5}, /* Malware	orange */
 	{ 30, 85, 30}, /* VOIP		matte green */

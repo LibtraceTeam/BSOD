@@ -1,0 +1,1 @@
+SUBDIRS=colour direction position

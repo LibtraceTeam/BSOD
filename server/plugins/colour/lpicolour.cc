@@ -16,7 +16,7 @@ typedef enum counters {
 	DNS,
 	P2P,
 	P2P_UDP,
-	ENCRYPTED,
+	WINDOWS,
 	GAMES,
 	MALWARE,
 	VOIP,
@@ -40,7 +40,7 @@ char counternames [][256] = {
 	"DNS",
 	"P2P",
 	"P2P UDP",
-	"Encrypted",
+	"Windows",
 	"Games",
 	"Malware",
 	"VOIP",
@@ -64,7 +64,7 @@ static uint8_t countercolours[][3] = {
 	{200,200,  5}, /* DNS		yellow	*/
 	{  5,150,  5}, /* P2P		green */
 	{250,120, 80}, /* P2P_UDP	coral */
-	{ 80, 80,  5}, /* Encrypted	olive */
+	{ 80, 80,  5}, /* Windows	olive */
 	{ 85, 30, 30}, /* Games		Icky green? */
 	{200,100,  5}, /* Malware	orange */
 	{ 30, 85, 30}, /* VOIP		matte green */
@@ -169,6 +169,12 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 		case LPI_PROTO_ICMP:
 			*id_num = ICMP;
 			return;
+		case LPI_PROTO_UDP_NETBIOS:
+		case LPI_PROTO_NETBIOS:
+		case LPI_PROTO_UDP_WIN_MESSAGE:
+			*id_num = WINDOWS;
+			return;
+
 		case LPI_PROTO_NO_PAYLOAD:
 			if (col->transport == 6) {
 				*id_num = UNK_TCP;
@@ -178,12 +184,19 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 				*id_num = UNK_UDP;
 				return;
 			}
+			break;
 		case LPI_PROTO_UNSUPPORTED:
 			if (col->transport == 37 || col->transport == 50 ||
-					col->transport == 51) {
+					col->transport == 51 ||
+					col->transport == 47) {
 				*id_num = TUNNELLING;
 				return;
 			}
+			if (col->transport == 17) {
+				*id_num = UNK_UDP;
+				return;
+			}
+			break;
 		default:
 			break;
 	}
@@ -228,8 +241,16 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 		case LPI_CATEGORY_MALWARE:
 			*id_num = MALWARE;
 			return;
-		case LPI_CATEGORY_ENCRYPT:
-			*id_num = ENCRYPTED;
+		case LPI_CATEGORY_NO_CATEGORY:
+			if (col->transport == 6) {
+				*id_num = UNK_TCP;
+				return;
+			}
+			if (col->transport == 17) {
+				*id_num = UNK_UDP;
+				return;
+			}
+			break;
 		default:
 			*id_num = OTHER;
 			return;
@@ -430,6 +451,7 @@ int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet) {
 	plen = trace_get_payload_length(packet);
 
 	guess_protocol(id_num, col, dir, plen);
+	
 	return 0;
 
 }

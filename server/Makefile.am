@@ -21,3 +21,6 @@ bsodserver_SOURCES=Blacklist.cpp \
 bsodserver_LDADD=@ADD_LIBS@
 
 EXTRA_DIST=bsod_server.conf
+
+install-data-hook:
+	mkdir -p $(prefix)/blist

@@ -16,7 +16,7 @@ typedef enum counters {
 	DNS,
 	P2P,
 	P2P_UDP,
-	P2PTV,
+	ENCRYPTED,
 	GAMES,
 	MALWARE,
 	VOIP,
@@ -40,7 +40,7 @@ char counternames [][256] = {
 	"DNS",
 	"P2P",
 	"P2P UDP",
-	"P2PTV",
+	"Encrypted",
 	"Games",
 	"Malware",
 	"VOIP",
@@ -64,7 +64,7 @@ static uint8_t countercolours[][3] = {
 	{200,200,  5}, /* DNS		yellow	*/
 	{  5,150,  5}, /* P2P		green */
 	{250,120, 80}, /* P2P_UDP	coral */
-	{ 80, 80,  5}, /* P2PTV		olive */
+	{ 80, 80,  5}, /* Encrypted	olive */
 	{ 85, 30, 30}, /* Games		Icky green? */
 	{200,100,  5}, /* Malware	orange */
 	{ 30, 85, 30}, /* VOIP		matte green */
@@ -211,7 +211,7 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 			*id_num = STREAMING;
 			return;
 		case LPI_CATEGORY_P2PTV:
-			*id_num = P2PTV;
+			*id_num = P2P;
 			return;
 		case LPI_CATEGORY_GAMING:
 			*id_num = GAMES;
@@ -228,6 +228,8 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 		case LPI_CATEGORY_MALWARE:
 			*id_num = MALWARE;
 			return;
+		case LPI_CATEGORY_ENCRYPT:
+			*id_num = ENCRYPTED;
 		default:
 			*id_num = OTHER;
 			return;

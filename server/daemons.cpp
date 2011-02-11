@@ -28,7 +28,7 @@ void put_pid( char *fname )
         int fd;
 
         if( fname == NULL ) {
-                fname = defname;
+                fname = (char *)defname;
                 snprintf( buf, 512, "/var/run/%s.pid", fname );
         } else {
                 snprintf( buf, 512, "%s", fname );

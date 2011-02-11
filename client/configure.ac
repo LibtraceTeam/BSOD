@@ -1,4 +1,4 @@
-AC_INIT([bsod-client],[2.0.0],[contact@wand.net.nz])
+AC_INIT([bsod-client],[2.0.1],[contact@wand.net.nz])
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
@@ -33,8 +33,6 @@ AC_PROG_INSTALL
 
 AC_LANG(C++)
 AC_PROG_LIBTOOL
-
-build_tools=yes
 
 AC_CONFIG_FILES([Makefile src/Makefile src/include/Makefile runtime/Makefile
 		runtime/data/Makefile runtime/data/gui/Makefile 

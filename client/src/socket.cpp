@@ -569,6 +569,11 @@ void App::addFlowDescriptor(byte id, Color c, string name){
     f->bShown = true; //show by default
     
     mFlowDescriptors[id] = f;
+   
+  	/* Make sure the particles using this colour are rendered - they
+	 * may have been disabled when we were connected to another server
+	 * but we will have reset our flow descriptors since then */
+	ps()->showColor(c, true);
     
     //Add this to the GUI
 #ifdef ENABLE_GUI

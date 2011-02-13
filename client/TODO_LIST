@@ -1,4 +1,19 @@
 ======================
+ Management
+======================
+
+- Create a trac for BSOD and move all of this stuff in that!
+
+=========================
+ Things noticed by Shane
+=========================
+ - Auto-detect of the appropriate rendering type isn't too flash
+ - Enter key should work in the server window
+ - WASD movement scheme - navigating through the 3d environment is very
+   unintuitive
+
+
+======================
  From NZNOG feedback
 ======================
 
@@ -12,7 +27,7 @@
  Faster particle systems
 =========================
 
-- We can get smoother perfomance under ihug-style loads with the vertex shader 
+- We can get smoother perfomance under ISP-style loads with the vertex shader 
   particle system by limiting to Nk particles per frame
 - We can get even *better* performance by rendering each Nk particles to a 
   seperate texture, and only updating those textures every Nk/total seconds.

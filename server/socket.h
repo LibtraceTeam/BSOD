@@ -32,9 +32,11 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 #include <inttypes.h>
-int setup_listen_socket();
-int setup_udp_socket();
-int bind_tcp_socket(int listener, int port);
+#include <libwandevent.h>
+void setup_listen_socket(wand_event_handler_t *ev_hdl, 
+		struct modptrs_t *modptrs,
+		struct wand_fdcb_t *listener, uint16_t port);
+void setup_udp_socket(wand_event_handler_t *ev_hdl, struct wand_fdcb_t *udp);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
 int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
 int send_update_flow(struct client *client, 

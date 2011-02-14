@@ -42,11 +42,17 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <libwandevent.h>
+
 #include "socket.h"
+#include "packets.h"
 #include "debug.h"
 #include <syslog.h>
 #include "bsod_server.h"
 #include <list>
+#include <map>
+
+#define BSOD_PROTO_VERSION 0x14
 
 float htonf(float x) { 
 	union {
@@ -74,6 +80,8 @@ struct client {
 	struct client *next;
 	struct client *prev;
 	int data_waiting;
+	wand_event_handler_t *ev_hdl;
+	struct wand_fdcb_t writer;
 	std::list< client_buffer > buffer;
 } *clients = NULL;
 
@@ -128,34 +136,47 @@ struct image_data_t {
 	uint32_t length; //the number of bytes following this packet of image data
 } __attribute__((packed));
 
-int listen_socket;
-int udp_socket;
-fd_set read_fds;
-fd_set write_fds;
+struct listen_data {
+	wand_event_handler_t *ev_hdl;
+	struct modptrs_t *modptrs;
+};
+
+struct listen_data ldata;
 
 /* For discovery replies */
-extern int port;
+static uint16_t server_port = 0;
+
 extern char *server_name;
 
 /* For left and right images */
 extern char *left_image, *right_image;
 
+void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) ;
+
 /* Creates a new structure containing a file descriptor */
-struct client* create_fd(int fd)
+struct client* create_fd(int fd, wand_event_handler_t *ev_hdl)
 {
 	client *tmp = new client;
 	tmp->data_waiting = 0;
 	tmp->fd = fd;
 	tmp->next = NULL;
 	tmp->prev = NULL;
+	tmp->ev_hdl = ev_hdl;
+
+	tmp->writer.fd = fd;
+	tmp->writer.flags = EV_READ;
+	tmp->writer.data = tmp;
+	tmp->writer.callback = client_cb;
+
+	wand_add_event(ev_hdl, &(tmp->writer));
 
 	return tmp;
 }
 
 /* Adds a structure containing a file descriptor to the front of the list */
-struct client *add_fd(int fd)
+struct client *add_fd(int fd, wand_event_handler_t *ev_hdl)
 {
-	struct client *tmp = create_fd(fd);
+	struct client *tmp = create_fd(fd, ev_hdl);
 
 	if(clients == NULL)
 		clients = tmp;
@@ -175,8 +196,8 @@ void remove_fd(struct client *tmp)
 {
 	Log(LOG_DAEMON|LOG_INFO,"Removing client on fd %i\n", tmp->fd);
 
-	FD_CLR(tmp->fd, &read_fds);
-	FD_CLR(tmp->fd, &write_fds);
+	wand_del_event(tmp->ev_hdl, &tmp->writer);
+	
 	close(tmp->fd);
 
 	if(tmp->next == NULL && tmp->prev == NULL) // only item
@@ -206,10 +227,54 @@ void remove_fd(struct client *tmp)
 	delete tmp;
 }
 
+static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+
+	char protocol_version = BSOD_PROTO_VERSION;
+	struct sockaddr_in remoteaddr;
+	socklen_t sock_size;
+	int newfd;
+	struct client * ret;
+	
+	// handle new connections
+	sock_size = sizeof(struct sockaddr_in);
+	if ((newfd = accept(evcb->fd, (struct sockaddr *)&remoteaddr,
+					&sock_size)) == -1) { 
+		perror("accept");
+	} 
+	else 
+	{
+		fcntl(newfd, F_SETFL, O_NONBLOCK);
+		if (write(newfd,&protocol_version,1) == -1) {
+			Log(LOG_DAEMON | LOG_DEBUG, "Error writing protocol version: %s\n", strerror(errno));
+			return;
+		}
+
+		ret=add_fd(newfd, ldata.ev_hdl);
+		Log(LOG_DAEMON|LOG_DEBUG,
+				"server: new connection from %s\n", 
+				inet_ntoa(remoteaddr.sin_addr));
+		// Update all clients with the colour table
+		// This could be done better by targeting only the new
+		// client.
+		send_colour_table(ldata.modptrs);	
+
+		// Send the new client the left and right images
+		send_images(ret);
+
+		send_flows(ret);
+	}
+
+
+}
+
 //----------------------------------------------------------
-int setup_listen_socket()
+void setup_listen_socket(wand_event_handler_t *ev_hdl, 
+		struct modptrs_t *modptrs, 
+		struct wand_fdcb_t *listener, uint16_t port)
 {
 	int yes=1;        // for setsockopt() SO_REUSEADDR, below
+	int listen_socket = -1;
+	struct sockaddr_in myaddr;     // server address
 
 	// get the listener
 	if ((listen_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -224,20 +289,84 @@ int setup_listen_socket()
 		exit(1);
 	}
 
-	// reset the set and add the listening socket to it
-	FD_ZERO(&read_fds);
-	FD_ZERO(&write_fds);
-	FD_SET(listen_socket, &read_fds);
 
-	return listen_socket;
+	assert(port > 0);
+	assert(listen_socket >= 0);// starts at 0? 
+
+	myaddr.sin_family = AF_INET;
+	myaddr.sin_addr.s_addr = INADDR_ANY;
+	myaddr.sin_port = htons(port);
+	memset(&(myaddr.sin_zero), '\0', 8);
+	if (bind(listen_socket, (struct sockaddr *)&myaddr, 
+				sizeof(myaddr)) == -1) {
+		perror("bind");
+		exit(1);
+	}
+
+	// listen
+	if (listen(listen_socket, 10) == -1) {
+		perror("listen");
+		exit(1);
+	}
+	
+
+	server_port = port;
+
+	ldata.ev_hdl = ev_hdl;
+	ldata.modptrs = modptrs;
+
+	listener->fd = listen_socket;
+	listener->flags = EV_READ;
+	listener->data = NULL;
+	listener->callback = listen_cb;
+
+	wand_add_event(ev_hdl, listener);
+
+	return;
+
 }
 
+static void udp_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+	struct sockaddr_in sendaddr;
+	int addr_len = sizeof(sendaddr);
+	int numbytes;
+	unsigned char buf[16];
+	char response[256];
+	
+	sendaddr.sin_family = AF_INET;
+	sendaddr.sin_port = htons(UDP_PORT);
+	sendaddr.sin_addr.s_addr = INADDR_ANY;
+	memset(sendaddr.sin_zero,'\0', sizeof sendaddr.sin_zero);
+
+	if ((numbytes = recvfrom(evcb->fd, buf, sizeof(buf), 0,
+					(struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1){
+		perror("recvfrom");
+	}
+	buf[numbytes] = 0;
+
+	Log(LOG_DAEMON|LOG_DEBUG,"UDP discovery from %s\n", 
+			inet_ntoa(sendaddr.sin_addr));
+
+	//Send them a response 
+	sprintf(response, "%s|%d|%s", "0.0.0.0", server_port, server_name);
+
+	numbytes = sendto(evcb->fd, response, strlen(response) , 0, 
+			(struct sockaddr *)&sendaddr, 
+			sizeof(sendaddr));
+
+	Log(LOG_DAEMON|LOG_DEBUG,"Sent a reply: '%s'\n", response);
+
+
+
+}
 
 //----------------------------------------------------------
-int setup_udp_socket(){
+void setup_udp_socket(wand_event_handler_t *ev_hdl, 
+		struct wand_fdcb_t *udp){
 
 	int addr_len;
-    int broadcast=1;
+    	int broadcast=1;
+	int udp_socket;
 
 	if((udp_socket = socket(PF_INET, SOCK_DGRAM, 0)) == -1){
 		perror("socket");
@@ -274,45 +403,28 @@ int setup_udp_socket(){
 		printf("UDP port %d is in use\n", port);		
 	}
 	
-	//Add the UDP socket to the socket set so we can select() on it
-	FD_SET(udp_socket, &read_fds);
+	udp->fd = udp_socket;
+	udp->flags = EV_READ;
+	udp->data = ev_hdl;
+	udp->callback = udp_cb;
+
+	wand_add_event(ev_hdl, udp);
+	
 		
-	return udp_socket;
+	return ;
 }
 
-//-------------------------------------------------------------
-int bind_tcp_socket(int listener, int port)
-{
-	struct sockaddr_in myaddr;     // server address
+void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 
-	assert(port > 0);
-	assert(listener >= 0);// starts at 0? 
+	struct client *client = (struct client *)(evcb->data);
 
-	myaddr.sin_family = AF_INET;
-	myaddr.sin_addr.s_addr = INADDR_ANY;
-	myaddr.sin_port = htons(port);
-	memset(&(myaddr.sin_zero), '\0', 8);
-	if (bind(listener, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
-		perror("bind");
-		exit(1);
+	if (ev == EV_READ) {
+
+		Log(LOG_DAEMON | LOG_DEBUG, "Detected EOF in client callback\n");
+		remove_fd(client);
+		return;
 	}
 
-	// listen
-	if (listen(listener, 10) == -1) {
-		perror("listen");
-		exit(1);
-	}
-	return 0;
-}
-
-/*
- * Writes all waiting data out to the client immediately
- *
- * returns 1 if the client is fine
- *         0 if the client is "dead"
- */
-int flush_data(struct client *client)
-{
 	while (!client->buffer.empty()) {
 		int ret=send(client->fd,
 				(char*)client->buffer.front().data+client->buffer.front().offset,
@@ -324,10 +436,11 @@ int flush_data(struct client *client)
 				case EINTR: continue;
 				case ENOBUFS:
 				case ENOMEM:
-				case EAGAIN: return 1;
+				case EAGAIN: return;
 				default:
 					perror("send");
-					return 0;
+					remove_fd(client);
+					return;
 			}
 		}
 
@@ -340,148 +453,18 @@ int flush_data(struct client *client)
 		}
 		else {
 			client->buffer.front().offset+=ret;
-			return 1;
+			return;
 		}
 	}
 
 	/* Nothing more to write */
-	FD_CLR(client->fd, &write_fds);
+	wand_del_event(client->ev_hdl, &(client->writer));
+	client->writer.flags = EV_READ;
+	wand_add_event(client->ev_hdl, &(client->writer));
 
-	return 1;
+
 }
 
-//-----------------------------------------------------------------
-/* Pickup any new clients. */
-struct client *check_clients(struct modptrs_t *modptrs, bool wait)
-{
-	/* Protocol version is a single byte, the upper nibble is the 
-	 * major version, and the lower nibble is the minor
-	 * version.  The number is the lowest release version that can
-	 * understand this protocol.
-	 * examples:
-	 *  1.2 == 0x12
-	 *  10.13 = 0xad
-	 */
-	char protocol_version = 0x14;
-	struct sockaddr_in remoteaddr;
-	socklen_t sock_size;
-	int newfd;
-	struct timeval tv;
-	struct timeval *tvp;
-	struct client *tmp = clients;
-	struct client *ret = NULL;
-	fd_set xread_fds, xwrite_fds;
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-
-	if (wait) {
-		tvp = NULL;
-	}
-	else {
-		tvp = &tv;
-	}
-
-	xread_fds = read_fds;
-	xwrite_fds = write_fds;
-
-	while (select(fd_max+1, &xread_fds, &xwrite_fds, NULL, tvp) == -1) {
-		switch (errno) {
-			case EAGAIN: continue;
-			case EINTR: return NULL;
-			default:
-				    perror("select");
-				    exit(1);
-		}
-	}
-	
-	
-	
-	/* For every client that can accept data, send it anything that it
-	 * has queued 
-	 */
-	struct client *next;
-	while(tmp) {
-		next = tmp->next;
-		if (!flush_data(tmp)) {
-			remove_fd(tmp);
-		}
-		tmp = next;
-	}
-
-	/* if listen_socket is in the set, we have a new client */
-	if (FD_ISSET(listen_socket, &xread_fds))
-	{
-		// handle new connections
-		sock_size = sizeof(struct sockaddr_in);
-		if ((newfd = accept(listen_socket, (struct sockaddr *)&remoteaddr,
-						&sock_size)) == -1) { 
-			perror("accept");
-		} 
-		else 
-		{
-			fcntl(newfd, F_SETFL, O_NONBLOCK);
-			FD_SET(newfd, &xread_fds);
-			if (write(newfd,&protocol_version,1) == -1) {
-				Log(LOG_DAEMON | LOG_DEBUG, "Error writing protocol version: %s\n", strerror(errno));
-				return ret;
-			}
-
-			ret=add_fd(newfd);
-			if (newfd > fd_max) 
-			{    
-				// keep track of the maximum
-				fd_max = newfd;
-			}
-			Log(LOG_DAEMON|LOG_DEBUG,
-					"server: new connection from %s\n", 
-					inet_ntoa(remoteaddr.sin_addr));
-			// Update all clients with the colour table
-			// This could be done better by targeting only the new
-			// client.
-			send_colour_table(modptrs);	
-			
-			// Send the new client the left and right images
-			send_images(ret);
-		}
-	}
-	
-	//Check for UDP
-	else if (FD_ISSET(udp_socket, &xread_fds)){
-			
-		struct sockaddr_in sendaddr;
-
-		sendaddr.sin_family = AF_INET;
-        sendaddr.sin_port = htons(UDP_PORT);
-        sendaddr.sin_addr.s_addr = INADDR_ANY;
-        memset(sendaddr.sin_zero,'\0', sizeof sendaddr.sin_zero);
- 
- 		int addr_len = sizeof(sendaddr);
-		int numbytes;
-		unsigned char buf[16];
-        if ((numbytes = recvfrom(udp_socket, buf, sizeof(buf), 0,
-              (struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1){
-       		perror("recvfrom");
-       	}
-       	buf[numbytes] = 0;
-       	
-       	Log(LOG_DAEMON|LOG_DEBUG,"UDP discovery from %s\n", 
-       								inet_ntoa(sendaddr.sin_addr));
-       	       
-       	//Send them a response 
-       	char response[256];
-       	sprintf(response, "%s|%d|%s", "0.0.0.0", port, server_name);
-		  
-		numbytes = sendto(udp_socket, response, strlen(response) , 0, 
-							(struct sockaddr *)&sendaddr, 
-							sizeof(sendaddr));
-		
-		Log(LOG_DAEMON|LOG_DEBUG,"Sent a reply: '%s'\n", response);
-       	
-       	
-	}
-
-	return ret;
-}
 
 /* Enqueue data onto a clients sendq
  *
@@ -507,7 +490,12 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 	memcpy(sendq.data,buffer,sendq.datalen);
 	sendq.offset = 0;
 	client->buffer.push_back(sendq);
-	FD_SET(client->fd,&write_fds);
+
+	wand_del_event(client->ev_hdl, &client->writer);
+	client->writer.flags = EV_WRITE | EV_READ;
+	wand_add_event(client->ev_hdl, &client->writer);
+
+
 }
 
 /*

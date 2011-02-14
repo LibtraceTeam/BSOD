@@ -33,6 +33,8 @@
 #ifndef RTTMAP_H
 #define RTTMAP_H
 
+#include <map>
+
 using namespace std;
 
 #define UINT16 unsigned short int

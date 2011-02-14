@@ -1,0 +1,57 @@
+BSOD Client 2.0.1
+
+-------------------------------------------------------------------------------
+Copyright (c) 2005-2011 The University of Waikato, Hamilton, New Zealand.
+All rights reserved.
+
+This code has been developed by the University of Waikato WAND
+research group. For further information please see http://www.wand.net.nz/.
+-------------------------------------------------------------------------------
+
+======================================================================
+For build and installation instructions, please see the file INSTALL.
+======================================================================
+
+This directory contains source code for BSOD client, a network traffic
+visualisation tool which displays the flow of network data between hosts in
+real time. BSOD client is only one half of the visualisation process; it 
+connects to a BSOD server which tells the client what it should be rendering
+on screen.
+
+Further information about both the BSOD client and server can be found at
+http://research.wand.net.nz/software/visualisation.php
+
+BSOD client is licensed under the GNU General Public License (GPL) version 3.
+Please see the include file COPYING for details of this license.
+
+Running BSOD Client
+===================
+The BSOD client runs from the runtime/ directory. Edit the configuation file
+"bsod2.cfg" to suit your requirements (see Configuration below) and then
+simply run the bsodclient executable. It will automatically attempt to 
+connect to the server specified in your config file, if you have specified one.
+
+Configuration
+=============
+The "bsod2.cfg" file in the runtime/ directory describes all the configuration
+for the BSOD client. Each configuration option is documented within the 
+bsod2.cfg file itself.
+
+The config file can be used to set the BSOD server to connect to, the 
+screen resolution and the method to use to render the packet particles.
+
+Note: autodetection of the particle method is not always reliable. If the BSOD 
+client is performing poorly, try manually setting the particle method to
+pointsprites or triangles.
+
+
+Acknowledgements
+================
+
+The original BSOD client was developed by Sam Jansen and Brendon Jones and was
+based on the BuNg 3D engine written by Sam Jansen and Jesse Baker 
+(http://www.wand.net.nz/~stj2/bung/).
+
+The current BSOD client was developed by Paul Hunkin and uses OpenGL.
+
+For further information or to report bugs, please email contact@wand.net.nz.

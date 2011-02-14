@@ -1,0 +1,43 @@
+Building BSOD client under Linux / OSX
+=======================================
+
+First step, make sure you have installed all of the libraries that BSOD
+client depends upon. These are:
+	* libSDL
+	* libSDL_net
+	* libSDL_ttf
+	* libIL		
+	* libILU
+	* libILUT
+	* libGLEW
+	* libconfuse
+	* libCEGUI
+
+Debian/Ubuntu users can get all of these libraries using the following command:
+
+	sudo apt-get install libsdl-dev libsdl-net1.2-dev libsdl-ttf2.0-dev libdevil-dev libglew-dev libconfuse-dev libcegui-mk2-dev
+
+
+Then, run the following commands:
+	./configure
+	make
+
+If you are missing any of the above libraries, the configure step will fail and
+should tell you which ones you are missing.
+
+The bsodclient binary will be created in the 'runtime' directory. Run the
+client from within that directory.
+
+
+Building BSOD client under Windows
+==================================
+
+If you are just wanting to run BSOD client, a precompiled Windows binary
+should be included with your download. Simply run that binary to start a BSOD
+client.
+
+A Visual Studio 2008 solution is also included in the 'windows' directory. It
+may need adjusting to set paths for your particular machine setup.
+
+
+

@@ -31,7 +31,7 @@
 
 #include "main.h"
 
-
+#include <IL/il.h>
 
 
 
@@ -171,9 +171,9 @@ void App::generateTestData(){
 		
 		int x = iTestRow;
 		
-		for(int y=1;y<tex->iSizeY - 1;y++){
+		for(int y=0;y<tex->iSizeY;y++){
 			
-			int index = (x * 4) + ((tex->iSizeY - y) * tex->iSizeX * 4);
+			int index = (x * 4) +  (y * tex->iSizeX * 4);
 			
 			byte r = data[index + 0];
 			byte g = data[index + 1];
@@ -188,10 +188,11 @@ void App::generateTestData(){
 				
 				Vector3 vel = Vector3(-10, 0, 0);// + Vector3(randFloat(-v,v),
 								//randFloat(-v,v),randFloat(-v,v));
-				Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),
-								randFloat(-v,v) + randFloat(-1,1));
+				//Vector3 pos = Vector3(randFloat(-v,v),randFloat(-v,v),
+				//				randFloat(-v,v) + randFloat(-1,1));
+				Vector3 pos = Vector3(0,0,0);
 	
-				ps()->add(pos + Vector3(60, (y / 3.0f) - 20, 0), vel, 
+				ps()->add(pos + Vector3(60, (y / 2.0f) - 20, 0), vel, 
 							Color(r,g,b), 1.0f, 15.0f);
 			}
 			

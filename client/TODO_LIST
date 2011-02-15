@@ -8,9 +8,10 @@
  Things noticed by Shane
 =========================
  - Auto-detect of the appropriate rendering type isn't too flash
- - Enter key should work in the server window
  - WASD movement scheme - navigating through the 3d environment is very
    unintuitive
+ - Client performance seems to degrade over multiple reconnects / restarts?
+   Noticably slower at loading images and rendering flows.
 
 
 ======================

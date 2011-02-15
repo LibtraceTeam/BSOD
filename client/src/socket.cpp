@@ -665,7 +665,7 @@ void App::disconnect(bool notify){
 		mRightTex = NULL;
 	}
 	
-	LOG("Disconected from server\n");
+	LOG("Disconnected from server\n");
 	
 	ps()->delAll();
 	

@@ -119,13 +119,16 @@ Texture *App::texLoad(string name, int flags){
 	}
 
 		
-	//ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 			
 	tex->iSizeX = ilGetInteger(IL_IMAGE_WIDTH);
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
 	if(flags != TEXTURE_NO_GL){	
-		tex->mData = ilGetData();
+		tex->mData = new byte[tex->iSizeX * tex->iSizeY * 4];
+		ilCopyPixels(0, 0, 0, tex->iSizeX, tex->iSizeY, 1, IL_RGBA,
+				IL_UNSIGNED_BYTE, tex->mData);
+		
 		tex->iGLID = ilutGLBindTexImage(); //ilutGLBindMipmaps();
 		
 		LOG("(got id %d)\n", tex->iGLID);	    
@@ -276,6 +279,7 @@ void App::texDelete(Texture *tex){
 	
 	for(int i=0;i<mTextures.size();i++){
 		if(mTextures[i] == tex){
+			free(tex->mData);
 			mTextures[i] = mTextures[mTextures.size() - 1];
 			mTextures.pop_back();
 			break;

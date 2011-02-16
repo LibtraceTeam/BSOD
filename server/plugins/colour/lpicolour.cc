@@ -1,3 +1,32 @@
+/*
+ * This file is part of bsod-server
+ *
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
+ * Author: Shane Alcock
+ *          
+ * All rights reserved.
+ *
+ * This code has been developed by the University of Waikato WAND 
+ * research group. For further information please see http://www.wand.net.nz/
+ *
+ * bsod-server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * bsod-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with bsod-server; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ *
+ */
+
 #include "colours.h"
 #include <libtrace.h>
 #include <libprotoident.h>
@@ -58,7 +87,7 @@ char counternames [][256] = {
 static uint8_t countercolours[][3] = {
 
 	{  5, 10,200}, /* HTTP		blue */
-	{150,150,240}, /* HTTPS		light blue/purple */
+	{150,150,240}, /* HTTPS		light blue */
 	{200,  5,  5}, /* MAIL		red */
 	{200,200,  5}, /* DNS		yellow	*/
 	{  5,150,  5}, /* P2P		green */
@@ -68,14 +97,14 @@ static uint8_t countercolours[][3] = {
 	{200,100,  5}, /* Malware	orange */
 	{ 30, 85, 30}, /* VOIP		matte green */
 	{250,250,250}, /* Tunnelling	white */
-	{ 75,  5,130}, /* Streaming	plum */
+	{170,250, 50}, /* Streaming	yellow-green */
 	{ 50, 80, 80}, /* Services	dark slate grey */
 	{120,100,240}, /* Files		medium slate blue */
 	{110,110,110}, /* Remote	grey */
 	{240,230,140}, /* Chat		khaki brown */
 	{  5,250,200}, /* ICMP		cyan */
 	{  5,130,130}, /* Other		teal	*/
-	{100,  5,100}, /* TCP		purple */
+	{250,  5,250}, /* TCP		magenta */
 	{150,100, 50}  /* UDP		light brown */
 
 

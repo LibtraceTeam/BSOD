@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -25,14 +32,10 @@
  * along with bsod-server; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: bsod_server.cc 412 2007-11-13 03:14:24Z spa1 $
+ * $Id$
  *
  */
 
-
-/*
- * main loop(s) and the signal handlers may need looking at?
- */
 
 #include <stdio.h>
 #include <string.h>
@@ -148,7 +151,6 @@ typedef struct bsod_vars {
 static int load_modules();
 static void close_modules();
 static void init_times();
-static void offline_delay(struct timeval tv);
 static void init_signals();
 static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		RTTMap *rttmap);
@@ -840,32 +842,3 @@ static void init_times() {
 }
 
 
-static void offline_delay(struct timeval tv){
-	struct timeval diff;
-	struct timeval delta;
-
-	if(startts32 == 0)
-		startts32 = tv.tv_sec;
-	if(tracetime.tv_sec == 0)
-		tracetime = tv;
-
-	ts32 = tv.tv_sec;
-	gettimeofday(&nowtime, 0);
-
-	// time since we started the trace
-	timersub(&nowtime,&starttime,&delta);
-	
-	// add this to the trace timer
-	timeradd(&delta,&tracetime,&delta);
-	
-
-	// check to see if current trace time is ahead of this
-
-	if (timercmp(&tv, &delta, >)) {
-		timersub(&tv,&delta,&diff);
-		usleep((diff.tv_sec * 1000000) + diff.tv_usec);
-	}
-
-	return;
-
-}

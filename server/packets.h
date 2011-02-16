@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -25,7 +32,7 @@
  * along with bsod-server; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: packets.h 352 2006-06-27 00:56:00Z perry $
+ * $Id$
  *
  */
 

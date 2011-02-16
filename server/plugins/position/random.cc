@@ -1,10 +1,8 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
- * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
+ * Author: Sebastian Dusterwald
  *          
  * All rights reserved.
  *
@@ -25,7 +23,7 @@
  * along with bsod-server; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: random.cc 308 2006-03-10 03:47:54Z sjd18 $
+ * $Id$
  *
  */
 

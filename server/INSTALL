@@ -3,22 +3,24 @@ Installing bsod-server:
 ----------------------------------
 The bsod server requires:
 
-* libtrace (http://research.wand.net.nz/software/)
+* libtrace (http://research.wand.net.nz/software/libtrace/)
+* libwandevent (http://research.wand.net.nz/software/libwandevent/
 * g++-3.0 or greater (known to work with 3.0, fails with 2.95)
 * libconfuse (package libconfuse-dev on debian)
 
 
+Optional:
+* libprotoident, required for the lpicolour module 
+	(http://research.wand.net.nz/software/libprotoident/)
+
 ----------------------------------
 To make and install the bsod server:
-
-Ensure that libtrace is properly installed (refer to the
-documentation that comes with it for information on how to do this).
-
 
 Linux:
 
 tar xzvf bsod-server-x.y.z.tar.gz
 cd bsod-server-x.y.z
+./configure
 make
 (as root )
 make install 
@@ -27,16 +29,17 @@ make install
 FreeBSD:
 
 Exactly the same as the above, replacing 'make' with 'gmake'.
-You will probably need to remove the reference to -ldl from the Makefile
-in order to compile. We should have an automake system ready for the
-next release which will solve this problem.
 
+
+If you wish to install BSOD server to a non-standard location (i.e. other than
+/usr/local/bsod), add --prefix=/new/install/location to the ./configure command
+above.
 
 
 ----------------------------------
 Running the bsod server:
 
-You will have need to edit the default configuration in to get a meaningful
+You will have need to edit the default configuration to get a meaningful
 visualisation. At least the direction module will have to be configured
 otherwise you will see a blank visualisation.  See the appropriate section in
 the README for more information on the format of the file and the options that

@@ -39,6 +39,25 @@
 #define SIDE_LENGTH 8
 #define MAX_SIZE 10000
 
+struct flow_id_t {
+        float start[3];
+        float end[3];
+        unsigned char type; // Type of flow. ("colour")
+        uint32_t ip1;
+        uint32_t ip2;
+	uint16_t port1;
+	uint16_t port2;
+};
+
+
+struct flow_info_t {
+        uint32_t flow_id;
+        uint32_t time;
+
+        void *colour_data;
+};
+
+
 int per_packet(struct libtrace_packet_t *packet, time_t secs, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList);
 float convert_speed( float speed );
 

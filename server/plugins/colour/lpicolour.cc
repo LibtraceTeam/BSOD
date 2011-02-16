@@ -1,7 +1,6 @@
 #include "colours.h"
 #include <libtrace.h>
 #include <libprotoident.h>
-#include <libflowmanager.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stddef.h>
@@ -63,19 +62,19 @@ static uint8_t countercolours[][3] = {
 	{200,  5,  5}, /* MAIL		red */
 	{200,200,  5}, /* DNS		yellow	*/
 	{  5,150,  5}, /* P2P		green */
-	{250,120, 80}, /* P2P_UDP	coral */
+	{220,160,220}, /* P2P_UDP	plum */
 	{ 80, 80,  5}, /* Windows	olive */
-	{ 85, 30, 30}, /* Games		Icky green? */
+	{130,  5,  5}, /* Games		maroon */
 	{200,100,  5}, /* Malware	orange */
 	{ 30, 85, 30}, /* VOIP		matte green */
 	{250,250,250}, /* Tunnelling	white */
-	{220,160,220}, /* Streaming	plum */
+	{ 75,  5,130}, /* Streaming	plum */
 	{ 50, 80, 80}, /* Services	dark slate grey */
 	{120,100,240}, /* Files		medium slate blue */
 	{110,110,110}, /* Remote	grey */
 	{240,230,140}, /* Chat		khaki brown */
-	{  5,250,200}, /* ICMP		teal */
-	{255,192,203}, /* Other		pink	*/
+	{  5,250,200}, /* ICMP		cyan */
+	{  5,130,130}, /* Other		teal	*/
 	{100,  5,100}, /* TCP		purple */
 	{150,100, 50}  /* UDP		light brown */
 
@@ -86,6 +85,7 @@ typedef struct lpi_col {
 	uint8_t seen_dir0;
 	uint8_t seen_dir1;
 	uint8_t transport;
+	bool use_ports;
 
 	lpi_module_t *protocol;
 	lpi_data_t lpi;
@@ -93,8 +93,9 @@ typedef struct lpi_col {
 
 
 
-static void init_lpi_flow(Flow *f, uint8_t transport) {
+static lpi_col_t *init_lpi_flow(uint8_t transport, libtrace_packet_t *packet) {
 	
+	libtrace_tcp_t *tcp = NULL;
 	lpi_col_t *col = (lpi_col_t *)malloc(sizeof(lpi_col_t));
 
 	lpi_init_data(&col->lpi);
@@ -102,24 +103,23 @@ static void init_lpi_flow(Flow *f, uint8_t transport) {
 	col->seen_dir1 = 0;
 	col->transport = transport;
 	col->protocol = NULL;
-	f->extension = col;
-	
-}
+	col->use_ports = true;
 
-static void expire_lpi_flows(double ts, bool exp_flag) {
-
-	Flow *expired;
-
-        /* Loop until libflowmanager has no more expired flows available */
-        while ((expired = lfm_expire_next_flow(ts, exp_flag)) != NULL) {
-		lpi_col_t *col = (lpi_col_t *)expired->extension;
-
-		free(col);
-		delete(expired);
-        
+	if (transport != TRACE_IPPROTO_TCP) {
+		col->use_ports = false;
+		return col;
 	}
 
+	tcp = trace_get_tcp(packet);
 
+	if (tcp && tcp->syn) {
+		col->use_ports = false;
+	}
+	else
+		col->use_ports = true;
+
+	return col;
+	
 }
 
 static bool check_needed(lpi_col_t *col, uint8_t dir) {
@@ -259,23 +259,17 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 
 }
 
-static void guess_using_port(unsigned char *id_num, libtrace_packet_t *packet)
+static void guess_using_port(unsigned char *id_num, lpi_col_t *col)
 {
 	/* Borrowed most of this from the standard colours module, except
 	 * for all the dodgy guessing, e.g. P2P etc */
-	struct libtrace_ip *ip = trace_get_ip(packet);
-        if (!ip) {
-                *id_num = OTHER;
-                return;
-        }
-
-        int protocol = ip->ip_p;
+        int protocol = col->transport;
         int port = trace_get_server_port(
                         protocol,
-                        trace_get_source_port(packet),
-                        trace_get_destination_port(packet)) == USE_SOURCE
-                ? trace_get_source_port(packet)
-                : trace_get_destination_port(packet);
+                        col->lpi.server_port,
+                        col->lpi.client_port) == USE_SOURCE
+                ? col->lpi.server_port
+                : col->lpi.client_port;
 
         switch(port)
         {
@@ -349,16 +343,13 @@ static void guess_using_port(unsigned char *id_num, libtrace_packet_t *packet)
 }
 
 extern "C"
-int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet) {
+int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet,
+		flow_info_t *f) {
 
-	Flow *f;
 	lpi_col_t *col = NULL;
  	uint8_t dir;
-        bool is_new = false;
 
-        libtrace_tcp_t *tcp = NULL;
         libtrace_ip_t *ip = NULL;
-        double ts;
 
         uint16_t l3_type;
 
@@ -371,40 +362,24 @@ int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet) {
 		lpi_init_library();
 		lpi_init_called = true;
 	}
-
-        /* Libflowmanager only deals with IP traffic, so ignore anything
-         * that does not have an IP header */
-        ip = (libtrace_ip_t *)trace_get_layer3(packet, &l3_type, NULL);
+        
+	ip = (libtrace_ip_t *)trace_get_layer3(packet, &l3_type, NULL);
         if (l3_type != 0x0800 || ip == NULL) {
 		*id_num = OTHER;
 		return 0;
 	}
 
-        /* Expire all suitably idle flows */
-        ts = trace_get_seconds(packet);
-        expire_lpi_flows(ts, false);
+	if (f->colour_data == NULL) {
+		col = init_lpi_flow(ip->ip_p, packet);
+		f->colour_data = col;
+	} else {
+		col = (lpi_col_t *)f->colour_data;
+	}
 
-	 /* Many trace formats do not support direction tagging (e.g. PCAP), so
-         * using trace_get_direction() is not an ideal approach. The one we
-         * use here is not the nicest, but it is pretty consistent and 
-         * reliable. Feel free to replace this with something more suitable
-         * for your own needs!.
-         */
-
-        src_port = trace_get_source_port(packet);
-        dst_port = trace_get_destination_port(packet);
-
-        if (src_port == dst_port) {
-                if (ip->ip_src.s_addr < ip->ip_dst.s_addr)
-                        dir = 0;
-                else
-                        dir = 1;
-        } else {
-                if (trace_get_server_port(ip->ip_p, src_port, dst_port) == USE_SOURCE)
-                        dir = 0;
-                else
-                        dir = 1;
-        }
+	if (ip->ip_src.s_addr < ip->ip_dst.s_addr)
+		dir = 0;
+	else
+		dir = 1;
 
         /* Ignore packets where the IP addresses are the same - something is
          * probably screwy and it's REALLY hard to determine direction */
@@ -412,45 +387,18 @@ int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet) {
 		*id_num = OTHER;
                 return 0;
 	}
-	/* Match the packet to a Flow - this will create a new flow if
-         * there is no matching flow already in the Flow map and set the
-         * is_new flag to true. */
-        f = lfm_match_packet_to_flow(packet, dir, &is_new);
 
-        if (f == NULL) {
-		/* We've probably missed the handshake - maybe we can get
-		 * something useful from the port numbers...? */	
-		guess_using_port(id_num, packet);
-                return 0;
-        }
-
-	tcp = trace_get_tcp(packet);
-        /* If the returned flow is new, you will probably want to allocate and
-         * initialise any custom data that you intend to track for the flow */
-        if (is_new) {
-                init_lpi_flow(f, ip->ip_p);
-                col = (lpi_col_t *)f->extension;
-        } else {
-                col = (lpi_col_t *)f->extension;
-        }
 	/* Pass the packet into libprotoident so that it can extract any
          * info it needs from this packet */
         lpi_update_data(packet, &col->lpi, dir);
 
-        /* Update TCP state for TCP flows. The TCP state determines how long
-         * the flow can be idle before being expired by libflowmanager. For
-         * instance, flows for which we have only seen a SYN will expire much
-         * quicker than a TCP connection that has completed the handshake */
-        if (tcp) {
-                lfm_check_tcp_flags(f, tcp, dir, ts);
-        }
-
-        /* Tell libflowmanager to update the expiry time for this flow */
-        lfm_update_flow_expiry_timeout(f, ts);
-
 	plen = trace_get_payload_length(packet);
 
-	guess_protocol(id_num, col, dir, plen);
+	if (col->use_ports) {
+		guess_using_port(id_num, col);
+	} else {
+		guess_protocol(id_num, col, dir, plen);
+	}
 	
 	return 0;
 

@@ -92,20 +92,8 @@ bool enable_rttest = true;
 bool enable_darknet = true;
 
 
-struct flow_id_t {
-	float start[3];
-	float end[3];
-	unsigned char type; // Type of flow. ("colour")
-	uint32_t ip1;
-	uint32_t ip2;
-};
-
-struct flow_info_t {
-	uint32_t flow_id;
-	uint32_t time; 
-};
-
 static inline bool operator <(const flow_id_t &a, const flow_id_t &b) {
+	/*
 	if (a.start[2]!=b.start[2]) 
 		return a.start[2] < b.start[2];
 	if (a.end[2]!=b.end[2]) 
@@ -118,10 +106,17 @@ static inline bool operator <(const flow_id_t &a, const flow_id_t &b) {
 		return a.start[0] < b.start[0];
 	if (a.end[0]!=b.end[0]) 
 		return a.end[0] < b.end[0];
-	return a.type < b.type;
+	*/
+	if (a.ip1 != b.ip1)
+		return a.ip1 < b.ip1;
+	if (a.ip2 != b.ip2)
+		return a.ip2 < b.ip2;
+	if (a.port1 != b.port1)
+		return a.port1 < b.port1;
+	return a.port2 < b.port2;
 }
 
-typedef lru<flow_id_t,flow_info_t> flow_lru_t;
+typedef lru<flow_id_t,flow_info_t *> flow_lru_t;
 flow_lru_t flows;
 
 /* 
@@ -150,9 +145,10 @@ void expire_flows(uint32_t time)
 	uint32_t tmpid; 
 	//remove flows till we find one that hasnt expired
 	while( !flows.empty() && 
-		(time - flows.front().second.time > EXPIRE_SECS)) 
+		(time - flows.front().second->time > EXPIRE_SECS)) 
 	{
-		tmpid = flows.front().second.flow_id;
+		tmpid = flows.front().second->flow_id;
+		delete(flows.front().second);
 		flows.erase(flows.front().first);	
 
 		if(send_kill_flow(tmpid) != 0)
@@ -176,7 +172,7 @@ void send_flows(struct client *client)
 	{
 		send_update_flow(client, (*flow_iterator).first.start, 
 					(*flow_iterator).first.end, 
-					(*flow_iterator).second.flow_id, 
+					(*flow_iterator).second->flow_id, 
 					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2 );
 	}
 }
@@ -223,7 +219,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	int direction = -1;
 	int datasize = -1;
 	int force_display = 0;
-
+	uint16_t src_port = 0;
+	uint16_t dest_port = 0;
 
 	flow_id_t tmpid;
 	flow_lru_t::iterator current;
@@ -251,20 +248,17 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
 			force_display = 1;
+		src_port = tcpptr->source;
+		dest_port = tcpptr->dest;
 	}
 	else if((udpptr = trace_get_udp(packet)))
 	{
 		hlen = p->ip_hl * 4;
 
 		datasize = (ntohs(p->ip_len)) - sizeof(struct libtrace_udp);
+		src_port = udpptr->source;
+		dest_port = udpptr->dest;
 	}
-
-	/* Find out the packet colour early on, then we can skip looking up
-	 * positions if we're lucky
-	 */
-	if (modptrs->colour(&(tmpid.type), 
-			packet) != 0)
-		return 0;
 
 	direction = modptrs->direction(packet);
 
@@ -293,21 +287,27 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	{
 		tmpid.ip1 = tmpip->ip_src.s_addr;
 		tmpid.ip2 = tmpip->ip_dst.s_addr;
+		tmpid.port1 = src_port;
+		tmpid.port2 = dest_port;
 	}
 	else
 	{
 		tmpid.ip1 = tmpip->ip_dst.s_addr;
 		tmpid.ip2 = tmpip->ip_src.s_addr;
+		tmpid.port1 = dest_port;
+		tmpid.port2 = src_port;
 	}
 
 	current = flows.find(tmpid);
 
 	if ( current == flows.end() ) // this is a new flow
 	{
-		std::pair<flow_id_t,flow_info_t> flowdata;
+		std::pair<flow_id_t,flow_info_t *> flowdata;
 
-		flowdata.second.flow_id = id;
-		flowdata.second.time = secs;
+		flowdata.second = new flow_info_t;
+		flowdata.second->flow_id = id;
+		flowdata.second->time = secs;
+		flowdata.second->colour_data = NULL;
 
 		id++;
 
@@ -316,14 +316,18 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		current = flows.insert(flowdata);
 
 		if(send_new_flow(tmpid.start, tmpid.end,
-					current->second.flow_id, tmpid.ip1, tmpid.ip2)!=0)
+					current->second->flow_id, tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 
 	}
 	else // this is a flow we've already seen
 	{
-		current->second.time = secs; // update time last seen
+		current->second->time = secs; // update time last seen
 	}
+
+	if (modptrs->colour(&(tmpid.type), 
+			packet, current->second) != 0)
+		return 0;
 
 
 	// Expire flows is efficient, and will only expire flows that have uh
@@ -468,7 +472,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	
 	}
 
-	if(send_new_packet(secs, current->second.flow_id, tmpid.type, 
+	if(send_new_packet(secs, current->second->flow_id, tmpid.type, 
 				ntohs(p->ip_len), speed, is_dark) !=0)
 		return 1;
 

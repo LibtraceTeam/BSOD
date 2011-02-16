@@ -35,6 +35,7 @@
 #define _BSOD_SERVER_H
 #include <stdint.h>
 #include "libtrace.h"
+#include "packets.h"
 
 #define UDP_PORT 2080
 
@@ -51,7 +52,8 @@ typedef enum {
 } side_t;
 
 
-typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *);
+typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *,
+		flow_info_t * );
 typedef void (* inffptr)(uint8_t*,char[256],int);
 typedef int (* posfptr)(float[3], 
 		side_t side,

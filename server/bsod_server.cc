@@ -203,6 +203,8 @@ int main(int argc, char *argv[])
 	setup_udp_socket(wand_ev_hdl, &udpsocket);	
 
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
+	sleep_event.callback = NULL;
+	file_event.fd = -1;
 
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
@@ -273,7 +275,7 @@ int main(int argc, char *argv[])
 
 
 		bsod_event(&bsod_vars);
-
+		wand_ev_hdl->running = true;
 		wand_event_run(wand_ev_hdl);
 
 		/*
@@ -295,9 +297,15 @@ int main(int argc, char *argv[])
 			expire_flows(last_packet_time.tv_sec+3600);
 		}
 		// We've finished with this trace
+		if (file_event.fd != -1)
+			wand_del_event(wand_ev_hdl, &file_event);
+		if (sleep_event.callback != NULL)
+			wand_del_timer(wand_ev_hdl, &sleep_event);
 		trace_destroy(trace);
 		trace = NULL;
-
+		sleep_event.callback = NULL;
+		file_event.fd = -1;
+		
 		
 		// the loop criteria is to loop if we want to loop always, or if
 		// we get a USR1 we restart - the code path is the same.
@@ -318,11 +326,13 @@ static void file_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	
 	wand_del_event(wand_ev_hdl, evcb);
 	assert(ev == EV_READ);
+	evcb->fd = -1;
 	bsod_event((bsod_vars_t *)evcb->data);
 
 }
 
 static void sleep_cb(struct wand_timer_t *timer) {
+	timer->callback = NULL;
 	bsod_event((bsod_vars_t *)timer->data);
 }
 

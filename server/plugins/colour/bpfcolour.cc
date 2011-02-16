@@ -71,8 +71,13 @@ int init_module(char *args)
 }
 
 extern "C"
-int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet,
+		flow_info_t *f)
 {
+	
+	/* We don't use the flow info in this module */
+	assert(f->colour_data == NULL);
+
 	for(exps_t::const_iterator i=exps.begin();
 			i!=exps.end();
 			++i) {

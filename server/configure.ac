@@ -42,9 +42,8 @@ AC_CONFIG_FILES([Makefile images/Makefile plugins/Makefile
 
 AC_SEARCH_LIBS([trace_read_packet], [trace],,libtrace_found=0)
 AC_SEARCH_LIBS([cfg_init],[confuse],,conf_found=0)
-AC_SEARCH_LIBS([lfm_match_packet_to_flow],[flowmanager],,lfm_found=0)
-AC_SEARCH_LIBS([lpi_init_library],[protoident],,lpi_found=0)
 AC_SEARCH_LIBS([wand_event_init],[wandevent],,event_found=0)
+AC_SEARCH_LIBS([lpi_init_library],[protoident],,lpi_found=0)
 
 depend_error=0
 if test "$libtrace_found" = 0; then
@@ -60,11 +59,6 @@ fi
 if test "$event_found" = 0; then
 	AC_MSG_NOTICE(Required library libwandevent not found!)
 	depend_error=1
-fi
-
-if test "$lfm_found" = 0; then
-	AC_MSG_NOTICE(Libflowmanager not found - will not build lpicolour module)
-	build_lpicolour=0
 fi
 
 if test "$lpi_found" = 0; then

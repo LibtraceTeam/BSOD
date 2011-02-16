@@ -78,12 +78,15 @@ char counternames [][256] = {
 * port/protocol being used.
 */
 extern "C"
-int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet,
+		flow_info_t *f)
 {
 
 	void *payload;
 	uint8_t proto;
 	uint32_t remain;
+
+	assert(f->colour_data == NULL);
 
 	payload = trace_get_transport(packet,&proto,&remain);
 	if (!payload) {

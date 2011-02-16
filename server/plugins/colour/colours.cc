@@ -108,10 +108,15 @@ char counternames [][256] = {
 * port/protocol being used.
 */
 extern "C"
-int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet,
+		flow_info_t *f)
 {
 
 	struct libtrace_ip *ip = trace_get_ip(packet);
+	
+	/* We don't use the flow info in this plugin */
+	assert(f->colour_data == NULL);
+
 	if (!ip) {
 		*id_num = OTHER;
 		return 0;

@@ -44,8 +44,9 @@ form:
 
 <key> = <value>
 
-A value can be one of two types - string or integer. All strings are 
-enclosed in double quotes, while integers are simply a number.
+A value can be one of three types - string, boolean or integer. All strings are 
+enclosed in double quotes, while integers are simply a number. Booleans are
+either true or false.
 
 The configuration file can be reloaded on the fly by sending the bsod server
 process a SIGUSR1.
@@ -68,7 +69,13 @@ loop		integer
 shownondata	integer
 showdata	integer
 showcontrol	integer
-
+darknet		boolean
+blacklistdir 	string
+rttest		boolean
+sampling	integer
+sendq		integer
+left_image	string
+right_image	string
 
 option: pidfile		type: string
     The file that the process id (pid) of the bsod server should be written
@@ -131,6 +138,7 @@ option: lpos_module	type: string
     evenly spread a number of /24 networks out over a square).
 
 option: dir_module	type: string
+option: macaddrfile	type: string
     Specify the shared library that should be loaded to determine which
     direction packets are travelling in. This defaults to 
     "plugins/direction/interface.so", which uses the interface field in
@@ -138,9 +146,10 @@ option: dir_module	type: string
     you are using a pcap based format instead of erf, you will want to
     use the module "plugins/direction/destmac.so". If you use this
     alternate module, you will need to specify the file containing remote
-    mac addresses as an argument to the direction module, eg -
+    mac addresses using the macaddrfile option, eg -
     
-	dir_module "plugins/direction/destmac.so etc/mac_addrs"
+	dir_module = "plugins/direction/destmac.so"
+	macaddrfile = "etc/mac_addrs"
     
     Whether the packet is destined to or coming from one of the mac 
     addresses listed in this file is used to determine which way it is 
@@ -170,18 +179,47 @@ options: showcontrol	type: integer
     Set it to 0 to hide these packets. This only applies to TCP, and 
     overrides the showdata and shownondata options. Defaults to 1.
 
+option: darknet		type: boolean
+    Specifies whether BSOD should maintain a blacklist of inactive hosts to
+    identify DarkNet traffic. This lightlist is stored in the directory
+    defined using the blacklistdir option. Defaults to false.
+     
 option: blacklistdir	type: string
     Specifies the directory where the blacklist information should be stored.
     This is used so that it can be reloaded at a later date without having
     to be regenerated. Blacklist info can be used to show/hide 'legitimate'
     traffic. Defaults to blist/ based off the base directory.
 
+option: rttest		type: boolean
+    Specifies whether BSOD should estimate RTT for each flow so that it can
+    adjust packet velocity to mimic the connection speed. Defaults to false.
+
+option: sampling	type: integer
+    Specifies a sampling rate for the input source. One in every N packets is
+    processed and sent to the client, where N is the value of this option.
+    If set to 0 (or 1), no sampling is performed. Defaults to 0.
+
+option: sendq		type: integer
+    Specifies the maximum amount of outstanding data (in bytes) allowed for 
+    each BSOD client. If this is exceeded, the client is dropped. Defaults to
+    10 MB, i.e. 10000000.
+
+option: left_image	type: string
+    Specifies the image file that should be transmitted to the client to 
+    display on the left pane.
+
+option: right_image	type: string
+    Specifies the image file that should be transmitted to the client to 
+    display on the right pane.
 
 
 
 Troubleshooting bsod server
 ----------------------------------
 ----------------------------------
+Note: if these suggestions do not help, email contact@wand.net.nz with
+details of your problem and we will do our best to help you.
+
 
 Problem:
 Everything builds and runs fine, but when the client connects it doesn't
@@ -194,6 +232,10 @@ that the 'interface' module is used. If reading straight from a network
 interface or a pcap trace, the 'destmac' direction module should be used,
 and the mac_addrs config file should contain remote mac addresses.
 
+Another cause is that the server is so busy reading packets from the input
+source that it has no time to transmit packet records to the client. Try
+filtering the traffic source to only display a subset of the traffic or 
+increase the sampling rate.
 
 Problem:
 /usr/local/bsod/bin/bsod_server: error while loading shared libraries: libtrace.so.2: cannot open shared object file: No such file or directory

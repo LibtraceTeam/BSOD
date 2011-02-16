@@ -1,7 +1,7 @@
 bsod-server-2.0.0
 
 ---------------------------------------------------------------------------
-Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
 All rights reserved.
 
 This code has been developed by the University of Waikato WAND
@@ -104,7 +104,9 @@ option: filter		type: string
 option: colour_module	type: string
     Specify the shared library that should be loaded to supply the colour
     selection algorithms. Defaults to "plugins/colour/colours.so", which
-    uses the colour scheme we originally came up with. 
+    uses a port-based colour scheme. If your packet capture retains at least
+    four bytes of packet payload, we recommend using the lpicolour module
+    instead, as it can identify protocols much more accurately.
 
 option: rpos_module	type: string
     Specify the shared library that should be loaded to supply the layout

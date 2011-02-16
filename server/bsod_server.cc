@@ -161,10 +161,10 @@ bsod_vars_t bsod_vars;
 int main(int argc, char *argv[])
 {
 	// RTTMap:
-	RTTMap *rttmap = new RTTMap();
+	RTTMap *rttmap = NULL;
     
 	// Blacklist:
-	blacklist *theList;
+	blacklist *theList = NULL;
 	
 
 	int one=1;
@@ -207,6 +207,8 @@ int main(int argc, char *argv[])
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
 	sleep_event.callback = NULL;
 	file_event.fd = -1;
+	if (enable_rttest)
+		rttmap = new RTTMap();
 
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
@@ -224,7 +226,16 @@ int main(int argc, char *argv[])
 		char tmp[4096];
 		snprintf(tmp,4096,"%s%s",basedir,blacklistdir);
 		Log(LOG_DAEMON|LOG_INFO,"Saving blacklist info to '%s'\n", tmp);
-		theList = new blacklist( tmp );
+		if (enable_darknet) {
+			if (theList)
+				delete(theList);
+			theList = new blacklist( tmp );
+		}
+		if (enable_rttest) {
+			if (rttmap)
+				delete(rttmap);
+			rttmap = new RTTMap();
+		}
 
 		bsod_vars.blist = theList;
 		bsod_vars.rttmap = rttmap;
@@ -317,8 +328,10 @@ int main(int argc, char *argv[])
 	// shut down entirely
 
 	close_modules();
-	delete rttmap;
-	delete theList;
+	if (rttmap)
+		delete rttmap;
+	if (theList)
+		delete theList;
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 
 	return 0;
@@ -435,7 +448,7 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		return 1;
 	}
 
-	if (packettime.tv_sec > next_save) {
+	if (enable_darknet && packettime.tv_sec > next_save) {
 		/* Save the blacklist every 5 min */
 		next_save = packettime.tv_sec + 300;
 		theList->save();

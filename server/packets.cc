@@ -347,7 +347,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	// RTT calculation stuff:
 	float speed = -2.0f; // Default. (1.0f)
 
-	if( enable_rttest ) 
+	if( enable_rttest) 
 	{
 		double now = trace_get_seconds( packet );
 		static double last = now;
@@ -357,6 +357,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		Flow *rtt_flow;
 		Flow *rtt_flow_inverse;
 		double the_time = 0.0;
+
+		assert(map);
 
 		pts = map->GetTimeStamp( packet );
 		dport = trace_get_destination_port( packet );

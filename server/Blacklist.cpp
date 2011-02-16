@@ -58,7 +58,10 @@ void blacklist::load(void)
 		char buf[80];
 		in_addr_t addr;
 		if (fgets(buf,sizeof(buf),f) == NULL) {
-			Log(LOG_DAEMON | LOG_WARNING, "Error reading from blacklist file: %s\n", strerror(errno));
+			if (ferror(f)) {
+				Log(LOG_DAEMON | LOG_WARNING, "Error reading from blacklist file: %s\n", strerror(errno));
+			}
+			fclose(f);
 			return;
 		}
 		if (strchr(buf,'\n')) {

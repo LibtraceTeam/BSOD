@@ -58,7 +58,7 @@ struct flow_id_t {
 
 
 struct flow_info_t {
-        uint32_t flow_id;
+        uint32_t flow_id[2];
         uint32_t time;
 
         void *colour_data;

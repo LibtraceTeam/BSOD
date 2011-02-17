@@ -149,16 +149,19 @@ void init_packets()
  */
 void expire_flows(uint32_t time)
 {
-	uint32_t tmpid; 
+	uint32_t tmpid, tmpid2; 
 	//remove flows till we find one that hasnt expired
 	while( !flows.empty() && 
 		(time - flows.front().second->time > EXPIRE_SECS)) 
 	{
-		tmpid = flows.front().second->flow_id;
+		tmpid = flows.front().second->flow_id[0];
+		tmpid2 = flows.front().second->flow_id[1];
 		delete(flows.front().second);
 		flows.erase(flows.front().first);	
 
 		if(send_kill_flow(tmpid) != 0)
+			return;
+		if(send_kill_flow(tmpid2) != 0)
 			return;
 	}
 }
@@ -179,8 +182,12 @@ void send_flows(struct client *client)
 	{
 		send_update_flow(client, (*flow_iterator).first.start, 
 					(*flow_iterator).first.end, 
-					(*flow_iterator).second->flow_id, 
+					(*flow_iterator).second->flow_id[0], 
 					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2 );
+		send_update_flow(client, (*flow_iterator).first.end, 
+					(*flow_iterator).first.start, 
+					(*flow_iterator).second->flow_id[1], 
+					(*flow_iterator).first.ip2, (*flow_iterator).first.ip1 );
 	}
 }
 
@@ -287,6 +294,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 			modptrs) != 0)
 		return 0;
 
+
 	// Get the right IP addresses for each end of the flow:
 	libtrace_ip *tmpip = trace_get_ip( packet );
 	if( direction == DIR_OUTBOUND )
@@ -312,20 +320,30 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		std::pair<flow_id_t,flow_info_t *> flowdata;
 
 		flowdata.second = new flow_info_t;
-		flowdata.second->flow_id = id;
+		if (direction == DIR_OUTBOUND) {
+			flowdata.second->flow_id[0] = id;
+			flowdata.second->flow_id[1] = id + 1;
+		} else {
+			flowdata.second->flow_id[1] = id;
+			flowdata.second->flow_id[0] = id + 1;
+		}
+
 		flowdata.second->time = secs;
 		flowdata.second->colour_data = NULL;
 
-		id++;
+		id+=2;
 
 		flowdata.first = tmpid;
 
 		current = flows.insert(flowdata);
 
 		if(send_new_flow(tmpid.start, tmpid.end,
-					current->second->flow_id, tmpid.ip1, tmpid.ip2)!=0)
+					current->second->flow_id[0], tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 
+		if(send_new_flow(tmpid.end, tmpid.start,
+					current->second->flow_id[1], tmpid.ip1, tmpid.ip2)!=0)
+			return 1;
 	}
 	else // this is a flow we've already seen
 	{
@@ -481,8 +499,16 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	
 	}
 
-	if(send_new_packet(secs, current->second->flow_id, tmpid.type, 
-				ntohs(p->ip_len), speed, is_dark) !=0)
+	uint32_t send_id;
+
+	if (direction == DIR_OUTBOUND) {
+		send_id = current->second->flow_id[0];
+	} else {
+		send_id = current->second->flow_id[1];
+	}
+	if(send_new_packet(secs, send_id, 
+			tmpid.type, ntohs(p->ip_len), speed, 
+			is_dark) !=0)
 		return 1;
 
 	return 0;

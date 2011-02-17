@@ -596,6 +596,7 @@ int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,
 	update.speed = htonf(speed);
 	update.dark = dark;
 
+
 	send_all(&update,sizeof(update));
 
 	return 0;

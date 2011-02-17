@@ -113,6 +113,8 @@ static uint8_t countercolours[][3] = {
 typedef struct lpi_col {
 	uint8_t seen_dir0;
 	uint8_t seen_dir1;
+	uint32_t first_seq0;
+	uint32_t first_seq1;
 	uint8_t transport;
 	bool use_ports;
 
@@ -130,6 +132,8 @@ static lpi_col_t *init_lpi_flow(uint8_t transport, libtrace_packet_t *packet) {
 	lpi_init_data(&col->lpi);
 	col->seen_dir0 = 0;
 	col->seen_dir1 = 0;
+	col->first_seq0 = 0;
+	col->first_seq1 = 0;
 	col->transport = transport;
 	col->protocol = NULL;
 	col->use_ports = true;
@@ -171,9 +175,10 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 		col->protocol = lpi_guess_protocol(&col->lpi);
 	}
 
-	if (dir == 0 && plen > 0)
+
+	if (dir == 0 && col->lpi.payload_len[0] > 0) 
 		col->seen_dir0 = 1;
-	if (dir == 1 && plen > 0)
+	if (dir == 1 && col->lpi.payload_len[1] > 0)
 		col->seen_dir1 = 1;
 
 	cat = lpi_categorise(col->protocol);
@@ -288,28 +293,18 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 
 }
 
-static void guess_using_port(unsigned char *id_num, lpi_col_t *col)
-{
-	/* Borrowed most of this from the standard colours module, except
-	 * for all the dodgy guessing, e.g. P2P etc */
-        int protocol = col->transport;
-        int port = trace_get_server_port(
-                        protocol,
-                        col->lpi.server_port,
-                        col->lpi.client_port) == USE_SOURCE
-                ? col->lpi.server_port
-                : col->lpi.client_port;
+static bool check_port (uint16_t port, unsigned char *id_num) {
 
         switch(port)
         {
         case 80:
                 *id_num = HTTP;
-                break;
+                return true;
 
         case 21:
         case 20:
                 *id_num = FILES;
-                break;
+                return true;
 
         case 110: /* pop3 */
         case 143: /* imap2 */
@@ -319,31 +314,57 @@ static void guess_using_port(unsigned char *id_num, lpi_col_t *col)
         case 465: /* smtp over ssl */
         case 25:
                 *id_num = MAIL;
-                break;
+                return true;
 
         case 53:
                 *id_num = DNS;
-                break;
+                return true;
 
         case 22:
         case 23:
                 *id_num = REMOTE;	/* SSH / Telnet */
-                break;
+                return true;
 
         case 443:
                 *id_num = HTTPS;
-                break;
+                return true;
 	case 6667:
                 *id_num = CHAT;		/* IRC */
-                break;
+                return true;
         case 10000:
                 *id_num = TUNNELLING;	/* Cisco VPN */
-                break;
+                return true;
         case 123:
                 *id_num = SERVICES;	/* NTP */
-                break;
-	default:
-                switch(protocol)
+                return true;
+	case 554:
+		*id_num = STREAMING;	/* RTSP */
+		return true;
+	}
+
+	return false;
+}
+
+static void guess_using_port(unsigned char *id_num, lpi_col_t *col)
+{
+	/* Borrowed most of this from the standard colours module, except
+	 * for all the dodgy guessing, e.g. P2P etc */
+        int protocol = col->transport;
+        /*
+	int port = trace_get_server_port(
+                        protocol,
+                        col->lpi.server_port,
+                        col->lpi.client_port) == USE_SOURCE
+                ? col->lpi.server_port
+                : col->lpi.client_port;
+	*/
+
+	if (check_port(col->lpi.server_port, id_num))
+		return;
+	if (check_port(col->lpi.client_port, id_num))
+		return;
+
+        switch(protocol)
                 {
                 case 6:
                         *id_num = UNK_TCP;
@@ -364,8 +385,8 @@ static void guess_using_port(unsigned char *id_num, lpi_col_t *col)
                 default:
                         *id_num = OTHER;
                         break;
-                };break;
-        };
+                }
+        
 
 
 

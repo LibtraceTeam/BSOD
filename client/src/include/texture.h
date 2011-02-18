@@ -48,7 +48,8 @@ public:
 	string mFilename;
 	
 	byte *mData;
-	
+	bool mFree;
+
 	void bind(){
 		glBindTexture(GL_TEXTURE_2D, iGLID);
 	}

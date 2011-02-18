@@ -983,7 +983,7 @@ void App::makeServerWindow(){
 	edit->setSize(UVector2(cegui_reldim(0.75f), cegui_reldim( 0.1f)));
 	//text->setProperty("TextColours", "tl:FFFF0000 tr:FFFF0000 bl:FFFF0000 br:FFFF0000");
 	edit->setAlwaysOnTop(true);	
-	edit->subscribeEvent(Editbox:EventTextAccepted, Event::Subscriber(&App::onServerButtonClicked, this));
+	edit->subscribeEvent(Editbox::EventTextAccepted, Event::Subscriber(&App::onServerButtonClicked, this));
     
     mServerWindow->subscribeEvent(FrameWindow::EventCloseClicked, Event::Subscriber(&App::onWndClose, this));
     mServerWindow->setAlpha(0.85f);

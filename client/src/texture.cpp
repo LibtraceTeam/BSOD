@@ -57,6 +57,7 @@ static Texture *genTexObj(){
 	tex->iGLID = -1;
 	tex->iDevilID = -1;
 	tex->mData = NULL;
+	tex->mFree = false;
 	tex->mFilename = "";
 	
 	mTextures.push_back(tex);
@@ -125,6 +126,7 @@ Texture *App::texLoad(string name, int flags){
 	tex->iSizeY = ilGetInteger(IL_IMAGE_HEIGHT);
 	
 	if(flags != TEXTURE_NO_GL){	
+		tex->mFree = true;
 		tex->mData = new byte[tex->iSizeX * tex->iSizeY * 4];
 		ilCopyPixels(0, 0, 0, tex->iSizeX, tex->iSizeY, 1, IL_RGBA,
 				IL_UNSIGNED_BYTE, tex->mData);
@@ -279,7 +281,8 @@ void App::texDelete(Texture *tex){
 	
 	for(int i=0;i<mTextures.size();i++){
 		if(mTextures[i] == tex){
-			free(tex->mData);
+			if (tex->mData && tex->mFree)
+				free(tex->mData);
 			mTextures[i] = mTextures[mTextures.size() - 1];
 			mTextures.pop_back();
 			break;

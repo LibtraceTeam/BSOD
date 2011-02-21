@@ -86,10 +86,12 @@ struct client {
 	int fd;
 	struct client *next;
 	struct client *prev;
-	int data_waiting;
 	wand_event_handler_t *ev_hdl;
 	struct wand_fdcb_t writer;
-	std::list< client_buffer > buffer;
+	
+	struct client_buffer buffer2;
+	
+	//std::list< client_buffer > buffer;
 } *clients = NULL;
 
 /* structure for flow update packets */
@@ -164,7 +166,6 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) ;
 struct client* create_fd(int fd, wand_event_handler_t *ev_hdl)
 {
 	client *tmp = new client;
-	tmp->data_waiting = 0;
 	tmp->fd = fd;
 	tmp->next = NULL;
 	tmp->prev = NULL;
@@ -174,6 +175,11 @@ struct client* create_fd(int fd, wand_event_handler_t *ev_hdl)
 	tmp->writer.flags = EV_READ;
 	tmp->writer.data = tmp;
 	tmp->writer.callback = client_cb;
+
+	tmp->buffer2.data = NULL;
+	tmp->buffer2.datalen = 0;
+	tmp->buffer2.offset = 0;
+
 
 	wand_add_event(ev_hdl, &(tmp->writer));
 
@@ -226,10 +232,16 @@ void remove_fd(struct client *tmp)
 		tmp->prev->next = tmp->next;
 	}
 
+	if (tmp->buffer2.data) {
+		free(tmp->buffer2.data);
+	}
+
+/*
 	while (!tmp->buffer.empty()) {
 		free(tmp->buffer.front().data);
 		tmp->buffer.pop_front();
 	}
+*/
 
 	delete tmp;
 }
@@ -432,12 +444,18 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 		return;
 	}
 
+	while (client->buffer2.datalen - client->buffer2.offset > 0) {
+		int ret = send(client->fd,
+				(char *)client->buffer2.data + client->buffer2.offset,
+				client->buffer2.datalen - client->buffer2.offset,
+				0);
+	/*
 	while (!client->buffer.empty()) {
 		int ret=send(client->fd,
 				(char*)client->buffer.front().data+client->buffer.front().offset,
 				client->buffer.front().datalen-client->buffer.front().offset,
 				0);
-
+	*/
 		if (ret == -1) {
 			switch (errno) {
 				case EINTR: continue;
@@ -451,9 +469,12 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 			}
 		}
 
-		client->data_waiting-=ret;
 
 		// If we successfully wrote this data, remove it from the queue
+		
+		client->buffer2.offset += ret;
+		assert(client->buffer2.offset <= client->buffer2.datalen);
+		/*
 		if (ret == (int)client->buffer.front().datalen - (int)client->buffer.front().offset) {
 			free(client->buffer.front().data);
 			client->buffer.pop_front();
@@ -462,6 +483,7 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 			client->buffer.front().offset+=ret;
 			return;
 		}
+		*/
 	}
 
 	/* Nothing more to write */
@@ -479,6 +501,51 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
  */
 void enqueue_data(struct client *client,void *buffer, size_t size)
 {
+
+	if (client->buffer2.data == NULL) {
+		client->buffer2.data = malloc(max_sendq_size);
+		if (client->buffer2.data == NULL) {
+			Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i: Out of memory\n",client->fd);
+			remove_fd(client);
+			return;
+		}
+
+		client->buffer2.datalen = 0;
+		client->buffer2.offset = 0;
+	}
+
+	if (client->buffer2.datalen - client->buffer2.offset + size > 
+			max_sendq_size) {
+		
+		/* Send queue is getting full - force a send */
+		Log(LOG_DAEMON | LOG_DEBUG,"Forced send to client %i\n", 
+				client->fd);
+		client_cb(&client->writer, EV_WRITE);
+	}
+
+	/* If send queue is still too full, we'll have to drop the client */
+
+	if (client->buffer2.datalen - client->buffer2.offset + size > 
+			max_sendq_size) {
+		
+		Log(LOG_DAEMON|LOG_ALERT,"Disconnecting %i for max sendq exceeded\n",client->fd);
+		remove_fd(client);
+		return;
+	}
+
+	/* Check if we need to realloc the queue */
+	if (client->buffer2.datalen + size >  max_sendq_size) {
+		memmove(client->buffer2.data, (char *)client->buffer2.data + client->buffer2.offset, client->buffer2.datalen - client->buffer2.offset);
+		client->buffer2.datalen -= client->buffer2.offset;
+		client->buffer2.offset = 0;
+
+	}
+
+	memcpy((char *)client->buffer2.data + client->buffer2.datalen, buffer, size);
+	client->buffer2.datalen += size;
+	assert(client->buffer2.datalen <= max_sendq_size);		
+
+/*
 	struct client_buffer sendq;
 	assert(buffer);
 	client->data_waiting+=size;
@@ -497,6 +564,7 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 	memcpy(sendq.data,buffer,sendq.datalen);
 	sendq.offset = 0;
 	client->buffer.push_back(sendq);
+*/
 
 	wand_del_event(client->ev_hdl, &client->writer);
 	client->writer.flags = EV_WRITE | EV_READ;

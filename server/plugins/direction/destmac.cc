@@ -39,6 +39,7 @@
 #include <err.h>
 
 #include "../../debug.h"
+#include "../../daemons.h"
 #include <syslog.h>
 
 
@@ -120,8 +121,10 @@ extern "C"
 int mod_get_direction(struct libtrace_packet_t *packet)
 {
     struct ether_header *ethptr;
+	libtrace_linktype_t linktype;
+	uint32_t rem;
 
-    ethptr = (struct ether_header *)trace_get_layer2(packet, NULL, NULL);
+    ethptr = (struct ether_header *)trace_get_layer2(packet, &linktype, &rem);
 
 
     /* Set direction bit based on upstream routers' MAC */

@@ -6,7 +6,7 @@ AM_CXXFLAGS+=-rdynamic -DDIRNAME=\"$(plugindir)\" $(INCLUDES)
 plugin_LTLIBRARIES= destbpf.la destmac.la interface.la
 
 destbpf_la_SOURCES=destbpf.cc 
-destmac_la_SOURCES=destmac.cc 
+destmac_la_SOURCES=destmac.cc ../../debug.cpp ../../daemons.cpp 
 interface_la_SOURCES=interface.cc 
 
 destbpf_la_LDFLAGS=-module -avoid-version @ADD_LDFLAGS@

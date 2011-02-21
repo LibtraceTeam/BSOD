@@ -64,7 +64,7 @@ colour_module	string
 rpos_module	string
 lpos_module	string
 dir_module	string
-macaddrfile	string
+dirparam	string
 loop		integer
 shownondata	integer
 showdata	integer
@@ -138,25 +138,26 @@ option: lpos_module	type: string
     evenly spread a number of /24 networks out over a square).
 
 option: dir_module	type: string
-option: macaddrfile	type: string
+option: dirparam	type: string
     Specify the shared library that should be loaded to determine which
     direction packets are travelling in. This defaults to 
     "plugins/direction/interface.so", which uses the interface field in
     the erf header to decide between incoming and outgoing traffic. If
     you are using a pcap based format instead of erf, you will want to
-    use the module "plugins/direction/destmac.so". If you use this
-    alternate module, you will need to specify the file containing remote
-    mac addresses using the macaddrfile option, eg -
+    use the module "plugins/direction/destmac.so". 
     
+    The dirparam option is used to specify any additional parameters that
+    may be required by the direction plugin. For example, the destmac
+    plugin requires a path to a file containing the mac addresses of the
+    external router interfaces. This can be done as follows:
+
 	dir_module = "plugins/direction/destmac.so"
-	macaddrfile = "etc/mac_addrs"
+	dirparam = "/path/to/bsod/etc/mac_addrs"
     
     Whether the packet is destined to or coming from one of the mac 
     addresses listed in this file is used to determine which way it is 
-    travelling. You need to explicitly specify all local mac addresses 
-    that could possibly appear in the trace/capture. These should be in 
-    the standard colon seperated hex notation (eg 00:11:22:33:44:55), 
-    one address per line in the file.
+    travelling. The mac addresses should be in the standard colon seperated 
+    hex notation (eg 00:11:22:33:44:55), one address per line in the file.
     
 option: loop		type: integer
     Only makes sense when running with offline traces. If set to 1, then 

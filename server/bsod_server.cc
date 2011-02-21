@@ -98,7 +98,7 @@ char *colourmod = 0;
 char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
-char *macaddrfile = 0;
+char *dirparam = 0;
 char *blacklistdir = 0;
 const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
@@ -524,8 +524,6 @@ void fix_defaults() {
 		dirmod=strdup("plugins/direction/interface.so");
 	if (!pidfile)
 		pidfile=strdup("/var/run/bsod_server.pid");
-	if (!macaddrfile)
-		macaddrfile=strdup("etc/mac_addrs");
 	if (!blacklistdir)
 		blacklistdir=strdup("blist/");
 	if (!server_name){
@@ -559,7 +557,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_INT((char *)"shownondata", 0, CFGF_NONE),
 		CFG_INT((char *)"showdata", 1, CFGF_NONE),
 		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
-		CFG_STR((char *)"macaddrfile", NULL, CFGF_NONE),
+		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
 		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
 		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
 		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
@@ -615,7 +613,7 @@ void do_configuration(int argc, char **argv) {
 		shownondata = cfg_getint(cfg, "shownondata");
 		showdata = cfg_getint(cfg, "showdata");
 		showcontrol = cfg_getint(cfg, "showcontrol");
-		macaddrfile = cfg_getstr(cfg, "macaddrfile");
+		dirparam = cfg_getstr(cfg, "dirparam");
 		blacklistdir = cfg_getstr(cfg, "blacklistdir");
 		enable_darknet = cfg_getbool(cfg, "darknet");
 		enable_rttest = cfg_getbool(cfg, "rttest");
@@ -683,7 +681,7 @@ static void *get_module(const char *name)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(args)) {
+		if (!init_func(dirparam)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);

@@ -77,9 +77,8 @@ bool PSShaders::init(){
 	//shaders, that would be rude. 
 	if(!mShader.isCompiled()){	
 	
-		//string vs = readfile("data/shaders/ps.vert");
-		string vs = readfile("data/shaders/directional.vert");
-		string fs = readfile("data/shaders/directional.frag");
+		string vs = readfile("data/shaders/ps.vert");
+		string fs = readfile("data/shaders/ps.frag");
 
 		//Set up the shader object
 		if(!mShader.addVertex(vs)) return false;

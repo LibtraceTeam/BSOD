@@ -55,8 +55,8 @@ bool Shader::compile(){
 	const char * ff = mFragText.c_str();
 	const char * vv = mVertText.c_str();
 	
-	//Log::info("Fragment: %s\n", ff);
-	//Log::info("Vertex: %s\n", vv);
+	//printf("Fragment: %s\n", ff);
+	//printf("Vertex: %s\n", vv);
 		
 	char infobuffer[16385];
 	int infobufferlen = 0;
@@ -75,26 +75,33 @@ bool Shader::compile(){
 	
 	if(mFragText != "") glAttachObjectARB(mProgram, mFrag);
 	if(mVertText != "") glAttachObjectARB(mProgram, mVert);
+
+	GLint compiled, linked;
+	glGetObjectParameterivARB(mVert, GL_COMPILE_STATUS, &compiled);
+
+	if (!compiled && mVertText != "") {
 	
-	glGetInfoLogARB(mVert, 16384, &infobufferlen, infobuffer);
-	infobuffer[infobufferlen] = 0;	
-	if(infobufferlen){
+		glGetInfoLogARB(mVert, 16384, &infobufferlen, infobuffer);
+		infobuffer[infobufferlen] = 0;	
 		ERR("Couldn't compile vertex shader: \n%s\n", infobuffer);
 		return false;
 	}
 	
-	glGetInfoLogARB(mFrag, 16384, &infobufferlen, infobuffer);
-	infobuffer[infobufferlen] = 0;	
-	if(infobufferlen){
+	glGetObjectParameterivARB(mFrag, GL_COMPILE_STATUS, &compiled);
+	if (!compiled && mFragText != "") {
+		glGetInfoLogARB(mFrag, 16384, &infobufferlen, infobuffer);
+		infobuffer[infobufferlen] = 0;	
 		ERR("Couldn't compile fragment shader: \n%s\n", infobuffer);
 		return false;
 	}
 	
 	glLinkProgramARB(mProgram);
 	
-	glGetInfoLogARB(mProgram, 16384, &infobufferlen, infobuffer);
-	infobuffer[infobufferlen] = 0;	
-	if(infobufferlen){
+	glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
+
+	if (!linked) {
+		glGetInfoLogARB(mProgram, 16384, &infobufferlen, infobuffer);
+		infobuffer[infobufferlen] = 0;	
 		ERR("Couldn't link shader: \n%s\n", infobuffer);
 		return false;
 	}

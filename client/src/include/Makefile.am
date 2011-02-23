@@ -1,4 +1,4 @@
-EXTRA_DIST=config.h \
+EXTRA_DIST=bsodconfig.h \
 	flowmanager.h \
 	libs.h \
 	main.h \

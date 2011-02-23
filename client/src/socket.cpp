@@ -231,13 +231,13 @@ bool App::openSocket(bool addList){
     
     mFlowDescriptors.clear();
 
+#ifdef ENABLE_GUI
 	if (addList) {
 		string ip_str = toString(ip.host & 0xff) + "." + toString((ip.host>>8)&0xff) + "." + toString((ip.host>>16)&0xff) + "." + toString((ip.host >> 24)&0xff);
 		addExplicitServerListEntry(mServerAddr, ip_str, toString(iServerPort));
 	}
     
     //Set the 'connected to server' text
-#ifdef ENABLE_GUI
     updateGUIConnectionStatus();
 #endif
     

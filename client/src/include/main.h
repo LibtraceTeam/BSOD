@@ -38,7 +38,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#include "config.h"
+#include "bsodconfig.h"
 
 //Pull in standard libraries
 #include "libs.h"

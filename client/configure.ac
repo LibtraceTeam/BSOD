@@ -52,13 +52,25 @@ LIBS="$LIBS -lCEGUIBase -lCEGUIOpenGLRenderer -lCEGUIXercesParser"
 CPPFLAGS="$CPPFLAGS -I/usr/include/CEGUI"
 
 AC_MSG_CHECKING(for libCEGUI)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <CEGUI.h>]],
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <CEGUI/CEGUI.h>]],
 	[CEGUI::WindowManager::getSingleton();])],cegui_found=1,cegui_found=0)
 
 if test "$cegui_found" = 0; then
 	AC_MSG_RESULT(No)
 else
 	AC_MSG_RESULT(Yes)
+	AC_MSG_CHECKING(libCEGUI version)
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([
+	[#include <CEGUI/CEGUI.h>
+#include <CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h>]],
+	[CEGUI::WindowManager::getSingleton();])],newcegui_found=1,
+	newcegui_found=0)
+
+	if test "$newcegui_found" = 1; then
+		AC_MSG_RESULT(0.7)
+	else
+		AC_MSG_RESULT(0.6 or previous)
+	fi
 fi
 
 depend_error=0
@@ -112,10 +124,21 @@ if test "$depend_error" = 1; then
 	AC_MSG_ERROR(Critical libraries are missing - please install the missing libraries listed above and rerun ./configure)
 fi
 
+if test "$newcegui_found" = 1; then
+	AC_MSG_NOTICE(Using CEGUI 0.7)
+	AC_DEFINE(HAVE_CEGUI_07, 1, [Set to 1 if you have CEGUI 0.7 or later])
+else
+	AC_MSG_NOTICE(Not using CEGUI 0.7)
+	AC_DEFINE(HAVE_CEGUI_07, 0, [Set to 1 if you have CEGUI 0.7 or later])
+fi
+
+
+
 AC_SUBST([ADD_LIBS])
 AC_SUBST([ADD_LDFLAGS])
 AC_SUBST([ADD_INCLS])
 AC_SUBST([LTLIBOBJS])
+AC_SUBST([HAVE_CEGUI_07])
 
 AC_OUTPUT
 

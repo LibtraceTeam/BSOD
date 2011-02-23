@@ -43,7 +43,7 @@
 					CEGUI
 **********************************************/
 #ifdef ENABLE_GUI
-#include <CEGUI.h>
+#include <CEGUI/CEGUI.h>
 #endif
 
 /*********************************************

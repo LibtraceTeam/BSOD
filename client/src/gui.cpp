@@ -29,16 +29,22 @@
  */
 
 
+#include "config.h"
 #include "main.h"
 
 #ifdef ENABLE_GUI
 
 //There are some nasty issues with this file pulling in gl.h and conflicting
 //with glew.h, so we have it #included here instead of in libs.h
-#include "RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+
+#if HAVE_CEGUI_07
+#include "CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+#else
+#include "CEGUI/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+#endif
 
 //These are alo apparently not included (properly) by CEGUI.h
-#include "CEGUIDefaultResourceProvider.h"
+#include "CEGUI/CEGUIDefaultResourceProvider.h"
 //#include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
 //Only for this file...
@@ -48,7 +54,7 @@ using namespace CEGUI;
 /*********************************************
 	CEGUI components
 **********************************************/
-OpenGLRenderer*mGUI = NULL;
+OpenGLRenderer *mGUI = NULL;
 DefaultWindow *root = NULL;
 WindowManager *winMgr = NULL;
 FrameWindow *mProtoWindow = NULL;
@@ -96,9 +102,13 @@ void App::initGUI(){
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 	//Set up the GUI object
+
+#if HAVE_CEGUI_07
+	mGUI = &(CEGUI::OpenGLRenderer::bootstrapSystem());
+#else
 	mGUI = new CEGUI::OpenGLRenderer( 0, iScreenX, iScreenY );
 	new CEGUI::System( mGUI );
-	
+#endif	
 	// initialise the required dirs for the DefaultResourceProvider
 	CEGUI::DefaultResourceProvider* rp = (CEGUI::DefaultResourceProvider *)
 							CEGUI::System::getSingleton().getResourceProvider();
@@ -119,16 +129,30 @@ void App::initGUI(){
 	rp->setResourceGroupDirectory("looknfeels", "./data/gui/looknfeel/");
 	rp->setResourceGroupDirectory("lua_scripts","./data/gui/lua_scripts/");
 	rp->setResourceGroupDirectory("schemas", 	"./data/gui/XMLRefSchema/");
+
+#if HAVE_CEGUI_07
+	CEGUI::XMLParser* parser = CEGUI::System::getSingleton().getXMLParser();
+	if (parser->isPropertyPresent("SchemaDefaultResourceGroup"))
+		parser->setProperty("SchemaDefaultResourceGroup", "schemas");
+#endif
 	
 	//CEGUI::XercesParser::setSchemaDefaultResourceGroup("schemas");
 	
 	//Load Arial to make sure we have at least one font
+#if HAVE_CEGUI_07
+	if(!CEGUI::FontManager::getSingleton().isDefined( "arial" ) )
+		CEGUI::FontManager::getSingleton().create( "arial.font" );
+
+	//Load in the themee file
+	CEGUI::SchemeManager::getSingleton().create( "SleekSpaceBSOD.scheme" );
+#else	
+
 	if(!CEGUI::FontManager::getSingleton().isFontPresent( "arial" ) )
 		CEGUI::FontManager::getSingleton().createFont( "arial.font" );
 
 	//Load in the themee file
 	CEGUI::SchemeManager::getSingleton().loadScheme( "SleekSpaceBSOD.scheme" );
-	
+#endif	
 	// All windows and widgets are created via the WindowManager singleton.
     winMgr = &WindowManager::getSingleton();   
     
@@ -598,8 +622,12 @@ void App::shutdownGUI(){
 
 	if(!bGlobalGuiEnable) return;
 
+#if HAVE_CEGUI_07
+	CEGUI::OpenGLRenderer::destroySystem();
+#else	
 	delete CEGUI::System::getSingletonPtr (); 
 	delete mGUI;
+#endif
 }
 
 void App::resizeGUI(int x, int y){
@@ -629,12 +657,15 @@ void App::addProtocolEntry(string name, Color col, int index){
 	
 	float ypos = (index / 2) * 0.1f;
 	float xpos = (index % 2) * 0.5f;
-	
+
+#if HAVE_CEGUI_07
+
+#else
 	ypos += 0.1;
 	xpos += 0.1;
-	
+#endif	
 	cb->setPosition(UVector2(cegui_reldim( xpos ), cegui_reldim( ypos )));
-	cb->setSize(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.075f)));
+	cb->setSize(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.08f)));
 	cb->setText(name.c_str());
 	cb->setProperty("SelectedTextColour", col.toString()); 
 	cb->setSelected(true);
@@ -786,6 +817,9 @@ void App::makeMenuButtons(){
 }
 
 
+
+
+
 /*********************************************
 	Creates the protocol toggle window
 **********************************************/
@@ -795,7 +829,11 @@ void App::makeProtocolWindow(){
     root->addChildWindow(mProtoWindow);
     
     mProtoWindow->setPosition(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.25f)));
+#if HAVE_CEGUI_07
+    mProtoWindow->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.4f)));  
+#else
     mProtoWindow->setSize(UVector2(cegui_reldim(0.5f), cegui_reldim( 0.5f)));  
+#endif
     mProtoWindow->setMaxSize(UVector2(cegui_reldim(1.5f), cegui_reldim( 1.0f)));
     mProtoWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
 
@@ -803,9 +841,13 @@ void App::makeProtocolWindow(){
     
     ScrollablePane *pane = (ScrollablePane*)winMgr->createWindow("SleekSpaceBSOD/ScrollablePane", "paneProto");
     mProtoWindow->addChildWindow(pane);
+#if HAVE_CEGUI_07
+    pane->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.05f)));
+    pane->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.85f)));  
+#else 
     pane->setPosition(UVector2(cegui_reldim(0.075f), cegui_reldim( 0.12f)));
     pane->setSize(UVector2(cegui_reldim(0.87f), cegui_reldim( 0.75f)));  
-    
+#endif
     //for(int i=0;i<30;i++){   
 	//	addProtocolEntry("protocol" + toString(i), Color(randFloat(0,1), randFloat(0,1), randFloat(0,1)), i);
    	//}
@@ -813,16 +855,26 @@ void App::makeProtocolWindow(){
    	PushButton* btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnHideAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Hide All");
+#if HAVE_CEGUI_07
+    btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.90f)));
+    btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.1f)));
+#else    
     btn->setPosition(UVector2(cegui_reldim(0.06f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
+#endif
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onProtocolButtonClicked, this));
     btn->setAlwaysOnTop(true);	
     
     btn = (PushButton *)(winMgr->createWindow("SleekSpaceBSOD/Button", "btnShowAll"));
     mProtoWindow->addChildWindow(btn);
     btn->setText("Show All");
+#if HAVE_CEGUI_07
+    btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.90f)));
+    btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.1f)));
+#else    
     btn->setPosition(UVector2(cegui_reldim(0.54f), cegui_reldim( 0.88f)));
     btn->setSize(UVector2(cegui_reldim(0.4f), cegui_reldim( 0.08f)));
+#endif
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onProtocolButtonClicked, this));
     btn->setAlwaysOnTop(true);	
     
@@ -997,12 +1049,17 @@ void App::makeServerWindow(){
 	Creates the options window
 **********************************************/
 void App::makeOptionWindow(){
+#if HAVE_CEGUI_07
+	float opt_shift = 0.05;
+#else
+	float opt_shift = 0.0;
+#endif
           
     mOptionWindow = (FrameWindow*)winMgr->createWindow("SleekSpaceBSOD/FrameWindow", "wndOption");
     root->addChildWindow(mOptionWindow);
     
     mOptionWindow->setPosition(UVector2(cegui_reldim(0.45f), cegui_reldim( 0.45f)));
-    mOptionWindow->setSize(UVector2(cegui_reldim(0.25f), cegui_reldim( 0.5f)));  
+    mOptionWindow->setSize(UVector2(cegui_reldim(0.30f), cegui_reldim( 0.5f)));  
     mOptionWindow->setMaxSize(UVector2(cegui_reldim(1.0f), cegui_reldim( 1.0f)));
     mOptionWindow->setMinSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.1f))); 
     mOptionWindow->setText("Options");    
@@ -1015,13 +1072,13 @@ void App::makeOptionWindow(){
     DefaultWindow* text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtSpeedInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Speed: 1.0");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.10f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f - opt_shift), cegui_reldim( 0.10f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.1f)));
     
     Slider *slide = (Slider *)(winMgr->createWindow("SleekSpaceBSOD/Slider", "slideSpeed"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Connect");
-    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.17f)));
+    slide->setPosition(UVector2(cegui_reldim(0.1f - opt_shift), cegui_reldim( 0.17f)));
     slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.10f)));
     slide->setAlwaysOnTop(true);	
 	slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
@@ -1030,13 +1087,13 @@ void App::makeOptionWindow(){
     text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtSizeInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Particle Size: 1.0");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.25f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f - opt_shift), cegui_reldim( 0.25f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.2f)));
     
     slide = (Slider *)(winMgr->createWindow("SleekSpaceBSOD/Slider", "slideSize"));
     mOptionWindow->addChildWindow(slide);
     slide->setText("Size");
-    slide->setPosition(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.37f)));
+    slide->setPosition(UVector2(cegui_reldim(0.1f - opt_shift), cegui_reldim( 0.37f)));
     slide->setSize(UVector2(cegui_reldim(0.8f), cegui_reldim( 0.10f)));
     slide->setAlwaysOnTop(true);	
     slide->subscribeEvent(Slider::EventValueChanged, Event::Subscriber(&App::onOptionSliderMoved, this));
@@ -1045,14 +1102,14 @@ void App::makeOptionWindow(){
     text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtDarkInfo");
     mOptionWindow->addChildWindow(text);
 	text->setText("Darknet:");	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.5f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f - opt_shift), cegui_reldim( 0.5f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.1f)));
   
   	
   	
 	Checkbox* cb = (Checkbox *)winMgr->createWindow("SleekSpaceBSOD/Checkbox", "cbDarknet");
 	mOptionWindow->addChildWindow(cb);	
-	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.60f )));
+	cb->setPosition(UVector2(cegui_reldim( 0.1f  - opt_shift), cegui_reldim( 0.60f )));
 	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
 	cb->setText("Show Darknet traffic");
 	cb->setSelected(bShowDarknet);
@@ -1063,7 +1120,7 @@ void App::makeOptionWindow(){
 						
 	cb = (Checkbox *)winMgr->createWindow("SleekSpaceBSOD/Checkbox", "cbNonDarknet" );
 	mOptionWindow->addChildWindow(cb);	
-	cb->setPosition(UVector2(cegui_reldim( 0.1f ), cegui_reldim( 0.67f )));
+	cb->setPosition(UVector2(cegui_reldim( 0.1f  - opt_shift), cegui_reldim( 0.67f )));
 	cb->setSize(UVector2(cegui_reldim(0.9f), cegui_reldim( 0.05f)));
 	cb->setText("Show Non-darknet traffic");
 	cb->setSelected(bShowNonDarknet);
@@ -1076,7 +1133,7 @@ void App::makeOptionWindow(){
 	text = (DefaultWindow *)winMgr->createWindow("SleekSpaceBSOD/StaticText", "txtVersion");
     mOptionWindow->addChildWindow(text);
 	text->setText("BSOD Client - version v" + toString(CLIENT_VERSION) + "\nBuilt " + __DATE__ + " at " + __TIME__);	
-	text->setPosition(UVector2(cegui_reldim(0.05f), cegui_reldim( 0.75f)));
+	text->setPosition(UVector2(cegui_reldim(0.05f - opt_shift), cegui_reldim( 0.75f)));
 	text->setSize(UVector2(cegui_reldim(0.95f), cegui_reldim( 0.3f)));
     
     

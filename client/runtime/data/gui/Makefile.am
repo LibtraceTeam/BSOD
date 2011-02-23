@@ -21,7 +21,15 @@ EXTRA_DIST = configs/CEGUIConfig.xsd \
              fonts/Legal.txt \
              imagesets/sleekspace_bsod.imageset \
              imagesets/sleekspace_bsod.png \
-             looknfeel/Falagard.xsd \
+             imagesets/Imageset.xsd \
+	     looknfeel/Falagard.xsd \
              looknfeel/sleekspace_bsod.looknfeel \
              schemes/GUIScheme.xsd \
-	     schemes/SleekSpaceBSOD.scheme 
+	     schemes/SleekSpaceBSOD.scheme \
+	     XMLRefSchema/CEGUIConfig.xsd \
+	     XMLRefSchema/Font.xsd \
+	     XMLRefSchema/Imageset.xsd \
+	     XMLRefSchema/Falagard.xsd \
+	     XMLRefSchema/GUIScheme.xsd \
+	     XMLRefSchema/GUILayout.xsd 
+

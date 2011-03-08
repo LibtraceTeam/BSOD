@@ -97,7 +97,8 @@ bool Shader::compile(){
 	
 	glLinkProgramARB(mProgram);
 	
-	glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
+	//glGetProgramiv(mProgram, GL_LINK_STATUS, &linked);
+	glGetObjectParameterivARB(mProgram, GL_OBJECT_LINK_STATUS_ARB, &linked);
 
 	if (!linked) {
 		glGetInfoLogARB(mProgram, 16384, &infobufferlen, infobuffer);
@@ -166,9 +167,9 @@ void Shader::bindResource(const char *name, float *data, int count){
 }
 
 void Shader::dispose(){
-	if(mFrag) glDeleteShader(mFrag);
-	if(mVert) glDeleteShader(mVert);
-	glDeleteProgram(mProgram); 
+	if(mFrag) glDeleteObjectARB(mFrag);
+	if(mVert) glDeleteObjectARB(mVert);
+	glDeleteObjectARB(mProgram); 
 	
 	LOG("Dispose\n");
 }

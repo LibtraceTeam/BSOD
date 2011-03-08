@@ -38,7 +38,7 @@ bool App::loadConfig(){
 		CFG_STR((char *)"Server", (char *)"", CFGF_NONE),
 		CFG_STR((char *)"LeftTex", (char *)"", CFGF_NONE),
 		CFG_STR((char *)"RightTex", (char *)"", CFGF_NONE),
-		CFG_STR((char *)"ParticleTextureName", (char *)"particle.bmp", CFGF_NONE),
+		CFG_STR((char *)"ParticleTextureName", (char *)"particle.png", CFGF_NONE),
 		CFG_INT((char *)"Port", 54567, CFGF_NONE),
 		CFG_INT((char *)"ResX", 0, CFGF_NONE),
 		CFG_INT((char *)"ResY", 0, CFGF_NONE),

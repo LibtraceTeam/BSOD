@@ -38,33 +38,62 @@ AC_CONFIG_FILES([Makefile src/Makefile src/include/Makefile runtime/Makefile
 		runtime/data/Makefile runtime/data/gui/Makefile 
 		runtime/data/shaders/Makefile])
 
+AC_CANONICAL_HOST
+
 AC_SEARCH_LIBS([SDL_Init], [SDL],,SDL_found=0)
 AC_SEARCH_LIBS([SDLNet_Init], [SDL_net],,SDLNet_found=0)
 AC_SEARCH_LIBS([TTF_Init],[SDL_ttf],,SDLttf_found=0)
-AC_SEARCH_LIBS([ilGenImages],[IL],,devil_found=0)
-AC_SEARCH_LIBS([iluGetInteger],[ILU],,ilu_found=0)
-AC_SEARCH_LIBS([ilutGetInteger],[ILUT],,ilut_found=0)
+AC_SEARCH_LIBS([png_read_image],[png],,png_found=0)
 AC_SEARCH_LIBS([glewInit],[GLEW],,glew_found=0)
+
+if test "$host_vendor" == "apple"; then
+	LIBS="$LIBS -lintl -liconv -lc"
+fi
+
 AC_SEARCH_LIBS([cfg_init],[confuse],,conf_found=0)
 
 # Hackish, but it works 
-LIBS="$LIBS -lCEGUIBase -lCEGUIOpenGLRenderer -lCEGUIXercesParser"
-CPPFLAGS="$CPPFLAGS -I/usr/include/CEGUI"
 
 AC_MSG_CHECKING(for libCEGUI)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <CEGUI/CEGUI.h>]],
-	[CEGUI::WindowManager::getSingleton();])],cegui_found=1,cegui_found=0)
+if test "$host_vendor" == "apple"; then
+	CPPFLAGS="$CPPFLAGS"
+	LDFLAGS="$LDFLAGS -framework CoreFoundation -framework AppKit -framework OpenGL -framework CEGUIBase -framework CEGUIOpenGLRenderer"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+		#include <CoreFoundation/CoreFoundation.h>
+		#include <CEGUIBase/CEGUI.h>
+		]],
+		[CEGUI::WindowManager::getSingleton();])],
+		cegui_found=1,cegui_found=0)
+
+else
+	LIBS="$LIBS -lCEGUIBase -lCEGUIOpenGLRenderer -lCEGUIXercesParser"
+	CPPFLAGS="$CPPFLAGS -I/usr/include/CEGUI"
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <CEGUI/CEGUI.h>]],
+		[CEGUI::WindowManager::getSingleton();])],
+		cegui_found=1,cegui_found=0)
+fi
 
 if test "$cegui_found" = 0; then
 	AC_MSG_RESULT(No)
 else
 	AC_MSG_RESULT(Yes)
 	AC_MSG_CHECKING(libCEGUI version)
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([
-	[#include <CEGUI/CEGUI.h>
-#include <CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h>]],
-	[CEGUI::WindowManager::getSingleton();])],newcegui_found=1,
-	newcegui_found=0)
+
+	if test "$host_vendor" == "apple"; then
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([
+		[#include <CoreFoundation/CoreFoundation.h>
+		#include <CEGUIBase/CEGUI.h>
+		#include <CEGUIBase/RendererModules/OpenGL/CEGUIOpenGLRenderer.h>]],
+		[CEGUI::WindowManager::getSingleton();])],newcegui_found=1,
+		newcegui_found=0)
+		
+	else	
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([
+		[#include <CEGUI/CEGUI.h>
+		#include <CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h>]],
+		[CEGUI::WindowManager::getSingleton();])],newcegui_found=1,
+		newcegui_found=0)
+	fi
 
 	if test "$newcegui_found" = 1; then
 		AC_MSG_RESULT(0.7)
@@ -90,18 +119,8 @@ if test "$SDLttf_found" = 0; then
 	depend_error=1
 fi
 
-if test "$devil_found" = 0; then
-	AC_MSG_NOTICE(Required library IL not found!)
-	depend_error=1
-fi
-
-if test "$ilu_found" = 0; then
-	AC_MSG_NOTICE(Required library ILU not found!)
-	depend_error=1
-fi
-
-if test "$ilut_found" = 0; then
-	AC_MSG_NOTICE(Required library ILUT not found!)
+if test "$png_found" = 0; then
+	AC_MSG_NOTICE(Required library libpng not found!)
 	depend_error=1
 fi
 
@@ -131,7 +150,6 @@ else
 	AC_MSG_NOTICE(Not using CEGUI 0.7)
 	AC_DEFINE(HAVE_CEGUI_07, 0, [Set to 1 if you have CEGUI 0.7 or later])
 fi
-
 
 
 AC_SUBST([ADD_LIBS])

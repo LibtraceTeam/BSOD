@@ -34,10 +34,12 @@
 
  	Wrapper for a GLSL shader object. 
 *******************************************************************************/
+#include "libs.h"
+
 class Shader{
-	unsigned int mFrag;
-	unsigned int mVert;
-	unsigned int mProgram;
+	GLhandleARB mFrag;
+	GLhandleARB mVert;
+	GLhandleARB mProgram;
 	
 	string mFragText, mVertText;
 	
@@ -57,7 +59,7 @@ public:
 	void bindResource(const char *name, int id);
 	void bindResource(const char *name, float *data, int count);
 	
-	unsigned int getProgram(){return mProgram;}
+	GLhandleARB getProgram(){return mProgram;}
 	
 	bool isCompiled(){return bIsCompiled;}
 };

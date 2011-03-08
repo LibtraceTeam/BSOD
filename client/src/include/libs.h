@@ -43,7 +43,12 @@
 					CEGUI
 **********************************************/
 #ifdef ENABLE_GUI
-#include <CEGUI/CEGUI.h>
+	#ifdef __APPLE__
+		#include <CoreFoundation/CoreFoundation.h>
+		#include <CEGUIBase/CEGUI.h>
+	#else
+		#include <CEGUI/CEGUI.h>
+	#endif
 #endif
 
 /*********************************************
@@ -100,8 +105,15 @@ using std::map;
 	#include <GL/glew.h>
 #endif
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glu.h>
+	#include <OpenGL/glext.h>
+#else
+
+	#include <GL/gl.h>
+	#include <GL/glu.h>
+#endif
 
 /*********************************************
 				SDL*
@@ -116,5 +128,17 @@ using std::map;
 #include <SDL/SDL_net.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mutex.h>
+#endif
+
+
+/* PowerPCs with Altivec seem to replace rather important keywords such as
+ * "bool" and "vector" :( */
+#ifdef __APPLE__
+#ifdef bool
+#undef bool
+#endif
+#ifdef vector
+#undef vector
+#endif
 #endif
 

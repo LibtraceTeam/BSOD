@@ -37,14 +37,29 @@
 //There are some nasty issues with this file pulling in gl.h and conflicting
 //with glew.h, so we have it #included here instead of in libs.h
 
+
+
+
 #if HAVE_CEGUI_07
-#include "CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+	#ifdef __APPLE__
+		#include "CEGUIBase/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+	#else
+		#include "CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+	#endif
 #else
-#include "CEGUI/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+	#ifdef __APPLE__
+		#include "CEGUIBase/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+	#else
+		#include "CEGUI/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+	#endif
 #endif
 
 //These are alo apparently not included (properly) by CEGUI.h
-#include "CEGUI/CEGUIDefaultResourceProvider.h"
+#ifdef __APPLE__
+	#include "CEGUIBase/CEGUIDefaultResourceProvider.h"
+#else
+	#include "CEGUI/CEGUIDefaultResourceProvider.h"
+#endif
 //#include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
 //Only for this file...

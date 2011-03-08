@@ -171,9 +171,12 @@ void App::generateTestData(){
 		
 		int x = iTestRow;
 		
+		/* When we loaded this texture, it will have been flipped to
+		 * compensate for OpenGL using a bottom up coordinate
+		 * system, so we have to be careful how we render each row */
 		for(int y=0;y<tex->iSizeY;y++){
 			
-			int index = (x * 4) +  (y * tex->iSizeX * 4);
+			int index = (x * 4) +  ((tex->iSizeY - 1 - y) * tex->iSizeX * 4);
 			
 			byte r = data[index + 0];
 			byte g = data[index + 1];

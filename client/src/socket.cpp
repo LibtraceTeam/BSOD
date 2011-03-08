@@ -100,7 +100,7 @@ struct pack_update_t {
 	unsigned char packetType;
 	uint16_t size;
 	float speed; 
-	bool dark;
+	uint8_t dark;
 };
 
 //Expire flow packets
@@ -518,7 +518,7 @@ void App::updateTCPSocket(){
 			}
 			
 			
-			bool dark = pkt->dark;
+			uint8_t dark = pkt->dark;
 			
 			if((dark && bShowDarknet) || (!dark && bShowNonDarknet)){			
 				mFlowMgr->newPacket(ntohl(pkt->id), size, rtt, 

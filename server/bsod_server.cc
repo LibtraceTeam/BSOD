@@ -306,8 +306,8 @@ int main(int argc, char *argv[])
 					err.problem);
 		} else {
 			// expire any outstanding flows
-			last_packet_time = trace_get_timeval(bsod_vars.packet);
-			expire_flows(last_packet_time.tv_sec+3600);
+			//last_packet_time = trace_get_timeval(bsod_vars.packet);
+			expire_flows(0, true);
 		}
 		// We've finished with this trace
 		if (file_event.fd != -1)

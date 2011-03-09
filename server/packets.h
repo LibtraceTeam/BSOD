@@ -69,7 +69,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs, struct modptrs_t *
 float convert_speed( float speed );
 
 void kill_all();
-void expire_flows(uint32_t time);
+void expire_flows(uint32_t time, bool expire_all);
 void init_packets();
 void send_flows(struct client *client);
 

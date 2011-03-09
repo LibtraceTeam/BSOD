@@ -116,7 +116,7 @@ struct pack_update_t {
 	unsigned char id_num; // packet type id
 	uint16_t size;
 	float speed; // This affects the speed of the entire flow based on RTT
-	bool dark;
+	uint8_t dark;
 } __attribute__((packed));
 
 /* structure for expire flow packets */
@@ -662,7 +662,10 @@ int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,
 	update.id_num = id_num;
 	update.size = htons(size);
 	update.speed = htonf(speed);
-	update.dark = dark;
+	if (dark)
+		update.dark = 1;
+	else
+		update.dark = 0;
 
 
 	send_all(&update,sizeof(update));
@@ -747,7 +750,7 @@ int send_images(struct client *c){
 		}
 		
 		image.id = 0; //left
-		image.length = len;
+		image.length = htonl(len);
 	
 		enqueue_data(c, &image, sizeof(image));	
 		enqueue_data(c, buf, len);
@@ -767,7 +770,7 @@ int send_images(struct client *c){
 		}
 		
 		image.id = 1; //right
-		image.length = len;
+		image.length = htonl(len);
 	
 		enqueue_data(c, &image, sizeof(image));	
 		enqueue_data(c, buf, len);

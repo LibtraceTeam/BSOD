@@ -147,15 +147,17 @@ void init_packets()
  * otherwise they might be deleted too early and have them disappear from
  * the display.
  */
-void expire_flows(uint32_t time)
+void expire_flows(uint32_t time, bool expire_all)
 {
 	uint32_t tmpid, tmpid2; 
 	//remove flows till we find one that hasnt expired
-	while( !flows.empty() && 
-		(time - flows.front().second->time > EXPIRE_SECS)) 
+	while( !flows.empty() && (expire_all ||
+		(time - flows.front().second->time > EXPIRE_SECS))) 
 	{
 		tmpid = flows.front().second->flow_id[0];
 		tmpid2 = flows.front().second->flow_id[1];
+		if (flows.front().second->colour_data)
+			free(flows.front().second->colour_data);
 		delete(flows.front().second);
 		flows.erase(flows.front().first);	
 
@@ -359,7 +361,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	// expired, there is no need to only run it once a second
 	// We want to run this after we've touched the current flow so we
 	// don't expire it only to recreate it again
-	expire_flows(secs);
+	expire_flows(secs, false);
 
 	// BGN RTT code #####################################################################################
 	// RTT calculation stuff:

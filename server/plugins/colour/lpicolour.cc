@@ -454,6 +454,7 @@ int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet,
 
 }
 
+extern "C"
 void mod_get_info(uint8_t colours[3], char name[256], int id) {
 	
 	if (id >= LAST) {
@@ -470,4 +471,11 @@ void mod_get_info(uint8_t colours[3], char name[256], int id) {
 	colours[2] = countercolours[id][2];
 
 	strcpy(name, counternames[id]);
+}
+
+extern "C"
+int end_module(void) {
+
+	lpi_free_library();
+	return 1;
 }

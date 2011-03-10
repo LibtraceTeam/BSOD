@@ -1,4 +1,4 @@
-Building BSOD client under Linux / OSX
+Building BSOD client under Linux 
 =======================================
 
 First step, make sure you have installed all of the libraries that BSOD
@@ -6,16 +6,14 @@ client depends upon. These are:
 	* libSDL
 	* libSDL_net
 	* libSDL_ttf
-	* libIL		
-	* libILU
-	* libILUT
+	* libpng
 	* libGLEW
 	* libconfuse
 	* libCEGUI
 
 Debian/Ubuntu users can get all of these libraries using the following command:
 
-	sudo apt-get install libsdl-dev libsdl-net1.2-dev libsdl-ttf2.0-dev libdevil-dev libglew-dev libconfuse-dev libcegui-mk2-dev
+	sudo apt-get install libsdl-dev libsdl-net1.2-dev libsdl-ttf2.0-dev libglew-dev libconfuse-dev libcegui-mk2-dev libpng12-dev
 
 
 Then, run the following commands:
@@ -29,15 +27,44 @@ The bsodclient binary will be created in the 'runtime' directory. Run the
 client from within that directory.
 
 
+Building BSOD client under Mac OS X
+===================================
+
+If you wish to build the BSOD client from source, you will first need to ensure
+that you have installed all the required dependencies.
+
+NOTE: We also distribute a pre-built universal app bundle for Mac OS X, which 
+you may wish to try using instead of building from source.
+
+The easiest way to do this is to use macports (http://www.macports.org).
+Install the following ports:
+	* libsdl
+	* libsdl_net
+	* libsdl_ttf
+	* libpng
+	* glew
+	* libconfuse
+
+You will also need the CEGUI 0.7 framework, which can be downloaded from
+http://www.cegui.org.uk/wiki/index.php/Downloads - you want the binary download
+for Apple Mac OS X. Place both CEGUIBase.framework and 
+CEGUIOpenGLRenderer.framework into /Library/Frameworks. Also download the
+dependencies package and install the frameworks contained within into
+/Library/Frameworks as well.
+
+Now you should be able to run:
+	./configure
+	make
+
+The configure step should tell you if any libraries are missing. The bsodclient
+binary will be created in the 'runtime' directory. Run the client from within
+that directory.
+
 Building BSOD client under Windows
 ==================================
 
-If you are just wanting to run BSOD client, a precompiled Windows binary
-should be included with your download. Simply run that binary to start a BSOD
-client.
-
-A Visual Studio 2008 solution is also included in the 'windows' directory. It
-may need adjusting to set paths for your particular machine setup.
+Building BSOD client from source under Windows is not supported. Please use
+the pre-compiled Windows binary if you want to run bsodclient.
 
 
 

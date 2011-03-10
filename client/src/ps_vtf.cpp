@@ -50,7 +50,7 @@ bool PSVTF::init(){
 #endif
 	
 	//And make sure we have at least one VTF texture unit
-	int num = 0;
+	GLint num = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB, &num);
 	
 	LOG("We have %d VTF units!\n", num);

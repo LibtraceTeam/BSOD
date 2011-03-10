@@ -59,7 +59,7 @@ bool Shader::compile(){
 	//printf("Vertex: %s\n", vv);
 		
 	char infobuffer[16385];
-	int infobufferlen = 0;
+	GLsizei infobufferlen = 0;
 
 	if(mVertText != ""){
 		glShaderSourceARB(mVert, 1, &vv,NULL);

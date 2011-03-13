@@ -554,7 +554,7 @@ void App::updateTCPSocket(){
 			
 			//Kinda hacky - we break here as well if we don't have the whole
 			//image buffer. 
-			thisSize += pkt->length;
+			thisSize += ntohl(pkt->length);
 			
 			if((int)mDataBuf.size() - index < thisSize){
 				//we don't have the whole packet...
@@ -564,9 +564,9 @@ void App::updateTCPSocket(){
 			byte *buf = data + sizeof(image_data_t);
 						
 			if(pkt->id == 0 && mLeftTexName == ""){
-				mLeftTex = texGenerate("left", buf, pkt->length);
+				mLeftTex = texGenerate("left", buf, ntohl(pkt->length));
 			}else if(pkt->id == 1  && mRightTexName == ""){
-				mRightTex = texGenerate("right", buf, pkt->length);
+				mRightTex = texGenerate("right", buf, ntohl(pkt->length));
 			}else{
 				LOG("Ignored image ID %d\n", pkt->id);
 			}

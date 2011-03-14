@@ -199,9 +199,23 @@ static Texture* loadPngTexture(FILE *fp, byte *buffer, int buflen, int flags) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_ptr);
 		return NULL;
 	}
+
 	
 	for (int i = 0; i < theight; ++i) {
+		/* Account for images that have been sent over the network
+		 * being rendered upside down on Windows clients :( */
+		
+#ifndef _WINDOWS
 		row_pointers[i] = image_data + i * rowbytes;
+#else
+		if (!fp) {
+			row_pointers[i] = image_data + 	
+				(theight - 1 - i) * rowbytes;
+		}
+		else {
+			row_pointers[i] = image_data + i * rowbytes;
+		}
+#endif
 	}
 
 	png_read_image(png_ptr, row_pointers);

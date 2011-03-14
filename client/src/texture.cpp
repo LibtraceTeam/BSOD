@@ -115,7 +115,10 @@ static Texture* loadPngTexture(FILE *fp, byte *buffer, int buflen, int flags) {
 	assert(!(fp == NULL && buffer == NULL));
 
 	if (fp) {
-		fread(header, 1, 8, fp);
+		if (fread(header, 1, 8, fp) != 8) {
+			LOG("Failed to read PNG header\n");
+			return NULL;
+		}
 		is_png = !png_sig_cmp(header, 0, 8);
 	} else {
 		is_png = !png_sig_cmp(buffer, 0, 8);

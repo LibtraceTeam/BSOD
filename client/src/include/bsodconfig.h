@@ -36,7 +36,7 @@
  file options. 
 *******************************************************************************/
 
-#define ENABLE_CGL_COMPAT //for running under clustergl
+//#define ENABLE_CGL_COMPAT //for running under clustergl
 //#define ENABLE_VTF //vertex texture fetch particle system. Doesn't compile :P
 #define ENABLE_GUI //comment out to not require CEGUI
 #define DEFAULT_PORT 34567

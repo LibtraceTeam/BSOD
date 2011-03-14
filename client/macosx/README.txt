@@ -50,7 +50,7 @@ option: LeftTex
 	Specifies a texture to use on the left plane instead of the texture
 	sent by the server.
 
-option: LeftTex
+option: RightTex
 	Specifies a texture to use on the right plane instead of the texture
 	sent by the server.
 

@@ -49,11 +49,6 @@
 #include "position.h"
 #include <libtrace.h>
 
-/*
- * Number of /24 networks you are mapping. These are spread evenly across
- * the vertical axis
- */
-
 #define NETCOUNT 50  
 
 
@@ -64,7 +59,14 @@
  * the horizontal position
  */
 
-uint32_t nets[NETCOUNT] = {0};
+/*
+ * Number of /24 networks you are mapping. These are spread evenly across
+ * the vertical axis
+ */
+
+uint32_t netcount = NETCOUNT;
+uint32_t *nets;
+bool warned = false;
 
 static int check_subnet(uint32_t net) {
 	int i = 0;
@@ -103,8 +105,11 @@ int mod_get_position(float coord[3],
 	net = ntohl(ip.s_addr) & 0xffffff00;
 
 	if ((index = check_subnet(net)) == -1) {
-		printf("increase NETCOUNT in multiplenet24.cc\n");
-		assert(index != -1);
+		if (!warned) {
+			Log(LOG_DAEMON | LOG_INFO, "Netcount exceeded for multiplenet24 position module - flows outside of the first %d /24s will not be displayed\n", netcount);
+			warned = true;
+		}
+		return;
 	}
 	
 
@@ -116,3 +121,19 @@ int mod_get_position(float coord[3],
 	return 0;
 }
 
+extern "C"
+int init_module(char *modarg) {
+
+	
+	uint32_t nc = 0;
+	if (modarg)
+		nc = strtoul(modarg, NULL, 10);
+
+	if (nc > 0)
+		netcount = nc;
+	nets = (uint32_t *)malloc(sizeof(uint32_t) * netcount);
+
+	memset(nets, 0, sizeof(uint32_t) * netcount);
+	
+	Log(LOG_DAEMON | LOG_INFO, "Netcount set to %u\n", netcount);
+}

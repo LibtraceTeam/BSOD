@@ -68,7 +68,7 @@ typedef int (* posfptr)(float[3],
 typedef int (* dirfptr)(struct libtrace_packet_t *);
 typedef void (* initdirfptr)(char* );
 typedef int (* initfuncfptr)(const char *);
-typedef int (* initsidefptr)(side_t side, const char *);
+typedef int (* initsidefptr)(char *);
 typedef int (* endfptr)();
 typedef int (* endsidefptr)(side_t side);
 struct modptrs_t {
@@ -77,7 +77,6 @@ struct modptrs_t {
 	posfptr left;
 	posfptr right;
 	dirfptr direction;
-	initdirfptr init_dir;
 };
 
 

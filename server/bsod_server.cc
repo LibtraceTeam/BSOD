@@ -99,6 +99,7 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *dirparam = 0;
+char *posparam = 0;
 char *blacklistdir = 0;
 const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
@@ -135,6 +136,8 @@ struct wand_fdcb_t udpsocket;
 struct wand_fdcb_t file_event;
 struct wand_timer_t sleep_event;
 
+struct wand_timer_t signal_timer;
+
 void do_usage(char* name)
 {
     printf("Usage: %s [-h] [-b] -C <configfile> \n", name);
@@ -155,6 +158,7 @@ static void init_signals();
 static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		RTTMap *rttmap);
 static void bsod_event(bsod_vars_t *vars);
+static void set_signal_timer(bsod_vars_t *vars, bool remove);
 
 bsod_vars_t bsod_vars;
 
@@ -194,7 +198,7 @@ int main(int argc, char *argv[])
 		put_pid(pidfile);
 
 	}
-	do_configuration(0,0);
+	//do_configuration(0,0);
 	restart_config = 0;
 	if (!load_modules()) {
 		Log(LOG_DAEMON|LOG_INFO,"Failed to load modules, aborting\n");
@@ -286,7 +290,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 
-
 		bsod_event(&bsod_vars);
 		wand_ev_hdl->running = true;
 		wand_event_run(wand_ev_hdl);
@@ -342,13 +345,30 @@ static void file_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	wand_del_event(wand_ev_hdl, evcb);
 	assert(ev == EV_READ);
 	evcb->fd = -1;
+	wand_del_timer(wand_ev_hdl, &signal_timer);
 	bsod_event((bsod_vars_t *)evcb->data);
 
 }
 
 static void sleep_cb(struct wand_timer_t *timer) {
 	timer->callback = NULL;
+	wand_del_timer(wand_ev_hdl, &signal_timer);
 	bsod_event((bsod_vars_t *)timer->data);
+}
+
+static void signal_timer_cb(struct wand_timer_t *timer) {
+	timer->callback = NULL;
+	bsod_event((bsod_vars_t *)timer->data);
+}
+
+static void set_signal_timer(bsod_vars_t *vars) {
+	
+	signal_timer.expire = wand_calc_expire(wand_ev_hdl, 1, 0);
+	signal_timer.callback = signal_timer_cb;
+	signal_timer.data = vars;
+	signal_timer.next = signal_timer.prev = NULL;
+
+	wand_add_timer(wand_ev_hdl, &signal_timer);
 }
 
 
@@ -400,12 +420,28 @@ static void bsod_event(bsod_vars_t *vars) {
 	struct libtrace_eventobj_t event;
 	int poll_again = 1;
 
+	// If we get a USR1, we want to restart. Break out and restart
+	if (restart_config == 1) {
+		wand_ev_hdl->running = false;
+		return;
+	}
+
+	if (terminate_bsod) {
+		loop=0;
+		wand_ev_hdl->running = false;
+		return;
+	}
+	
 	do {
 		if (!vars->packet)
 			vars->packet = trace_create_packet();
 		event = trace_event(trace, vars->packet);
 		poll_again = process_bsod_event(vars, event);
 	} while (poll_again);
+
+	/* Make sure we check for a signal every second, just in case we
+	 * have no other events for a while */
+	set_signal_timer(vars);
 
 }
 
@@ -416,17 +452,6 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 	
 	struct timeval packettime;
 
-	// If we get a USR1, we want to restart. Break out of
-	// this while() and go into cleanup
-	if (restart_config == 1) {
-		return 0;
-	}
-
-	if (terminate_bsod) {
-		loop=0;
-		return 0;
-	}
-	
 	/* check for new clients */
 	/*
 	new_client = check_clients(&modptrs, false);
@@ -455,6 +480,7 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 	}
 	return 1;
 }
+
 
 
 static void sigterm_cb(struct wand_signal_t *signal) {
@@ -558,6 +584,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_INT((char *)"showdata", 1, CFGF_NONE),
 		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
 		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
+		CFG_STR((char *)"posparam", NULL, CFGF_NONE),
 		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
 		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
 		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
@@ -614,6 +641,7 @@ void do_configuration(int argc, char **argv) {
 		showdata = cfg_getint(cfg, "showdata");
 		showcontrol = cfg_getint(cfg, "showcontrol");
 		dirparam = cfg_getstr(cfg, "dirparam");
+		posparam = cfg_getstr(cfg, "posparam");
 		blacklistdir = cfg_getstr(cfg, "blacklistdir");
 		enable_darknet = cfg_getbool(cfg, "darknet");
 		enable_rttest = cfg_getbool(cfg, "rttest");
@@ -724,7 +752,7 @@ static void *get_position_module(side_t side, const char *name)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(side,args)) {
+		if (!init_func(posparam)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);

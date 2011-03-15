@@ -43,6 +43,11 @@
 
 #include <netinet/in.h>
 
+#include "../../debug.h"
+#include "../../daemons.h"
+#include <syslog.h>
+
+
 typedef enum {
 	DIR_UNKNOWN = -1,
 	DIR_OUTBOUND = 0,

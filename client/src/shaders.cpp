@@ -155,10 +155,10 @@ void Shader::bindResource(const char *name, float *data, int count){
 		
 	//hacky!
 	//Is this really the best the GL API has to offer :|?
-	if(count == 1)		glUniform1f(location, data[0]);
-	else if(count == 2) glUniform2f(location, data[0], data[1]);
-	else if(count == 3) glUniform3f(location, data[0], data[1], data[2]);
-	else if(count == 4) glUniform4f(location, data[0], data[1], data[2], data[3]);
+	if(count == 1)		glUniform1fARB(location, data[0]);
+	else if(count == 2) glUniform2fARB(location, data[0], data[1]);
+	else if(count == 3) glUniform3fARB(location, data[0], data[1], data[2]);
+	else if(count == 4) glUniform4fARB(location, data[0], data[1], data[2], data[3]);
 	else{
 		LOG("Bad count %d in bindResource(%s)\n", count, name);
 	}

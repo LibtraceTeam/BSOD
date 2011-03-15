@@ -141,12 +141,10 @@ float PSSprites::setSizeScale(){
 	Set up the point sprites
 **********************************************/
 bool PSSprites::init(){
-/*
 	if (!glewIsSupported("GL_VERSION_1_4  GL_ARB_point_sprite")){
 		ERR("No point sprite support!\n");
 	  	return false;
 	}
-*/
 	glGetFloatv( GL_POINT_SIZE_MAX_ARB, &fMaxSize );
 			
 	glPointSize( fMaxSize );

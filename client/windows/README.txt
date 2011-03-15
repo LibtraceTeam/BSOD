@@ -17,8 +17,19 @@ on screen.
 Further information about both the BSOD client and server can be found at
 http://research.wand.net.nz/software/visualisation.php
 
+This particular build was created using Visual Studio 2010 and tested on a 32 
+bit Windows 7 install. We expect that it will work fine on Vista machines, but
+has not been explicitly tested as yet. Windows XP may or may not work, but feel
+free to try your luck. If you absolutely must have a working version of BSOD
+client for Windows XP, get in touch and we'll see what we can do.
+
 Running BSOD Client
 ===================
+IMPORTANT for Windows users: If you have not installed Visual Studio on your
+machine, you may not have all the development libraries required to run BSOD
+client. The file vcredist_x86.exe (included in the zip file) will install 
+these libraries for you. 
+
 Edit the configuration file "bsod2.cfg" to suit your requirements (see 
 Configuration below) and then simply double-click on the bsodclient executable.
 It will automatically attempt to connect to the server specified in your
@@ -84,6 +95,10 @@ option: ParticleSizeScale
 
 option: ParticleSpeedScale
 	Specifies a multiplier to apply to the speed of the particles.
+
+option: MaxFrameRate
+	Specifies an upper limit on the frame rate. If 0, the frame rate is
+	unlimited.
 
 option: DropPacketThresh
 	Specifies the minimum frame rate before bsodclient starts dropping

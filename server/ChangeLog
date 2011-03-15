@@ -8,13 +8,15 @@ This code has been developed by the University of Waikato WAND
 research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
 
-Version 2.0.1, Feb 17, 2011
+Version 2.0.1, Mar 15, 2011
 ---------------------------
 Changes	    - Added new colour module that uses libprotoident to identify
 	      applications.
 	    - Moved to libwandevent for managing main loop, which should
 	      provide more timely response to events, i.e. incoming connections.
 	    - Switch to autotool-based build system.
+	    - Fixed annoying error messages that pop up when the blacklist is
+	      loaded for the first time.
 
 Version 2.0.0, Jan 26, 2009
 ----------------------------

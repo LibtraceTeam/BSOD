@@ -3,15 +3,15 @@ Installing bsod-server:
 ----------------------------------
 The bsod server requires:
 
-* libtrace (http://research.wand.net.nz/software/libtrace/)
-* libwandevent (http://research.wand.net.nz/software/libwandevent/
+* libtrace ( http://research.wand.net.nz/software/libtrace/ )
+* libwandevent ( http://research.wand.net.nz/software/libwandevent/ )
 * g++-3.0 or greater (known to work with 3.0, fails with 2.95)
 * libconfuse (package libconfuse-dev on debian)
 
 
 Optional:
 * libprotoident, required for the lpicolour module 
-	(http://research.wand.net.nz/software/libprotoident/)
+	( http://research.wand.net.nz/software/libprotoident/ )
 
 ----------------------------------
 To make and install the bsod server:

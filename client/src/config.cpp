@@ -52,6 +52,8 @@ bool App::loadConfig(){
 		CFG_INT((char *)"ShowDarknet", 1, CFGF_NONE),
 		CFG_INT((char *)"ShowNonDarknet", 1, CFGF_NONE),
 		CFG_INT((char *)"FlipTextures", 0, CFGF_NONE),
+		CFG_INT((char *)"MaxFrameRate", DEFAULT_MAX_FRAME_RATE, 
+				CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -77,7 +79,7 @@ bool App::loadConfig(){
 	bShowNonDarknet = cfg_getint(cfg, "ShowNonDarknet");
 	bTexFlip = cfg_getint(cfg, "FlipTextures");
 	mParticleTexName = string(cfg_getstr(cfg, "ParticleTextureName"));
-	
+	iMaxFrameRate = cfg_getint(cfg, "MaxFrameRate");	
 	cfg_free(cfg);
 	
 	return true;

@@ -301,6 +301,7 @@ public:
 	//rendering
 	float fParticleSizeScale;	//Global scaling factor applied to size
 	float fParticleSpeedScale;	//Global scaling factor applied to speed
+	int iMaxFrameRate;		//Upper bound on frame rate 
 	
 	//Skip
 	int iDropPacketThresh; //The FPS that we start to discard packets below

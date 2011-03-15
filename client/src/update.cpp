@@ -289,6 +289,12 @@ void App::utilEventLoop(){
 			
 			//Figure out the scaling factor for FPS-independent movement
 			uint32_t diff = endTime - startTime;
+			
+			if (iMaxFrameRate > 0 && diff < 1000 / iMaxFrameRate) {
+				SDL_Delay((1000 / iMaxFrameRate) - diff);
+				diff = 1000 / iMaxFrameRate;
+			}
+			
 			fTimeScale = (float)diff * fTimeScaleScale;
 			
 			//Every hour, do a cleanup

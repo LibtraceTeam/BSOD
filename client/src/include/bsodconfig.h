@@ -46,6 +46,7 @@
 #define MAX_PARTICLES 1000000 //global cap of 1m particles for particle systems
 #define SLAB_SIZE 40
 #define GUI_HIDE_DELAY 5.0f //seconds
+#define DEFAULT_MAX_FRAME_RATE 60
 
 //Toggles between std::map and unordered_map
 #ifndef _WINDOWS 

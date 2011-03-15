@@ -85,6 +85,10 @@ option: ParticleSizeScale
 option: ParticleSpeedScale
 	Specifies a multiplier to apply to the speed of the particles.
 
+option: MaxFrameRate
+	Specifies an upper-bound on the frame rate. If 0, the frame rate is
+	unlimited.
+
 option: DropPacketThresh
 	Specifies the minimum frame rate before bsodclient starts dropping
 	packets.

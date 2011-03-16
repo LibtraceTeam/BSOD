@@ -47,7 +47,11 @@
 		#include <CoreFoundation/CoreFoundation.h>
 		#include <CEGUIBase/CEGUI.h>
 	#else
-		#include <CEGUI/CEGUI.h>
+		#ifdef _WINDOWS
+			#include <CEGUI.h>
+		#else
+			#include <CEGUI/CEGUI.h>
+		#endif
 	#endif
 #endif
 

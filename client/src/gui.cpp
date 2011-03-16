@@ -44,13 +44,21 @@
 	#ifdef __APPLE__
 		#include "CEGUIBase/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
 	#else
+		#ifdef _WINDOWS
+		#include "RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+		#else
 		#include "CEGUI/RendererModules/OpenGL/CEGUIOpenGLRenderer.h"
+		#endif
 	#endif
 #else
 	#ifdef __APPLE__
 		#include "CEGUIBase/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
 	#else
+		#ifdef _WINDOWS
+		#include "RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+		#else
 		#include "CEGUI/RendererModules/OpenGLGUIRenderer/openglrenderer.h"
+		#endif
 	#endif
 #endif
 

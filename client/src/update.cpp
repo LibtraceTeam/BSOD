@@ -31,9 +31,6 @@
 
 #include "main.h"
 
-#include <IL/il.h>
-
-
 
 /*********************************************
 		per-frame logic goes here

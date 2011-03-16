@@ -161,6 +161,7 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		RTTMap *rttmap);
 static void bsod_event(bsod_vars_t *vars);
 static void set_signal_timer(bsod_vars_t *vars, bool remove);
+static void signal_event(bsod_vars_t *vars) ;
 
 bsod_vars_t bsod_vars;
 
@@ -360,7 +361,7 @@ static void sleep_cb(struct wand_timer_t *timer) {
 
 static void signal_timer_cb(struct wand_timer_t *timer) {
 	timer->callback = NULL;
-	bsod_event((bsod_vars_t *)timer->data);
+	signal_event((bsod_vars_t *)timer->data);
 }
 
 static void set_signal_timer(bsod_vars_t *vars) {
@@ -405,6 +406,7 @@ static int process_bsod_event(bsod_vars_t *vars, libtrace_eventobj_t event) {
 			}
 			return 1;
 		case TRACE_EVENT_TERMINATE:
+			Log(LOG_DEBUG, "Terminating trace\n");
 			wand_ev_hdl->running = false;
 			return 0;
 		default:
@@ -415,7 +417,22 @@ static int process_bsod_event(bsod_vars_t *vars, libtrace_eventobj_t event) {
 	}
 }
 
-			
+static void signal_event(bsod_vars_t *vars) {
+	// If we get a USR1, we want to restart. Break out and restart
+	if (restart_config == 1) {
+		wand_ev_hdl->running = false;
+		return;
+	}
+
+	if (terminate_bsod) {
+		loop=0;
+		wand_ev_hdl->running = false;
+		return;
+	}
+	/* Make sure we check for a signal every second, just in case we
+	 * have no other events for a while */
+	set_signal_timer(vars);
+}			
 
 static void bsod_event(bsod_vars_t *vars) {
 

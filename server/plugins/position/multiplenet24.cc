@@ -41,10 +41,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
-#include <vector>
-#include <algorithm>
-#include <numeric>
-#include <iostream>
+#include <string.h>
+#include <stdlib.h>
 
 #include "position.h"
 #include <libtrace.h>
@@ -82,7 +80,6 @@ static int check_subnet(uint32_t net) {
 	return -1;
 }
 
-extern "C"
 int mod_get_position(float coord[3], 
 		side_t side, direction_t dir,
 		struct libtrace_packet_t *packet) {
@@ -109,7 +106,7 @@ int mod_get_position(float coord[3],
 			Log(LOG_DAEMON | LOG_INFO, "Netcount exceeded for multiplenet24 position module - flows outside of the first %d /24s will not be displayed\n", netcount);
 			warned = true;
 		}
-		return;
+		return 1;
 	}
 	
 
@@ -121,7 +118,6 @@ int mod_get_position(float coord[3],
 	return 0;
 }
 
-extern "C"
 int init_module(char *modarg) {
 
 	
@@ -136,4 +132,6 @@ int init_module(char *modarg) {
 	memset(nets, 0, sizeof(uint32_t) * netcount);
 	
 	Log(LOG_DAEMON | LOG_INFO, "Netcount set to %u\n", netcount);
+
+	return 1;
 }

@@ -6,7 +6,7 @@ AM_CXXFLAGS+=-rdynamic -DDIRNAME=\"$(plugindir)\" $(INCLUDES)
 plugin_LTLIBRARIES= multiplenet24.la network16.la networkxxyy.la radial.la \
 		random.la
 
-multiplenet24_la_SOURCES=multiplenet24.cc
+multiplenet24_la_SOURCES=multiplenet24.cc ../../debug.cpp ../../daemons.cpp
 network16_la_SOURCES=network16.cc
 networkxxyy_la_SOURCES=networkxxyy.cc
 radial_la_SOURCES=radial.cc

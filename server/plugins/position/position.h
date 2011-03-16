@@ -72,7 +72,7 @@ typedef enum {
  * @note The param may be an empty string ("") if there is no parameter.
  */
 extern "C"
-int init_module(side_t side, const char *msg);
+int init_module(char *param);
 
 /** mod_get_position
  * @param[in,out] coord[3] The 3d coordinate of the position (x,y,z), 

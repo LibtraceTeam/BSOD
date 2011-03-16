@@ -99,7 +99,8 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *dirparam = 0;
-char *posparam = 0;
+char *leftposparam = 0;
+char *rightposparam = 0;
 char *blacklistdir = 0;
 const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
@@ -584,7 +585,8 @@ void do_configuration(int argc, char **argv) {
 		CFG_INT((char *)"showdata", 1, CFGF_NONE),
 		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
 		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
-		CFG_STR((char *)"posparam", NULL, CFGF_NONE),
+		CFG_STR((char *)"lpos_param", NULL, CFGF_NONE),
+		CFG_STR((char *)"rpos_param", NULL, CFGF_NONE),
 		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
 		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
 		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
@@ -641,7 +643,8 @@ void do_configuration(int argc, char **argv) {
 		showdata = cfg_getint(cfg, "showdata");
 		showcontrol = cfg_getint(cfg, "showcontrol");
 		dirparam = cfg_getstr(cfg, "dirparam");
-		posparam = cfg_getstr(cfg, "posparam");
+		leftposparam = cfg_getstr(cfg, "lpos_param");
+		rightposparam = cfg_getstr(cfg, "rpos_param");
 		blacklistdir = cfg_getstr(cfg, "blacklistdir");
 		enable_darknet = cfg_getbool(cfg, "darknet");
 		enable_rttest = cfg_getbool(cfg, "rttest");
@@ -730,7 +733,7 @@ static void *get_module(const char *name)
 /**
  * Load a position module, calling it's initialisation function if appropriate
  */
-static void *get_position_module(side_t side, const char *name)
+static void *get_position_module(side_t side, const char *name, char *posparam)
 {
 	char tmp[4096];
 	char *driver;
@@ -794,7 +797,7 @@ static int load_modules() {
 		return 0;
 	}
 
-	lefthandle = get_position_module(SIDE_LEFT, leftpos);
+	lefthandle = get_position_module(SIDE_LEFT, leftpos, leftposparam);
 	if (!lefthandle) {
 		return 0;
 	}
@@ -804,7 +807,7 @@ static int load_modules() {
 		return 0;
 	}
 
-	righthandle = get_position_module(SIDE_RIGHT,rightpos);
+	righthandle = get_position_module(SIDE_RIGHT,rightpos, rightposparam);
 	if (!righthandle) {
 		return 0;
 	}
@@ -864,7 +867,6 @@ static void close_modules() {
 		}
 		dlclose(dirhandle);
 	}
-	modptrs.init_dir = 0;
 	modptrs.direction = 0;
 }	
 

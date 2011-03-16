@@ -99,6 +99,7 @@ char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
 char *dirparam = 0;
+char *colourparam = 0;
 char *leftposparam = 0;
 char *rightposparam = 0;
 char *blacklistdir = 0;
@@ -585,6 +586,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_INT((char *)"showdata", 1, CFGF_NONE),
 		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
 		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
+		CFG_STR((char *)"colourparam", NULL, CFGF_NONE),
 		CFG_STR((char *)"lpos_param", NULL, CFGF_NONE),
 		CFG_STR((char *)"rpos_param", NULL, CFGF_NONE),
 		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
@@ -643,6 +645,7 @@ void do_configuration(int argc, char **argv) {
 		showdata = cfg_getint(cfg, "showdata");
 		showcontrol = cfg_getint(cfg, "showcontrol");
 		dirparam = cfg_getstr(cfg, "dirparam");
+		colourparam = cfg_getstr(cfg, "colourparam");
 		leftposparam = cfg_getstr(cfg, "lpos_param");
 		rightposparam = cfg_getstr(cfg, "rpos_param");
 		blacklistdir = cfg_getstr(cfg, "blacklistdir");
@@ -689,7 +692,7 @@ static void parse_args(const char *line, char **driver, char **args)
 /**
  * Load the module, calling it's initialisation function if appropriate
  */
-static void *get_module(const char *name)
+static void *get_module(const char *name, char *param)
 {
 	char tmp[4096];
 	char *driver;
@@ -712,7 +715,7 @@ static void *get_module(const char *name)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(dirparam)) {
+		if (!init_func(param)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
@@ -779,7 +782,7 @@ static int load_modules() {
 
 	//------- Load up modules -----------
 	
-	colourhandle = get_module(colourmod);
+	colourhandle = get_module(colourmod, colourparam);
 	if (!colourhandle) {
 		return 0;
 	}
@@ -818,7 +821,7 @@ static int load_modules() {
 	}
 
 
-	dirhandle = get_module(dirmod);
+	dirhandle = get_module(dirmod, dirparam);
 	if (!dirhandle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		return 0;

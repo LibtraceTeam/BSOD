@@ -271,9 +271,6 @@ int main(int argc, char *argv[])
 		    exit(1);
 		}
 
-		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
-		gettimeofday(&starttime, 0); // XXX
-
 
 		//------- Create filter -------------
 		if (filter)
@@ -287,11 +284,15 @@ int main(int argc, char *argv[])
 		//trace_config(trace, TRACE_OPTION_EVENT_REALTIME, &one);
 		if (trace_start(trace)==-1) {
 			struct trace_err_t err;
+		    	err=trace_get_err(trace);
 			Log(LOG_DAEMON|LOG_ALERT, 
 					"Unable to connect to data source: %s\n",
 					err.problem);
 			exit(1);
 		}
+
+		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
+		gettimeofday(&starttime, 0); // XXX
 
 		bsod_event(&bsod_vars);
 		wand_ev_hdl->running = true;

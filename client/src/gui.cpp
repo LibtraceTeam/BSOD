@@ -66,7 +66,11 @@
 #ifdef __APPLE__
 	#include "CEGUIBase/CEGUIDefaultResourceProvider.h"
 #else
-	#include "CEGUI/CEGUIDefaultResourceProvider.h"
+	#ifdef _WINDOWS
+		#include "CEGUIDefaultResourceProvider.h"
+	#else
+		#include "CEGUI/CEGUIDefaultResourceProvider.h"
+	#endif
 #endif
 //#include "XMLParserModules/XercesParser/CEGUIXercesParser.h"
 
@@ -587,6 +591,10 @@ bool App::onMouseCursorChanged(const CEGUI::EventArgs&){
 	//If CEGUI has changed to a valid image, hide the SDL cursor. This ensures
 	//that we do sensible things when we mouse over edit boxes and such, 
 	//otherwise we have duplicate cursors. 
+
+	//Windows is lame and seems to reset the position of the mouse pointer 
+	//when you disable the mouse cursor. This will probably instantly change
+	//the mouse pointer back :(
 #ifndef _WINDOWS
 #ifndef ENABLE_CGL_COMPAT
 	if(CEGUI::MouseCursor::getSingleton().getImage()){

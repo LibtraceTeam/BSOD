@@ -57,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Programming\bsod2\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../src/include;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\dependencies\include;C:\Users\WAND-Lab\Downloads\confuse-2.7\confuse-2.7\src;C:\Users\WAND-Lab\Downloads\SDL-devel-1.2.14-VC8\SDL-1.2.14\include;C:\Users\WAND-Lab\Downloads\SDL_ttf-2.0.10\include;C:\Users\WAND-Lab\Downloads\SDL_net-1.2.7\include;C:\Users\WAND-Lab\Downloads\glew-1.5.8\include;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\cegui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -83,7 +83,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Users\WAND-Lab\Downloads\glew-1.5.8\include;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\dependencies\include;C:\Users\WAND-Lab\Downloads\SDL_ttf-2.0.10\include;C:\Users\WAND-Lab\Downloads\SDL_net-1.2.7\include;C:\Users\WAND-Lab\Downloads\SDL-devel-1.2.14-VC8\SDL-1.2.14\include;C:\bsodclient\windows;C:\Users\WAND-Lab\Downloads\confuse-2.7\confuse-2.7\src;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\cegui\include;C:\bsodclient\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../src/include;C:\Users\WAND-Lab\Downloads\glew-1.5.8\include;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\dependencies\include;C:\Users\WAND-Lab\Downloads\SDL_ttf-2.0.10\include;C:\Users\WAND-Lab\Downloads\SDL_net-1.2.7\include;C:\Users\WAND-Lab\Downloads\SDL-devel-1.2.14-VC8\SDL-1.2.14\include;C:\bsodclient\windows;C:\Users\WAND-Lab\Downloads\confuse-2.7\confuse-2.7\src;C:\Users\WAND-Lab\Downloads\CEGUI-SDK-0.7.5-vc10\CEGUI-SDK-0.7.5-vc10\cegui\include;C:\bsodclient\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -108,7 +108,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <Version>2.0.1</Version>
-      <AdditionalLibraryDirectories>C:\bsodclient\runtime;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../runtime;.;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -117,7 +117,9 @@
     <ClCompile Include="..\src\flowmanager.cpp" />
     <ClCompile Include="..\src\font.cpp" />
     <ClCompile Include="..\src\gl_util.cpp" />
-    <ClCompile Include="..\src\gui.cpp" />
+    <ClCompile Include="..\src\gui.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../src/include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="..\src\keys.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\misc.cpp" />

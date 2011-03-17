@@ -182,7 +182,8 @@ void App::initGUI(){
     //Create the root window
     root = (DefaultWindow*)winMgr->createWindow("DefaultWindow", "Root");
     System::getSingleton().setGUISheet(root); 
-    		
+   	root->setProperty("MousePassThroughEnabled", "true");   
+ 		
     mProtoWindow = NULL;
     		
    	//Create the main menu buttons

@@ -61,14 +61,19 @@ source		string
 listenport	integer
 filter		string
 colour_module	string
+colourparam	string
 rpos_module	string
+rpos_param	string
 lpos_module	string
+lpos_param	string
 dir_module	string
 dirparam	string
 loop		integer
 shownondata	integer
 showdata	integer
 showcontrol	integer
+showresets	integer
+shownontcpudp	integer
 darknet		boolean
 blacklistdir 	string
 rttest		boolean
@@ -109,13 +114,19 @@ option: filter		type: string
     of BPF filters.
 
 option: colour_module	type: string
+option: colourparam	type: string
     Specify the shared library that should be loaded to supply the colour
     selection algorithms. Defaults to "plugins/colour/colours.so", which
     uses a port-based colour scheme. If your packet capture retains at least
     four bytes of packet payload, we recommend using the lpicolour module
     instead, as it can identify protocols much more accurately.
 
+    The colourparam option can be used to pass parameters into a colour
+    plugin. At present, no colour plugins utilise this option but they may in
+    the future.
+
 option: rpos_module	type: string
+option: rpos_param	type: string
     Specify the shared library that should be loaded to supply the layout
     algorithms for the right hand side of the display. Defaults to 
     "plugins/position/radial.so", which fits the entire ipv4 address space 
@@ -126,7 +137,12 @@ option: rpos_module	type: string
     them out into a square), and "plugins/position/multiplenet24.so" (will
     evenly spread a number of /24 networks out over a square).
     
+    The rpos_param option can be used to pass parameters into a layout module.
+    For instance, the multiplenet24 plugin accepts a maximum number of /24
+    networks to layout on the plane.
+
 option: lpos_module	type: string
+option: lpos_param	type: string
     Specify the shared library that should be loaded to supply the layout
     algorithms for the left hand side of the display. Defaults to 
     "plugins/position/network16.so", which treats all addresses as belonging
@@ -136,6 +152,10 @@ option: lpos_module	type: string
     into a square), "plugins/position/radial.so" (will fit the ipv4 address 
     space into a circle, and "plugins/position/multiplenet24.so" (will
     evenly spread a number of /24 networks out over a square).
+
+    The lpos_param option can be used to pass parameters into a layout module.
+    For instance, the multiplenet24 plugin accepts a maximum number of /24
+    networks to layout on the plane.
 
 option: dir_module	type: string
 option: dirparam	type: string
@@ -179,6 +199,16 @@ options: showcontrol	type: integer
     If set to 1 the display will show TCP control packets (syn, fin, rst).
     Set it to 0 to hide these packets. This only applies to TCP, and 
     overrides the showdata and shownondata options. Defaults to 1.
+
+options: showresets	type: integer
+    If set to 1 the display will show TCP reset packets. To hide these packets,
+    set this AND showcontrol to 0. This only applies to TCP, and does not
+    override the showcontrol option. Defaults to 1.
+
+options: shownontcpudp	type: integer
+    If set to 1 the display will show IP packets for transports other than
+    TCP and UDP, e.g. ICMP, GRE, ESP. Set to 0 to hide these packets.
+    Defaults to 1.
 
 option: darknet		type: boolean
     Specifies whether BSOD should maintain a blacklist of inactive hosts to

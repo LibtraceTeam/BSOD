@@ -94,6 +94,8 @@ static uint32_t id = 0;
 extern int shownondata;
 extern int showdata;
 extern int showcontrol;
+extern int shownontcpudp;
+extern int showresets;
 
 bool enable_rttest = true;
 bool enable_darknet = true;
@@ -264,6 +266,8 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		if(showcontrol && (tcpptr->syn || tcpptr->fin || tcpptr->rst))
 			force_display = 1;
+		if(showresets && (tcpptr->rst))
+			force_display = 1;
 		src_port = tcpptr->source;
 		dest_port = tcpptr->dest;
 	}
@@ -277,7 +281,6 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	}
 
 	direction = modptrs->direction(packet);
-
 #ifdef INVERSE_DIRECTION
 	direction = !direction;
 #endif
@@ -322,34 +325,41 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		std::pair<flow_id_t,flow_info_t *> flowdata;
 
 		flowdata.second = new flow_info_t;
-		if (direction == DIR_OUTBOUND) {
-			flowdata.second->flow_id[0] = id;
-			flowdata.second->flow_id[1] = id + 1;
-		} else {
-			flowdata.second->flow_id[1] = id;
-			flowdata.second->flow_id[0] = id + 1;
-		}
+		
+		flowdata.second->flow_id[0] = id;
+		flowdata.second->flow_id[1] = id + 1;
 
 		flowdata.second->time = secs;
 		flowdata.second->colour_data = NULL;
+		flowdata.second->init_dir = direction;
 
 		id+=2;
 
 		flowdata.first = tmpid;
 
 		current = flows.insert(flowdata);
-
+		
 		if(send_new_flow(tmpid.start, tmpid.end,
-					current->second->flow_id[0], tmpid.ip1, tmpid.ip2)!=0)
+				current->second->flow_id[0], 
+				tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 
 		if(send_new_flow(tmpid.end, tmpid.start,
-					current->second->flow_id[1], tmpid.ip1, tmpid.ip2)!=0)
+				current->second->flow_id[1],
+				tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 	}
 	else // this is a flow we've already seen
 	{
 		current->second->time = secs; // update time last seen
+	}
+
+	uint32_t flowid;
+
+	if (direction == current->second->init_dir) {
+		flowid = current->second->flow_id[0];
+	} else {
+		flowid = current->second->flow_id[1];
 	}
 
 	if (modptrs->colour(&(tmpid.type), 
@@ -501,14 +511,10 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	
 	}
 
-	uint32_t send_id;
+	if (shownontcpudp == 0 && !tcpptr && !udpptr) 
+		return 0;
 
-	if (direction == DIR_OUTBOUND) {
-		send_id = current->second->flow_id[0];
-	} else {
-		send_id = current->second->flow_id[1];
-	}
-	if(send_new_packet(secs, send_id, 
+	if(send_new_packet(secs, flowid, 
 			tmpid.type, ntohs(p->ip_len), speed, 
 			is_dark) !=0)
 		return 1;

@@ -90,7 +90,8 @@ void blacklist::save(void)
 	if( f == NULL )
 	{
 		Log(LOG_DAEMON|LOG_WARNING, 
-				"Warning: Failed to write out lightlist.\n" );
+				"Warning: Failed to write out lightlist: %s\n",
+				strerror(errno) );
 		return;
 	}
 

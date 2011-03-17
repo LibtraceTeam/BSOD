@@ -114,6 +114,8 @@ int loop = 0;
 int shownondata = 0;
 int showdata = 1;
 int showcontrol = 1;
+int shownontcpudp = 1;
+int showresets = 1;
 int sampling = 0;
 
 void do_configuration(int argc, char **argv);
@@ -231,7 +233,7 @@ int main(int argc, char *argv[])
 		
 		/* set up directory where we should store our blacklist stuff */
 		char tmp[4096];
-		snprintf(tmp,4096,"%s%s",basedir,blacklistdir);
+		snprintf(tmp,4096,"%s",blacklistdir);
 		Log(LOG_DAEMON|LOG_INFO,"Saving blacklist info to '%s'\n", tmp);
 		if (enable_darknet) {
 			if (theList)
@@ -554,6 +556,8 @@ void set_defaults() {
 	shownondata = 0;
 	showdata = 1;
 	showcontrol = 1;
+	shownontcpudp = 1;
+	showresets = 1;
 	sampling = 0;
 }
 
@@ -603,6 +607,8 @@ void do_configuration(int argc, char **argv) {
 		CFG_INT((char *)"shownondata", 0, CFGF_NONE),
 		CFG_INT((char *)"showdata", 1, CFGF_NONE),
 		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
+		CFG_INT((char *)"shownontcpudp", 1, CFGF_NONE),
+		CFG_INT((char *)"showresets", 1, CFGF_NONE),
 		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
 		CFG_STR((char *)"colourparam", NULL, CFGF_NONE),
 		CFG_STR((char *)"lpos_param", NULL, CFGF_NONE),
@@ -662,6 +668,8 @@ void do_configuration(int argc, char **argv) {
 		shownondata = cfg_getint(cfg, "shownondata");
 		showdata = cfg_getint(cfg, "showdata");
 		showcontrol = cfg_getint(cfg, "showcontrol");
+		shownontcpudp = cfg_getint(cfg, "shownontcpudp");
+		showresets = cfg_getint(cfg, "showresets");
 		dirparam = cfg_getstr(cfg, "dirparam");
 		colourparam = cfg_getstr(cfg, "colourparam");
 		leftposparam = cfg_getstr(cfg, "lpos_param");

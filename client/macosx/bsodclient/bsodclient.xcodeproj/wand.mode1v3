@@ -273,11 +273,6 @@
 								<string>1058C7A0FEA54F0111CA2CBB</string>
 								<string>1058C7A2FEA54F0111CA2CBB</string>
 								<string>1C37FBAC04509CD000000102</string>
-								<string>A345B90913272CF4007210C1</string>
-								<string>A345B960132827C1007210C1</string>
-								<string>A345BA1D1328317D007210C1</string>
-								<string>A345B94C132824D5007210C1</string>
-								<string>A345B95B13282567007210C1</string>
 								<string>1C37FAAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
@@ -290,7 +285,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 792}, {212, 445}}</string>
+							<string>{{0, 0}, {212, 445}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -337,7 +332,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>A345BAA3132861E1007210C1</string>
+										<string>A38179761332B1A8004D3FAC</string>
 										<key>history</key>
 										<array>
 											<string>A3CBE4A01326D54800951A76</string>
@@ -349,7 +344,7 @@
 											<string>A345BA9013285F5A007210C1</string>
 											<string>A345BA9113285F5A007210C1</string>
 											<string>A345BAA0132861E1007210C1</string>
-											<string>A345BAA1132861E1007210C1</string>
+											<string>A345BAA3132861E1007210C1</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -362,8 +357,6 @@
 											<string>A345BA9513285F5A007210C1</string>
 											<string>A345BA9613285F5A007210C1</string>
 											<string>A345BA9713285F5A007210C1</string>
-											<string>A345BA9813285F5A007210C1</string>
-											<string>A345BAA2132861E1007210C1</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -421,9 +414,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>A345B90B13272D0F007210C1</string>
+				<string>A38179771332B1A8004D3FAC</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>A345B90C13272D0F007210C1</string>
+				<string>A38179781332B1A8004D3FAC</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -557,9 +550,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>1CD10A99069EF8BA00B06720</string>
-		<string>A3CBE4AE1326D54800951A76</string>
-		<string>/Users/wand/bsod-client-2.0.1/macosx/bsodclient/bsodclient.xcodeproj</string>
+		<string>/Users/wand/svn/bsodclient/macosx/bsodclient/bsodclient.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>413 443 788 504 0 0 1280 1002 </string>

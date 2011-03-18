@@ -43,6 +43,7 @@
 		A345BA4513283D05007210C1 /* libSDL-1.2.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */; };
 		A345BA4D13284D4F007210C1 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
 		A345BA4E13284D56007210C1 /* libz.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
+		A38179871332F2D5004D3FAC /* bsod.icns in Resources */ = {isa = PBXBuildFile; fileRef = A38179861332F2D5004D3FAC /* bsod.icns */; };
 		A3CBE2611325DC4300951A76 /* CEGUIBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */; };
 		A3CBE2621325DC4300951A76 /* CEGUIOpenGLRenderer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */; };
 		A3CBE2631325DC4300951A76 /* expat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25E1325DC4300951A76 /* expat.framework */; };
@@ -165,6 +166,7 @@
 		A345BA4013283CF5007210C1 /* libfreetype.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.6.dylib; path = /opt/local/lib/libfreetype.6.dylib; sourceTree = "<absolute>"; };
 		A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL-1.2.0.dylib"; path = "/opt/local/lib/libSDL-1.2.0.dylib"; sourceTree = "<absolute>"; };
 		A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = /opt/local/lib/libz.1.2.5.dylib; sourceTree = "<absolute>"; };
+		A38179861332F2D5004D3FAC /* bsod.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = bsod.icns; path = ../../runtime/data/bsod.icns; sourceTree = SOURCE_ROOT; };
 		A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIBase.framework; path = /Library/Frameworks/CEGUIBase.framework; sourceTree = "<absolute>"; };
 		A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIOpenGLRenderer.framework; path = /Library/Frameworks/CEGUIOpenGLRenderer.framework; sourceTree = "<absolute>"; };
 		A3CBE25E1325DC4300951A76 /* expat.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = expat.framework; path = /Library/Frameworks/expat.framework; sourceTree = "<absolute>"; };
@@ -359,6 +361,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A38179861332F2D5004D3FAC /* bsod.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 			);
@@ -422,6 +425,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				A38179871332F2D5004D3FAC /* bsod.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

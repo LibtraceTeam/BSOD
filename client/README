@@ -1,279 +1,130 @@
----------------------------------------------------------------------------
-Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+BSOD Client 2.0.1
+
+-------------------------------------------------------------------------------
+Copyright (c) 2005-2011 The University of Waikato, Hamilton, New Zealand.
 All rights reserved.
 
 This code has been developed by the University of Waikato WAND
 research group. For further information please see http://www.wand.net.nz/.
----------------------------------------------------------------------------
-
-
-This is the source release of the bsod client software. To download
-the bsod server, see http://research.wand.net.nz/. To use
-this software you must have access to a machine running the bsod server.
-
-The bsod client is based on the BuNg 3d engine written by Sam Jansen and
-Jesse Baker. See http://www.wand.net.nz/~stj2/bung/ for more information
-and read the BUNG_LICENSE included with this release.
-
-
-Changes to the client between 1.3.0 and 1.4.0
-==============================================
-
-*	IMPORTANT: Config file format changed from lua to being similar
-	to bsod_server.
-*	IMPORTANT: New dependancies:
-	*	libconfig
-	*	devil
-*	Stripped out a lot of unused code (eg XML Config file parser)
-*	Moved to external dependancies (removed everything from external/)
-*	Removed the dependancy on lua.
-*	Removed the dependancy on SCons.
-
-Changes to the client between 1.2.0 and 1.2.1
-==============================================
-
-*	Now checks the version of the server to help prevent server/client
-	mismatch.
-
-Changes to the client between 1.1.0 and 1.2.0
-==============================================
-
-*	Vastly better performance when a lot of flows are created and destroyed 
-	in a short period of time.
-*	Performance improvements across the board.
-*	Several new options to play with in the config file (see below).
-*	Added help page (press F1 while the client is running).
-*	P2P ports have their own colour now (for common ports only).
-*	Particles are jittered in low framerate situations making the 
-	visualization look more pleasing.
-*	New particle alpha map (looks nicer and creates dots, not squares, when 
-	particles are piled on top of each other).
-*	Added the ability to toggle between all traffic and darknet traffic, 
-	allowing you to see scans and other "garbage" traffic more easily.
-
-
-Using the bsod client:
-----------------------------------
-----------------------------------
-
-
-What you see:
-----------------------------------
-
-The bsod client displays the packets that the server receives as particles
-moving through the space of the visualisation. The plane on the left hand
-side represents the local address space (however the server determines that)
-and the plane on the right is the remote address space (everywhere else).
-Each IP address corresponds to a fixed point on one of these planes, and the
-packets they send travel from the location of the source address to the
-location of the destination address.
-
-Depending on information available to the server, packets can be drawn at
-different speeds, some faster, others slower. This is based off the estimated
-round trip time between the source and destination machines - packets sent
-between those that are close together will spend less time in the network,
-and so they spend less time in the visualisation.
-
-The colours used in the display represent different types of traffic, with
-the decisions on which colours to use and which traffic to single out with
-unique colours being fairly arbitrary (but based on what was commonly seen
-at our capture point). The colours can be changed by replacing the colour
-plugin the server uses, but the default colours based around port and
-protocol are:
-
-http:			blue
-https:			light blue
-smtp/pop/imap:	red
-ftp:			green
-dns:			yellow
-ssh/telnet:		grey
-windows:		orange
-irc:			khaki brown
-ntp:			matte green
-vpn:			bright green
-p2p:			toxic green (common p2p ports are processed but due to the 
-				large port ranges used by modern p2p apps it is impossible to 
-				mark all p2p traffic)
-
-icmp:		teal
-other tcp:	purple
-other udp:	brown
-unknown:	pink
-
-
-Configuration file:
-----------------------------------
-
-After unzipping the archive and before running the bsod executable, you
-must edit the configuration file to reflect where the bsod server is being
-run.  The config file is no longer using the lua scripting language, but 
-uses the same syntax as the BSOD server.  Strings must enclosed in quotes,
-and booleans use "true"/"on" or "false"/"off".  Comments are introduced with
-a "#", everything after that point in the line will be ignored.  There is a
-known issue that a parse error may occur if the last line of the file is not
-a blank line.
+-------------------------------------------------------------------------------
+
+======================================================================
+For build and installation instructions, please see the file INSTALL.
+======================================================================
+
+This directory contains source code for BSOD client, a network traffic
+visualisation tool which displays the flow of network data between hosts in
+real time. BSOD client is only one half of the visualisation process; it 
+connects to a BSOD server which tells the client what it should be rendering
+on screen.
+
+Further information about both the BSOD client and server can be found at
+http://research.wand.net.nz/software/visualisation.php
+
+BSOD client is licensed under the GNU General Public License (GPL) version 3.
+Please see the include file COPYING for details of this license.
+
+Running BSOD Client
+===================
+The BSOD client runs from the runtime/ directory. Edit the configuation file
+"bsod2.cfg" to suit your requirements (see Configuration below) and then
+simply run the bsodclient executable. It will automatically attempt to 
+connect to the server specified in your config file, if you have specified one.
 
-Tweaking some of these options can yield large performance increases and make
-visualizations of large amounts of traffic more readable. The default values
-are optimal for the University of Waikato capture, for other networks these 
-values should be changed appropiately.
+Configuration
+=============
+The "bsod2.cfg" file in the runtime/ directory provides all the configuration
+for the BSOD client. Each configuration option is documented within the 
+bsod2.cfg file itself.
 
+The config file can be used to set the BSOD server to connect to, the 
+screen resolution and the method to use to render the packet particles.
 
-option: server			type: string
-Specify the host running the bsod server that will provide data to this 
-client. Takes a string of the form "host:port". The server must be running
-and connected to its data source before the client connects to the server.
+You can specify a different file by giving bsodclient the command line option 
+'-C /path/to/config/file". Configuration options are pairs of the form:
 
-option:	startx
-option:	starty
-option:	startz
-These options specify the X, Y and Z coordinates that the camera should
-initially be positioned at. Pressing the 'H' key while the client is running
-will display the current location, which can be useful for getting the
-coordinates of the position you would like to have the camera start at.
+<key> = <value>
 
-option:	pitch			type: real
-Specify the pitch the camera should have when at its initial position.
-Pressing the 'H' key while the client is running will display the current 
-pitch, which can be useful for setting the pitch you would like to have the 
-camera start at.
+The options supported by bsodclient are described below:
 
-option:	heading			type: real
-Specify the heading the camera should have when at its initial position.
-Pressing the 'H' key while the client is running will display the current 
-heading, which can be useful for setting the heading you would like to have 
-the camera start at.
+option: Server
+	The bsodserver to connect to upon launch. This may be a hostname or an
+	IP address. If you do not specify a server, you can manually connect
+	using the server browser within bsodclient itself.
 
+option: Port
+	The port on the bsodserver to connect to.
 
-option: fullscreen		type: bool
-Set this to "yes" to run the bsod client in fullscreen mode, otherwise set
-it to "no" to run it in a window.
+option: LeftTex
+	Specifies a texture to use on the left plane instead of the texture
+	sent by the server.
 
+option: RightTex
+	Specifies a texture to use on the right plane instead of the texture
+	sent by the server.
 
-option: width			type: integer
-Specify the horizontal width (in pixels) that the bsod client should be
-displayed at.
+option: ResX
+	Defines the screen resolution along the X axis. If 0 or not defined,
+	the current desktop resolution will be used.
 
+option: ResY
+	Defines the screen resolution along the X axis. If 0 or not defined,
+	the current desktop resolution will be used.
 
-option: height			type: integer
-Specify the vertical height (in pixels) that the bsod client should be 
-displayed at. Lower the width and height to a value such as 640x480 to
-get better performance at the expense of image quality.
+option: Fullscreen
+	If 1, will run bsodclient in full screen mode. If 0, will attempt to
+	run in windowed mode. Defaults to 1.
 
+option: ParticleMethod
+	Selects the method to render the particles. Possible options are:
+	
+		0 - autodetect, will try to guess the best option for you.
+		1 - triangles, will work on just about anything but is slow.
+		2 - pointsprites
+		3 - shaders
+		4 - texture (experimental)
 
-option: bpp				type: integer
-Specify the number of bits per pixel used for colour information.
-Lowering this to 16 may improve performance on some graphics cards.
+	Note: autodetection of the particle method is not always reliable. If 
+	the BSOD client is performing poorly, try manually setting the particle 
+	method to pointsprites or triangles.
 
+option: ParticleSizeScale
+	Specifies a multiplier to apply to the size of the particles.
 
-option: speed			type: real
-Sets a modifier to the speed that packets will travel at. Increasing this 
-will mean fewer packets on the screen at one time and therefore better
-performance. This value should be greater than 0.
+option: ParticleSpeedScale
+	Specifies a multiplier to apply to the speed of the particles.
 
+option: MaxFrameRate
+	Specifies an upper-bound on the frame rate. If 0, frame rate is
+	unlimited.
 
-option: size			type: real
-Sets a modifier to the size of particles. Set this to something smaller such
-as 0.5 (1/2 size) to make particles smaller and improve performance. It will
-also help making a very busy display (lots of traffic) easier to read.
+option: DropPacketThresh
+	Specifies the minimum frame rate before bsodclient starts dropping
+	packets.
 
+option: DropFlowThresh
+	Specifies the minimum frame rate before bsodclient starts dropping
+	entire flows.
 
-option: jitter			type: string
-This option should be set to "yes". It will jitter particles in low framerate
-situations to avoid a banding effect that would otherwise happen and make the
-visualization look better. Setting it to "no" will disable this; doing so is 
-not recommended.
+option: ShowDarknet
+	If 1, darknet traffic will be shown. If 0, darknet traffic will not be
+	displayed. Can also be toggled at runtime via the Options window.
 
+option: ShowNonDarknet
+	If 1, non-darknet traffic will be shown. If 0, non-darknet traffic will 
+	not be displayed. Can also be toggled at runtime via the Options window.
 
-option: pointsprites	type: bool
-Can be "yes" or "no".  Set to "no" if your graphics card doesn't support
-point sprites.
+option: FlipTextures
+	If the textures are loaded upside down, set this option to 1 to flip
+	them up the right way.
 
-option: particle		type: string
-Sets the path and filename of the alpha texture to use for the particles.
+Acknowledgements
+================
 
-option: matrix_mode		type: bool
-Just for fun, changes the images used as particles to be characters from
-a Matrix style font. Set to "yes" to enable, "no" to disable.
+The original BSOD client was developed by Sam Jansen and Brendon Jones and was
+based on the BuNg 3D engine written by Sam Jansen and Jesse Baker 
+(http://www.wand.net.nz/~stj2/bung/).
 
-option: do_gcc			type: bool
-Every 10 minutes a garbage collection will be performed to throw away old,
-unused flows. This can mean a slight impact in performance when the garbage 
-collector runs. Setting this option to "no" may be a good idea if you have 
-a lot of memory and periodically restart the client anyway.
+The current BSOD client was developed by Paul Hunkin and uses OpenGL.
 
-
-
-
-
-Controls
-----------------------------------
-
-Menu:						F1
-Pitch up/down:				mouse up/down, up arrow/down arrow
-Heading left/right:			mouse left/right, left arrow/right arrow
-Forward:					W
-Back:						S
-Strafe left:				A
-Strafe right:				D
-Toggle HUD display:			H
-Toggle wireframe mode:		R
-Take screenshot:			M
-Toggle darknet modes:		/
-Increase speed:				=
-Decrease speed:				-
-Quit:						Esc
-
-A small label in the bottom left corner shows what traffic is currently being
-shown.  Depending on how the server is configured and where it is capturing
-data from, not all traffic types will show anything useful.
-
-The HUD display can be toggled between showing the current date/time and
-the debug hud, which will show the current position, pitch and heading of 
-the camera, as well as frame rate and the last few lines written to the log
-file.
-
-Screenshots will be saved in the bsod client directory as 
-screenshot-TIMESTAMP-COUNT.png
-
-
-
-BSOD recommended system specs:
-==============================
-
-The machine being used to develop BSOD has the following specs: 
-AMD AthlonXP 1800+, 512MB RAM, nVidia GF4-MX. BSOD should run on nearly any 
-system with an OpenGL compatible 3D card but running it on anything less than 
-the above is not recommended unless you are only monitoring a very low 
-traffic network. On about 8Mbps worth of traffic, our machine sits at a steady
-40 frames per second.
-
-If you are running BSOD on a large network take into account that having a 
-large number of flows is CPU intensive while having a large number of packets 
-is GPU intensive. I.e. if you see many flows with very low packet count 
-(mostly scans and worm traffic) using a fast CPU will be more important than 
-a fast graphics card. If you see fewer flows but with large amounts of 
-packets on them (most normal traffic, especially p2p) a fast graphics card 
-becomes more important. If you see a lot of flows with a lot of packets you 
-will want to use the fastest computer money can buy (BSOD really starts to 
-crawl on large traffic volume networks, we are currently looking at further 
-optimizing it to work better when visualizing these networks). When it comes 
-to graphics card performance fillrate is the bottleneck so this is something 
-to look for (rather than vertex performance) when considering buying a 
-graphics card specifically for BSOD.
-
-
-
-Customisation
-----------------------------------
-
-You can change the images displayed at either side of the visualisation area
-by replacing the images in the data directory of the bsod client. The side
-that represents local address space (on the left hand side with default
-camera positioning) uses the file data/left.png while the world address space
-(on the right by default), uses the file data/right.png. Each particle 
-travelling through the display space is drawn as the image data/particle.png.
-
-
-
-vim: ts=4
+For further information or to report bugs, please email contact@wand.net.nz.

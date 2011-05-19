@@ -1,0 +1,41 @@
+apt-get install build-essential subversion libsdl-dev libsdl-net1.2-dev libdevil-dev libconfuse-dev boost-build libboost-dev libboost-program-options-dev libsdl-ttf nvidia-cg-toolkit
+
+
+
+
+************** OLD CRAP BELOW **************
+Ideas:
+- Small codebase
+- Modular visualisation system
+	- IVisual interface
+	- Modules are loaded from .so's
+ 	- Classic
+ 	- Lines
+ 	- Globe
+ 	- Series of tubes (like the old win95 screensaver)
+ 	- Spring-embedder
+ 		- Center of screen is local node
+ 		- When traffic goes to a remote site, make a new node and attach it to the center node
+ 		- Every packet to a node grows it, shrink nodes over time. Delete 0-sized nodes. 
+	 	- fl0w-style graphics?
+		- Nodes per AS, then sub-nodes inside it?
+			- probably only want this if >1 nodes share the same AS
+	- http://hackszine.com/blog/archive/mac/2.html
+	
+	
+Module interface:
+	- bool init();
+		Called on module load, after GL is init'd
+		Returning false causes the app to bail out
+		
+	- void update(float currentTime, float timeDelta);
+		Called every frame. currentTime is the total number of seconds the system has been running for
+		timeDelta is the multiplier that should be applied to movement units to make it a virtual 60fps
+		This is where the rendering is done
+		
+	- void shutdown()
+		Called when the program is exiting
+		
+	- void onPacket()
+		Need some more info about how this will work...
+	

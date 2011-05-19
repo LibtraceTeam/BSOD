@@ -1,10 +1,9 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
  *	    Daniel Lawson
- *	    Sebastian Dusterwald
  *          
  * All rights reserved.
  *
@@ -40,6 +39,7 @@
 #include <err.h>
 
 #include "../../debug.h"
+#include "../../daemons.h"
 #include <syslog.h>
 
 
@@ -121,8 +121,10 @@ extern "C"
 int mod_get_direction(struct libtrace_packet_t *packet)
 {
     struct ether_header *ethptr;
+	libtrace_linktype_t linktype;
+	uint32_t rem;
 
-    ethptr = (struct ether_header *)trace_get_link(packet);
+    ethptr = (struct ether_header *)trace_get_layer2(packet, &linktype, &rem);
 
 
     /* Set direction bit based on upstream routers' MAC */

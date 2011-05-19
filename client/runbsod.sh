@@ -1,1 +1,0 @@
-exec ./bsod_client

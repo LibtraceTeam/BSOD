@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -32,6 +39,8 @@
 #ifndef _COLOURS_H
 #define _COLOURS_H
 
+#include "packets.h"
+#include <assert.h>
 #include <stdint.h>
 /** get_colour() accepts an array of 3 chars, and the IP protocol 
  *  and TCP or UDP port value. It then makes "a decision" on these two 
@@ -39,7 +48,8 @@
  */
 
 extern "C" {
-int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet);
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet,
+		flow_info_t *f);
 void mod_get_info(uint8_t colours[3], char name[256], int id );
 }
 

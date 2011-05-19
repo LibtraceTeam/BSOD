@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -30,10 +37,16 @@
  */
 
 
+
 #ifndef _POSITION_H
 #define _POSITION_H
 
 #include <netinet/in.h>
+
+#include "../../debug.h"
+#include "../../daemons.h"
+#include <syslog.h>
+
 
 typedef enum {
 	DIR_UNKNOWN = -1,
@@ -59,7 +72,7 @@ typedef enum {
  * @note The param may be an empty string ("") if there is no parameter.
  */
 extern "C"
-int init_module(side_t side, const char *msg);
+int init_module(char *param);
 
 /** mod_get_position
  * @param[in,out] coord[3] The 3d coordinate of the position (x,y,z), 

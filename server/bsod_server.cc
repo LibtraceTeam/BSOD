@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -30,10 +37,6 @@
  */
 
 
-/*
- * main loop(s) and the signal handlers may need looking at?
- */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -58,8 +61,9 @@
 #include <map>
 
 #include <libtrace.h>
+#include <confuse.h>
+#include <libwandevent.h>
 
-#include <libconfig.h>
 #include "bsod_server.h"
 
 #include "socket.h"
@@ -72,12 +76,9 @@
 
 typedef struct ip ip_t;
 
-struct sigaction sigact;
-
 int  _fcs_bits = 32;
 int restart_config = 1;
 int terminate_bsod = 0;
-int fd_max;
 
 libtrace_t *trace = 0;
 
@@ -97,21 +98,26 @@ char *colourmod = 0;
 char *leftpos = 0;
 char *rightpos = 0;
 char *dirmod = 0;
-char *macaddrfile = 0;
+char *dirparam = 0;
+char *colourparam = 0;
+char *leftposparam = 0;
+char *rightposparam = 0;
 char *blacklistdir = 0;
-char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
+const char *configfile = "/usr/local/bsod/etc/bsod_server.conf";
 static char* uri = 0; 
+char *server_name = 0;
+char *left_image = 0;
+char *right_image = 0;
 
 int port = 32500;
 int loop = 0;
 int shownondata = 0;
 int showdata = 1;
 int showcontrol = 1;
+int shownontcpudp = 1;
+int showresets = 1;
 int sampling = 0;
-bool live = true;
 
-static void sigusr_hnd(int sig);
-static void sigterm_hnd(int sig);
 void do_configuration(int argc, char **argv);
 
 void *colourhandle = 0;
@@ -121,42 +127,65 @@ void *dirhandle = 0;
 
 struct modptrs_t modptrs;
 
+wand_event_handler_t *wand_ev_hdl = NULL;
+
+struct wand_signal_t sigterm_event;
+struct wand_signal_t sigusr_event;
+struct wand_signal_t sigpipe_event;
+struct wand_signal_t sigint_event;
+
+struct wand_fdcb_t listener;
+struct wand_fdcb_t udpsocket;
+
+struct wand_fdcb_t file_event;
+struct wand_timer_t sleep_event;
+
+struct wand_timer_t signal_timer;
+
 void do_usage(char* name)
 {
     printf("Usage: %s [-h] [-b] -C <configfile> \n", name);
     exit(0);
 }
 
+typedef struct bsod_vars {
+	RTTMap *rttmap;
+	blacklist *blist;
+	libtrace_packet_t *packet;
+} bsod_vars_t;
+
+
 static int load_modules();
 static void close_modules();
 static void init_times();
-static void offline_delay(struct timeval tv);
 static void init_signals();
 static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		RTTMap *rttmap);
+static void bsod_event(bsod_vars_t *vars);
+static void set_signal_timer(bsod_vars_t *vars, bool remove);
+static void signal_event(bsod_vars_t *vars) ;
+
+bsod_vars_t bsod_vars;
 
 int main(int argc, char *argv[])
 {
 	// RTTMap:
-	RTTMap *rttmap = new RTTMap();
+	RTTMap *rttmap = NULL;
     
 	// Blacklist:
-	blacklist *theList;
+	blacklist *theList = NULL;
 	
-	// socket stuff
-	int listen_socket;
-	fd_set listen_set, event_set;
 
+	int one=1;
 	struct client *new_client = NULL;
 
 	struct timeval last_packet_time;
 
 	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
-	struct libtrace_packet_t *packet;
 
-	FD_ZERO(&listen_set);
-	FD_ZERO(&event_set);
+	wand_event_init();
+	wand_ev_hdl = wand_create_event_handler();
 	init_signals();
 
 	//-------------------------------------------------------
@@ -174,15 +203,21 @@ int main(int argc, char *argv[])
 		put_pid(pidfile);
 
 	}
-	
+	//do_configuration(0,0);
+	restart_config = 0;
+	if (!load_modules()) {
+		Log(LOG_DAEMON|LOG_INFO,"Failed to load modules, aborting\n");
+		return 1;
+	}
 
-	//-------Setup listen socket-----------
-	listen_socket = setup_listen_socket(); // set up socket
-	bind_tcp_socket(listen_socket, port); // bind and start listening
+	setup_listen_socket(wand_ev_hdl, &modptrs, &listener, port);
+	setup_udp_socket(wand_ev_hdl, &udpsocket);	
 
-	// add the listening socket to the master set
-	fd_max = listen_socket; // biggest file descriptor
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
+	sleep_event.callback = NULL;
+	file_event.fd = -1;
+	if (enable_rttest)
+		rttmap = new RTTMap();
 
 	do { // loop on loop variable - restart input
 		if (restart_config == 1) {
@@ -198,16 +233,22 @@ int main(int argc, char *argv[])
 		
 		/* set up directory where we should store our blacklist stuff */
 		char tmp[4096];
-		snprintf(tmp,4096,"%s%s",basedir,blacklistdir);
+		snprintf(tmp,4096,"%s",blacklistdir);
 		Log(LOG_DAEMON|LOG_INFO,"Saving blacklist info to '%s'\n", tmp);
-		theList = new blacklist( tmp );
-
-		//------- ---------------------------
-		// keep rtclient from starting till someone connects
-		// but if we already have clients, don't bother
-		if (!new_client) {
-			new_client = check_clients(&modptrs, true);
+		if (enable_darknet) {
+			if (theList)
+				delete(theList);
+			theList = new blacklist( tmp );
 		}
+		if (enable_rttest) {
+			if (rttmap)
+				delete(rttmap);
+			rttmap = new RTTMap();
+		}
+
+		bsod_vars.blist = theList;
+		bsod_vars.rttmap = rttmap;
+		bsod_vars.packet = trace_create_packet();
 
 		// reset the timers and packet objects
 		kill_all();
@@ -232,43 +273,40 @@ int main(int argc, char *argv[])
 		    exit(1);
 		}
 
-		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
-		gettimeofday(&starttime, 0); // XXX
-
-		//----- Check live status --------
-		if ((!strncmp(uri,"erf:",4)) || (!strncmp(uri,"pcap:",5))) {
-			// erf or pcap trace, slow down!
-			Log(LOG_DAEMON|LOG_INFO,"Attempting to replay trace in real time\n");
-			live = false;
-		} else {
-			live = true;
-		}
 
 		//------- Create filter -------------
 		if (filter)
 			trace_destroy_filter(filter);
-		filter = 0;
+		filter = NULL;
 		if (filterstring) {
 			Log(LOG_DAEMON|LOG_INFO,"setting filter %s\n",filterstring);
 			filter = trace_create_filter(filterstring);
 			trace_config(trace,TRACE_OPTION_FILTER,filter);
 		}
-
+		//trace_config(trace, TRACE_OPTION_EVENT_REALTIME, &one);
 		if (trace_start(trace)==-1) {
 			struct trace_err_t err;
+		    	err=trace_get_err(trace);
 			Log(LOG_DAEMON|LOG_ALERT, 
 					"Unable to connect to data source: %s\n",
 					err.problem);
 			exit(1);
 		}
 
-		packet=trace_create_packet();
+		Log(LOG_DAEMON|LOG_INFO,"Connected to data source: %s\n", uri);
+		gettimeofday(&starttime, 0); // XXX
 
+		bsod_event(&bsod_vars);
+		wand_ev_hdl->running = true;
+		wand_event_run(wand_ev_hdl);
+
+		/*
 		while(loop) // loop on packets
 		{
 			if (!bsod_read_packet(packet, theList, rttmap))
 				break;
 		}
+		*/
 
 		if (trace_is_err(trace)) {
 			struct trace_err_t err;
@@ -277,13 +315,19 @@ int main(int argc, char *argv[])
 					err.problem);
 		} else {
 			// expire any outstanding flows
-			last_packet_time = trace_get_timeval(packet);
-			expire_flows(last_packet_time.tv_sec+3600);
+			//last_packet_time = trace_get_timeval(bsod_vars.packet);
+			expire_flows(0, true);
 		}
 		// We've finished with this trace
+		if (file_event.fd != -1)
+			wand_del_event(wand_ev_hdl, &file_event);
+		if (sleep_event.callback != NULL)
+			wand_del_timer(wand_ev_hdl, &sleep_event);
 		trace_destroy(trace);
 		trace = NULL;
-
+		sleep_event.callback = NULL;
+		file_event.fd = -1;
+		
 		
 		// the loop criteria is to loop if we want to loop always, or if
 		// we get a USR1 we restart - the code path is the same.
@@ -291,45 +335,151 @@ int main(int argc, char *argv[])
 
 	// if we actually get out of the outer loop, it's because we want to 
 	// shut down entirely
-	close(listen_socket);
 
 	close_modules();
-	delete rttmap;
-	delete theList;
+	if (rttmap)
+		delete rttmap;
+	if (theList)
+		delete theList;
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 
 	return 0;
 }
 
-static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
-		RTTMap *rttmap) {
-	static time_t next_save = 0;
-	static int packet_count = 0;
+static void file_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	
-	struct timeval packettime;
-	int psize = 0;
-	struct client *new_client = NULL;
+	wand_del_event(wand_ev_hdl, evcb);
+	assert(ev == EV_READ);
+	evcb->fd = -1;
+	wand_del_timer(wand_ev_hdl, &signal_timer);
+	bsod_event((bsod_vars_t *)evcb->data);
 
-	// If we get a USR1, we want to restart. Break out of
-	// this while() and go into cleanup
+}
+
+static void sleep_cb(struct wand_timer_t *timer) {
+	timer->callback = NULL;
+	wand_del_timer(wand_ev_hdl, &signal_timer);
+	bsod_event((bsod_vars_t *)timer->data);
+}
+
+static void signal_timer_cb(struct wand_timer_t *timer) {
+	timer->callback = NULL;
+	signal_event((bsod_vars_t *)timer->data);
+}
+
+static void set_signal_timer(bsod_vars_t *vars) {
+	
+	signal_timer.expire = wand_calc_expire(wand_ev_hdl, 1, 0);
+	signal_timer.callback = signal_timer_cb;
+	signal_timer.data = vars;
+	signal_timer.next = signal_timer.prev = NULL;
+
+	wand_add_timer(wand_ev_hdl, &signal_timer);
+}
+
+
+static int process_bsod_event(bsod_vars_t *vars, libtrace_eventobj_t event) {
+	switch(event.type) {
+		case TRACE_EVENT_IOWAIT:
+			file_event.fd = event.fd;
+			file_event.flags = EV_READ;
+			file_event.data = vars;
+			file_event.callback = file_cb;
+			wand_add_event(wand_ev_hdl, &file_event);
+			return 0;
+		case TRACE_EVENT_SLEEP:
+			int micros;
+		 	micros = (int)((event.seconds - (int)event.seconds) * 1000000.0);
+			sleep_event.expire = wand_calc_expire(wand_ev_hdl, 
+			 		(int)event.seconds, micros);
+			sleep_event.callback = sleep_cb;
+			sleep_event.data = vars;
+			sleep_event.prev = sleep_event.next = NULL;
+			wand_add_timer(wand_ev_hdl, &sleep_event);
+			return 0;
+		case TRACE_EVENT_PACKET:
+			if (event.size == -1) {
+				wand_ev_hdl->running = false;
+				return 0;
+			}
+			if (bsod_read_packet(vars->packet, vars->blist, 
+					vars->rttmap) == 0) {
+				wand_ev_hdl->running = false;
+				return 0;
+			}
+			return 1;
+		case TRACE_EVENT_TERMINATE:
+			Log(LOG_DEBUG, "Terminating trace\n");
+			wand_ev_hdl->running = false;
+			return 0;
+		default:
+			Log(LOG_DAEMON | LOG_DEBUG, 
+					"Unknown libtrace event type: %d\n", 
+					event.type);
+			return 0;
+	}
+}
+
+static void signal_event(bsod_vars_t *vars) {
+	// If we get a USR1, we want to restart. Break out and restart
 	if (restart_config == 1) {
-		return 0;
+		wand_ev_hdl->running = false;
+		return;
 	}
 
 	if (terminate_bsod) {
 		loop=0;
-		return 0;
+		wand_ev_hdl->running = false;
+		return;
+	}
+	/* Make sure we check for a signal every second, just in case we
+	 * have no other events for a while */
+	set_signal_timer(vars);
+}			
+
+static void bsod_event(bsod_vars_t *vars) {
+
+	struct libtrace_eventobj_t event;
+	int poll_again = 1;
+
+	// If we get a USR1, we want to restart. Break out and restart
+	if (restart_config == 1) {
+		wand_ev_hdl->running = false;
+		return;
+	}
+
+	if (terminate_bsod) {
+		loop=0;
+		wand_ev_hdl->running = false;
+		return;
 	}
 	
+	do {
+		if (!vars->packet)
+			vars->packet = trace_create_packet();
+		event = trace_event(trace, vars->packet);
+		poll_again = process_bsod_event(vars, event);
+	} while (poll_again);
+
+	/* Make sure we check for a signal every second, just in case we
+	 * have no other events for a while */
+	set_signal_timer(vars);
+
+}
+
+static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
+		RTTMap *rttmap) {
+	static int packet_count = 0;
+	static int next_save = 0;
+	
+	struct timeval packettime;
+
 	/* check for new clients */
+	/*
 	new_client = check_clients(&modptrs, false);
 	if(new_client)
 		send_flows(new_client);
-
-	/* get a packet, and process it */
-	if((psize = trace_read_packet(trace, packet)) <= 0) {
-	    return 0;
-	}
+	*/
 
 	++packet_count;
 
@@ -340,24 +490,12 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 
 	packettime = trace_get_timeval(packet);
 
-	/* this time checking only matters when reading from a
-	 * prerecorded trace file. It limits it to a seconds
-	 * worth of data a second, which is still a large
-	 * chunk
-	 */ 
-		
-	if(!live)
-	{
-		offline_delay(packettime);
-	}
-
-	
 	// if sending fails, assume we just lost a client
 	if(per_packet(packet, packettime.tv_sec, &modptrs, rttmap, theList)!=0) {
 		return 1;
 	}
 
-	if (packettime.tv_sec > next_save) {
+	if (enable_darknet && packettime.tv_sec > next_save) {
 		/* Save the blacklist every 5 min */
 		next_save = packettime.tv_sec + 300;
 		theList->save();
@@ -366,44 +504,43 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 }
 
 
-static void sigusr_hnd(int signo) {
-	restart_config = 1;
-}
 
-static void sigterm_hnd(int signo) {
+static void sigterm_cb(struct wand_signal_t *signal) {
 	terminate_bsod = 1;
 }
 
+static void sigusr_cb(struct wand_signal_t *signal) {
+	restart_config = 1;
+}
+
+static void sigpipe_cb(struct wand_signal_t *signal) {
+	return;
+}
+
+
 static void init_signals() {
 	// setup signal handlers
-	sigact.sa_handler = sigusr_hnd;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	if(sigaction(SIGUSR1, &sigact, NULL) < 0) {
-		Log(LOG_DAEMON|LOG_DEBUG,"sigaction SIGUSR1: %d\n",errno);
-	}
 	
-	sigact.sa_handler = SIG_IGN;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
+	sigterm_event.signum = SIGTERM;
+	sigterm_event.callback = sigterm_cb;
+	sigterm_event.data = NULL;
+	wand_add_signal(&sigterm_event);
+	
+	sigint_event.signum = SIGINT;
+	sigint_event.callback = sigterm_cb;
+	sigint_event.data = NULL;
+	wand_add_signal(&sigint_event);
 
-	if(sigaction(SIGPIPE, &sigact, NULL) < 0) {
-		perror("sigaction");
-		exit(-1);
-	}
+	sigusr_event.signum = SIGUSR1;
+	sigusr_event.callback = sigusr_cb;
+	sigusr_event.data = NULL;
+	wand_add_signal(&sigusr_event);
 
-	sigact.sa_handler = sigterm_hnd;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-
-	if (sigaction(SIGTERM, &sigact, NULL) < 0) {
-		perror("sigaction(SIGTERM)");
-		exit(1);
-	}
-	if (sigaction(SIGINT, &sigact, NULL) < 0) {
-		perror("sigaction(SIGINT)");
-		exit(1);
-	}
+	sigpipe_event.signum = SIGPIPE;
+	sigpipe_event.callback = sigpipe_cb;
+	sigpipe_event.data = NULL;
+	wand_add_signal(&sigpipe_event);
+	
 
 }
 
@@ -419,6 +556,8 @@ void set_defaults() {
 	shownondata = 0;
 	showdata = 1;
 	showcontrol = 1;
+	shownontcpudp = 1;
+	showresets = 1;
 	sampling = 0;
 }
 
@@ -435,12 +574,16 @@ void fix_defaults() {
 		dirmod=strdup("plugins/direction/interface.so");
 	if (!pidfile)
 		pidfile=strdup("/var/run/bsod_server.pid");
-	if (!macaddrfile)
-		macaddrfile=strdup("etc/mac_addrs");
 	if (!blacklistdir)
 		blacklistdir=strdup("blist/");
-
+	if (!server_name){
+		if(uri)	server_name=strdup(uri);
+		else server_name=strdup("Unnamed");
+	}
+		
 	
+	//left_image and right_image can be NULL, it means the client will use the
+	//default images and provides compatibility for the old client if needed
 }
 
 void do_configuration(int argc, char **argv) {
@@ -448,33 +591,43 @@ void do_configuration(int argc, char **argv) {
 
 	// void everything
 	set_defaults();
-
-	// initialise config parser
-	config_t main_config[] = {
-		{"pidfile", TYPE_STR|TYPE_NULL, &pidfile},
-		{"background", TYPE_INT|TYPE_NULL, &background},
-		{"basedir", TYPE_STR|TYPE_NULL, &basedir},
-		{"source", TYPE_STR|TYPE_NULL, &uri},
-		{"listenport", TYPE_INT|TYPE_NULL, &port},
-		{"filter", TYPE_STR|TYPE_NULL, &filterstring},
-		{"colour_module",TYPE_STR|TYPE_NULL, &colourmod},
-		{"rpos_module",TYPE_STR|TYPE_NULL, &rightpos},
-		{"lpos_module",TYPE_STR|TYPE_NULL, &leftpos},
-		{"dir_module",TYPE_STR|TYPE_NULL, &dirmod},
-		{"loop",TYPE_INT|TYPE_NULL, &loop},
-		{"shownondata", TYPE_INT|TYPE_NULL, &shownondata},
-		{"showdata", TYPE_INT|TYPE_NULL, &showdata},
-		{"showcontrol", TYPE_INT|TYPE_NULL, &showcontrol},
-		{"macaddrfile", TYPE_STR|TYPE_NULL, &macaddrfile},
-		{"blacklistdir", TYPE_STR|TYPE_NULL, &blacklistdir},
-		{"darknet", TYPE_BOOL|TYPE_NULL, &enable_darknet},
-		{"rttest", TYPE_BOOL|TYPE_NULL, &enable_rttest},
-		{"sampling", TYPE_INT|TYPE_NULL, &sampling},
-		{0,0,0}
-	};
-
-	// read cmdline opts
 	
+	cfg_opt_t opts[] =	{
+		CFG_STR((char *)"pidfile", (char *)"", CFGF_NONE),
+		CFG_INT((char *)"background", 0, CFGF_NONE),
+		CFG_STR((char *)"basedir", NULL, CFGF_NONE),
+		CFG_STR((char *)"source", NULL, CFGF_NONE),
+		CFG_INT((char *)"listenport", 34567, CFGF_NONE),
+		CFG_STR((char *)"filter", NULL, CFGF_NONE),
+		CFG_STR((char *)"colour_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"rpos_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"lpos_module", NULL, CFGF_NONE),
+		CFG_STR((char *)"dir_module", NULL, CFGF_NONE),
+		CFG_INT((char *)"loop", 0, CFGF_NONE),
+		CFG_INT((char *)"shownondata", 0, CFGF_NONE),
+		CFG_INT((char *)"showdata", 1, CFGF_NONE),
+		CFG_INT((char *)"showcontrol", 1, CFGF_NONE),
+		CFG_INT((char *)"shownontcpudp", 1, CFGF_NONE),
+		CFG_INT((char *)"showresets", 1, CFGF_NONE),
+		CFG_STR((char *)"dirparam", NULL, CFGF_NONE),
+		CFG_STR((char *)"colourparam", NULL, CFGF_NONE),
+		CFG_STR((char *)"lpos_param", NULL, CFGF_NONE),
+		CFG_STR((char *)"rpos_param", NULL, CFGF_NONE),
+		CFG_STR((char *)"blacklistdir", NULL, CFGF_NONE),
+		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
+		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
+		CFG_INT((char *)"sampling", 0, CFGF_NONE),
+		CFG_STR((char *)"name", NULL, CFGF_NONE),
+		CFG_STR((char *)"left_image", NULL, CFGF_NONE),
+		CFG_STR((char *)"right_image", NULL, CFGF_NONE),
+		CFG_INT((char *)"sendq", 10*1024*1024, CFGF_NONE),
+		CFG_END()
+	};
+	cfg_t *cfg;
+
+	cfg = cfg_init(opts, CFGF_NONE);
+	
+	// read cmdline opts
 	while( argv && (opt = getopt(argc, argv, "hbC:")) != -1)
 	{
 		switch(opt)
@@ -494,11 +647,44 @@ void do_configuration(int argc, char **argv) {
 
 	// parse configfile opts
 	if (configfile) {
-		if (parse_config(main_config,configfile)) {
+		
+		if(cfg_parse(cfg, configfile) == CFG_PARSE_ERROR){		
 			Log(LOG_DAEMON|LOG_ALERT,"Bad config file %s, giving up\n",
 					configfile);
 			exit(1);
 		}
+		
+		pidfile = cfg_getstr(cfg, "pidfile");
+		background = cfg_getint(cfg, "background");
+		basedir = cfg_getstr(cfg, "basedir");
+		uri = cfg_getstr(cfg, "source");
+		port = cfg_getint(cfg, "listenport");
+		filterstring = cfg_getstr(cfg, "filter");
+		colourmod = cfg_getstr(cfg, "colour_module");
+		rightpos = cfg_getstr(cfg, "rpos_module");
+		leftpos = cfg_getstr(cfg, "lpos_module");
+		dirmod = cfg_getstr(cfg, "dir_module");
+		loop = cfg_getint(cfg, "loop");
+		shownondata = cfg_getint(cfg, "shownondata");
+		showdata = cfg_getint(cfg, "showdata");
+		showcontrol = cfg_getint(cfg, "showcontrol");
+		shownontcpudp = cfg_getint(cfg, "shownontcpudp");
+		showresets = cfg_getint(cfg, "showresets");
+		dirparam = cfg_getstr(cfg, "dirparam");
+		colourparam = cfg_getstr(cfg, "colourparam");
+		leftposparam = cfg_getstr(cfg, "lpos_param");
+		rightposparam = cfg_getstr(cfg, "rpos_param");
+		blacklistdir = cfg_getstr(cfg, "blacklistdir");
+		enable_darknet = cfg_getbool(cfg, "darknet");
+		enable_rttest = cfg_getbool(cfg, "rttest");
+		sampling = cfg_getint(cfg, "sampling");
+		server_name = cfg_getstr(cfg, "name");
+		left_image = cfg_getstr(cfg, "left_image");
+		right_image = cfg_getstr(cfg, "right_image");
+		max_sendq_size = cfg_getint(cfg, "sendq");
+		
+		printf("URI: %s\n", uri);
+		
 	}
 	// if any options were omitted from the config file,
 	// set them here
@@ -513,7 +699,7 @@ void do_configuration(int argc, char **argv) {
  */
 static void parse_args(const char *line, char **driver, char **args)
 {
-	char *tok;
+	const char *tok;
 	tok = strchr(line,' ');
 	if (!tok) {
 		*driver = strdup(line);
@@ -532,7 +718,7 @@ static void parse_args(const char *line, char **driver, char **args)
 /**
  * Load the module, calling it's initialisation function if appropriate
  */
-static void *get_module(const char *name)
+static void *get_module(const char *name, char *param)
 {
 	char tmp[4096];
 	char *driver;
@@ -555,7 +741,7 @@ static void *get_module(const char *name)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(args)) {
+		if (!init_func(param)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
@@ -576,7 +762,7 @@ static void *get_module(const char *name)
 /**
  * Load a position module, calling it's initialisation function if appropriate
  */
-static void *get_position_module(side_t side, const char *name)
+static void *get_position_module(side_t side, const char *name, char *posparam)
 {
 	char tmp[4096];
 	char *driver;
@@ -598,7 +784,7 @@ static void *get_position_module(side_t side, const char *name)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(side,args)) {
+		if (!init_func(posparam)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
@@ -622,7 +808,7 @@ static int load_modules() {
 
 	//------- Load up modules -----------
 	
-	colourhandle = get_module(colourmod);
+	colourhandle = get_module(colourmod, colourparam);
 	if (!colourhandle) {
 		return 0;
 	}
@@ -640,7 +826,7 @@ static int load_modules() {
 		return 0;
 	}
 
-	lefthandle = get_position_module(SIDE_LEFT, leftpos);
+	lefthandle = get_position_module(SIDE_LEFT, leftpos, leftposparam);
 	if (!lefthandle) {
 		return 0;
 	}
@@ -650,7 +836,7 @@ static int load_modules() {
 		return 0;
 	}
 
-	righthandle = get_position_module(SIDE_RIGHT,rightpos);
+	righthandle = get_position_module(SIDE_RIGHT,rightpos, rightposparam);
 	if (!righthandle) {
 		return 0;
 	}
@@ -661,7 +847,7 @@ static int load_modules() {
 	}
 
 
-	dirhandle = get_module(dirmod);
+	dirhandle = get_module(dirmod, dirparam);
 	if (!dirhandle) {
 		Log(LOG_DAEMON|LOG_ALERT,"Couldn't load module %s\n",tmp);
 		return 0;
@@ -710,7 +896,6 @@ static void close_modules() {
 		}
 		dlclose(dirhandle);
 	}
-	modptrs.init_dir = 0;
 	modptrs.direction = 0;
 }	
 
@@ -727,32 +912,3 @@ static void init_times() {
 }
 
 
-static void offline_delay(struct timeval tv){
-	struct timeval diff;
-	struct timeval delta;
-
-	if(startts32 == 0)
-		startts32 = tv.tv_sec;
-	if(tracetime.tv_sec == 0)
-		tracetime = tv;
-
-	ts32 = tv.tv_sec;
-	gettimeofday(&nowtime, 0);
-
-	// time since we started the trace
-	timersub(&nowtime,&starttime,&delta);
-	
-	// add this to the trace timer
-	timeradd(&delta,&tracetime,&delta);
-	
-
-	// check to see if current trace time is ahead of this
-
-	if (timercmp(&tv, &delta, >)) {
-		timersub(&tv,&delta,&diff);
-		usleep((diff.tv_sec * 1000000) + diff.tv_usec);
-	}
-
-	return;
-
-}

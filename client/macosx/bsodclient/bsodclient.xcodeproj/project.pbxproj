@@ -1,0 +1,629 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
+		002F3A0009D0884600EBEB88 /* SDL.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = 002F39F909D0881F00EBEB88 /* SDL.framework */; };
+		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
+		002F3C0109D093BD00EBEB88 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F3C0009D093BD00EBEB88 /* OpenGL.framework */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		A345B94F13282529007210C1 /* libconfuse.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = A3CBE4431325DDA500951A76 /* libconfuse.a */; };
+		A345B9651328282D007210C1 /* libpng14.14.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B9641328282D007210C1 /* libpng14.14.dylib */; };
+		A345B96613282834007210C1 /* libpng14.14.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9641328282D007210C1 /* libpng14.14.dylib */; };
+		A345B975132828EF007210C1 /* libGLEW.1.5.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */; };
+		A345B976132828EF007210C1 /* libiconv.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B971132828EF007210C1 /* libiconv.2.dylib */; };
+		A345B977132828EF007210C1 /* libintl.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B972132828EF007210C1 /* libintl.8.dylib */; };
+		A345B978132828EF007210C1 /* libSDL_net-1.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */; };
+		A345B979132828EF007210C1 /* libSDL_ttf-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B974132828EF007210C1 /* libSDL_ttf-2.0.0.dylib */; };
+		A345B97A132828F7007210C1 /* libGLEW.1.5.8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */; };
+		A345B97B132828F7007210C1 /* libiconv.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B971132828EF007210C1 /* libiconv.2.dylib */; };
+		A345B97C132828F7007210C1 /* libintl.8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B972132828EF007210C1 /* libintl.8.dylib */; };
+		A345B97D132828F7007210C1 /* libSDL_net-1.2.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */; };
+		A345B97E132828F7007210C1 /* libSDL_ttf-2.0.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B974132828EF007210C1 /* libSDL_ttf-2.0.0.dylib */; };
+		A345BA0F1328316E007210C1 /* CEGUICoronaImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9931328311A007210C1 /* CEGUICoronaImageCodec.bundle */; };
+		A345BA101328316E007210C1 /* CEGUIDevILImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9941328311A007210C1 /* CEGUIDevILImageCodec.bundle */; };
+		A345BA111328316E007210C1 /* CEGUIExpatParser.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9951328311A007210C1 /* CEGUIExpatParser.bundle */; };
+		A345BA121328316E007210C1 /* CEGUIFalagardWRBase.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9961328311A007210C1 /* CEGUIFalagardWRBase.bundle */; };
+		A345BA131328316E007210C1 /* CEGUIFreeImageImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9971328311A007210C1 /* CEGUIFreeImageImageCodec.bundle */; };
+		A345BA141328316E007210C1 /* CEGUILibxmlParser.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9981328311A007210C1 /* CEGUILibxmlParser.bundle */; };
+		A345BA151328316E007210C1 /* CEGUISILLYImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9991328311A007210C1 /* CEGUISILLYImageCodec.bundle */; };
+		A345BA161328316E007210C1 /* CEGUISTBImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B99A1328311A007210C1 /* CEGUISTBImageCodec.bundle */; };
+		A345BA171328316E007210C1 /* CEGUITGAImageCodec.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B99B1328311A007210C1 /* CEGUITGAImageCodec.bundle */; };
+		A345BA181328316E007210C1 /* CEGUITinyXMLParser.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B99C1328311A007210C1 /* CEGUITinyXMLParser.bundle */; };
+		A345BA191328316E007210C1 /* CEGUIXercesParser.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B99D1328311A007210C1 /* CEGUIXercesParser.bundle */; };
+		A345BA4213283CF5007210C1 /* libfreetype.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4013283CF5007210C1 /* libfreetype.6.dylib */; };
+		A345BA4313283CF5007210C1 /* libSDL-1.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */; };
+		A345BA4413283D05007210C1 /* libfreetype.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4013283CF5007210C1 /* libfreetype.6.dylib */; };
+		A345BA4513283D05007210C1 /* libSDL-1.2.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */; };
+		A345BA4D13284D4F007210C1 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
+		A345BA4E13284D56007210C1 /* libz.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
+		A38179871332F2D5004D3FAC /* bsod.icns in Resources */ = {isa = PBXBuildFile; fileRef = A38179861332F2D5004D3FAC /* bsod.icns */; };
+		A3CBE2611325DC4300951A76 /* CEGUIBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */; };
+		A3CBE2621325DC4300951A76 /* CEGUIOpenGLRenderer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */; };
+		A3CBE2631325DC4300951A76 /* expat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25E1325DC4300951A76 /* expat.framework */; };
+		A3CBE2641325DC4300951A76 /* freetype2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25F1325DC4300951A76 /* freetype2.framework */; };
+		A3CBE2651325DC4300951A76 /* PCRE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE2601325DC4300951A76 /* PCRE.framework */; };
+		A3CBE4021325DC6D00951A76 /* CEGUIBase.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */; };
+		A3CBE4031325DC6D00951A76 /* CEGUIOpenGLRenderer.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */; };
+		A3CBE4041325DC6D00951A76 /* expat.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = A3CBE25E1325DC4300951A76 /* expat.framework */; };
+		A3CBE4051325DC6D00951A76 /* freetype2.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = A3CBE25F1325DC4300951A76 /* freetype2.framework */; };
+		A3CBE4061325DC6D00951A76 /* PCRE.framework in Copy Frameworks into .app bundle */ = {isa = PBXBuildFile; fileRef = A3CBE2601325DC4300951A76 /* PCRE.framework */; };
+		A3CBE41C1325DCAF00951A76 /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4091325DCAF00951A76 /* config.cpp */; };
+		A3CBE41D1325DCAF00951A76 /* flow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40A1325DCAF00951A76 /* flow.cpp */; };
+		A3CBE41E1325DCAF00951A76 /* flowmanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40B1325DCAF00951A76 /* flowmanager.cpp */; };
+		A3CBE41F1325DCAF00951A76 /* font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40C1325DCAF00951A76 /* font.cpp */; };
+		A3CBE4201325DCAF00951A76 /* gl_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40D1325DCAF00951A76 /* gl_util.cpp */; };
+		A3CBE4211325DCAF00951A76 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40E1325DCAF00951A76 /* gui.cpp */; };
+		A3CBE4221325DCAF00951A76 /* keys.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE40F1325DCAF00951A76 /* keys.cpp */; };
+		A3CBE4231325DCAF00951A76 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4101325DCAF00951A76 /* main.cpp */; };
+		A3CBE4241325DCAF00951A76 /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4111325DCAF00951A76 /* misc.cpp */; };
+		A3CBE4251325DCAF00951A76 /* particles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4121325DCAF00951A76 /* particles.cpp */; };
+		A3CBE4261325DCAF00951A76 /* ps_classic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4131325DCAF00951A76 /* ps_classic.cpp */; };
+		A3CBE4271325DCAF00951A76 /* ps_shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4141325DCAF00951A76 /* ps_shaders.cpp */; };
+		A3CBE4281325DCAF00951A76 /* ps_texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4151325DCAF00951A76 /* ps_texture.cpp */; };
+		A3CBE4291325DCAF00951A76 /* ps_vtf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4161325DCAF00951A76 /* ps_vtf.cpp */; };
+		A3CBE42A1325DCAF00951A76 /* render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4171325DCAF00951A76 /* render.cpp */; };
+		A3CBE42B1325DCAF00951A76 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4181325DCAF00951A76 /* shaders.cpp */; };
+		A3CBE42C1325DCAF00951A76 /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE4191325DCAF00951A76 /* socket.cpp */; };
+		A3CBE42D1325DCAF00951A76 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE41A1325DCAF00951A76 /* texture.cpp */; };
+		A3CBE42E1325DCAF00951A76 /* update.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE41B1325DCAF00951A76 /* update.cpp */; };
+		A3CBE4481325DDA500951A76 /* libconfuse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE4431325DDA500951A76 /* libconfuse.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A3CBE4021325DC6D00951A76 /* CEGUIBase.framework in Copy Frameworks into .app bundle */,
+				A3CBE4031325DC6D00951A76 /* CEGUIOpenGLRenderer.framework in Copy Frameworks into .app bundle */,
+				A3CBE4041325DC6D00951A76 /* expat.framework in Copy Frameworks into .app bundle */,
+				A3CBE4051325DC6D00951A76 /* freetype2.framework in Copy Frameworks into .app bundle */,
+				A3CBE4061325DC6D00951A76 /* PCRE.framework in Copy Frameworks into .app bundle */,
+				002F3A0009D0884600EBEB88 /* SDL.framework in Copy Frameworks into .app bundle */,
+			);
+			name = "Copy Frameworks into .app bundle";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A345B94D132824FB007210C1 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 12;
+			files = (
+				A345B97A132828F7007210C1 /* libGLEW.1.5.8.dylib in CopyFiles */,
+				A345BA4E13284D56007210C1 /* libz.1.2.5.dylib in CopyFiles */,
+				A345B97B132828F7007210C1 /* libiconv.2.dylib in CopyFiles */,
+				A345BA4413283D05007210C1 /* libfreetype.6.dylib in CopyFiles */,
+				A345BA4513283D05007210C1 /* libSDL-1.2.0.dylib in CopyFiles */,
+				A345B97C132828F7007210C1 /* libintl.8.dylib in CopyFiles */,
+				A345B97D132828F7007210C1 /* libSDL_net-1.2.0.dylib in CopyFiles */,
+				A345B97E132828F7007210C1 /* libSDL_ttf-2.0.0.dylib in CopyFiles */,
+				A345B96613282834007210C1 /* libpng14.14.dylib in CopyFiles */,
+				A345B94F13282529007210C1 /* libconfuse.a in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A345B990132830EE007210C1 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A345BA0F1328316E007210C1 /* CEGUICoronaImageCodec.bundle in CopyFiles */,
+				A345BA101328316E007210C1 /* CEGUIDevILImageCodec.bundle in CopyFiles */,
+				A345BA111328316E007210C1 /* CEGUIExpatParser.bundle in CopyFiles */,
+				A345BA121328316E007210C1 /* CEGUIFalagardWRBase.bundle in CopyFiles */,
+				A345BA131328316E007210C1 /* CEGUIFreeImageImageCodec.bundle in CopyFiles */,
+				A345BA141328316E007210C1 /* CEGUILibxmlParser.bundle in CopyFiles */,
+				A345BA151328316E007210C1 /* CEGUISILLYImageCodec.bundle in CopyFiles */,
+				A345BA161328316E007210C1 /* CEGUISTBImageCodec.bundle in CopyFiles */,
+				A345BA171328316E007210C1 /* CEGUITGAImageCodec.bundle in CopyFiles */,
+				A345BA181328316E007210C1 /* CEGUITinyXMLParser.bundle in CopyFiles */,
+				A345BA191328316E007210C1 /* CEGUIXercesParser.bundle in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		002F39F909D0881F00EBEB88 /* SDL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		002F3A2B09D0888800EBEB88 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = SOURCE_ROOT; };
+		002F3A2C09D0888800EBEB88 /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = SOURCE_ROOT; };
+		002F3C0009D093BD00EBEB88 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32CA4F630368D1EE00C91783 /* bsodclient_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bsodclient_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* bsodclient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bsodclient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A345B9641328282D007210C1 /* libpng14.14.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng14.14.dylib; path = /opt/local/lib/libpng14.14.dylib; sourceTree = "<absolute>"; };
+		A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.5.8.dylib; path = /opt/local/lib/libGLEW.1.5.8.dylib; sourceTree = "<absolute>"; };
+		A345B971132828EF007210C1 /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = /opt/local/lib/libiconv.2.dylib; sourceTree = "<absolute>"; };
+		A345B972132828EF007210C1 /* libintl.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libintl.8.dylib; path = /opt/local/lib/libintl.8.dylib; sourceTree = "<absolute>"; };
+		A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL_net-1.2.0.dylib"; path = "/opt/local/lib/libSDL_net-1.2.0.dylib"; sourceTree = "<absolute>"; };
+		A345B974132828EF007210C1 /* libSDL_ttf-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL_ttf-2.0.0.dylib"; path = "/opt/local/lib/libSDL_ttf-2.0.0.dylib"; sourceTree = "<absolute>"; };
+		A345B9931328311A007210C1 /* CEGUICoronaImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUICoronaImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUICoronaImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B9941328311A007210C1 /* CEGUIDevILImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIDevILImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIDevILImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B9951328311A007210C1 /* CEGUIExpatParser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIExpatParser.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIExpatParser.bundle; sourceTree = "<absolute>"; };
+		A345B9961328311A007210C1 /* CEGUIFalagardWRBase.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIFalagardWRBase.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIFalagardWRBase.bundle; sourceTree = "<absolute>"; };
+		A345B9971328311A007210C1 /* CEGUIFreeImageImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIFreeImageImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIFreeImageImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B9981328311A007210C1 /* CEGUILibxmlParser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUILibxmlParser.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUILibxmlParser.bundle; sourceTree = "<absolute>"; };
+		A345B9991328311A007210C1 /* CEGUISILLYImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUISILLYImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUISILLYImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B99A1328311A007210C1 /* CEGUISTBImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUISTBImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUISTBImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B99B1328311A007210C1 /* CEGUITGAImageCodec.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUITGAImageCodec.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUITGAImageCodec.bundle; sourceTree = "<absolute>"; };
+		A345B99C1328311A007210C1 /* CEGUITinyXMLParser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUITinyXMLParser.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUITinyXMLParser.bundle; sourceTree = "<absolute>"; };
+		A345B99D1328311A007210C1 /* CEGUIXercesParser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIXercesParser.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIXercesParser.bundle; sourceTree = "<absolute>"; };
+		A345BA4013283CF5007210C1 /* libfreetype.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.6.dylib; path = /opt/local/lib/libfreetype.6.dylib; sourceTree = "<absolute>"; };
+		A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL-1.2.0.dylib"; path = "/opt/local/lib/libSDL-1.2.0.dylib"; sourceTree = "<absolute>"; };
+		A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = /opt/local/lib/libz.1.2.5.dylib; sourceTree = "<absolute>"; };
+		A38179861332F2D5004D3FAC /* bsod.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = bsod.icns; path = ../../runtime/data/bsod.icns; sourceTree = SOURCE_ROOT; };
+		A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIBase.framework; path = /Library/Frameworks/CEGUIBase.framework; sourceTree = "<absolute>"; };
+		A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIOpenGLRenderer.framework; path = /Library/Frameworks/CEGUIOpenGLRenderer.framework; sourceTree = "<absolute>"; };
+		A3CBE25E1325DC4300951A76 /* expat.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = expat.framework; path = /Library/Frameworks/expat.framework; sourceTree = "<absolute>"; };
+		A3CBE25F1325DC4300951A76 /* freetype2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = freetype2.framework; path = /Library/Frameworks/freetype2.framework; sourceTree = "<absolute>"; };
+		A3CBE2601325DC4300951A76 /* PCRE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PCRE.framework; path = /Library/Frameworks/PCRE.framework; sourceTree = "<absolute>"; };
+		A3CBE4091325DCAF00951A76 /* config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = config.cpp; path = ../../src/config.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40A1325DCAF00951A76 /* flow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flow.cpp; path = ../../src/flow.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40B1325DCAF00951A76 /* flowmanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = flowmanager.cpp; path = ../../src/flowmanager.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40C1325DCAF00951A76 /* font.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = font.cpp; path = ../../src/font.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40D1325DCAF00951A76 /* gl_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gl_util.cpp; path = ../../src/gl_util.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40E1325DCAF00951A76 /* gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gui.cpp; path = ../../src/gui.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE40F1325DCAF00951A76 /* keys.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = keys.cpp; path = ../../src/keys.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4101325DCAF00951A76 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../src/main.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4111325DCAF00951A76 /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = misc.cpp; path = ../../src/misc.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4121325DCAF00951A76 /* particles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = particles.cpp; path = ../../src/particles.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4131325DCAF00951A76 /* ps_classic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ps_classic.cpp; path = ../../src/ps_classic.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4141325DCAF00951A76 /* ps_shaders.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ps_shaders.cpp; path = ../../src/ps_shaders.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4151325DCAF00951A76 /* ps_texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ps_texture.cpp; path = ../../src/ps_texture.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4161325DCAF00951A76 /* ps_vtf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ps_vtf.cpp; path = ../../src/ps_vtf.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4171325DCAF00951A76 /* render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = render.cpp; path = ../../src/render.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4181325DCAF00951A76 /* shaders.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shaders.cpp; path = ../../src/shaders.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4191325DCAF00951A76 /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = socket.cpp; path = ../../src/socket.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE41A1325DCAF00951A76 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = texture.cpp; path = ../../src/texture.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE41B1325DCAF00951A76 /* update.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = update.cpp; path = ../../src/update.cpp; sourceTree = SOURCE_ROOT; };
+		A3CBE4311325DCD400951A76 /* bsodconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bsodconfig.h; path = ../../src/include/bsodconfig.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4321325DCD400951A76 /* flowmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = flowmanager.h; path = ../../src/include/flowmanager.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4331325DCD400951A76 /* libs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libs.h; path = ../../src/include/libs.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4341325DCD400951A76 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = ../../src/include/main.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4351325DCD400951A76 /* misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = misc.h; path = ../../src/include/misc.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4361325DCD400951A76 /* ps_classic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ps_classic.h; path = ../../src/include/ps_classic.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4371325DCD400951A76 /* ps_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ps_interface.h; path = ../../src/include/ps_interface.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4381325DCD400951A76 /* ps_shaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ps_shaders.h; path = ../../src/include/ps_shaders.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4391325DCD400951A76 /* ps_texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ps_texture.h; path = ../../src/include/ps_texture.h; sourceTree = SOURCE_ROOT; };
+		A3CBE43A1325DCD400951A76 /* shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shader.h; path = ../../src/include/shader.h; sourceTree = SOURCE_ROOT; };
+		A3CBE43B1325DCD400951A76 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture.h; path = ../../src/include/texture.h; sourceTree = SOURCE_ROOT; };
+		A3CBE43C1325DCD400951A76 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vector.h; path = ../../src/include/vector.h; sourceTree = SOURCE_ROOT; };
+		A3CBE4431325DDA500951A76 /* libconfuse.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfuse.a; path = /opt/local/lib/libconfuse.a; sourceTree = "<absolute>"; };
+		A3CBE4561325DF2E00951A76 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				002F39FA09D0881F00EBEB88 /* SDL.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				002F3C0109D093BD00EBEB88 /* OpenGL.framework in Frameworks */,
+				A3CBE2611325DC4300951A76 /* CEGUIBase.framework in Frameworks */,
+				A3CBE2621325DC4300951A76 /* CEGUIOpenGLRenderer.framework in Frameworks */,
+				A3CBE2631325DC4300951A76 /* expat.framework in Frameworks */,
+				A3CBE2641325DC4300951A76 /* freetype2.framework in Frameworks */,
+				A3CBE2651325DC4300951A76 /* PCRE.framework in Frameworks */,
+				A3CBE4481325DDA500951A76 /* libconfuse.a in Frameworks */,
+				A345B9651328282D007210C1 /* libpng14.14.dylib in Frameworks */,
+				A345B975132828EF007210C1 /* libGLEW.1.5.8.dylib in Frameworks */,
+				A345B976132828EF007210C1 /* libiconv.2.dylib in Frameworks */,
+				A345B977132828EF007210C1 /* libintl.8.dylib in Frameworks */,
+				A345B978132828EF007210C1 /* libSDL_net-1.2.0.dylib in Frameworks */,
+				A345B979132828EF007210C1 /* libSDL_ttf-2.0.0.dylib in Frameworks */,
+				A345BA4213283CF5007210C1 /* libfreetype.6.dylib in Frameworks */,
+				A345BA4313283CF5007210C1 /* libSDL-1.2.0.dylib in Frameworks */,
+				A345BA4D13284D4F007210C1 /* libz.1.2.5.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		002F3BF309D0937800EBEB88 /* atlantis */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = atlantis;
+			sourceTree = "<group>";
+		};
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				A3CBE4561325DF2E00951A76 /* config.h */,
+				A3CBE4311325DCD400951A76 /* bsodconfig.h */,
+				A3CBE4321325DCD400951A76 /* flowmanager.h */,
+				A3CBE4331325DCD400951A76 /* libs.h */,
+				A3CBE4341325DCD400951A76 /* main.h */,
+				A3CBE4351325DCD400951A76 /* misc.h */,
+				A3CBE4361325DCD400951A76 /* ps_classic.h */,
+				A3CBE4371325DCD400951A76 /* ps_interface.h */,
+				A3CBE4381325DCD400951A76 /* ps_shaders.h */,
+				A3CBE4391325DCD400951A76 /* ps_texture.h */,
+				A3CBE43A1325DCD400951A76 /* shader.h */,
+				A3CBE43B1325DCD400951A76 /* texture.h */,
+				A3CBE43C1325DCD400951A76 /* vector.h */,
+				A3CBE4091325DCAF00951A76 /* config.cpp */,
+				A3CBE40A1325DCAF00951A76 /* flow.cpp */,
+				A3CBE40B1325DCAF00951A76 /* flowmanager.cpp */,
+				A3CBE40C1325DCAF00951A76 /* font.cpp */,
+				A3CBE40D1325DCAF00951A76 /* gl_util.cpp */,
+				A3CBE40E1325DCAF00951A76 /* gui.cpp */,
+				A3CBE40F1325DCAF00951A76 /* keys.cpp */,
+				A3CBE4101325DCAF00951A76 /* main.cpp */,
+				A3CBE4111325DCAF00951A76 /* misc.cpp */,
+				A3CBE4121325DCAF00951A76 /* particles.cpp */,
+				A3CBE4131325DCAF00951A76 /* ps_classic.cpp */,
+				A3CBE4141325DCAF00951A76 /* ps_shaders.cpp */,
+				A3CBE4151325DCAF00951A76 /* ps_texture.cpp */,
+				A3CBE4161325DCAF00951A76 /* ps_vtf.cpp */,
+				A3CBE4171325DCAF00951A76 /* render.cpp */,
+				A3CBE4181325DCAF00951A76 /* shaders.cpp */,
+				A3CBE4191325DCAF00951A76 /* socket.cpp */,
+				A3CBE41A1325DCAF00951A76 /* texture.cpp */,
+				A3CBE41B1325DCAF00951A76 /* update.cpp */,
+				002F3A2B09D0888800EBEB88 /* SDLMain.h */,
+				002F3A2C09D0888800EBEB88 /* SDLMain.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */,
+				A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */,
+				A3CBE25E1325DC4300951A76 /* expat.framework */,
+				A3CBE25F1325DC4300951A76 /* freetype2.framework */,
+				A3CBE2601325DC4300951A76 /* PCRE.framework */,
+				002F39F909D0881F00EBEB88 /* SDL.framework */,
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				002F3C0009D093BD00EBEB88 /* OpenGL.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* bsodclient.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* bsodclient */ = {
+			isa = PBXGroup;
+			children = (
+				A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */,
+				A345BA4013283CF5007210C1 /* libfreetype.6.dylib */,
+				A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */,
+				A345B9931328311A007210C1 /* CEGUICoronaImageCodec.bundle */,
+				A345B9941328311A007210C1 /* CEGUIDevILImageCodec.bundle */,
+				A345B9951328311A007210C1 /* CEGUIExpatParser.bundle */,
+				A345B9961328311A007210C1 /* CEGUIFalagardWRBase.bundle */,
+				A345B9971328311A007210C1 /* CEGUIFreeImageImageCodec.bundle */,
+				A345B9981328311A007210C1 /* CEGUILibxmlParser.bundle */,
+				A345B9991328311A007210C1 /* CEGUISILLYImageCodec.bundle */,
+				A345B99A1328311A007210C1 /* CEGUISTBImageCodec.bundle */,
+				A345B99B1328311A007210C1 /* CEGUITGAImageCodec.bundle */,
+				A345B99C1328311A007210C1 /* CEGUITinyXMLParser.bundle */,
+				A345B99D1328311A007210C1 /* CEGUIXercesParser.bundle */,
+				A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */,
+				A345B971132828EF007210C1 /* libiconv.2.dylib */,
+				A345B972132828EF007210C1 /* libintl.8.dylib */,
+				A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */,
+				A345B974132828EF007210C1 /* libSDL_ttf-2.0.0.dylib */,
+				A345B9641328282D007210C1 /* libpng14.14.dylib */,
+				A3CBE4431325DDA500951A76 /* libconfuse.a */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = bsodclient;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				002F3BF309D0937800EBEB88 /* atlantis */,
+				32CA4F630368D1EE00C91783 /* bsodclient_Prefix.pch */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A38179861332F2D5004D3FAC /* bsod.icns */,
+				8D1107310486CEB800E47090 /* Info.plist */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1107260486CEB800E47090 /* bsodclient */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "bsodclient" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				A345B990132830EE007210C1 /* CopyFiles */,
+				A345B94D132824FB007210C1 /* CopyFiles */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+				002F39FD09D0883400EBEB88 /* Copy Frameworks into .app bundle */,
+				A345B95C13282568007210C1 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = bsodclient;
+			productInstallPath = "$(HOME)/Applications";
+			productName = bsodclient;
+			productReference = 8D1107320486CEB800E47090 /* bsodclient.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "bsodclient" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* bsodclient */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D1107260486CEB800E47090 /* bsodclient */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				A38179871332F2D5004D3FAC /* bsod.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A345B95C13282568007210C1 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "EXECFILE=${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nLIBPATH=${BUILT_PRODUCTS_DIR}/${SHARED_SUPPORT_FOLDER_PATH}\nNEWLIBPATH=\"@executable_path/../SharedSupport\"\nPORTLIBPATH=\"/opt/local/lib\"\n\nTARGETS=\"libiconv.2.dylib libintl.8.dylib libGLEW.1.5.8.dylib libpng14.14.dylib libSDL_net-1.2.0.dylib libSDL_ttf-2.0.0.dylib libSDL-1.2.0.dylib libfreetype.6.dylib libz.1.2.5.dylib\"\nfor TARGET in ${TARGETS}; do\n\tLIBFILE=${LIBPATH}/${TARGET}\n\tTARGETID=`otool -DX ${LIBFILE}`\n\tNEWTARGETID=${NEWLIBPATH}/${TARGET}\n\tinstall_name_tool -id ${NEWTARGETID} ${LIBFILE}\n\tinstall_name_tool -change ${TARGETID} ${NEWTARGETID} ${EXECFILE}\ndone \n\n# Have to do libs within libs manually\n# libiconv in libintl\ninstall_name_tool -change ${PORTLIBPATH}/libiconv.2.dylib ${NEWLIBPATH}/libiconv.2.dylib ${LIBPATH}/libintl.8.dylib\n\n# libSDL in libSDL_net\ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_net-1.2.0.dylib\n\n# libSDL in libSDL_ttf \ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libfreetype in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libfreetype.6.dylib ${NEWLIBPATH}/libfreetype.6.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libz in libpng\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libpng14.14.dylib\n\n# libz in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n#libz in libfreetype\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libfreetype.6.dylib\n\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */,
+				A3CBE41C1325DCAF00951A76 /* config.cpp in Sources */,
+				A3CBE41D1325DCAF00951A76 /* flow.cpp in Sources */,
+				A3CBE41E1325DCAF00951A76 /* flowmanager.cpp in Sources */,
+				A3CBE41F1325DCAF00951A76 /* font.cpp in Sources */,
+				A3CBE4201325DCAF00951A76 /* gl_util.cpp in Sources */,
+				A3CBE4211325DCAF00951A76 /* gui.cpp in Sources */,
+				A3CBE4221325DCAF00951A76 /* keys.cpp in Sources */,
+				A3CBE4231325DCAF00951A76 /* main.cpp in Sources */,
+				A3CBE4241325DCAF00951A76 /* misc.cpp in Sources */,
+				A3CBE4251325DCAF00951A76 /* particles.cpp in Sources */,
+				A3CBE4261325DCAF00951A76 /* ps_classic.cpp in Sources */,
+				A3CBE4271325DCAF00951A76 /* ps_shaders.cpp in Sources */,
+				A3CBE4281325DCAF00951A76 /* ps_texture.cpp in Sources */,
+				A3CBE4291325DCAF00951A76 /* ps_vtf.cpp in Sources */,
+				A3CBE42A1325DCAF00951A76 /* render.cpp in Sources */,
+				A3CBE42B1325DCAF00951A76 /* shaders.cpp in Sources */,
+				A3CBE42C1325DCAF00951A76 /* socket.cpp in Sources */,
+				A3CBE42D1325DCAF00951A76 /* texture.cpp in Sources */,
+				A3CBE42E1325DCAF00951A76 /* update.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = bsodclient_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include,
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					/usr/lib/,
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-liconv",
+					"-lintl",
+					"-lc",
+				);
+				PRODUCT_NAME = bsodclient;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2.0.1;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = bsodclient_Prefix.pch;
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include,
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					/opt/local/lib,
+					"$(inherited)",
+				);
+				OTHER_LDFLAGS = "-liconv";
+				PRODUCT_NAME = bsodclient;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				CURRENT_PROJECT_VERSION = 2.0.1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks",
+					/Library/Frameworks,
+					"$(FRAMEWORK_SEARCH_PATHS)",
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks",
+					/Library/Frameworks,
+					"$(FRAMEWORK_SEARCH_PATHS)",
+				);
+				GCC_VERSION = 4.0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
+					/Library/Frameworks/SDL.framework/Headers,
+					"$(HEADER_SEARCH_PATHS)",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../SharedSupport";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "bsodclient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "bsodclient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}

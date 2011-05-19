@@ -1,10 +1,9 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
  *	    Daniel Lawson
- *	    Sebastian Dusterwald
  *          
  * All rights reserved.
  *
@@ -42,18 +41,11 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
-#include <vector>
-#include <algorithm>
-#include <numeric>
-#include <iostream>
+#include <string.h>
+#include <stdlib.h>
 
 #include "position.h"
 #include <libtrace.h>
-
-/*
- * Number of /24 networks you are mapping. These are spread evenly across
- * the vertical axis
- */
 
 #define NETCOUNT 50  
 
@@ -65,7 +57,14 @@
  * the horizontal position
  */
 
-uint32_t nets[NETCOUNT] = {0};
+/*
+ * Number of /24 networks you are mapping. These are spread evenly across
+ * the vertical axis
+ */
+
+uint32_t netcount = NETCOUNT;
+uint32_t *nets;
+bool warned = false;
 
 static int check_subnet(uint32_t net) {
 	int i = 0;
@@ -81,7 +80,6 @@ static int check_subnet(uint32_t net) {
 	return -1;
 }
 
-extern "C"
 int mod_get_position(float coord[3], 
 		side_t side, direction_t dir,
 		struct libtrace_packet_t *packet) {
@@ -104,8 +102,11 @@ int mod_get_position(float coord[3],
 	net = ntohl(ip.s_addr) & 0xffffff00;
 
 	if ((index = check_subnet(net)) == -1) {
-		printf("increase NETCOUNT in multiplenet24.cc\n");
-		assert(index != -1);
+		if (!warned) {
+			Log(LOG_DAEMON | LOG_INFO, "Netcount exceeded for multiplenet24 position module - flows outside of the first %d /24s will not be displayed\n", netcount);
+			warned = true;
+		}
+		return 1;
 	}
 	
 
@@ -117,3 +118,20 @@ int mod_get_position(float coord[3],
 	return 0;
 }
 
+int init_module(char *modarg) {
+
+	
+	uint32_t nc = 0;
+	if (modarg)
+		nc = strtoul(modarg, NULL, 10);
+
+	if (nc > 0)
+		netcount = nc;
+	nets = (uint32_t *)malloc(sizeof(uint32_t) * netcount);
+
+	memset(nets, 0, sizeof(uint32_t) * netcount);
+	
+	Log(LOG_DAEMON | LOG_INFO, "Netcount set to %u\n", netcount);
+
+	return 1;
+}

@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -84,22 +91,30 @@ int RTTMap::Flush( double now )
 	FlowMap::iterator i = m_flows->begin();
 	int count = 0;
 
-	for( ; i != m_flows->end(); i++ )
+	for( ; i != m_flows->end(); )
 	{
 		TraceMap &tmap = i->second;
+		FlowMap::iterator inext = i;
 		TraceMap::iterator j = tmap.begin();
 
-		for( ; j != tmap.end(); j++ )
+		++inext;
+
+		while( j != tmap.end() )
 		{
+			TraceMap::iterator jnext = j;
+			++jnext;
 			if( (now - j->second) > 180 )
 			{
-				tmap.erase( j );
+				tmap.erase( j);
 				count++;
 			}
+			j=jnext;
 		}
 
 		if( tmap.size() < 1 )
 			m_flows->erase( i );
+
+		i = inext;
 	}
 
 	return( count );

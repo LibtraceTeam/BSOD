@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -39,11 +46,31 @@
 #define SIDE_LENGTH 8
 #define MAX_SIZE 10000
 
+struct flow_id_t {
+        float start[3];
+        float end[3];
+        unsigned char type; // Type of flow. ("colour")
+        uint32_t ip1;
+        uint32_t ip2;
+	uint16_t port1;
+	uint16_t port2;
+};
+
+
+struct flow_info_t {
+        uint32_t flow_id[2];
+        uint32_t time;
+	uint8_t init_dir;
+
+        void *colour_data;
+};
+
+
 int per_packet(struct libtrace_packet_t *packet, time_t secs, struct modptrs_t *modptrs, RTTMap *map, blacklist *theList);
 float convert_speed( float speed );
 
 void kill_all();
-void expire_flows(uint32_t time);
+void expire_flows(uint32_t time, bool expire_all);
 void init_packets();
 void send_flows(struct client *client);
 

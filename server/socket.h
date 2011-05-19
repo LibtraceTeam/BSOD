@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -32,8 +39,11 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 #include <inttypes.h>
-int setup_listen_socket();
-int bind_tcp_socket(int listener, int port);
+#include <libwandevent.h>
+void setup_listen_socket(wand_event_handler_t *ev_hdl, 
+		struct modptrs_t *modptrs,
+		struct wand_fdcb_t *listener, uint16_t port);
+void setup_udp_socket(wand_event_handler_t *ev_hdl, struct wand_fdcb_t *udp);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
 int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
 int send_update_flow(struct client *client, 
@@ -44,5 +54,8 @@ int send_kill_flow(uint32_t id);
 void hax_fdmax(int fd);
 int send_kill_all();
 int send_colour_table(struct modptrs_t *modptrs);
+int send_images(struct client *c);
+
+extern int max_sendq_size;
 
 #endif // _SOCKET_H

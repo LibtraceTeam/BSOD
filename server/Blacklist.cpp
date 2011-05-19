@@ -1,8 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
- * Author: Jesse Pouw-Waas
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
+ * Authors: Brendon Jones
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *		 Jamie Curtis
+ *		 Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -27,7 +36,7 @@
  *
  */
 
-
+#include <errno.h>
 #include "Blacklist.h"
 #include "debug.h"
 
@@ -48,7 +57,13 @@ void blacklist::load(void)
 	while(!feof(f)) {
 		char buf[80];
 		in_addr_t addr;
-		fgets(buf,sizeof(buf),f);
+		if (fgets(buf,sizeof(buf),f) == NULL) {
+			if (ferror(f)) {
+				Log(LOG_DAEMON | LOG_WARNING, "Error reading from blacklist file: %s\n", strerror(errno));
+			}
+			fclose(f);
+			return;
+		}
 		if (strchr(buf,'\n')) {
 			*strchr(buf,'\n')='\0';
 		}
@@ -75,7 +90,8 @@ void blacklist::save(void)
 	if( f == NULL )
 	{
 		Log(LOG_DAEMON|LOG_WARNING, 
-				"Warning: Failed to write out lightlist.\n" );
+				"Warning: Failed to write out lightlist: %s\n",
+				strerror(errno) );
 		return;
 	}
 

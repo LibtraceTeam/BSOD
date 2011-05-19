@@ -1,7 +1,7 @@
-bsod-server-1.2.1
+bsod-server-2.0.1
 
 ---------------------------------------------------------------------------
-Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
 All rights reserved.
 
 This code has been developed by the University of Waikato WAND
@@ -42,10 +42,11 @@ You can specify a different file by giving bsod server the command line
 option '-C /path/to/config/file'. Configuration options are pairs of the 
 form:
 
-<key> <value>
+<key> = <value>
 
-A value can be one of two types - string or integer. All strings are 
-enclosed in double quotes, while integers are simply a number.
+A value can be one of three types - string, boolean or integer. All strings are 
+enclosed in double quotes, while integers are simply a number. Booleans are
+either true or false.
 
 The configuration file can be reloaded on the fly by sending the bsod server
 process a SIGUSR1.
@@ -60,15 +61,26 @@ source		string
 listenport	integer
 filter		string
 colour_module	string
+colourparam	string
 rpos_module	string
+rpos_param	string
 lpos_module	string
+lpos_param	string
 dir_module	string
-macaddrfile	string
+dirparam	string
 loop		integer
 shownondata	integer
 showdata	integer
 showcontrol	integer
-
+showresets	integer
+shownontcpudp	integer
+darknet		boolean
+blacklistdir 	string
+rttest		boolean
+sampling	integer
+sendq		integer
+left_image	string
+right_image	string
 
 option: pidfile		type: string
     The file that the process id (pid) of the bsod server should be written
@@ -102,11 +114,19 @@ option: filter		type: string
     of BPF filters.
 
 option: colour_module	type: string
+option: colourparam	type: string
     Specify the shared library that should be loaded to supply the colour
     selection algorithms. Defaults to "plugins/colour/colours.so", which
-    uses the colour scheme we originally came up with. 
+    uses a port-based colour scheme. If your packet capture retains at least
+    four bytes of packet payload, we recommend using the lpicolour module
+    instead, as it can identify protocols much more accurately.
+
+    The colourparam option can be used to pass parameters into a colour
+    plugin. At present, no colour plugins utilise this option but they may in
+    the future.
 
 option: rpos_module	type: string
+option: rpos_param	type: string
     Specify the shared library that should be loaded to supply the layout
     algorithms for the right hand side of the display. Defaults to 
     "plugins/position/radial.so", which fits the entire ipv4 address space 
@@ -117,7 +137,12 @@ option: rpos_module	type: string
     them out into a square), and "plugins/position/multiplenet24.so" (will
     evenly spread a number of /24 networks out over a square).
     
+    The rpos_param option can be used to pass parameters into a layout module.
+    For instance, the multiplenet24 plugin accepts a maximum number of /24
+    networks to layout on the plane.
+
 option: lpos_module	type: string
+option: lpos_param	type: string
     Specify the shared library that should be loaded to supply the layout
     algorithms for the left hand side of the display. Defaults to 
     "plugins/position/network16.so", which treats all addresses as belonging
@@ -128,24 +153,31 @@ option: lpos_module	type: string
     space into a circle, and "plugins/position/multiplenet24.so" (will
     evenly spread a number of /24 networks out over a square).
 
+    The lpos_param option can be used to pass parameters into a layout module.
+    For instance, the multiplenet24 plugin accepts a maximum number of /24
+    networks to layout on the plane.
+
 option: dir_module	type: string
+option: dirparam	type: string
     Specify the shared library that should be loaded to determine which
     direction packets are travelling in. This defaults to 
     "plugins/direction/interface.so", which uses the interface field in
     the erf header to decide between incoming and outgoing traffic. If
     you are using a pcap based format instead of erf, you will want to
-    use the module "plugins/direction/destmac.so". If you use this
-    alternate module, you will need to specify the file containing remote
-    mac addresses as an argument to the direction module, eg -
+    use the module "plugins/direction/destmac.so". 
     
-	dir_module "plugins/direction/destmac.so etc/mac_addrs"
+    The dirparam option is used to specify any additional parameters that
+    may be required by the direction plugin. For example, the destmac
+    plugin requires a path to a file containing the mac addresses of the
+    external router interfaces. This can be done as follows:
+
+	dir_module = "plugins/direction/destmac.so"
+	dirparam = "/path/to/bsod/etc/mac_addrs"
     
     Whether the packet is destined to or coming from one of the mac 
     addresses listed in this file is used to determine which way it is 
-    travelling. You need to explicitly specify all local mac addresses 
-    that could possibly appear in the trace/capture. These should be in 
-    the standard colon seperated hex notation (eg 00:11:22:33:44:55), 
-    one address per line in the file.
+    travelling. The mac addresses should be in the standard colon seperated 
+    hex notation (eg 00:11:22:33:44:55), one address per line in the file.
     
 option: loop		type: integer
     Only makes sense when running with offline traces. If set to 1, then 
@@ -168,18 +200,57 @@ options: showcontrol	type: integer
     Set it to 0 to hide these packets. This only applies to TCP, and 
     overrides the showdata and shownondata options. Defaults to 1.
 
+options: showresets	type: integer
+    If set to 1 the display will show TCP reset packets. To hide these packets,
+    set this AND showcontrol to 0. This only applies to TCP, and does not
+    override the showcontrol option. Defaults to 1.
+
+options: shownontcpudp	type: integer
+    If set to 1 the display will show IP packets for transports other than
+    TCP and UDP, e.g. ICMP, GRE, ESP. Set to 0 to hide these packets.
+    Defaults to 1.
+
+option: darknet		type: boolean
+    Specifies whether BSOD should maintain a blacklist of inactive hosts to
+    identify DarkNet traffic. This lightlist is stored in the directory
+    defined using the blacklistdir option. Defaults to false.
+     
 option: blacklistdir	type: string
     Specifies the directory where the blacklist information should be stored.
     This is used so that it can be reloaded at a later date without having
     to be regenerated. Blacklist info can be used to show/hide 'legitimate'
     traffic. Defaults to blist/ based off the base directory.
 
+option: rttest		type: boolean
+    Specifies whether BSOD should estimate RTT for each flow so that it can
+    adjust packet velocity to mimic the connection speed. Defaults to false.
+
+option: sampling	type: integer
+    Specifies a sampling rate for the input source. One in every N packets is
+    processed and sent to the client, where N is the value of this option.
+    If set to 0 (or 1), no sampling is performed. Defaults to 0.
+
+option: sendq		type: integer
+    Specifies the maximum amount of outstanding data (in bytes) allowed for 
+    each BSOD client. If this is exceeded, the client is dropped. Defaults to
+    10 MB, i.e. 10000000.
+
+option: left_image	type: string
+    Specifies the image file that should be transmitted to the client to 
+    display on the left pane.
+
+option: right_image	type: string
+    Specifies the image file that should be transmitted to the client to 
+    display on the right pane.
 
 
 
 Troubleshooting bsod server
 ----------------------------------
 ----------------------------------
+Note: if these suggestions do not help, email contact@wand.net.nz with
+details of your problem and we will do our best to help you.
+
 
 Problem:
 Everything builds and runs fine, but when the client connects it doesn't
@@ -192,6 +263,10 @@ that the 'interface' module is used. If reading straight from a network
 interface or a pcap trace, the 'destmac' direction module should be used,
 and the mac_addrs config file should contain remote mac addresses.
 
+Another cause is that the server is so busy reading packets from the input
+source that it has no time to transmit packet records to the client. Try
+filtering the traffic source to only display a subset of the traffic or 
+increase the sampling rate.
 
 Problem:
 /usr/local/bsod/bin/bsod_server: error while loading shared libraries: libtrace.so.2: cannot open shared object file: No such file or directory

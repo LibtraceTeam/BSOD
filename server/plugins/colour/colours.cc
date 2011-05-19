@@ -1,3 +1,33 @@
+/*
+ * This file is part of bsod-server
+ *
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
+ * Authors: Brendon Jones
+ *          Daniel Lawson
+ *          
+ * All rights reserved.
+ *
+ * This code has been developed by the University of Waikato WAND 
+ * research group. For further information please see http://www.wand.net.nz/
+ *
+ * bsod-server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * bsod-server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with bsod-server; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ *
+ */
+
 #include "colours.h"
 #include <libtrace.h>
 #include <inttypes.h>
@@ -108,10 +138,15 @@ char counternames [][256] = {
 * port/protocol being used.
 */
 extern "C"
-int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet)
+int mod_get_colour(unsigned char *id_num, struct libtrace_packet_t *packet,
+		flow_info_t *f)
 {
 
 	struct libtrace_ip *ip = trace_get_ip(packet);
+	
+	/* We don't use the flow info in this plugin */
+	assert(f->colour_data == NULL);
+
 	if (!ip) {
 		*id_num = OTHER;
 		return 0;
@@ -277,3 +312,4 @@ void mod_get_info(uint8_t colours[3], char name[256], int id )
 	colours[2] = countercolours[id][2];
 	strcpy( name, counternames[id] );
 }
+

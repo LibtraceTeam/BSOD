@@ -1,10 +1,17 @@
 /*
  * This file is part of bsod-server
  *
- * Copyright (c) 2004 The University of Waikato, Hamilton, New Zealand.
+ * Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
  * Authors: Brendon Jones
- *	    Daniel Lawson
- *	    Sebastian Dusterwald
+ *          Daniel Lawson
+ *          Sebastian Dusterwald
+ *          Yuwei Wang
+ *          Paul Hunkin
+ *          Shane Alcock
+ *
+ * Contributors: Perry Lorier
+ *               Jamie Curtis
+ *               Jesse Pouw-Waas
  *          
  * All rights reserved.
  *
@@ -30,11 +37,13 @@
  */
 
 
-
 #ifndef _BSOD_SERVER_H
 #define _BSOD_SERVER_H
 #include <stdint.h>
 #include "libtrace.h"
+#include "packets.h"
+
+#define UDP_PORT 2080
 
 typedef enum {
 	DIR_UNKNOWN = -1,
@@ -49,7 +58,8 @@ typedef enum {
 } side_t;
 
 
-typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *);
+typedef int (* colfptr)(unsigned char*,struct libtrace_packet_t *,
+		flow_info_t * );
 typedef void (* inffptr)(uint8_t*,char[256],int);
 typedef int (* posfptr)(float[3], 
 		side_t side,
@@ -58,7 +68,7 @@ typedef int (* posfptr)(float[3],
 typedef int (* dirfptr)(struct libtrace_packet_t *);
 typedef void (* initdirfptr)(char* );
 typedef int (* initfuncfptr)(const char *);
-typedef int (* initsidefptr)(side_t side, const char *);
+typedef int (* initsidefptr)(char *);
 typedef int (* endfptr)();
 typedef int (* endsidefptr)(side_t side);
 struct modptrs_t {
@@ -67,7 +77,6 @@ struct modptrs_t {
 	posfptr left;
 	posfptr right;
 	dirfptr direction;
-	initdirfptr init_dir;
 };
 
 

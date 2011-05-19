@@ -1,0 +1,58 @@
+======================
+ Management
+======================
+
+- Create a trac for BSOD and move all of this stuff in that!
+
+=========================
+ Things noticed by Shane
+=========================
+ - Auto-detect of the appropriate rendering type isn't too flash
+ - WASD movement scheme - navigating through the 3d environment is very
+   unintuitive
+ - Client performance seems to degrade over multiple reconnects / restarts?
+   Noticably slower at loading images and rendering flows.
+
+
+======================
+ From NZNOG feedback
+======================
+
+- Disable CEGUI log and catch the CEGUI exception. 
+- Make server window more HCI-friendly
+- Internet master server style lookups for public servers
+- Server layout module needs to be able to push a random string to the client
+  that is displayed in the endpoint info pane. 
+
+=========================
+ Faster particle systems
+=========================
+
+- We can get smoother perfomance under ISP-style loads with the vertex shader 
+  particle system by limiting to Nk particles per frame
+- We can get even *better* performance by rendering each Nk particles to a 
+  seperate texture, and only updating those textures every Nk/total seconds.
+- Possibly there's a good system where we render a different particle type every
+  frame and don't clear the frame buffer. That's very very fast...but you can't
+  *un-render* them, so they'll leave trails.
+
+
+========================
+  Other random stuff
+========================
+
+- Auto rotate options
+- More keyboard options
+- Keyboard driven GUI
+- Resizing the window goes badly on Windows (and is disabled currently).
+	- In fact it's a bit clunky everywhere tbh. 
+- Move to glDrawArrays throughout (need to change memory layout of particles)
+- Auto benchmark to figure out the 'best' particle system backend
+- Change ps backends in real time
+- Better picking for the start/end points - 'best' hit rather than first
+- Classic PS needs to do some form of billboarding to make the particles face 
+  the camera. We can probably apply the same transformation to all of them and 
+  not care about the slight distortion on the edges.
+- OSX support
+- Move Windows build to VS2008
+  

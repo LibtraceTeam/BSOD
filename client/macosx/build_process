@@ -1,0 +1,87 @@
+Documentation on the process of building a Mac app bundle 
+====================================================================
+
+First off, fire up the provided project file in Xcode. All paths to source
+files are relative, so make sure you retain the directory structure from the
+SVN repository.
+
+All source and header files go into the "Classes" group. This includes the
+special Mac only file "config.h", located in this directory. This file is a
+replacement for the config.h that is usually generated via the configure
+process. 
+
+Frameworks that we link against go into the Linked Frameworks group (inside
+Frameworks). Frameworks that are not part of a standard Mac install, i.e. are
+not in /System/Library/Frameworks, must also be added to the Copy Frameworks
+into .app bundle step that is part of the bsodclient target. At the time of
+writing, bsodclient depends on the following non-standard frameworks:
+	* CEGUIBase
+	* CEGUIOpenGLRenderer
+	* expat
+	* freetype2
+	* PCRE
+	* SDL
+
+CEGUIBase and CEGUIOpenGLRenderer are included in the CEGUI 0.7.5 binary
+download for Mac OS X. expat, freetype2 and PCRE can be found in the 
+dependencies package for CEGUI 0.7.5 for Mac OS X. SDL can be downloaded from
+libSDL's main site. 
+
+bsodclient also depends on the following standard frameworks: Cocoa and OpenGL,
+which are linked, and Appkit and Foundation, which are not linked.
+
+bsodclient also requires the CEGUI plugins, which can be found in the Plugins
+directory inside CEGUIBase.framework. These are copied into the Plugins
+directory within the app via the first Copy Files step when building the
+bsodclient target. Make sure any additional plugins used are also copied to
+the app appropriately - first add them to the main project, then drag them into
+the Copy Files step with the other plugins.
+
+Dynamic libraries are the trickiest part. Because we cannot guarantee where the
+libraries are on the user machine, we distribute the dylibs with the app
+bundle and make sure the app knows where to find them. The following is an
+approximate guide to adding new dylibs to the project:
+
+ 1. Add the library to the main project itself. Make sure you add the library
+    itself and not one of the symlinks. The library will usually have numbers
+    in the filename, e.g. libz.1.2.5.dylib vs libz.dylib.
+ 2. Add the library to the second Copy Files step so that it is added to the
+    SharedSupport folder inside the app bundle.
+ 3. Now, we need to make sure the bsodclient app knows where to find the 
+    library you just added. Double-click on the Run Script phase for the
+    bsodclient target. Add the name of the library you just added to the line
+    that sets the TARGETS variable.
+ 4. Next, run 'otool -L' on the command line against the library you just added.
+    If any of the dependencies for the library are located anywhere other than
+    /System/ or /usr/lib/ then continue on to step 5. Otherwise, you're done!
+ 
+ 5. Repeat Steps 1-4 for all the non-standard dependencies that your new
+    library has. Once you're done, your library and all its dependencies should
+    be being copied to SharedSupport via the second Copy Files step and all
+    the dylibs should be included in TARGETS in the post-build script.
+ 6. Now, you've added the dependencies into your app bundle, but the libraries
+    that depend on them will still look for them in their previous location.
+    So we have to also add commands to the script that will substitute the
+    previous location to SharedSupport. The install_name_tool commands at the
+    end of the post-build script do this for the other dylibs - simply add
+    further commands for the dependencies that you have added.
+
+
+Putting the bundle together
+===========================
+Once you've done a release build of bsodclient in Xcode, we need to create a
+disk image containing not only the app itself, but also the runtime data that
+the client needs.
+
+Create a disk image via the Disk Utility, and then add the following to it:
+ * bsodclient.app (as built by Xcode)
+ * bsod2.cfg, the example config file from the bsodclient source dist
+ * the entire data/ directory from within runtime/ in the bsodclient source
+ * the README file located within this directory.
+
+Compress the disk image and you should have a working BSODClient app! Of
+course, test it on a Mac *other* than your development box to be sure (i.e.
+one without CEGUI, libSDL etc on it if possible).
+
+
+

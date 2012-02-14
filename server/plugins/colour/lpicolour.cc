@@ -284,12 +284,12 @@ static void guess_protocol(unsigned char *id_num, lpi_col_t *col, uint8_t dir,
 				*id_num = UNK_UDP;
 				return;
 			}
+			*id_num = OTHER;
 			break;
 		default:
 			*id_num = OTHER;
 			return;
 	}	
-
 
 }
 
@@ -449,7 +449,7 @@ int mod_get_colour(unsigned char *id_num, libtrace_packet_t *packet,
 	} else {
 		guess_protocol(id_num, col, dir, plen);
 	}
-	
+
 	return 0;
 
 }

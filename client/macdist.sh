@@ -25,6 +25,7 @@ tar -cvvf bsod-macosx.tar \
 	runtime/data/gui/XMLRefSchema/*.xsd \
 	runtime/data/shaders/*.frag \
 	runtime/data/shaders/*.vert \
+	runtime/data/bsod.icns \
 	macosx/README.txt \
 	macosx/config.h \
 	macosx/build_process \

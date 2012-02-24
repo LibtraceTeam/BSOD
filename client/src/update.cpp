@@ -77,10 +77,15 @@ void App::updateMain(){
 		fCamSpeed *= 10;
 	}
 	
-	if(keyDown(SDLK_LEFT))	fRot[1] += fCamSpeed;
-	if(keyDown(SDLK_RIGHT))	fRot[1] -= fCamSpeed;
+	if(keyDown(SDLK_LEFT))	fCameraX -= fCamSpeed;
+	if(keyDown(SDLK_RIGHT))	fCameraX += fCamSpeed;
 	if(keyDown(SDLK_UP))	fRot[0] += fCamSpeed;
 	if(keyDown(SDLK_DOWN))	fRot[0] -= fCamSpeed;
+
+	if(keyDown(SDLK_w)) fCameraY += fCamSpeed;
+	if(keyDown(SDLK_s)) fCameraY -= fCamSpeed;
+	if(keyDown(SDLK_a)) fRot[1] += fCamSpeed;
+	if(keyDown(SDLK_d)) fRot[1] -= fCamSpeed;
 	
 	if(keyDown(SDLK_SPACE))	resetCam();
 	

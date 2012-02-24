@@ -124,8 +124,6 @@ int App::init(App *a, int argc, char **argv){
 				
 		
 	//Camera
-	camSetPos(0, -SLAB_SIZE/3, SLAB_SIZE);
-	camLookAt(0, 0, 0); 
 	resetCam();
 	
 	//gui
@@ -148,8 +146,7 @@ int App::init(App *a, int argc, char **argv){
 	//Connect	
 	if(mServerAddr != ""){
 		if(!openSocket(true)){
-			LOG("Something went wrong with the socket, bailing out\n");
-			return 0;
+			LOG("Failed to connect to server specified in the config file\n");
 		}
 	}else{
 		LOG("No server specified\n");

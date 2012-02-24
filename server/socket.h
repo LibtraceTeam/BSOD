@@ -42,7 +42,8 @@
 #include <libwandevent.h>
 void setup_listen_socket(wand_event_handler_t *ev_hdl, 
 		struct modptrs_t *modptrs,
-		struct wand_fdcb_t *listener, uint16_t port);
+		struct wand_fdcb_t *listener, uint16_t port,
+		bool wait_flag);
 void setup_udp_socket(wand_event_handler_t *ev_hdl, struct wand_fdcb_t *udp);
 struct client *check_clients(struct modptrs_t *modptrs, bool wait);
 int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
@@ -55,7 +56,7 @@ void hax_fdmax(int fd);
 int send_kill_all();
 int send_colour_table(struct modptrs_t *modptrs);
 int send_images(struct client *c);
-
+bool no_clients();
 extern int max_sendq_size;
 
 #endif // _SOCKET_H

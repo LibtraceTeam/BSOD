@@ -148,6 +148,7 @@ struct image_data_t {
 struct listen_data {
 	wand_event_handler_t *ev_hdl;
 	struct modptrs_t *modptrs;
+	bool wait_for_client;
 };
 
 struct listen_data ldata;
@@ -161,6 +162,12 @@ extern char *server_name;
 extern char *left_image, *right_image;
 
 void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) ;
+
+bool no_clients(void) {
+
+	return (clients == NULL);
+
+}
 
 /* Creates a new structure containing a file descriptor */
 struct client* create_fd(int fd, wand_event_handler_t *ev_hdl)
@@ -253,6 +260,8 @@ static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	socklen_t sock_size;
 	int newfd;
 	struct client * ret;
+	static int first_client = 1;
+
 	
 	// handle new connections
 	sock_size = sizeof(struct sockaddr_in);
@@ -283,13 +292,20 @@ static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 		send_flows(ret);
 	}
 
+	/* Force the initial event loop (which will be listening only) to
+	 * stop and start reading the input trace */
+	if (first_client && ldata.wait_for_client) {
+		ldata.ev_hdl->running = false;
+		first_client = 0;
+	}
 
 }
 
 //----------------------------------------------------------
 void setup_listen_socket(wand_event_handler_t *ev_hdl, 
 		struct modptrs_t *modptrs, 
-		struct wand_fdcb_t *listener, uint16_t port)
+		struct wand_fdcb_t *listener, uint16_t port,
+		bool wait_flag)
 {
 	int yes=1;        // for setsockopt() SO_REUSEADDR, below
 	int listen_socket = -1;
@@ -333,6 +349,7 @@ void setup_listen_socket(wand_event_handler_t *ev_hdl,
 
 	ldata.ev_hdl = ev_hdl;
 	ldata.modptrs = modptrs;
+	ldata.wait_for_client = wait_flag;
 
 	listener->fd = listen_socket;
 	listener->flags = EV_READ;

@@ -117,6 +117,7 @@ int showcontrol = 1;
 int shownontcpudp = 1;
 int showresets = 1;
 int sampling = 0;
+int wait_client = 0;
 
 void do_configuration(int argc, char **argv);
 
@@ -162,7 +163,7 @@ static void init_signals();
 static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 		RTTMap *rttmap);
 static void bsod_event(bsod_vars_t *vars);
-static void set_signal_timer(bsod_vars_t *vars, bool remove);
+static void set_signal_timer(bsod_vars_t *vars);
 static void signal_event(bsod_vars_t *vars) ;
 
 bsod_vars_t bsod_vars;
@@ -210,7 +211,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	setup_listen_socket(wand_ev_hdl, &modptrs, &listener, port);
+	setup_listen_socket(wand_ev_hdl, &modptrs, &listener, port, 
+			wait_client);
 	setup_udp_socket(wand_ev_hdl, &udpsocket);	
 
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
@@ -258,11 +260,16 @@ int main(int argc, char *argv[])
 		init_times();
 		init_packets();
 
+		if (no_clients() && wait_client) {
+			set_signal_timer(&bsod_vars);
+			wand_event_run(wand_ev_hdl);
+		}
+		
 		if (terminate_bsod) {
 			loop=0;
 			break;
 		}
-
+		
 		//------- Connect trace ----------
 		trace = trace_create(uri);
 
@@ -625,6 +632,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_STR((char *)"left_image", NULL, CFGF_NONE),
 		CFG_STR((char *)"right_image", NULL, CFGF_NONE),
 		CFG_INT((char *)"sendq", 10*1024*1024, CFGF_NONE),
+		CFG_BOOL((char *)"client_wait", cfg_false, CFGF_NONE),
 		CFG_END()
 	};
 	cfg_t *cfg;
@@ -686,6 +694,7 @@ void do_configuration(int argc, char **argv) {
 		left_image = cfg_getstr(cfg, "left_image");
 		right_image = cfg_getstr(cfg, "right_image");
 		max_sendq_size = cfg_getint(cfg, "sendq");
+		wait_client=cfg_getbool(cfg, "client_wait");
 		
 		printf("URI: %s\n", uri);
 		
@@ -695,6 +704,7 @@ void do_configuration(int argc, char **argv) {
 	fix_defaults();
 	Log(LOG_DAEMON|LOG_DEBUG,"Darknet: %s\n",enable_darknet ? "Yes" : "No");
 	Log(LOG_DAEMON|LOG_DEBUG,"RTTEst: %s\n",enable_rttest ? "Yes" : "No");
+	Log(LOG_DAEMON|LOG_DEBUG,"Client Wait: %s\n",wait_client ? "Yes" : "No");
 }
 
 /** Parse out the arguments and the driver name 

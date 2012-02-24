@@ -59,6 +59,7 @@ background	integer
 basedir		string
 source		string
 listenport	integer
+client_wait	boolean
 filter		string
 colour_module	string
 colourparam	string
@@ -107,6 +108,11 @@ option: listenport	type: integer
     The port that the server should listen to for incoming connections.
     This is the only config option that is not reparsed when the server is
     restarted via a SIGUSR1. Defaults to 32500.
+
+option: client_wait	type: boolean
+    If set to true, the server will not start reading from the input source
+    until a client has successfully connected. Useful for replaying trace
+    files.
 
 option: filter		type: string
     BPF style filter to apply to the source URI. Works on any URI but is only

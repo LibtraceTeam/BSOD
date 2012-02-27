@@ -154,6 +154,12 @@
     <ClInclude Include="..\src\include\texture.h" />
     <ClInclude Include="..\src\include\vector.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="windows.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\runtime\data\bsod2.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -2,6 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows", "windows.vcxproj", "{9B7B3F0E-AE4E-4707-932F-C5A678474A73}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BSOD Client 2.0.2", "BSOD Client 2.0.2.vdproj", "{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -12,6 +14,9 @@ Global
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Debug|Win32.Build.0 = Release|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Release|Win32.ActiveCfg = Release|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Release|Win32.Build.0 = Release|Win32
+		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Debug|Win32.ActiveCfg = Debug
+		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Release|Win32.ActiveCfg = Release
+		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Release|Win32.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

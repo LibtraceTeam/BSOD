@@ -526,6 +526,7 @@
 					"-lc",
 				);
 				PRODUCT_NAME = bsodclient;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -558,6 +559,7 @@
 				);
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_NAME = bsodclient;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

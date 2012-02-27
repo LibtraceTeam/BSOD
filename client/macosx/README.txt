@@ -109,6 +109,21 @@ option: FlipTextures
 	If the textures are loaded upside down, set this option to 1 to flip
 	them up the right way.
 
+Navigation
+==========
+
+The camera can be moved using both the keyboard and mouse. Clicking and dragging with the 
+left mouse button will adjust the direction that the camera is pointing. The camera
+orientation can also be changed using the arrow keys on the keyboard.
+
+The location of the camera can be changed using the W, S, A and D keys on the keyboard. W
+moves the camera forward, S will reverse, A will strafe left and D will strafe right. 
+
+All camera movements made while holding down the left shift key will be 10x faster.
+
+If all else fails, pressing Space will return the camera to its original position and
+orientation.
+
 Acknowledgements
 ================
 

@@ -305,11 +305,14 @@ bool App::onMenuButtonClicked(const EventArgs &args){
 	if(target){
 		if(target->isVisible()){
 			target->hide();
+			if (target == mServerWindow)
+				this->bGlobalDisableKeyMovement = false;
 		}else{
 			target->show();
 			target->moveToFront();
 			
 			if(target == mServerWindow){
+				this->bGlobalDisableKeyMovement = true;
 				renderServerList();
 				beginDiscovery();
 			}
@@ -520,6 +523,7 @@ bool App::onServerButtonClicked(const EventArgs &args){
 		
 		if(openSocket(toAdd)){
 			mServerWindow->hide();
+			this->bGlobalDisableKeyMovement = false;	
 		}else{
 			messagebox("Could not connect to server '" + 
 						mServerAddr + ":" + 
@@ -580,6 +584,9 @@ bool App::onWndClose(const CEGUI::EventArgs &args){
 	//Get the object that sent this event
 	WindowEventArgs *we = (WindowEventArgs *)&args;
 	we->window->hide();
+
+	if (we->window == mServerWindow) 
+		bGlobalDisableKeyMovement = false;
 	
 	return true;
 }

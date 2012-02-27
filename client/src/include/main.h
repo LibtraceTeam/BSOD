@@ -111,6 +111,7 @@ class App{
 		
 	//gui.cpp
 	float fGUITimeout;			//Seconds until the GUI disappers. >0 = display
+	bool bGlobalDisableKeyMovement;		//If true, movement with key controls is disabled
 	
 	//render.cpp
 	string mStatusString;			//timestamp + server name

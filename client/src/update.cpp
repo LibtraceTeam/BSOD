@@ -48,90 +48,92 @@ void App::updateMain(){
 	float fCamSpeed = fTimeScale * 10.0f;
 	float fDragScale = 0.05f;
 
-	//Right button means we reset rotation and such
-	//NOTE: I did have this as 'both left and right at once', which seemed
-	//to make more sense, but it doesn't work great on systems that map this
-	//to middle-mouse		
-	if(mouseDown(3)){
-		resetCam();
-	}
+	if (!this->bGlobalDisableKeyMovement) {
 
-	//Rotation for the wall
-	/*
-	float camTime = fUptime * 0.1f;
+		//Right button means we reset rotation and such
+		//NOTE: I did have this as 'both left and right at once', which seemed
+		//to make more sense, but it doesn't work great on systems that map this
+		//to middle-mouse		
+		if(mouseDown(3)){
+			resetCam();
+		}
 
-	float fRotateSpeed = fCamSpeed;
-	fRot[1] += fRotateSpeed;
-	fRot[0] = (sinf(camTime) * 5);
-	fCameraY = cosf(camTime) * 5;
-	
-	fZoom = (sinf(camTime) * 15) + 27;
-	*/
+		//Rotation for the wall
+		/*
+		float camTime = fUptime * 0.1f;
+
+		float fRotateSpeed = fCamSpeed;
+		fRot[1] += fRotateSpeed;
+		fRot[0] = (sinf(camTime) * 5);
+		fCameraY = cosf(camTime) * 5;
 		
-	//LOG("%f, %f\n", fRot[1], fZoom);
-	
-	//fZoom = -10;
-	
-	//Keyboard rotation
-	if(keyDown(SDLK_RSHIFT) || keyDown(SDLK_LSHIFT)){
-		fCamSpeed *= 10;
-	}
-	
-	if(keyDown(SDLK_LEFT))	fRot[1] -= fCamSpeed;
-	if(keyDown(SDLK_RIGHT))	fRot[1] += fCamSpeed;
-	if(keyDown(SDLK_UP))	fRot[0] -= fCamSpeed;
-	if(keyDown(SDLK_DOWN))	fRot[0] += fCamSpeed;
-
-	if(keyDown(SDLK_w)) {
-		fCameraZ -= fCamSpeed; 
-		//fRot[0] = 0.0; fRot[1] = 0.0; fRot[2] = 0.0;
-		fLookZ -= fCamSpeed;
-	}
-	
-	if(keyDown(SDLK_s)) {
-		fCameraZ += fCamSpeed; 
-		//fRot[0] = 0.0; fRot[1] = 0.0; fRot[2] = 0.0;
-		fLookZ += fCamSpeed;
-	}
-	if(keyDown(SDLK_a)) {
-		fCameraX -= fCamSpeed;
-		fLookX -= fCamSpeed;
-	}
-	if(keyDown(SDLK_d)) {
-		fCameraX += fCamSpeed;
-		fLookX += fCamSpeed;
-	}
-	
-	if(keyDown(SDLK_SPACE))	resetCam();
-	
-	//If we're actively dragging with the mouse
-	if(bDrag){
+		fZoom = (sinf(camTime) * 15) + 27;
+		*/
+			
+		//LOG("%f, %f\n", fRot[1], fZoom);
 		
-		//Figure out the drag vectors and stuff
-		Vector2 drag = getMouse();
-		Vector2 diff = (dragStart - drag) * fDragScale;
-				
-		//Left mouse button means we modify the rotation
-		if(mouseDown(1)){
-			fRot[1] -= diff.x;
-			fRot[0] -= diff.y;			
+		//fZoom = -10;
+		
+		//Keyboard rotation
+		if(keyDown(SDLK_RSHIFT) || keyDown(SDLK_LSHIFT)){
+			fCamSpeed *= 10;
 		}
 		
-		//Middle mouse means we modify the zoom
-		else if(mouseDown(2)){
-			fZoom += diff.y;
+		if(keyDown(SDLK_LEFT))	fRot[1] -= fCamSpeed;
+		if(keyDown(SDLK_RIGHT))	fRot[1] += fCamSpeed;
+		if(keyDown(SDLK_UP))	fRot[0] -= fCamSpeed;
+		if(keyDown(SDLK_DOWN))	fRot[0] += fCamSpeed;
+
+		if(keyDown(SDLK_w)) {
+			fCameraZ -= fCamSpeed; 
+			//fRot[0] = 0.0; fRot[1] = 0.0; fRot[2] = 0.0;
+			fLookZ -= fCamSpeed;
 		}
 		
-		dragVel = diff;
-		dragStart = getMouse();
+		if(keyDown(SDLK_s)) {
+			fCameraZ += fCamSpeed; 
+			//fRot[0] = 0.0; fRot[1] = 0.0; fRot[2] = 0.0;
+			fLookZ += fCamSpeed;
+		}
+		if(keyDown(SDLK_a)) {
+			fCameraX -= fCamSpeed;
+			fLookX -= fCamSpeed;
+		}
+		if(keyDown(SDLK_d)) {
+			fCameraX += fCamSpeed;
+			fLookX += fCamSpeed;
+		}
 		
+		if(keyDown(SDLK_SPACE))	resetCam();
 		
-		
-	}else{
-		//fRot[1] -= dragVel.x;
-		//fRot[0] -= dragVel.y;
-	}
-	
+		//If we're actively dragging with the mouse
+		if(bDrag){
+			
+			//Figure out the drag vectors and stuff
+			Vector2 drag = getMouse();
+			Vector2 diff = (dragStart - drag) * fDragScale;
+					
+			//Left mouse button means we modify the rotation
+			if(mouseDown(1)){
+				fRot[1] -= diff.x;
+				fRot[0] -= diff.y;			
+			}
+			
+			//Middle mouse means we modify the zoom
+			else if(mouseDown(2)){
+				fZoom += diff.y;
+			}
+			
+			dragVel = diff;
+			dragStart = getMouse();
+			
+			
+			
+		}else{
+			//fRot[1] -= dragVel.x;
+			//fRot[0] -= dragVel.y;
+		}
+	}	
 
 	updateSocket();
 	

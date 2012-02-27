@@ -1,7 +1,7 @@
 BSOD Client 2.0.2 for Windows
 
 -------------------------------------------------------------------------------
-Copyright (c) 2005-2011 The University of Waikato, Hamilton, New Zealand.
+Copyright (c) 2005-2012 The University of Waikato, Hamilton, New Zealand.
 All rights reserved.
 
 This code has been developed by the University of Waikato WAND
@@ -23,17 +23,21 @@ has not been explicitly tested as yet. Windows XP may or may not work, but feel
 free to try your luck. If you absolutely must have a working version of BSOD
 client for Windows XP, get in touch and we'll see what we can do.
 
-Running BSOD Client
-===================
+Installing and Running BSOD Client
+==================================
 IMPORTANT for Windows users: If you have not installed Visual Studio on your
 machine, you may not have all the development libraries required to run BSOD
-client. The file vcredist_x86.exe (included in the zip file) will install 
-these libraries for you. 
+client. The installer should deal with this for you but if not, you will need to
+download and install vcredist_x86.exe from 
+http://www.microsoft.com/download/en/details.aspx?id=5555
 
-Edit the configuration file "bsod2.cfg" to suit your requirements (see 
-Configuration below) and then simply double-click on the bsodclient executable.
-It will automatically attempt to connect to the server specified in your
-config file, if you have specified one.
+Simply double click on the .msi installer to install BSOD client on your system.
+
+Once installation is complete, go to the directory where you installed BSOD
+client to and edit the configuration file "bsod2.cfg" to suit your requirements 
+(see Configuration below). Double-click on the bsodclient executable to launch
+the client visualisation. It will automatically attempt to connect to the server 
+specified in your config file.
 
 Configuration
 =============

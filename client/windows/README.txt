@@ -1,4 +1,4 @@
-BSOD Client 2.0.1 for Windows
+BSOD Client 2.0.2 for Windows
 
 -------------------------------------------------------------------------------
 Copyright (c) 2005-2011 The University of Waikato, Hamilton, New Zealand.
@@ -17,7 +17,7 @@ on screen.
 Further information about both the BSOD client and server can be found at
 http://research.wand.net.nz/software/visualisation.php
 
-This particular build was created using Visual Studio 2010 and tested on a 32 
+This particular build was created using Visual Studio 2010 and tested on a 64 
 bit Windows 7 install. We expect that it will work fine on Vista machines, but
 has not been explicitly tested as yet. Windows XP may or may not work, but feel
 free to try your luck. If you absolutely must have a working version of BSOD

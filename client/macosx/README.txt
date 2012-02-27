@@ -1,4 +1,4 @@
-BSOD Client 2.0.1 for Mac OS X
+BSOD Client 2.0.2 for Mac OS X
 
 -------------------------------------------------------------------------------
 Copyright (c) 2005-2011 The University of Waikato, Hamilton, New Zealand.

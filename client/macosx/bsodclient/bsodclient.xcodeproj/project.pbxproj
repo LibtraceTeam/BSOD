@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,12 +16,10 @@
 		A345B94F13282529007210C1 /* libconfuse.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = A3CBE4431325DDA500951A76 /* libconfuse.a */; };
 		A345B9651328282D007210C1 /* libpng14.14.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B9641328282D007210C1 /* libpng14.14.dylib */; };
 		A345B96613282834007210C1 /* libpng14.14.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B9641328282D007210C1 /* libpng14.14.dylib */; };
-		A345B975132828EF007210C1 /* libGLEW.1.5.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */; };
 		A345B976132828EF007210C1 /* libiconv.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B971132828EF007210C1 /* libiconv.2.dylib */; };
 		A345B977132828EF007210C1 /* libintl.8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B972132828EF007210C1 /* libintl.8.dylib */; };
 		A345B978132828EF007210C1 /* libSDL_net-1.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */; };
 		A345B979132828EF007210C1 /* libSDL_ttf-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345B974132828EF007210C1 /* libSDL_ttf-2.0.0.dylib */; };
-		A345B97A132828F7007210C1 /* libGLEW.1.5.8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */; };
 		A345B97B132828F7007210C1 /* libiconv.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B971132828EF007210C1 /* libiconv.2.dylib */; };
 		A345B97C132828F7007210C1 /* libintl.8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B972132828EF007210C1 /* libintl.8.dylib */; };
 		A345B97D132828F7007210C1 /* libSDL_net-1.2.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */; };
@@ -41,9 +39,9 @@
 		A345BA4313283CF5007210C1 /* libSDL-1.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */; };
 		A345BA4413283D05007210C1 /* libfreetype.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4013283CF5007210C1 /* libfreetype.6.dylib */; };
 		A345BA4513283D05007210C1 /* libSDL-1.2.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */; };
-		A345BA4D13284D4F007210C1 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
-		A345BA4E13284D56007210C1 /* libz.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */; };
 		A38179871332F2D5004D3FAC /* bsod.icns in Resources */ = {isa = PBXBuildFile; fileRef = A38179861332F2D5004D3FAC /* bsod.icns */; };
+		A384997B14FAF04700D50F61 /* libGLEW.1.7.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A3CF0E0C14FAEDF10087A8DC /* libGLEW.1.7.0.dylib */; };
+		A384997C14FAF05400D50F61 /* libz.1.2.6.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A3CF0E0A14FAEDE10087A8DC /* libz.1.2.6.dylib */; };
 		A3CBE2611325DC4300951A76 /* CEGUIBase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */; };
 		A3CBE2621325DC4300951A76 /* CEGUIOpenGLRenderer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */; };
 		A3CBE2631325DC4300951A76 /* expat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE25E1325DC4300951A76 /* expat.framework */; };
@@ -74,6 +72,8 @@
 		A3CBE42D1325DCAF00951A76 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE41A1325DCAF00951A76 /* texture.cpp */; };
 		A3CBE42E1325DCAF00951A76 /* update.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3CBE41B1325DCAF00951A76 /* update.cpp */; };
 		A3CBE4481325DDA500951A76 /* libconfuse.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CBE4431325DDA500951A76 /* libconfuse.a */; };
+		A3CF0E0B14FAEDE10087A8DC /* libz.1.2.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CF0E0A14FAEDE10087A8DC /* libz.1.2.6.dylib */; };
+		A3CF0E0D14FAEDF10087A8DC /* libGLEW.1.7.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A3CF0E0C14FAEDF10087A8DC /* libGLEW.1.7.0.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -99,14 +99,14 @@
 			dstPath = "";
 			dstSubfolderSpec = 12;
 			files = (
-				A345B97A132828F7007210C1 /* libGLEW.1.5.8.dylib in CopyFiles */,
-				A345BA4E13284D56007210C1 /* libz.1.2.5.dylib in CopyFiles */,
 				A345B97B132828F7007210C1 /* libiconv.2.dylib in CopyFiles */,
 				A345BA4413283D05007210C1 /* libfreetype.6.dylib in CopyFiles */,
+				A384997B14FAF04700D50F61 /* libGLEW.1.7.0.dylib in CopyFiles */,
 				A345BA4513283D05007210C1 /* libSDL-1.2.0.dylib in CopyFiles */,
 				A345B97C132828F7007210C1 /* libintl.8.dylib in CopyFiles */,
 				A345B97D132828F7007210C1 /* libSDL_net-1.2.0.dylib in CopyFiles */,
 				A345B97E132828F7007210C1 /* libSDL_ttf-2.0.0.dylib in CopyFiles */,
+				A384997C14FAF05400D50F61 /* libz.1.2.6.dylib in CopyFiles */,
 				A345B96613282834007210C1 /* libpng14.14.dylib in CopyFiles */,
 				A345B94F13282529007210C1 /* libconfuse.a in CopyFiles */,
 			);
@@ -147,7 +147,6 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* bsodclient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bsodclient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A345B9641328282D007210C1 /* libpng14.14.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng14.14.dylib; path = /opt/local/lib/libpng14.14.dylib; sourceTree = "<absolute>"; };
-		A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.5.8.dylib; path = /opt/local/lib/libGLEW.1.5.8.dylib; sourceTree = "<absolute>"; };
 		A345B971132828EF007210C1 /* libiconv.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.dylib; path = /opt/local/lib/libiconv.2.dylib; sourceTree = "<absolute>"; };
 		A345B972132828EF007210C1 /* libintl.8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libintl.8.dylib; path = /opt/local/lib/libintl.8.dylib; sourceTree = "<absolute>"; };
 		A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL_net-1.2.0.dylib"; path = "/opt/local/lib/libSDL_net-1.2.0.dylib"; sourceTree = "<absolute>"; };
@@ -165,7 +164,6 @@
 		A345B99D1328311A007210C1 /* CEGUIXercesParser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = CEGUIXercesParser.bundle; path = /Library/Frameworks/CEGUIBase.framework/Plugins/CEGUIXercesParser.bundle; sourceTree = "<absolute>"; };
 		A345BA4013283CF5007210C1 /* libfreetype.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.6.dylib; path = /opt/local/lib/libfreetype.6.dylib; sourceTree = "<absolute>"; };
 		A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL-1.2.0.dylib"; path = "/opt/local/lib/libSDL-1.2.0.dylib"; sourceTree = "<absolute>"; };
-		A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = /opt/local/lib/libz.1.2.5.dylib; sourceTree = "<absolute>"; };
 		A38179861332F2D5004D3FAC /* bsod.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = bsod.icns; path = ../../runtime/data/bsod.icns; sourceTree = SOURCE_ROOT; };
 		A3CBE25C1325DC4300951A76 /* CEGUIBase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIBase.framework; path = /Library/Frameworks/CEGUIBase.framework; sourceTree = "<absolute>"; };
 		A3CBE25D1325DC4300951A76 /* CEGUIOpenGLRenderer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CEGUIOpenGLRenderer.framework; path = /Library/Frameworks/CEGUIOpenGLRenderer.framework; sourceTree = "<absolute>"; };
@@ -205,6 +203,8 @@
 		A3CBE43C1325DCD400951A76 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vector.h; path = ../../src/include/vector.h; sourceTree = SOURCE_ROOT; };
 		A3CBE4431325DDA500951A76 /* libconfuse.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconfuse.a; path = /opt/local/lib/libconfuse.a; sourceTree = "<absolute>"; };
 		A3CBE4561325DF2E00951A76 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = SOURCE_ROOT; };
+		A3CF0E0A14FAEDE10087A8DC /* libz.1.2.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.6.dylib; path = ../../../../../../opt/local/lib/libz.1.2.6.dylib; sourceTree = "<group>"; };
+		A3CF0E0C14FAEDF10087A8DC /* libGLEW.1.7.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.1.7.0.dylib; path = ../../../../../../opt/local/lib/libGLEW.1.7.0.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,14 +222,14 @@
 				A3CBE2651325DC4300951A76 /* PCRE.framework in Frameworks */,
 				A3CBE4481325DDA500951A76 /* libconfuse.a in Frameworks */,
 				A345B9651328282D007210C1 /* libpng14.14.dylib in Frameworks */,
-				A345B975132828EF007210C1 /* libGLEW.1.5.8.dylib in Frameworks */,
 				A345B976132828EF007210C1 /* libiconv.2.dylib in Frameworks */,
 				A345B977132828EF007210C1 /* libintl.8.dylib in Frameworks */,
 				A345B978132828EF007210C1 /* libSDL_net-1.2.0.dylib in Frameworks */,
 				A345B979132828EF007210C1 /* libSDL_ttf-2.0.0.dylib in Frameworks */,
 				A345BA4213283CF5007210C1 /* libfreetype.6.dylib in Frameworks */,
 				A345BA4313283CF5007210C1 /* libSDL-1.2.0.dylib in Frameworks */,
-				A345BA4D13284D4F007210C1 /* libz.1.2.5.dylib in Frameworks */,
+				A3CF0E0B14FAEDE10087A8DC /* libz.1.2.6.dylib in Frameworks */,
+				A3CF0E0D14FAEDF10087A8DC /* libGLEW.1.7.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,7 +319,7 @@
 		29B97314FDCFA39411CA2CEA /* bsodclient */ = {
 			isa = PBXGroup;
 			children = (
-				A345BA4C13284D4F007210C1 /* libz.1.2.5.dylib */,
+				A3CF0E0C14FAEDF10087A8DC /* libGLEW.1.7.0.dylib */,
 				A345BA4013283CF5007210C1 /* libfreetype.6.dylib */,
 				A345BA4113283CF5007210C1 /* libSDL-1.2.0.dylib */,
 				A345B9931328311A007210C1 /* CEGUICoronaImageCodec.bundle */,
@@ -333,7 +333,7 @@
 				A345B99B1328311A007210C1 /* CEGUITGAImageCodec.bundle */,
 				A345B99C1328311A007210C1 /* CEGUITinyXMLParser.bundle */,
 				A345B99D1328311A007210C1 /* CEGUIXercesParser.bundle */,
-				A345B970132828EF007210C1 /* libGLEW.1.5.8.dylib */,
+				A3CF0E0A14FAEDE10087A8DC /* libz.1.2.6.dylib */,
 				A345B971132828EF007210C1 /* libiconv.2.dylib */,
 				A345B972132828EF007210C1 /* libintl.8.dylib */,
 				A345B973132828EF007210C1 /* libSDL_net-1.2.0.dylib */,
@@ -407,9 +407,16 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0410;
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "bsodclient" */;
-			compatibilityVersion = "Xcode 2.4";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* bsodclient */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -443,7 +450,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "EXECFILE=${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nLIBPATH=${BUILT_PRODUCTS_DIR}/${SHARED_SUPPORT_FOLDER_PATH}\nNEWLIBPATH=\"@executable_path/../SharedSupport\"\nPORTLIBPATH=\"/opt/local/lib\"\n\nTARGETS=\"libiconv.2.dylib libintl.8.dylib libGLEW.1.5.8.dylib libpng14.14.dylib libSDL_net-1.2.0.dylib libSDL_ttf-2.0.0.dylib libSDL-1.2.0.dylib libfreetype.6.dylib libz.1.2.5.dylib\"\nfor TARGET in ${TARGETS}; do\n\tLIBFILE=${LIBPATH}/${TARGET}\n\tTARGETID=`otool -DX ${LIBFILE}`\n\tNEWTARGETID=${NEWLIBPATH}/${TARGET}\n\tinstall_name_tool -id ${NEWTARGETID} ${LIBFILE}\n\tinstall_name_tool -change ${TARGETID} ${NEWTARGETID} ${EXECFILE}\ndone \n\n# Have to do libs within libs manually\n# libiconv in libintl\ninstall_name_tool -change ${PORTLIBPATH}/libiconv.2.dylib ${NEWLIBPATH}/libiconv.2.dylib ${LIBPATH}/libintl.8.dylib\n\n# libSDL in libSDL_net\ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_net-1.2.0.dylib\n\n# libSDL in libSDL_ttf \ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libfreetype in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libfreetype.6.dylib ${NEWLIBPATH}/libfreetype.6.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libz in libpng\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libpng14.14.dylib\n\n# libz in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n#libz in libfreetype\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.5.dylib ${LIBPATH}/libfreetype.6.dylib\n\n";
+			shellScript = "EXECFILE=${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nLIBPATH=${BUILT_PRODUCTS_DIR}/${SHARED_SUPPORT_FOLDER_PATH}\nNEWLIBPATH=\"@executable_path/../SharedSupport\"\nPORTLIBPATH=\"/opt/local/lib\"\n\nTARGETS=\"libiconv.2.dylib libintl.8.dylib libGLEW.1.7.0.dylib libpng14.14.dylib libSDL_net-1.2.0.dylib libSDL_ttf-2.0.0.dylib libSDL-1.2.0.dylib libfreetype.6.dylib libz.1.2.6.dylib\"\nfor TARGET in ${TARGETS}; do\n\tLIBFILE=${LIBPATH}/${TARGET}\n\tTARGETID=`otool -DX ${LIBFILE}`\n\tNEWTARGETID=${NEWLIBPATH}/${TARGET}\n\tinstall_name_tool -id ${NEWTARGETID} ${LIBFILE}\n\tinstall_name_tool -change ${TARGETID} ${NEWTARGETID} ${EXECFILE}\ndone \n\n# Have to do libs within libs manually\n# libiconv in libintl\ninstall_name_tool -change ${PORTLIBPATH}/libiconv.2.dylib ${NEWLIBPATH}/libiconv.2.dylib ${LIBPATH}/libintl.8.dylib\n\n# libSDL in libSDL_net\ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_net-1.2.0.dylib\n\n# libSDL in libSDL_ttf \ninstall_name_tool -change ${PORTLIBPATH}/libSDL-1.2.0.dylib ${NEWLIBPATH}/libSDL-1.2.0.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libfreetype in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libfreetype.6.dylib ${NEWLIBPATH}/libfreetype.6.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n# libz in libpng\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.6.dylib ${LIBPATH}/libpng14.14.dylib\n\n# libz in libSDL_ttf\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.6.dylib ${LIBPATH}/libSDL_ttf-2.0.0.dylib\n\n#libz in libfreetype\ninstall_name_tool -change ${PORTLIBPATH}/libz.1.dylib ${NEWLIBPATH}/libz.1.2.6.dylib ${LIBPATH}/libfreetype.6.dylib\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -493,12 +500,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2.0.2;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = bsodclient_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
@@ -530,12 +538,12 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2.0.1;
+				CURRENT_PROJECT_VERSION = 2.0.2;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = bsodclient_Prefix.pch;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
@@ -557,9 +565,8 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
-				CURRENT_PROJECT_VERSION = 2.0.1;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CURRENT_PROJECT_VERSION = 2.0.2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
@@ -573,16 +580,16 @@
 					/Library/Frameworks/SDL.framework/Headers,
 					"$(HEADER_SEARCH_PATHS)",
 				);
-				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = macosx10.6;
+				VERSION_INFO_BUILDER = 2.0.2;
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CURRENT_PROJECT_VERSION = 2.0.2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
@@ -597,8 +604,8 @@
 					"$(HEADER_SEARCH_PATHS)",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../SharedSupport";
-				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = macosx10.6;
+				VERSION_INFO_BUILDER = 2.0.2;
 			};
 			name = Release;
 		};

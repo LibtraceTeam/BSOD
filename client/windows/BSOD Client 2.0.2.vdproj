@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_04135A2628154FE9AE64AA1132809154"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_050EE88629FF4E6EA21FF256C15AD872"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -93,8 +99,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_32E110095DD7460087BDC047E0A414F1"
-        "OwnerKey" = "8:_96064A4B809D4D09B20263AF22BE8A90"
+        "MsmKey" = "8:_38ACC8A5B7284DA18E9C927BD5F2F28E"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -129,6 +135,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_565BFF8C63BB446B844C709F8FE0210B"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_57AA632CC51549B3B7C4597C8ACFA96A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_5F08C9AC270E4066BF98293C331DA45B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -136,6 +154,12 @@
         "Entry"
         {
         "MsmKey" = "8:_5FD50ADA676D4948BE63EC44FBAE0A6B"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_671A6C52970A45A1B3E0C0069D19FCFB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -154,6 +178,12 @@
         "Entry"
         {
         "MsmKey" = "8:_6BA5AB8680044E4EA2B4D34A455564B4"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6CB0ECDD252D48CB94F4F20CECC4BB7D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -184,6 +214,18 @@
         "Entry"
         {
         "MsmKey" = "8:_77BDE849E78240DABC3A06A7571ED021"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7AA4AF46C715410396A394726D9927F1"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7AB34833811B4656B3ECBFC9A1690019"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -261,6 +303,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_A50E8CA8FEC544038535A4819A478B8E"
+        "OwnerKey" = "8:_96064A4B809D4D09B20263AF22BE8A90"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_A528EFF40A002606E04997BB18045C44"
         "OwnerKey" = "8:_96064A4B809D4D09B20263AF22BE8A90"
         "MsmSig" = "8:_UNDEFINED"
@@ -279,13 +327,31 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_AAB89C44E1A248C0B0F94CB0A1389710"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AB45E69877C14E38A0DF5EE9196C4E91"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
+        "MsmKey" = "8:_AE1C5571112F4B03B2CE3A3998E3A341"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AEE32D95DEF348A588365723B54599A5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B03A7992A2AF49BC96C3051DEF4AF4D1"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -304,6 +370,18 @@
         "Entry"
         {
         "MsmKey" = "8:_B67D08762AEC47749E47FD0FA8769FE5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B8059237C96F412080115290EF1F2549"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B93908F4A6F44AAC98E23DA5E7241876"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -381,6 +459,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D5B9052E7684414490264F07F44A2041"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D895BB66CBFA4FE0996F167F099FEAD0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -412,6 +496,24 @@
         "Entry"
         {
         "MsmKey" = "8:_E14181AAAAC148C9B969F7F6A5998A5E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E6F082C1983B431AB3A71C56C11EBF8E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E8AC68357E18450C8028C5BE97079A69"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFDB643CEC204D43B1DACB3901FB4A9F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -499,6 +601,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -580,6 +690,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_04135A2628154FE9AE64AA1132809154"
+            {
+            "SourcePath" = "8:..\\licenses\\PCRE-License.txt"
+            "TargetName" = "8:PCRE-License.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_050EE88629FF4E6EA21FF256C15AD872"
@@ -822,6 +952,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_38ACC8A5B7284DA18E9C927BD5F2F28E"
+            {
+            "SourcePath" = "8:..\\licenses\\libiconv-license.txt"
+            "TargetName" = "8:libiconv-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3D0A35DF150644CA8FA56C44AFDAF17F"
             {
             "SourcePath" = "8:..\\runtime\\data\\gui\\XMLRefSchema\\CEGUIConfig.xsd"
@@ -922,6 +1072,46 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_565BFF8C63BB446B844C709F8FE0210B"
+            {
+            "SourcePath" = "8:..\\runtime\\data\\bsod2.ico"
+            "TargetName" = "8:bsod2.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_3959F736F5034AA687B065666320B8C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_57AA632CC51549B3B7C4597C8ACFA96A"
+            {
+            "SourcePath" = "8:..\\licenses\\Expat-License.txt"
+            "TargetName" = "8:Expat-License.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5F08C9AC270E4066BF98293C331DA45B"
             {
             "SourcePath" = "8:..\\runtime\\data\\gui\\fonts\\DejaVuSans.ttf"
@@ -948,6 +1138,26 @@
             "TargetName" = "8:CEGUISILLYImageCodec.dll"
             "Tag" = "8:"
             "Folder" = "8:_A64D8EBBA4534194B934BBC7277414A1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_671A6C52970A45A1B3E0C0069D19FCFB"
+            {
+            "SourcePath" = "8:..\\licenses\\Xerces-License.txt"
+            "TargetName" = "8:Xerces-License.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1008,6 +1218,26 @@
             "TargetName" = "8:bluehighway-10.font"
             "Tag" = "8:"
             "Folder" = "8:_1C2FF073CC4C4FF09D7808DF2AB774A2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6CB0ECDD252D48CB94F4F20CECC4BB7D"
+            {
+            "SourcePath" = "8:..\\licenses\\libpng-LICENSE.txt"
+            "TargetName" = "8:libpng-LICENSE.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1108,6 +1338,46 @@
             "TargetName" = "8:sleekspace.png"
             "Tag" = "8:"
             "Folder" = "8:_83AF6651BBD84F01963B6AF5C1F700F9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7AA4AF46C715410396A394726D9927F1"
+            {
+            "SourcePath" = "8:..\\licenses\\Xerces-NOTICE"
+            "TargetName" = "8:Xerces-NOTICE"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7AB34833811B4656B3ECBFC9A1690019"
+            {
+            "SourcePath" = "8:..\\licenses\\CEGUI-License.TXT"
+            "TargetName" = "8:CEGUI-License.TXT"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1402,6 +1672,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AAB89C44E1A248C0B0F94CB0A1389710"
+            {
+            "SourcePath" = "8:..\\licenses\\zlib-license.txt"
+            "TargetName" = "8:zlib-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AB45E69877C14E38A0DF5EE9196C4E91"
             {
             "SourcePath" = "8:..\\runtime\\data\\gui\\schemes\\SleekSpaceBSOD.scheme"
@@ -1422,12 +1712,52 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AE1C5571112F4B03B2CE3A3998E3A341"
+            {
+            "SourcePath" = "8:..\\licenses\\SDL_net-license.txt"
+            "TargetName" = "8:SDL_net-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AEE32D95DEF348A588365723B54599A5"
             {
             "SourcePath" = "8:..\\runtime\\CEGUIFalagardWRBase.dll"
             "TargetName" = "8:CEGUIFalagardWRBase.dll"
             "Tag" = "8:"
             "Folder" = "8:_A64D8EBBA4534194B934BBC7277414A1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B03A7992A2AF49BC96C3051DEF4AF4D1"
+            {
+            "SourcePath" = "8:..\\licenses\\FreeType2-License.txt"
+            "TargetName" = "8:FreeType2-License.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1488,6 +1818,46 @@
             "TargetName" = "8:arial.font"
             "Tag" = "8:"
             "Folder" = "8:_1C2FF073CC4C4FF09D7808DF2AB774A2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B8059237C96F412080115290EF1F2549"
+            {
+            "SourcePath" = "8:..\\licenses\\GPL.txt"
+            "TargetName" = "8:GPL.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B93908F4A6F44AAC98E23DA5E7241876"
+            {
+            "SourcePath" = "8:..\\licenses\\SDL-license.txt"
+            "TargetName" = "8:SDL-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1742,6 +2112,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D5B9052E7684414490264F07F44A2041"
+            {
+            "SourcePath" = "8:..\\licenses\\SILLY-License.txt"
+            "TargetName" = "8:SILLY-License.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D895BB66CBFA4FE0996F167F099FEAD0"
             {
             "SourcePath" = "8:..\\runtime\\data\\banner.png"
@@ -1767,7 +2157,7 @@
             "SourcePath" = "8:README.txt"
             "TargetName" = "8:README.txt"
             "Tag" = "8:"
-            "Folder" = "8:_A64D8EBBA4534194B934BBC7277414A1"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1848,6 +2238,66 @@
             "TargetName" = "8:GUILayout.xsd"
             "Tag" = "8:"
             "Folder" = "8:_E7509901A6D74B6CA36B4C5739D3D7D8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E6F082C1983B431AB3A71C56C11EBF8E"
+            {
+            "SourcePath" = "8:..\\licenses\\glew-license.txt"
+            "TargetName" = "8:glew-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E8AC68357E18450C8028C5BE97079A69"
+            {
+            "SourcePath" = "8:..\\licenses\\libintl-license.txt"
+            "TargetName" = "8:libintl-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EFDB643CEC204D43B1DACB3901FB4A9F"
+            {
+            "SourcePath" = "8:..\\licenses\\SDL_ttf-license.txt"
+            "TargetName" = "8:SDL_ttf-license.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_3AEB5FEDA54E41F3AA206959E924C6C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2241,6 +2691,17 @@
                             }
                         }
                     }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_3AEB5FEDA54E41F3AA206959E924C6C7"
+                    {
+                    "Name" = "8:doc"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_F5DB3B8F0C714DCCAB4936E35AAACF26"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
         }
@@ -2260,7 +2721,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:BSOD Client 2.0.2"
         "ProductCode" = "8:{587E09B3-4C4C-4131-A158-46A9BB32245A}"
-        "PackageCode" = "8:{CACB0D62-56E0-4F3E-8016-39E5CE6BDF77}"
+        "PackageCode" = "8:{0731BF06-9E0E-4500-90D8-A68EF7F03BD8}"
         "UpgradeCode" = "8:{21D6DC8F-6359-4778-A717-391ACF249EA0}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -2277,7 +2738,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:BSOD Client"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_565BFF8C63BB446B844C709F8FE0210B"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -2776,7 +3237,7 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_32E110095DD7460087BDC047E0A414F1"
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_A50E8CA8FEC544038535A4819A478B8E"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"

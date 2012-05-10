@@ -52,8 +52,24 @@ fi
 
 AC_SEARCH_LIBS([cfg_init],[confuse],,conf_found=0)
 
-# Hackish, but it works 
+AC_ARG_WITH(cgl,
+		AS_HELP_STRING(--with-cgl, enable ClusterGL support),
+[
+	if test "x$withval" = xyes
+	then 
+		enable_cgl=yes
+	elif test "x$withval" = xno
+	then
+		enable_cgl=no
+	else
+		enable_cgl=yes
+	fi
+],[
+	enable_cgl=no
+])
 
+
+# Hackish, but it works 
 AC_MSG_CHECKING(for libCEGUI)
 if test "$host_vendor" == "apple"; then
 	CPPFLAGS="$CPPFLAGS"
@@ -151,6 +167,10 @@ else
 	AC_DEFINE(HAVE_CEGUI_07, 0, [Set to 1 if you have CEGUI 0.7 or later])
 fi
 
+if test "x$enable_cgl" = xyes; then
+	AC_MSG_NOTICE(Enabled Cluster GL Compatibility)
+	AC_DEFINE(ENABLE_CGL_COMPAT, 1, [Set to 1 if Cluster GL enabled])
+fi
 
 AC_SUBST([ADD_LIBS])
 AC_SUBST([ADD_LDFLAGS])

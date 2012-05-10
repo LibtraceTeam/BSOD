@@ -28,7 +28,7 @@
  * $Id$
  */
 
-
+#include "config.h"
 #include "main.h"
 
 //#define ILUT_USE_OPENGL

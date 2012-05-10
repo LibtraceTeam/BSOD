@@ -29,6 +29,7 @@
  */
 
 
+#include "config.h"
 #include "main.h"
 
 #define MAX_SIZE 10.0f

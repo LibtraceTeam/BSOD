@@ -28,7 +28,7 @@
  * $Id$
  */
 
-
+#include "config.h"
 #include "main.h"
 
 float fTimeScale = 0.0f;
@@ -178,6 +178,7 @@ void App::render2D(){
 	int s = iScreenX / 32;
 		
 	Texture *tex = texGet("mouse.png");
+	LOG("Creating mouse cursor\n");
 	
 	if(!tex){
 		LOG("No mouse cursor texture!\n");

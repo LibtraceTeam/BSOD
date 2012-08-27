@@ -45,6 +45,8 @@ AC_SEARCH_LIBS([SDLNet_Init], [SDL_net],,SDLNet_found=0)
 AC_SEARCH_LIBS([TTF_Init],[SDL_ttf],,SDLttf_found=0)
 AC_SEARCH_LIBS([png_read_image],[png],,png_found=0)
 AC_SEARCH_LIBS([glewInit],[GLEW],,glew_found=0)
+AC_SEARCH_LIBS([glClear],[GL],,gl_found=0)
+AC_SEARCH_LIBS([gluOrtho2D],[GLU],,glu_found=0)
 
 if test "$host_vendor" == "apple"; then
 	LIBS="$LIBS -lintl -liconv -lc"
@@ -142,6 +144,16 @@ fi
 
 if test "$glew_found" = 0; then
 	AC_MSG_NOTICE(Required library libGLEW not found!)
+	depend_error=1
+fi
+
+if test "$gl_found" = 0; then
+	AC_MSG_NOTICE(Required library libGL not found!)
+	depend_error=1
+fi
+
+if test "$glu_found" = 0; then
+	AC_MSG_NOTICE(Required library libGLU not found!)
 	depend_error=1
 fi
 

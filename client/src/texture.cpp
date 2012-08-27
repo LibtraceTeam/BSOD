@@ -223,7 +223,7 @@ static Texture* loadPngTexture(FILE *fp, byte *buffer, int buflen, int flags) {
 
 	png_read_image(png_ptr, row_pointers);
 	bool hasAlpha = false;
-	switch(info_ptr->color_type) {
+	switch(color_type) {
 		case PNG_COLOR_TYPE_RGBA:
 			hasAlpha = true;
 			break;
@@ -231,7 +231,7 @@ static Texture* loadPngTexture(FILE *fp, byte *buffer, int buflen, int flags) {
 			hasAlpha = false;
 			break;
 		default:
-			LOG("Unknown color type: %u\n", info_ptr->color_type);
+			LOG("Unknown color type: %u\n", color_type);
 			png_destroy_read_struct(&png_ptr, &info_ptr, &end_ptr);
 			return NULL;
 	}

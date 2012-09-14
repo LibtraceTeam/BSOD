@@ -695,6 +695,12 @@ void do_configuration(int argc, char **argv) {
 		right_image = cfg_getstr(cfg, "right_image");
 		max_sendq_size = cfg_getint(cfg, "sendq");
 		wait_client=cfg_getbool(cfg, "client_wait");
+	
+		if (uri == NULL) {
+			Log(LOG_DAEMON | LOG_ALERT, "No URI specified in the config file! Where are your packets going to come from?\n");
+			Log(LOG_DAEMON | LOG_ALERT, "Use the 'source' option to specify a traffic source.\n");
+			exit(1);
+		}
 		
 		printf("URI: %s\n", uri);
 		

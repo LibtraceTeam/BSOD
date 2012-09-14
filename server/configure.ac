@@ -1,4 +1,4 @@
-AC_INIT([bsod-server],[2.0.2],[contact@wand.net.nz])
+AC_INIT([bsod-server],[2.0.3],[contact@wand.net.nz])
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([bsod_server.cc])

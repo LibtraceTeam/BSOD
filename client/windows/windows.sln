@@ -1,22 +1,38 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows", "windows.vcxproj", "{9B7B3F0E-AE4E-4707-932F-C5A678474A73}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "BSOD Client 2.0.2", "BSOD Client 2.0.2.vdproj", "{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}"
+Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "BSOD Client 2.03", "..\BSOD Client 2.03\BSOD Client 2.03.isproj", "{54000D17-8F56-4F02-80F5-FEA9420008B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CD_ROM|Win32 = CD_ROM|Win32
 		Debug|Win32 = Debug|Win32
+		DVD-5|Win32 = DVD-5|Win32
 		Release|Win32 = Release|Win32
+		SingleImage|Win32 = SingleImage|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.CD_ROM|Win32.ActiveCfg = Debug|Win32
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.CD_ROM|Win32.Build.0 = Debug|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Debug|Win32.ActiveCfg = Release|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Debug|Win32.Build.0 = Release|Win32
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.DVD-5|Win32.ActiveCfg = Debug|Win32
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.DVD-5|Win32.Build.0 = Debug|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Release|Win32.ActiveCfg = Release|Win32
 		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.Release|Win32.Build.0 = Release|Win32
-		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Debug|Win32.ActiveCfg = Debug
-		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Release|Win32.ActiveCfg = Release
-		{3AFEDE90-9387-4D83-9F3F-6F29BB10839F}.Release|Win32.Build.0 = Release
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.SingleImage|Win32.ActiveCfg = Debug|Win32
+		{9B7B3F0E-AE4E-4707-932F-C5A678474A73}.SingleImage|Win32.Build.0 = Debug|Win32
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.CD_ROM|Win32.ActiveCfg = CD_ROM
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.CD_ROM|Win32.Build.0 = CD_ROM
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.Debug|Win32.ActiveCfg = DVD-5
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.Debug|Win32.Build.0 = DVD-5
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.DVD-5|Win32.ActiveCfg = DVD-5
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.DVD-5|Win32.Build.0 = DVD-5
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.Release|Win32.ActiveCfg = SingleImage
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.Release|Win32.Build.0 = SingleImage
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.SingleImage|Win32.ActiveCfg = SingleImage
+		{54000D17-8F56-4F02-80F5-FEA9420008B7}.SingleImage|Win32.Build.0 = SingleImage
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

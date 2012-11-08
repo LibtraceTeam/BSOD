@@ -31,7 +31,7 @@
 
 #include "main.h"
 
-float htonf( float x )
+float htonf_bsod( float x )
 {
         union
         {
@@ -43,7 +43,7 @@ float htonf( float x )
         return( _u.f );
         //return( (float)(htonl( *((uint32*)&x) )) );
 }
-#define ntohf(x) htonf(x)
+#define ntohf_bsod(x) htonf_bsod(x)
 
 
 /*********************************************
@@ -471,13 +471,13 @@ void App::updateTCPSocket(){
 			dest.host = ip2.s_addr;
 			//uint16_t proto = pkt->type;			
 			
-			Vector3 start = Vector3(ntohf(pkt->x1),
-									ntohf(pkt->z1), 
-									ntohf(pkt->y1));
+			Vector3 start = Vector3(ntohf_bsod(pkt->x1),
+									ntohf_bsod(pkt->z1), 
+									ntohf_bsod(pkt->y1));
 									
-			Vector3 end = Vector3(	ntohf(pkt->x2), 
-									ntohf(pkt->z2), 
-									ntohf(pkt->y2));
+			Vector3 end = Vector3(	ntohf_bsod(pkt->x2), 
+									ntohf_bsod(pkt->z2), 
+									ntohf_bsod(pkt->y2));
 			
 			start.x = -start.x;
 			end.x = -end.x;
@@ -511,7 +511,7 @@ void App::updateTCPSocket(){
 			}
 				
 			uint16_t size = ntohs(pkt->size);
-			float rtt = ntohf(pkt->speed);
+			float rtt = ntohf_bsod(pkt->speed);
 
 			if(rtt < 0.0f){				
 				rtt = -rtt;

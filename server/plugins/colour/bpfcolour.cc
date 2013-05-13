@@ -87,7 +87,7 @@ void add_expression(const char *name, struct colour_t colour, const char *exp)
 }
 
 extern "C"
-int init_module(char *args) 
+int init_bsod_module(char *args) 
 {
 	colour_in = fopen(args,"r");
 	printf("Reading bpfcolour config from `%s'\n",args);
@@ -138,5 +138,5 @@ void mod_get_info(uint8_t colours[3], char name[256], int id)
 
 int main(int argc, char *argv[])
 {
-	init_module(argv[1]);
+	init_bsod_module(argv[1]);
 }

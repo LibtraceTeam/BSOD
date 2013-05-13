@@ -74,11 +74,13 @@ inline int is_local(const uint8_t mac[ETHER_ADDR_LEN]) {
  * Read in all the macs from the file specified in the config.
  */ 
 extern "C"
-int init_module(const char* filename)
+int init_bsod_module(const char* filename)
 {
     FILE *fin = 0;
     char *buffer;
     int lines = 0;
+
+	Log(LOG_DAEMON | LOG_INFO, "Initialising destmac module from %s\n", filename);
 
     buffer = (char *)malloc(65536);
     if( (fin = fopen(filename,"r")) == NULL)

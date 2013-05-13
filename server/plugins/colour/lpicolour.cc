@@ -118,8 +118,8 @@ typedef struct lpi_col {
 	uint8_t transport;
 	bool use_ports;
 
-	lpi_module_t *protocol;
 	lpi_data_t lpi;
+	lpi_module_t *protocol;
 } lpi_col_t;
 
 
@@ -128,7 +128,7 @@ static lpi_col_t *init_lpi_flow(uint8_t transport, libtrace_packet_t *packet) {
 	
 	libtrace_tcp_t *tcp = NULL;
 	lpi_col_t *col = (lpi_col_t *)malloc(sizeof(lpi_col_t));
-
+	
 	lpi_init_data(&col->lpi);
 	col->seen_dir0 = 0;
 	col->seen_dir1 = 0;

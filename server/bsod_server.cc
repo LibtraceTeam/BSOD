@@ -362,14 +362,14 @@ static void file_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	wand_del_event(wand_ev_hdl, evcb);
 	assert(ev == EV_READ);
 	evcb->fd = -1;
-	wand_del_timer(wand_ev_hdl, &signal_timer);
+	//wand_del_timer(wand_ev_hdl, &signal_timer);
 	bsod_event((bsod_vars_t *)evcb->data);
 
 }
 
 static void sleep_cb(struct wand_timer_t *timer) {
 	timer->callback = NULL;
-	wand_del_timer(wand_ev_hdl, &signal_timer);
+	//wand_del_timer(wand_ev_hdl, &signal_timer);
 	bsod_event((bsod_vars_t *)timer->data);
 }
 
@@ -757,7 +757,7 @@ static void *get_module(const char *name, char *param)
 		return NULL;
 	}
 
-	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_module");
+	initfuncfptr init_func = (initfuncfptr)dlsym(handle,"init_bsod_module");
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
@@ -800,7 +800,7 @@ static void *get_position_module(side_t side, const char *name, char *posparam)
 		return NULL;
 	}
 
-	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_module");
+	initsidefptr init_func = (initsidefptr)dlsym(handle,"init_bsod_module");
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);

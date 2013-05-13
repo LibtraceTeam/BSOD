@@ -49,7 +49,7 @@ static struct libtrace_filter_t *filter = NULL;
  * Read in all the macs from the file specified in the config.
  */ 
 extern "C"
-int init_module(const char* bpf)
+int init_bsod_module(const char* bpf)
 {
 	bpf_exp = strdup(bpf);
 	filter = trace_create_filter(bpf);

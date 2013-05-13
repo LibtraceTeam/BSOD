@@ -118,7 +118,7 @@ int mod_get_position(float coord[3],
 	return 0;
 }
 
-int init_module(char *modarg) {
+int init_bsod_module(char *modarg) {
 
 	
 	uint32_t nc = 0;

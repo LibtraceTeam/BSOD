@@ -761,7 +761,7 @@ static void *get_module(const char *name, char *param)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(param)) {
+		if (param && !init_func(param)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);
@@ -804,7 +804,7 @@ static void *get_position_module(side_t side, const char *name, char *posparam)
 
 	if (init_func) {
 		Log(LOG_DAEMON|LOG_DEBUG," Initialising module %s...\n",tmp);
-		if (!init_func(posparam)) {
+		if (posparam && !init_func(posparam)) {
 			Log(LOG_DAEMON|LOG_ALERT,
 			     "Initialisation function failed for %s\n",driver);
 			dlclose(handle);

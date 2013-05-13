@@ -453,6 +453,7 @@ void setup_udp_socket(wand_event_handler_t *ev_hdl,
 void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 
 	struct client *client = (struct client *)(evcb->data);
+	char *sendfrom = ((char *)client->buffer2.data) + client->buffer2.offset;
 
 	if (ev == EV_READ) {
 
@@ -462,8 +463,9 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	}
 
 	while (client->buffer2.datalen - client->buffer2.offset > 0) {
+		sendfrom = ((char *)client->buffer2.data) + client->buffer2.offset;
 		int ret = send(client->fd,
-				(char *)client->buffer2.data + client->buffer2.offset,
+				sendfrom,
 				client->buffer2.datalen - client->buffer2.offset,
 				0);
 	/*
@@ -583,10 +585,12 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 	client->buffer.push_back(sendq);
 */
 
+	if ((client->writer.flags & EV_WRITE) == EV_WRITE)
+		return;
+
 	wand_del_event(client->ev_hdl, &client->writer);
 	client->writer.flags = EV_WRITE | EV_READ;
 	wand_add_event(client->ev_hdl, &client->writer);
-
 
 }
 

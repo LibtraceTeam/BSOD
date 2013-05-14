@@ -324,3 +324,13 @@ Solution:
 This means that the server failed to open the data source correctly. Check
 that the 'source' option in the configuration file is set to the right path,
 and that the URI is of the correct type.
+
+Problem:
+bsodserver: trace.c:233: trace_create: Assertion `uri && "Passing NULL to trace_create makes me a very sad program"' failed.
+Aborted
+
+Solution:
+This is similar to the problem above - in this case, you've failed to specify
+the 'source' option at all. This often occurs if you do not provide a config
+file when running BSOD server or the config file that you specified does not
+exist. Make sure the file exists and contains a valid 'source' config option.

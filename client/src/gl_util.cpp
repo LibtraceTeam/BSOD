@@ -37,7 +37,7 @@
 **********************************************/
 void App::utilBeginRender(){
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	
+
 	glViewport(0,0, iScreenX, iScreenY);
 
 	glMatrixMode(GL_PROJECTION);
@@ -195,7 +195,13 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 	//Quick hack - our resizing doesn't work properly under windows.
 	//easier just to disable it
 #ifndef _WINDOWS
-	videoFlags |= SDL_RESIZABLE;     
+
+	// disable resizing for now, since we don't really handle it that
+	// well, e.g. we don't redraw our GUI in the right place.
+	/*
+	if (!fullscreen)
+		videoFlags |= SDL_RESIZABLE;     
+	*/
 #endif
 
 	//This checks to see if surfaces can be stored in memory 
@@ -218,7 +224,7 @@ bool App::utilCreateWindow(int sizeX, int sizeY, int bpp, bool fullscreen){
 
 	// get a SDL surface 
 
-	surface = SDL_SetVideoMode( iScreenX, iScreenY, bpp, videoFlags );
+	surface = SDL_SetVideoMode( sizeX, sizeY, bpp, videoFlags );
 
 	// Verify there is a surface 
 	if ( !surface ){

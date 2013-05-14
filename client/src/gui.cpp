@@ -790,7 +790,7 @@ void App::updateGUIConnectionStatus(){
 	Called as part of render2D
 **********************************************/
 void App::renderGUI(){
-	
+
 	if(!bGlobalGuiEnable) return;
 	
 	if(fGUITimeout > 0.0f){
@@ -853,6 +853,7 @@ void App::makeMenuButtons(){
     btn->setSize(UVector2(cegui_reldim(0.1f), cegui_reldim( 0.036f)));
     btn->setAlpha(0.9f);
     btn->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&App::onMenuButtonClicked, this));
+
 }
 
 

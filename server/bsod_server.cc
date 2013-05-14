@@ -333,7 +333,8 @@ int main(int argc, char *argv[])
 			wand_del_event(wand_ev_hdl, &file_event);
 		if (sleep_event.callback != NULL)
 			wand_del_timer(wand_ev_hdl, &sleep_event);
-		wand_del_timer(wand_ev_hdl, &signal_timer);
+		if (!terminate_bsod)
+			wand_del_timer(wand_ev_hdl, &signal_timer);
 		trace_destroy(trace);
 		trace = NULL;
 		sleep_event.callback = NULL;

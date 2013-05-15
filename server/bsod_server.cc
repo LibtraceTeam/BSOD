@@ -473,10 +473,6 @@ static void bsod_event(bsod_vars_t *vars) {
 		poll_again = process_bsod_event(vars, event);
 	} while (poll_again);
 
-	/* Make sure we check for a signal every second, just in case we
-	 * have no other events for a while */
-	set_signal_timer(vars);
-
 }
 
 static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,

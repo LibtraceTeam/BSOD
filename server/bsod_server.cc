@@ -130,18 +130,18 @@ struct modptrs_t modptrs;
 
 wand_event_handler_t *wand_ev_hdl = NULL;
 
-struct wand_signal_t sigterm_event;
-struct wand_signal_t sigusr_event;
-struct wand_signal_t sigpipe_event;
-struct wand_signal_t sigint_event;
+struct wand_signal_t *sigterm_event = NULL;
+struct wand_signal_t *sigusr_event = NULL;
+struct wand_signal_t *sigpipe_event = NULL;
+struct wand_signal_t *sigint_event = NULL;
 
-struct wand_fdcb_t listener;
-struct wand_fdcb_t udpsocket;
+struct wand_fdcb_t *listener = NULL;
+struct wand_fdcb_t *udpsocket = NULL;
 
-struct wand_fdcb_t file_event;
-struct wand_timer_t sleep_event;
+struct wand_fdcb_t *file_event = NULL;
+struct wand_timer_t *sleep_event = NULL;
 
-struct wand_timer_t signal_timer;
+struct wand_timer_t *signal_timer = NULL;
 
 void do_usage(char* name)
 {
@@ -211,13 +211,11 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	setup_listen_socket(wand_ev_hdl, &modptrs, &listener, port, 
+	listener = setup_listen_socket(wand_ev_hdl, &modptrs, port, 
 			wait_client);
-	setup_udp_socket(wand_ev_hdl, &udpsocket);	
+	udpsocket = setup_udp_socket(wand_ev_hdl);	
 
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
-	sleep_event.callback = NULL;
-	file_event.fd = -1;
 	if (enable_rttest)
 		rttmap = new RTTMap();
 
@@ -260,8 +258,8 @@ int main(int argc, char *argv[])
 		init_times();
 		init_packets();
 
+		set_signal_timer(&bsod_vars);
 		if (no_clients() && wait_client) {
-			set_signal_timer(&bsod_vars);
 			wand_event_run(wand_ev_hdl);
 		}
 		
@@ -329,16 +327,18 @@ int main(int argc, char *argv[])
 			expire_flows(0, true);
 		}
 		// We've finished with this trace
-		if (file_event.fd != -1)
-			wand_del_event(wand_ev_hdl, &file_event);
-		if (sleep_event.callback != NULL)
-			wand_del_timer(wand_ev_hdl, &sleep_event);
-		if (!terminate_bsod)
-			wand_del_timer(wand_ev_hdl, &signal_timer);
+		if (file_event)
+			wand_del_fd(wand_ev_hdl, file_event->fd);
+		if (sleep_event)
+			wand_del_timer(wand_ev_hdl, sleep_event);
+		if (signal_timer)
+			wand_del_timer(wand_ev_hdl, signal_timer);
 		trace_destroy(trace);
 		trace = NULL;
-		sleep_event.callback = NULL;
-		file_event.fd = -1;
+		
+		sleep_event = NULL;
+		file_event = NULL;
+		signal_timer = NULL;
 		
 		
 		// the loop criteria is to loop if we want to loop always, or if
@@ -358,56 +358,55 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-static void file_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+static void file_cb(wand_event_handler_t *ev_hdl, int fd, void *data,
+		enum wand_eventtype_t ev) {
 	
-	wand_del_event(wand_ev_hdl, evcb);
+	wand_del_fd(wand_ev_hdl, fd);
 	assert(ev == EV_READ);
-	evcb->fd = -1;
 	//wand_del_timer(wand_ev_hdl, &signal_timer);
-	bsod_event((bsod_vars_t *)evcb->data);
+	bsod_event((bsod_vars_t *)data);
 
 }
 
-static void sleep_cb(struct wand_timer_t *timer) {
-	timer->callback = NULL;
-	//wand_del_timer(wand_ev_hdl, &signal_timer);
-	bsod_event((bsod_vars_t *)timer->data);
+static void sleep_cb(wand_event_handler_t *ev_hdl, void *data) {
+	sleep_event = NULL;
+	bsod_event((bsod_vars_t *)data);
 }
 
-static void signal_timer_cb(struct wand_timer_t *timer) {
-	timer->callback = NULL;
-	signal_event((bsod_vars_t *)timer->data);
+static void signal_timer_cb(wand_event_handler_t *ev_hdl, void *data) {
+	signal_timer = NULL;
+	signal_event((bsod_vars_t *)data);
 }
 
 static void set_signal_timer(bsod_vars_t *vars) {
-	
+
+	signal_timer = wand_add_timer(wand_ev_hdl, 1, 0, vars, 
+			signal_timer_cb);	
+	assert(signal_timer);
+	/*
 	signal_timer.expire = wand_calc_expire(wand_ev_hdl, 1, 0);
 	signal_timer.callback = signal_timer_cb;
 	signal_timer.data = vars;
 	signal_timer.next = signal_timer.prev = NULL;
 
 	wand_add_timer(wand_ev_hdl, &signal_timer);
+	*/
 }
 
 
 static int process_bsod_event(bsod_vars_t *vars, libtrace_eventobj_t event) {
 	switch(event.type) {
 		case TRACE_EVENT_IOWAIT:
-			file_event.fd = event.fd;
-			file_event.flags = EV_READ;
-			file_event.data = vars;
-			file_event.callback = file_cb;
-			wand_add_event(wand_ev_hdl, &file_event);
+			file_event = wand_add_fd(wand_ev_hdl, event.fd, 
+					EV_READ, vars, file_cb);
 			return 0;
 		case TRACE_EVENT_SLEEP:
 			int micros;
 		 	micros = (int)((event.seconds - (int)event.seconds) * 1000000.0);
-			sleep_event.expire = wand_calc_expire(wand_ev_hdl, 
-			 		(int)event.seconds, micros);
-			sleep_event.callback = sleep_cb;
-			sleep_event.data = vars;
-			sleep_event.prev = sleep_event.next = NULL;
-			wand_add_timer(wand_ev_hdl, &sleep_event);
+			
+			sleep_event = wand_add_timer(wand_ev_hdl, 
+			 		(int)event.seconds, micros, vars,
+					sleep_cb);
 			return 0;
 		case TRACE_EVENT_PACKET:
 			if (event.size == -1) {
@@ -513,22 +512,33 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 
 
 
-static void sigterm_cb(struct wand_signal_t *signal) {
+static void sigterm_cb(wand_event_handler_t *ev_hdl, int signum, void *data) {
 	terminate_bsod = 1;
 }
 
-static void sigusr_cb(struct wand_signal_t *signal) {
+static void sigusr_cb(wand_event_handler_t *ev_hdl, int signum, void *data) {
 	restart_config = 1;
 }
 
-static void sigpipe_cb(struct wand_signal_t *signal) {
+static void sigpipe_cb(wand_event_handler_t *ev_hdl, int signum, void *data) {
 	return;
 }
 
 
 static void init_signals() {
 	// setup signal handlers
+
+	sigterm_event = wand_add_signal(SIGTERM, NULL, sigterm_cb);	
+	sigint_event = wand_add_signal(SIGINT, NULL, sigterm_cb);	
+	sigusr_event = wand_add_signal(SIGUSR1, NULL, sigusr_cb);	
+	sigpipe_event = wand_add_signal(SIGPIPE, NULL, sigpipe_cb);	
 	
+	assert(sigterm_event);	
+	assert(sigint_event);	
+	assert(sigusr_event);	
+	assert(sigpipe_event);	
+
+/*
 	sigterm_event.signum = SIGTERM;
 	sigterm_event.callback = sigterm_cb;
 	sigterm_event.data = NULL;
@@ -548,7 +558,7 @@ static void init_signals() {
 	sigpipe_event.callback = sigpipe_cb;
 	sigpipe_event.data = NULL;
 	wand_add_signal(&sigpipe_event);
-	
+*/
 
 }
 

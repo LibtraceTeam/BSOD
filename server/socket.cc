@@ -87,7 +87,7 @@ struct client {
 	struct client *next;
 	struct client *prev;
 	wand_event_handler_t *ev_hdl;
-	struct wand_fdcb_t writer;
+	struct wand_fdcb_t *writer;
 	
 	struct client_buffer buffer2;
 	
@@ -161,7 +161,8 @@ extern char *server_name;
 /* For left and right images */
 extern char *left_image, *right_image;
 
-void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) ;
+void client_cb(wand_event_handler_t *ev_hdl, 
+		int fd, void *data, enum wand_eventtype_t ev) ;
 
 bool no_clients(void) {
 
@@ -178,17 +179,11 @@ struct client* create_fd(int fd, wand_event_handler_t *ev_hdl)
 	tmp->prev = NULL;
 	tmp->ev_hdl = ev_hdl;
 
-	tmp->writer.fd = fd;
-	tmp->writer.flags = EV_READ;
-	tmp->writer.data = tmp;
-	tmp->writer.callback = client_cb;
-
 	tmp->buffer2.data = NULL;
 	tmp->buffer2.datalen = 0;
 	tmp->buffer2.offset = 0;
 
-
-	wand_add_event(ev_hdl, &(tmp->writer));
+	tmp->writer = wand_add_fd(ev_hdl, fd, EV_READ, tmp, client_cb);
 
 	return tmp;
 }
@@ -216,7 +211,7 @@ void remove_fd(struct client *tmp)
 {
 	Log(LOG_DAEMON|LOG_INFO,"Removing client on fd %i\n", tmp->fd);
 
-	wand_del_event(tmp->ev_hdl, &tmp->writer);
+	wand_del_fd(tmp->ev_hdl, tmp->fd);
 	
 	close(tmp->fd);
 
@@ -253,7 +248,8 @@ void remove_fd(struct client *tmp)
 	delete tmp;
 }
 
-static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+static void listen_cb(wand_event_handler_t *ev_hdl, int fd, void *data, 
+		enum wand_eventtype_t ev) {
 
 	char protocol_version = BSOD_PROTO_VERSION;
 	struct sockaddr_in remoteaddr;
@@ -265,7 +261,7 @@ static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	
 	// handle new connections
 	sock_size = sizeof(struct sockaddr_in);
-	if ((newfd = accept(evcb->fd, (struct sockaddr *)&remoteaddr,
+	if ((newfd = accept(fd, (struct sockaddr *)&remoteaddr,
 					&sock_size)) == -1) { 
 		perror("accept");
 	} 
@@ -277,7 +273,7 @@ static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 			return;
 		}
 
-		ret=add_fd(newfd, ldata.ev_hdl);
+		ret=add_fd(newfd, ev_hdl);
 		Log(LOG_DAEMON|LOG_DEBUG,
 				"server: new connection from %s\n", 
 				inet_ntoa(remoteaddr.sin_addr));
@@ -295,16 +291,15 @@ static void listen_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	/* Force the initial event loop (which will be listening only) to
 	 * stop and start reading the input trace */
 	if (first_client && ldata.wait_for_client) {
-		ldata.ev_hdl->running = false;
+		ev_hdl->running = false;
 		first_client = 0;
 	}
 
 }
 
 //----------------------------------------------------------
-void setup_listen_socket(wand_event_handler_t *ev_hdl, 
-		struct modptrs_t *modptrs, 
-		struct wand_fdcb_t *listener, uint16_t port,
+struct wand_fdcb_t * setup_listen_socket(wand_event_handler_t *ev_hdl, 
+		struct modptrs_t *modptrs, uint16_t port,
 		bool wait_flag)
 {
 	int yes=1;        // for setsockopt() SO_REUSEADDR, below
@@ -351,18 +346,11 @@ void setup_listen_socket(wand_event_handler_t *ev_hdl,
 	ldata.modptrs = modptrs;
 	ldata.wait_for_client = wait_flag;
 
-	listener->fd = listen_socket;
-	listener->flags = EV_READ;
-	listener->data = NULL;
-	listener->callback = listen_cb;
-
-	wand_add_event(ev_hdl, listener);
-
-	return;
-
+	return wand_add_fd(ev_hdl, listen_socket, EV_READ, NULL, listen_cb);
 }
 
-static void udp_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+static void udp_cb(wand_event_handler_t *ev_hdl, int fd, void *data, 
+		enum wand_eventtype_t ev) {
 	struct sockaddr_in sendaddr;
 	int addr_len = sizeof(sendaddr);
 	int numbytes;
@@ -374,7 +362,7 @@ static void udp_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	sendaddr.sin_addr.s_addr = INADDR_ANY;
 	memset(sendaddr.sin_zero,'\0', sizeof sendaddr.sin_zero);
 
-	if ((numbytes = recvfrom(evcb->fd, buf, sizeof(buf), 0,
+	if ((numbytes = recvfrom(fd, buf, sizeof(buf), 0,
 					(struct sockaddr *)&sendaddr, (socklen_t *)&addr_len)) == -1){
 		perror("recvfrom");
 	}
@@ -386,7 +374,7 @@ static void udp_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	//Send them a response 
 	sprintf(response, "%s|%d|%s", "0.0.0.0", server_port, server_name);
 
-	numbytes = sendto(evcb->fd, response, strlen(response) , 0, 
+	numbytes = sendto(fd, response, strlen(response) , 0, 
 			(struct sockaddr *)&sendaddr, 
 			sizeof(sendaddr));
 
@@ -397,8 +385,7 @@ static void udp_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 }
 
 //----------------------------------------------------------
-void setup_udp_socket(wand_event_handler_t *ev_hdl, 
-		struct wand_fdcb_t *udp){
+struct wand_fdcb_t *setup_udp_socket(wand_event_handler_t *ev_hdl){
 
 	int addr_len;
     	int broadcast=1;
@@ -438,21 +425,15 @@ void setup_udp_socket(wand_event_handler_t *ev_hdl,
 		
 		printf("UDP port %d is in use\n", port);		
 	}
-	
-	udp->fd = udp_socket;
-	udp->flags = EV_READ;
-	udp->data = ev_hdl;
-	udp->callback = udp_cb;
 
-	wand_add_event(ev_hdl, udp);
+	return wand_add_fd(ev_hdl, udp_socket, EV_READ, NULL, udp_cb);
 	
-		
-	return ;
 }
 
-void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
+void client_cb(wand_event_handler_t *ev_hdl, int fd, void *data, 
+		enum wand_eventtype_t ev) {
 
-	struct client *client = (struct client *)(evcb->data);
+	struct client *client = (struct client *)(data);
 	char *sendfrom = ((char *)client->buffer2.data) + client->buffer2.offset;
 
 	if (ev == EV_READ) {
@@ -506,10 +487,7 @@ void client_cb(struct wand_fdcb_t *evcb, enum wand_eventtype_t ev) {
 	}
 
 	/* Nothing more to write */
-	wand_del_event(client->ev_hdl, &(client->writer));
-	client->writer.flags = EV_READ;
-	wand_add_event(client->ev_hdl, &(client->writer));
-
+	wand_set_fd_flags(ev_hdl, fd, EV_READ);
 
 }
 
@@ -539,7 +517,7 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 		/* Send queue is getting full - force a send */
 		Log(LOG_DAEMON | LOG_DEBUG,"Forced send to client %i\n", 
 				client->fd);
-		client_cb(&client->writer, EV_WRITE);
+		client_cb(client->ev_hdl, client->fd, client, EV_WRITE);
 	}
 
 	/* If send queue is still too full, we'll have to drop the client */
@@ -585,12 +563,7 @@ void enqueue_data(struct client *client,void *buffer, size_t size)
 	client->buffer.push_back(sendq);
 */
 
-	if ((client->writer.flags & EV_WRITE) == EV_WRITE)
-		return;
-
-	wand_del_event(client->ev_hdl, &client->writer);
-	client->writer.flags = EV_WRITE | EV_READ;
-	wand_add_event(client->ev_hdl, &client->writer);
+	wand_set_fd_flags(client->ev_hdl, client->fd, EV_WRITE | EV_READ);
 
 }
 

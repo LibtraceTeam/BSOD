@@ -41,9 +41,29 @@
 #define _BSOD_SERVER_H
 #include <stdint.h>
 #include "libtrace.h"
-#include "packets.h"
+#include "lru"
 
 #define UDP_PORT 2080
+
+struct flow_id_t {
+        float start[3];
+        float end[3];
+        unsigned char type; // Type of flow. ("colour")
+        uint32_t ip1;
+        uint32_t ip2;
+        uint16_t port1;
+        uint16_t port2;
+};
+
+struct flow_info_t {
+        uint32_t flow_id[2];
+        uint32_t time;
+        uint8_t init_dir;
+
+        void *colour_data;
+};
+
+typedef lru<flow_id_t,flow_info_t *> flow_lru_t;
 
 typedef enum {
 	DIR_UNKNOWN = -1,

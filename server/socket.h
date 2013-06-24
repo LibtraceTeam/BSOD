@@ -41,22 +41,8 @@
 #include <inttypes.h>
 #include <libwandevent.h>
 struct wand_fdcb_t * setup_listen_socket(wand_event_handler_t *ev_hdl, 
-		struct modptrs_t *modptrs,
 		uint16_t port,
 		bool wait_flag);
 struct wand_fdcb_t * setup_udp_socket(wand_event_handler_t *ev_hdl);
-struct client *check_clients(struct modptrs_t *modptrs, bool wait);
-int send_new_flow(float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
-int send_update_flow(struct client *client, 
-		float start[3], float end[3], uint32_t count, uint32_t ip1, uint32_t ip2 );
-int send_new_packet(uint32_t ts, uint32_t id, unsigned char id_num, 
-	uint16_t size, float speed, bool dark);
-int send_kill_flow(uint32_t id);
-void hax_fdmax(int fd);
-int send_kill_all();
-int send_colour_table(struct modptrs_t *modptrs);
-int send_images(struct client *c);
-bool no_clients();
-extern int max_sendq_size;
 
 #endif // _SOCKET_H

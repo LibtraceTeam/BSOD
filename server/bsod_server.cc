@@ -70,6 +70,7 @@
 #include "packets.h"
 #include "daemons.h"
 #include "debug.h"
+#include "exporter.h"
 
 #include "RTTMap.h"
 #include "Blacklist.h"
@@ -118,6 +119,7 @@ int shownontcpudp = 1;
 int showresets = 1;
 int sampling = 0;
 int wait_client = 0;
+int max_sendq_size = 10000000;
 
 void do_configuration(int argc, char **argv);
 
@@ -130,18 +132,13 @@ struct modptrs_t modptrs;
 
 wand_event_handler_t *wand_ev_hdl = NULL;
 
-struct wand_signal_t *sigterm_event = NULL;
-struct wand_signal_t *sigusr_event = NULL;
-struct wand_signal_t *sigpipe_event = NULL;
-struct wand_signal_t *sigint_event = NULL;
-
 struct wand_fdcb_t *listener = NULL;
 struct wand_fdcb_t *udpsocket = NULL;
-
 struct wand_fdcb_t *file_event = NULL;
 struct wand_timer_t *sleep_event = NULL;
-
 struct wand_timer_t *signal_timer = NULL;
+
+pthread_t exportthread;
 
 void do_usage(char* name)
 {
@@ -175,15 +172,13 @@ int main(int argc, char *argv[])
     
 	// Blacklist:
 	blacklist *theList = NULL;
-	
 
 	int one=1;
 	struct client *new_client = NULL;
-
 	struct timeval last_packet_time;
-
-	// rt stuff
 	static struct libtrace_filter_t *filter = 0;
+
+	struct export_params expparams;
 
 	wand_event_init();
 	wand_ev_hdl = wand_create_event_handler();
@@ -211,8 +206,17 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	listener = setup_listen_socket(wand_ev_hdl, &modptrs, port, 
-			wait_client);
+	expparams.fifo_size = max_sendq_size;
+	expparams.left_image_file = left_image; 
+	expparams.right_image_file = right_image; 
+	expparams.modptrs = &modptrs;
+	init_exporter(wand_ev_hdl, &expparams);	
+
+	int rc = pthread_create(&exportthread, NULL, exporter_thread, NULL);
+	if (rc != 0)
+		return -1;
+
+	listener = setup_listen_socket(wand_ev_hdl, port, wait_client);
 	udpsocket = setup_udp_socket(wand_ev_hdl);	
 
 	Log(LOG_DAEMON|LOG_INFO, "Waiting for connection on port %i...\n", port);
@@ -254,12 +258,12 @@ int main(int argc, char *argv[])
 		bsod_vars.packet = trace_create_packet();
 
 		// reset the timers and packet objects
-		kill_all();
+		export_kill_all();
 		init_times();
 		init_packets();
 
 		set_signal_timer(&bsod_vars);
-		if (no_clients() && wait_client) {
+		if (!activeClients() && wait_client) {
 			wand_event_run(wand_ev_hdl);
 		}
 		
@@ -353,6 +357,7 @@ int main(int argc, char *argv[])
 		delete rttmap;
 	if (theList)
 		delete theList;
+	pthread_cancel(exportthread);
 	Log(LOG_DAEMON|LOG_INFO,"Exiting...\n");
 
 	return 0;
@@ -481,13 +486,6 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 	
 	struct timeval packettime;
 
-	/* check for new clients */
-	/*
-	new_client = check_clients(&modptrs, false);
-	if(new_client)
-		send_flows(new_client);
-	*/
-
 	++packet_count;
 
 	// If we're sampling packets, skip packets that
@@ -528,37 +526,11 @@ static void sigpipe_cb(wand_event_handler_t *ev_hdl, int signum, void *data) {
 static void init_signals() {
 	// setup signal handlers
 
-	sigterm_event = wand_add_signal(SIGTERM, NULL, sigterm_cb);	
-	sigint_event = wand_add_signal(SIGINT, NULL, sigterm_cb);	
-	sigusr_event = wand_add_signal(SIGUSR1, NULL, sigusr_cb);	
-	sigpipe_event = wand_add_signal(SIGPIPE, NULL, sigpipe_cb);	
+	wand_add_signal(SIGTERM, NULL, sigterm_cb);	
+	wand_add_signal(SIGINT, NULL, sigterm_cb);	
+	wand_add_signal(SIGUSR1, NULL, sigusr_cb);	
+	wand_add_signal(SIGPIPE, NULL, sigpipe_cb);	
 	
-	assert(sigterm_event);	
-	assert(sigint_event);	
-	assert(sigusr_event);	
-	assert(sigpipe_event);	
-
-/*
-	sigterm_event.signum = SIGTERM;
-	sigterm_event.callback = sigterm_cb;
-	sigterm_event.data = NULL;
-	wand_add_signal(&sigterm_event);
-	
-	sigint_event.signum = SIGINT;
-	sigint_event.callback = sigterm_cb;
-	sigint_event.data = NULL;
-	wand_add_signal(&sigint_event);
-
-	sigusr_event.signum = SIGUSR1;
-	sigusr_event.callback = sigusr_cb;
-	sigusr_event.data = NULL;
-	wand_add_signal(&sigusr_event);
-
-	sigpipe_event.signum = SIGPIPE;
-	sigpipe_event.callback = sigpipe_cb;
-	sigpipe_event.data = NULL;
-	wand_add_signal(&sigpipe_event);
-*/
 
 }
 

@@ -1,12 +1,35 @@
 bsod-server
 
 ---------------------------------------------------------------------------
-Copyright (c) 2004-2011 The University of Waikato, Hamilton, New Zealand.
+Copyright (c) 2004-2013 The University of Waikato, Hamilton, New Zealand.
 All rights reserved.
 
 This code has been developed by the University of Waikato WAND
 research group. For further information please see http://www.wand.net.nz/.
 ---------------------------------------------------------------------------
+
+Version 2.0.3, May 15, 2013
+---------------------------
+Changes
+	* Fixed assertion failure caused by the timer list developing a 
+	  broken ordering
+	* Fixed invalid free crash when using the lpicolour module
+	* Fixed bug where a plugin could be initialised with a NULL parameter
+	* Ensure that we only remove and re-insert a client callback function
+	  if the read-write properties of the callback have changed
+	* Added new config option -- client_wait. Setting this to true will
+	  prevent the server from processing any packets until the first
+	  client has connected
+	* Fixed small memory leaks when looping over trace files
+	* Nicer error reporting when the user fails to provide a traffic source
+	  in the config file
+
+Version 2.0.2, Feb 17, 2012
+---------------------------
+Changes     - Fixed build problem caused by a failure to correctly link 
+	      against libdl.
+	    - Fixed bug that would cause connected clients to crash or not 
+	      display any packets when using recent versions of libprotoident. 
 
 Version 2.0.1, Mar 15, 2011
 ---------------------------

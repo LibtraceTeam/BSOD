@@ -59,8 +59,6 @@
 #include <syslog.h>
 #include <map>
 
-#include "lru"
-
 
 #include "libtrace.h"
 //#include "dagformat.h"
@@ -68,7 +66,7 @@
 
 #include "packets.h"
 #include "debug.h"
-#include "socket.h" 
+#include "exporter.h" 
 #include "bsod_server.h"
 
 #include "RTTMap.h"
@@ -102,20 +100,6 @@ bool enable_darknet = true;
 
 
 static inline bool operator <(const flow_id_t &a, const flow_id_t &b) {
-	/*
-	if (a.start[2]!=b.start[2]) 
-		return a.start[2] < b.start[2];
-	if (a.end[2]!=b.end[2]) 
-		return a.end[2] < b.end[2];
-	if (a.start[1]!=b.start[1]) 
-		return a.start[1] < b.start[1];
-	if (a.end[1]!=b.end[1]) 
-		return a.end[1] < b.end[1];
-	if (a.start[0]!=b.start[0]) 
-		return a.start[0] < b.start[0];
-	if (a.end[0]!=b.end[0]) 
-		return a.end[0] < b.end[0];
-	*/
 	if (a.ip1 != b.ip1)
 		return a.ip1 < b.ip1;
 	if (a.ip2 != b.ip2)
@@ -125,7 +109,6 @@ static inline bool operator <(const flow_id_t &a, const flow_id_t &b) {
 	return a.port2 < b.port2;
 }
 
-typedef lru<flow_id_t,flow_info_t *> flow_lru_t;
 flow_lru_t flows;
 
 /* 
@@ -163,9 +146,9 @@ void expire_flows(uint32_t time, bool expire_all)
 		delete(flows.front().second);
 		flows.erase(flows.front().first);	
 
-		if(send_kill_flow(tmpid) != 0)
+		if(export_kill_flow(tmpid) != 0)
 			return;
-		if(send_kill_flow(tmpid2) != 0)
+		if(export_kill_flow(tmpid2) != 0)
 			return;
 	}
 }
@@ -177,21 +160,23 @@ void expire_flows(uint32_t time, bool expire_all)
  * When a new client connects, send them information about every flow that is
  * in progress.
  */ 
-void send_flows(struct client *client)
+void send_existing_flows(int client)
 {
 	Log(LOG_DAEMON|LOG_INFO,"Updating new client with all flows in progress...\n");
 	for(flow_lru_t::const_iterator flow_iterator=flows.begin();
 			flow_iterator!=flows.end();
 			++flow_iterator)
 	{
-		send_update_flow(client, (*flow_iterator).first.start, 
+		export_existing_flow(client, (*flow_iterator).first.start, 
 					(*flow_iterator).first.end, 
 					(*flow_iterator).second->flow_id[0], 
-					(*flow_iterator).first.ip1, (*flow_iterator).first.ip2 );
-		send_update_flow(client, (*flow_iterator).first.end, 
+					(*flow_iterator).first.ip1, 
+					(*flow_iterator).first.ip2 );
+		export_existing_flow(client, (*flow_iterator).first.end, 
 					(*flow_iterator).first.start, 
 					(*flow_iterator).second->flow_id[1], 
-					(*flow_iterator).first.ip2, (*flow_iterator).first.ip1 );
+					(*flow_iterator).first.ip2, 
+					(*flow_iterator).first.ip1 );
 	}
 }
 
@@ -339,12 +324,12 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		current = flows.insert(flowdata);
 		
-		if(send_new_flow(tmpid.start, tmpid.end,
+		if(export_new_flow(tmpid.start, tmpid.end,
 				current->second->flow_id[0], 
 				tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
 
-		if(send_new_flow(tmpid.end, tmpid.start,
+		if(export_new_flow(tmpid.end, tmpid.start,
 				current->second->flow_id[1],
 				tmpid.ip1, tmpid.ip2)!=0)
 			return 1;
@@ -514,7 +499,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	if (shownontcpudp == 0 && !tcpptr && !udpptr) 
 		return 0;
 
-	if(send_new_packet(secs, flowid, 
+	if(export_new_packet(secs, flowid, 
 			tmpid.type, ntohs(p->ip_len), speed, 
 			is_dark) !=0)
 		return 1;
@@ -538,7 +523,3 @@ float convert_speed( float speed )
 	return( 0.5f );
 }
 
-void kill_all()
-{
-    send_kill_all();
-}

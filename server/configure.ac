@@ -48,6 +48,8 @@ AC_SEARCH_LIBS([cfg_init],[confuse],,conf_found=0)
 AC_SEARCH_LIBS([wand_event_init],[wandevent],,event_found=0)
 AC_SEARCH_LIBS([lpi_init_library],[protoident],,lpi_found=0)
 AC_SEARCH_LIBS(dlopen,dl, dlfound=1,dlfound=0 )
+AC_SEARCH_LIBS([pthread_cancel],[pthread],,pthread_found=0)
+AC_SEARCH_LIBS([fifo_alloc_ptr],[fifo],,fifo_found=0)
 
 depend_error=0
 if test "$libtrace_found" = 0; then
@@ -72,6 +74,16 @@ fi
 
 if test "$dl_found" = 0; then
 	AC_MSG_NOTICE(Required library libdl not found!)
+	depend_error=1
+fi
+
+if test "$pthread_found" = 0; then
+	AC_MSG_NOTICE(Required library libpthread not found!)
+	depend_error=1
+fi
+
+if test "$fifo_found" = 0; then
+	AC_MSG_NOTICE(Required library libfifo not found!)
 	depend_error=1
 fi
 

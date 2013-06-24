@@ -116,7 +116,6 @@ struct kill_all_t {
 
 void init_exporter(wand_event_handler_t *evhdl, struct export_params *eps);
 void *exporter_thread(void *ptr);
-int export_message(int fd, char *buf, int buflen);
 int create_client(int fd);
 
 void export_new_packet(uint32_t ts, uint32_t id, unsigned char id_num,

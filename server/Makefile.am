@@ -17,7 +17,7 @@ bsodserver_SOURCES=Blacklist.cpp \
 	RTTMap.h \
 	socket.h \
 	lru \
-	exporter.h
+	exporter.h \
 	exporter.cc
 
 bsodserver_LDADD=@ADD_LIBS@

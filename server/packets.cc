@@ -146,10 +146,8 @@ void expire_flows(uint32_t time, bool expire_all)
 		delete(flows.front().second);
 		flows.erase(flows.front().first);	
 
-		if(export_kill_flow(tmpid) != 0)
-			return;
-		if(export_kill_flow(tmpid2) != 0)
-			return;
+		export_kill_flow(tmpid);
+		export_kill_flow(tmpid2);
 	}
 }
 
@@ -324,15 +322,13 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 		current = flows.insert(flowdata);
 		
-		if(export_new_flow(tmpid.start, tmpid.end,
+		export_new_flow(tmpid.start, tmpid.end,
 				current->second->flow_id[0], 
-				tmpid.ip1, tmpid.ip2)!=0)
-			return 1;
+				tmpid.ip1, tmpid.ip2);
 
-		if(export_new_flow(tmpid.end, tmpid.start,
+		export_new_flow(tmpid.end, tmpid.start,
 				current->second->flow_id[1],
-				tmpid.ip1, tmpid.ip2)!=0)
-			return 1;
+				tmpid.ip1, tmpid.ip2);
 	}
 	else // this is a flow we've already seen
 	{
@@ -499,10 +495,9 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	if (shownontcpudp == 0 && !tcpptr && !udpptr) 
 		return 0;
 
-	if(export_new_packet(secs, flowid, 
+	export_new_packet(secs, flowid, 
 			tmpid.type, ntohs(p->ip_len), speed, 
-			is_dark) !=0)
-		return 1;
+			is_dark);
 
 	return 0;
 }

@@ -41,6 +41,8 @@
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include <map>
 
@@ -52,7 +54,7 @@
 #include "debug.h"
 #include "exporter.h"
 
-typedef map<int, fifo_ptr_t *> ClientMap;
+typedef std::map<int, fifo_ptr_t *> ClientMap;
 
 ClientMap clients;
 struct fifo_t *fifo = NULL;
@@ -115,20 +117,20 @@ static void form_colour_msg(struct modptrs_t *modptrs) {
 		fd[i].type = BSOD_PKTTYPE_COLOURS;
 		fd[i].id = i;
 		fd[i].namelen = strlen(name) + 1;
-		savednames = strdup(name);
+		savednames[i] = strdup(name);
 		i++;
 
 		needed += sizeof(struct flow_descriptor_t);
-		needed += (namelen + 1);
+		needed += (fd[i].namelen);
 	}	
 
-	colour_msg = (char *)malloc(colour_msg);
+	colour_msg = (char *)malloc(needed);
 	colour_msg_size = needed;
 	ptr = colour_msg;
 
 	for (int j = 0; j < i; j++) {
-		memcpy(ptr, fd[j], sizeof(struct flow_descriptor));
-		ptr += sizeof(struct flow_descriptor);
+		memcpy(ptr, &(fd[j]), sizeof(struct flow_descriptor_t));
+		ptr += sizeof(struct flow_descriptor_t);
 		memcpy(ptr, savednames[j], fd[j].namelen);
 		ptr += fd[j].namelen;
 		
@@ -215,9 +217,9 @@ void *exporter_thread(void *ptr) {
 	sigaddset(&signalmask, SIGINT);
 	sigaddset(&signalmask, SIGTERM);
 
-	rc = pthread_sigmask(SIG_BLOCK, &signal_mask, NULL);
+	rc = pthread_sigmask(SIG_BLOCK, &signalmask, NULL);
 	if (rc != 0) {
-		Log(LOG_DAEMON | LOG_WARN, "Error blocking signals in export thread!\n");
+		Log(LOG_DAEMON | LOG_WARNING, "Error blocking signals in export thread!\n");
 		pthread_exit(NULL);
 	}
 
@@ -333,7 +335,7 @@ static int push_onto_fifo(void *buffer, size_t size) {
 	if (fifo_free(fifo) > size) {
 		fifo_write(fifo, buffer, size);
 	} else {
-		Log(LOG_DAEMON | LOG_ERROR, "Fifo has filled up!\n");
+		Log(LOG_DAEMON | LOG_ERR, "Fifo has filled up!\n");
 		return -1;
 	}
 
@@ -427,7 +429,7 @@ void export_existing_flow(int fd, float start[3], float end[3], uint32_t id,
         update.ip1 = htonl(ip1);
         update.ip2 = htonl(ip2);
 
-	export_message(fd, &update, sizeof(update));
+	export_message(fd, (char *)&update, sizeof(update));
 }
 
 bool activeClients(void) {

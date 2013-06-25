@@ -144,7 +144,7 @@ void expire_flows(uint32_t time, bool expire_all)
 		if (flows.front().second->colour_data)
 			free(flows.front().second->colour_data);
 		delete(flows.front().second);
-		flows.erase(flows.front().first);	
+		flows.pop();	
 
 		export_kill_flow(tmpid);
 		export_kill_flow(tmpid2);

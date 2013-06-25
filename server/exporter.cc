@@ -118,10 +118,10 @@ static void form_colour_msg(struct modptrs_t *modptrs) {
 		fd[i].id = i;
 		fd[i].namelen = strlen(name) + 1;
 		savednames[i] = strdup(name);
-		i++;
 
 		needed += sizeof(struct flow_descriptor_t);
 		needed += (fd[i].namelen);
+		i++;
 	}	
 
 	colour_msg = (char *)malloc(needed);
@@ -159,7 +159,7 @@ void init_exporter(wand_event_handler_t *evhdl, struct export_params *eps) {
 
 		leftimagehdr.type = BSOD_PKTTYPE_IMAGE;
 		leftimagehdr.id = BSOD_IMAGE_LEFT;
-		leftimagehdr.length = imagelen;
+		leftimagehdr.length = htonl(imagelen);
 	}
 	
 	if (eps->right_image_file) {
@@ -172,7 +172,7 @@ void init_exporter(wand_event_handler_t *evhdl, struct export_params *eps) {
 
 		rightimagehdr.type = BSOD_PKTTYPE_IMAGE;
 		rightimagehdr.id = BSOD_IMAGE_RIGHT;
-		rightimagehdr.length = imagelen;
+		rightimagehdr.length = htonl(imagelen);
 	}
 	
 	form_colour_msg(eps->modptrs);		
@@ -250,7 +250,7 @@ static int export_message(int fd, char *buf, int buflen) {
                 int ret = send(fd, buf + sent, buflen - sent, 0);
                 if (ret == -1) {
                         Log(LOG_DAEMON | LOG_INFO, 
-					"Error sending message to client!");
+					"Error sending message to client!\n");
                         return -1;
                 }
                 sent += ret;
@@ -283,6 +283,21 @@ int create_client(int fd) {
 	 * clients already have it and probably shouldn't be sent it again.
 	 */
 
+	/* Send the protocol version */
+	char version = BSOD_PROTOCOL_VERSION;
+
+	if (export_message(fd, &version, sizeof(char)) < 0) {
+		close(fd);
+		return -1;
+	}
+	
+	/* Send the colour table to the client */
+	if (export_message(fd, colour_msg, colour_msg_size) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	
 	/* Send images to the client */
 	if (export_message(fd, (char *)&leftimagehdr, 
 			sizeof(leftimagehdr)) < 0) {
@@ -290,7 +305,7 @@ int create_client(int fd) {
 		return -1;
 	}
 
-	if (export_message(fd, leftimage, leftimagehdr.length) < 0) {
+	if (export_message(fd, leftimage, ntohl(leftimagehdr.length)) < 0) {
 		close(fd);
 		return -1;
 	}
@@ -301,13 +316,7 @@ int create_client(int fd) {
 		return -1;
 	}
 
-	if (export_message(fd, rightimage, rightimagehdr.length) < 0) {
-		close(fd);
-		return -1;
-	}
-
-	/* Send the colour table to the client */
-	if (export_message(fd, colour_msg, colour_msg_size) < 0) {
+	if (export_message(fd, rightimage, ntohl(rightimagehdr.length)) < 0) {
 		close(fd);
 		return -1;
 	}
@@ -331,10 +340,10 @@ int create_client(int fd) {
 }
 
 static int push_onto_fifo(void *buffer, size_t size) {
+	if (size == 0)
+		return 0;
 
-	if (fifo_free(fifo) > size) {
-		fifo_write(fifo, buffer, size);
-	} else {
+	if (fifo_write(fifo, buffer, size) == 0) {
 		Log(LOG_DAEMON | LOG_ERR, "Fifo has filled up!\n");
 		return -1;
 	}

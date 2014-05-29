@@ -37,10 +37,13 @@ Configuring bsod server
 ----------------------------------
 ----------------------------------
 
-The default configuration file is "/usr/local/bsod/etc/bsod_server.conf".
-You can specify a different file by giving bsod server the command line 
-option '-C /path/to/config/file'. Configuration options are pairs of the 
-form:
+The configuration file is required to run bsod server. You must tell bsod
+server where the file is located using the command line option 
+'-C /path/to/config/file'. An example configuation file is included with
+the BSOD source distribution (bsod_server.conf), which is an excellent
+starting point for developing your own configuration. 
+
+Configuration options are pairs of the form:
 
 <key> = <value>
 

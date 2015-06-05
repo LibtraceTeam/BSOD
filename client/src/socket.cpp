@@ -119,7 +119,7 @@ struct flow_descriptor_t {
 	unsigned char type; //4
 	unsigned char id;
 	uint8_t colour[3];
-	char name[256];
+	uint8_t namelen;
 };
 
 //Image data 
@@ -133,8 +133,10 @@ struct image_data_t {
 
 //Size in bytes of each packet
 int packetSizes[] = {	sizeof(flow_update_t), sizeof(pack_update_t), 
-						sizeof(flow_remove_t), sizeof(kill_all_t),
-						sizeof(flow_descriptor_t), sizeof(image_data_t) };
+						sizeof(flow_remove_t), 
+						sizeof(kill_all_t),
+						sizeof(flow_descriptor_t), 
+						sizeof(image_data_t) };
 					
 /*********************************************
 	Sets up the initial networking
@@ -419,9 +421,9 @@ void App::updateTCPSocket(){
 	
 		//Get the type byte
 		byte type = mDataBuf[index];
-		
+	
 		//Protocol?
-		if(type == 0x20 || type == 20){
+		if(type == 0x15){
 			index++;
 			continue; //protocol version, ignore it
 		}
@@ -539,13 +541,23 @@ void App::updateTCPSocket(){
 		else if(type == FLOW_DESCRIPTOR){
 		
 			flow_descriptor_t *pkt = ( flow_descriptor_t *)data;
+			if (mDataBuf.size() - index < thisSize + pkt->namelen) {
+			    /* The name is missing or incomplete */
+			    break;
+			}
+			
+			char *name = (char *)data + thisSize;
+			thisSize += pkt->namelen;	
 						
-			if(strcmp(pkt->name, "<NULL>") == 0){
+			if(strcmp(name, "<NULL>") == 0){
 				//Ignore it!
 			}else{					
-				addFlowDescriptor(pkt->id, Color(pkt->colour[0], pkt->colour[1], 
-									pkt->colour[2]), string(pkt->name));
+				addFlowDescriptor(pkt->id, 
+				    Color(pkt->colour[0], pkt->colour[1], 
+				    pkt->colour[2]), string(name));
 			}
+
+			
 		}
 		
 		else if(type == IMAGE_DATA){

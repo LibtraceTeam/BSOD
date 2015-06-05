@@ -1,0 +1,18 @@
+BSOD: Network Traffic Visualisation
+
+Copyright (c) 2004-2015 The University of Waikato, Hamilton, New Zealand.
+
+The bsod visualisation tool uses the libtrace framework to transform network
+traffic into a graphical format that can be viewed in real time. Capturing from
+a live network interface, or from a saved trace file, bsod visualises the flow
+of network data between hosts, providing (at a glance) information about
+network usage.
+
+BSOD consists of two components: a server that processes captured packets and
+a client that renders the visualisation.
+
+More details about each component, including installation and configuration
+instructions, can be found in their individual READMEs or on the BSOD web-page 
+(http://research.wand.net.nz/software/visualisation.php).
+
+Please send any queries to contact@wand.net.nz.

@@ -4,7 +4,7 @@ Installing bsod-server:
 The bsod server requires:
 
 * libtrace ( http://research.wand.net.nz/software/libtrace/ )
-* libwandevent ( http://research.wand.net.nz/software/libwandevent/ )
+* libwandevent3 ( http://research.wand.net.nz/software/libwandevent/ )
 * g++-3.0 or greater (known to work with 3.0, fails with 2.95)
 * libconfuse (package libconfuse-dev on debian)
 
@@ -29,6 +29,15 @@ make install
 FreeBSD:
 
 Exactly the same as the above, replacing 'make' with 'gmake'.
+
+If you have cloned the BSOD git repository, the sequence of commands is
+instead:
+
+./bootstrap.sh
+./configure
+make
+(as root )
+make install 
 
 
 If you wish to install BSOD server to a non-standard location (i.e. other than

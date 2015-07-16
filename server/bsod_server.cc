@@ -117,6 +117,7 @@ int showdata = 1;
 int showcontrol = 1;
 int shownontcpudp = 1;
 int showresets = 1;
+int flowsampling = 0;
 int sampling = 0;
 int wait_client = 0;
 int max_sendq_size = 10000000;
@@ -488,11 +489,6 @@ static int bsod_read_packet(libtrace_packet_t *packet, blacklist *theList,
 
 	++packet_count;
 
-	// If we're sampling packets, skip packets that
-	// don't meet our sampling criteria
-	if (sampling && packet_count % sampling != 0)
-		return 1;
-
 	packettime = trace_get_timeval(packet);
 
 	// if sending fails, assume we just lost a client
@@ -549,6 +545,7 @@ void set_defaults() {
 	shownontcpudp = 1;
 	showresets = 1;
 	sampling = 0;
+        flowsampling = 0;
 }
 
 void fix_defaults() {
@@ -607,6 +604,7 @@ void do_configuration(int argc, char **argv) {
 		CFG_BOOL((char *)"darknet", cfg_false, CFGF_NONE),
 		CFG_BOOL((char *)"rttest", cfg_false, CFGF_NONE),
 		CFG_INT((char *)"sampling", 0, CFGF_NONE),
+		CFG_INT((char *)"flowsampling", 0, CFGF_NONE),
 		CFG_STR((char *)"name", NULL, CFGF_NONE),
 		CFG_STR((char *)"left_image", NULL, CFGF_NONE),
 		CFG_STR((char *)"right_image", NULL, CFGF_NONE),
@@ -669,6 +667,7 @@ void do_configuration(int argc, char **argv) {
 		enable_darknet = cfg_getbool(cfg, "darknet");
 		enable_rttest = cfg_getbool(cfg, "rttest");
 		sampling = cfg_getint(cfg, "sampling");
+		flowsampling = cfg_getint(cfg, "flowsampling");
 		server_name = cfg_getstr(cfg, "name");
 		left_image = cfg_getstr(cfg, "left_image");
 		right_image = cfg_getstr(cfg, "right_image");

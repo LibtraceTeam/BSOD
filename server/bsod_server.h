@@ -57,10 +57,12 @@ struct flow_id_t {
 
 struct flow_info_t {
         uint32_t flow_id[2];
+        uint32_t pktcount[2];
         uint32_t time;
         uint8_t init_dir;
 
         void *colour_data;
+        bool exported;
 };
 
 typedef lru<flow_id_t,flow_info_t *> flow_lru_t;

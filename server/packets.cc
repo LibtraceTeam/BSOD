@@ -94,6 +94,8 @@ extern int showdata;
 extern int showcontrol;
 extern int shownontcpudp;
 extern int showresets;
+extern int flowsampling;
+extern int sampling;
 
 bool enable_rttest = true;
 bool enable_darknet = true;
@@ -305,6 +307,7 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 
 	if ( current == flows.end() ) // this is a new flow
 	{
+                int chance = 0;
 		std::pair<flow_id_t,flow_info_t *> flowdata;
 
 		flowdata.second = new flow_info_t;
@@ -315,20 +318,36 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 		flowdata.second->time = secs;
 		flowdata.second->colour_data = NULL;
 		flowdata.second->init_dir = direction;
+                flowdata.second->pktcount[0] = 0;
+                flowdata.second->pktcount[1] = 0;
 
 		id+=2;
 
 		flowdata.first = tmpid;
 
+                if (flowsampling != 0) {
+                        chance = rand() % 100;
+                        if (chance < flowsampling)
+                                flowdata.second->exported = true;
+                        else
+                                flowdata.second->exported = false;
+                } else {
+                        flowdata.second->exported = true;
+                }
+                
+
 		current = flows.insert(flowdata);
 		
-		export_new_flow(tmpid.start, tmpid.end,
-				current->second->flow_id[0], 
-				tmpid.ip1, tmpid.ip2);
+               
+                if (flowdata.second->exported) {
+        		export_new_flow(tmpid.start, tmpid.end,
+	        			current->second->flow_id[0], 
+		        		tmpid.ip1, tmpid.ip2);
 
-		export_new_flow(tmpid.end, tmpid.start,
-				current->second->flow_id[1],
-				tmpid.ip1, tmpid.ip2);
+                        export_new_flow(tmpid.end, tmpid.start,
+                                        current->second->flow_id[1],
+                                        tmpid.ip1, tmpid.ip2);
+                }
 	}
 	else // this is a flow we've already seen
 	{
@@ -495,9 +514,19 @@ int per_packet(struct libtrace_packet_t *packet, time_t secs,
 	if (shownontcpudp == 0 && !tcpptr && !udpptr) 
 		return 0;
 
-	export_new_packet(secs, flowid, 
-			tmpid.type, ntohs(p->ip_len), speed, 
-			is_dark);
+        if (!current->second->exported)
+                return 0;
+
+        if (direction != 0 && direction != 1) 
+                return 0;
+
+        current->second->pktcount[direction]++;
+
+        if (sampling != 0 && current->second->pktcount[direction] % sampling != 1)
+                return 0;
+        export_new_packet(secs, flowid, 
+                        tmpid.type, ntohs(p->ip_len), speed, 
+                        is_dark);
 
 	return 0;
 }

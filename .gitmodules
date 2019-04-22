@@ -1,0 +1,3 @@
+[submodule "libtrace"]
+	path = libtrace
+	url = https://github.com/LibtraceTeam/libtrace
